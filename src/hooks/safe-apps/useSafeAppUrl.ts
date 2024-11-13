@@ -16,8 +16,9 @@ const useSafeAppUrl = (): string | undefined => {
   useEffect(() => {
     if (!router.isReady) return
     const url = router.query.appUrl?.toString()
-    if (url && AUTHORIZED_URLS.includes(sanitizeUrl(url))) {
-      setAppUrl(url)
+    const sanitizedUrl = sanitizeUrl(url)
+    if (sanitizedUrl && AUTHORIZED_URLS.includes(sanitizedUrl)) {
+      setAppUrl(sanitizedUrl)
     } else {
       setAppUrl(undefined)
     }
