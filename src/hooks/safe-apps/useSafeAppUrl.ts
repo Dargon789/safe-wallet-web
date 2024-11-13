@@ -23,7 +23,7 @@ const useSafeAppUrl = (): string | undefined => {
     }
   }, [router])
 
-  return useMemo(() => (appUrl ? DOMPurify.sanitize(sanitizeUrl(appUrl)) : undefined), [appUrl])
+  return useMemo(() => (appUrl ? sanitizeUrl(appUrl) : undefined), [appUrl])
 }
 
 export { useSafeAppUrl }
