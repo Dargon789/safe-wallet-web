@@ -3928,10 +3928,10 @@
   dependencies:
     glob "10.3.10"
 
-"@next/mdx@^14.2.11":
-  version "14.2.11"
-  resolved "https://registry.yarnpkg.com/@next/mdx/-/mdx-14.2.11.tgz#d68b7558186794147a45b7b6acdb27a69c904243"
-  integrity sha512-aTs8U7N5FLXArb1YfHMsomMtHa0sulAWrfbPdZKDIpF9DUNwY8tbRVpHLz/AbIwoJk/4oDhDwDSJBFZXYxrjzw==
+"@next/mdx@^15.0.3":
+  version "15.0.3"
+  resolved "https://registry.yarnpkg.com/@next/mdx/-/mdx-15.0.3.tgz#a079f79b619682da27251fc804f11d2e492ce479"
+  integrity sha512-EwCJKDeJqfbHbsS7rIdWpKDOZsOPsif9AX4PaIhy5ghSMsZvi+/vIZVc07pZT7BdwCIoL9XM1KZMd/vzxCxF5A==
   dependencies:
     source-map "^0.7.0"
 
