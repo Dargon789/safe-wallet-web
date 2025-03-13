@@ -111,7 +111,7 @@
     "@storybook/addon-essentials": "^8.3.4",
     "@storybook/addon-interactions": "^8.0.6",
     "@storybook/addon-links": "^8.3.4",
-    "@storybook/addon-onboarding": "^8.0.6",
+    "@storybook/addon-onboarding": "^8.4.7",
     "@storybook/addon-themes": "^8.3.4",
     "@storybook/blocks": "^8.0.6",
     "@storybook/nextjs": "^8.0.6",
@@ -160,7 +160,7 @@
     "storybook": "^8.4.7",
     "ts-prune": "^0.10.3",
     "typechain": "^8.3.2",
-    "typescript": "^5.4.5",
+    "typescript": "^5.8.2",
     "typescript-plugin-css-modules": "^4.2.2",
     "webpack": "^5.95.0"
   },
