@@ -4741,10 +4741,10 @@
     lodash "^4.17.21"
     ts-dedent "^2.0.0"
 
-"@storybook/addon-designs@^8.0.3":
-  version "8.0.3"
-  resolved "https://registry.yarnpkg.com/@storybook/addon-designs/-/addon-designs-8.0.3.tgz#645ffcb4cd4c73f1b7d255951d4a7dbd46f9fe70"
-  integrity sha512-uArLGYDwiRDjgJHgMotOLGGYK4hq1hBb0PfTJrlBnPy6evky9khrqf4KmXrIh4ViOyZ5t01THe1DnBj52DwrEQ==
+"@storybook/addon-designs@^8.2.1":
+  version "8.2.1"
+  resolved "https://registry.yarnpkg.com/@storybook/addon-designs/-/addon-designs-8.2.1.tgz#e0081c145f1a2586e19b2f6f57c5ec348fe2c4c0"
+  integrity sha512-orwihs1D5alhh4Qu3BSJKbSgQOdSagvRX/25m5fYZQAaqVErBY0lRR4vCAU/G/STkcdv+MHwIQ5U+0kX5Tm2+w==
   dependencies:
     "@figspec/react" "^1.0.0"
 
