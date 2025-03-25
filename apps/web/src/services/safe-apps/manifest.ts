@@ -1,6 +1,16 @@
 import type { AllowedFeatures, SafeAppDataWithPermissions } from '@/components/safe-apps/types'
 import { isRelativeUrl, trimTrailingSlash } from '@/utils/url'
 import { SafeAppAccessPolicyTypes } from '@safe-global/safe-gateway-typescript-sdk'
+const allowedDomains = ['example.com', 'another-example.com']
+
+const isValidAppUrl = (url: string): boolean => {
+  try {
+    const { hostname } = new URL(url)
+    return allowedDomains.some(domain => hostname.endsWith(domain))
+  } catch {
+    return false
+  }
+}
 
 type AppManifestIcon = {
   src: string
@@ -56,6 +66,9 @@ const getAppLogoUrl = (appUrl: string, { icons = [], iconPath = '' }: AppManifes
 }
 
 const fetchAppManifest = async (appUrl: string, timeout = 5000): Promise<unknown> => {
+  if (!isValidAppUrl(appUrl)) {
+    throw new Error('Invalid app URL')
+  }
   const normalizedUrl = trimTrailingSlash(appUrl)
   const manifestUrl = `${normalizedUrl}/manifest.json`
 
