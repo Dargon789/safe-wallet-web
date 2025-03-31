@@ -5947,15 +5947,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@next/third-parties@npm:^15.2.0":
-  version: 15.2.0
-  resolution: "@next/third-parties@npm:15.2.0"
+"@next/third-parties@npm:^15.2.4":
+  version: 15.2.4
+  resolution: "@next/third-parties@npm:15.2.4"
   dependencies:
     third-party-capital: "npm:1.0.20"
   peerDependencies:
     next: ^13.0.0 || ^14.0.0 || ^15.0.0
     react: ^18.2.0 || 19.0.0-rc-de68d2f4-20241204 || ^19.0.0
-  checksum: 10/7713a5d6e51bcbbfb7f499f905770a4cfe25638a39e99fcdaefafaa343e71ae0596802584df776c5029c4879c73adc9a04be511e920f8618e793f0fb9f726b7f
+  checksum: 10/eac59d3284028de135bc274124cd7aed49f580d0e396fb72b0a90e54275bb62d7a026b4cea0fc3db6b48bb76f4418a5afa8b224a4db460f7479e0d160bf6421c
   languageName: node
   linkType: hard
 
@@ -7772,7 +7772,7 @@ __metadata:
     "@mui/x-date-pickers": "npm:^7.23.3"
     "@next/bundle-analyzer": "npm:^15.0.4"
     "@next/mdx": "npm:^15.0.4"
-    "@next/third-parties": "npm:^15.2.0"
+    "@next/third-parties": "npm:^15.2.4"
     "@openzeppelin/contracts": "npm:^4.9.6"
     "@reduxjs/toolkit": "npm:^2.5.0"
     "@reown/walletkit": "npm:^1.2.1"
