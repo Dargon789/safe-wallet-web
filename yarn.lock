@@ -7871,7 +7871,7 @@ __metadata:
     typechain: "npm:^8.3.2"
     typescript: "npm:^5.4.5"
     typescript-plugin-css-modules: "npm:^4.2.2"
-    zodiac-roles-deployments: "npm:^2.3.4"
+    zodiac-roles-deployments: "npm:^2.5.0"
   languageName: unknown
   linkType: soft
 
@@ -33302,10 +33302,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zodiac-roles-deployments@npm:^2.3.4":
-  version: 2.3.4
-  resolution: "zodiac-roles-deployments@npm:2.3.4"
-  checksum: 10/9abebe6f6977cb8b750352822250cae2c8e0b567f3cc43f88b786c3b132cad362e7a4805890f1f1c92f008fc36d732b5ed67e742d8f25a4d5c30041ef2f787b3
+"zodiac-roles-deployments@npm:^2.5.0":
+  version: 2.5.0
+  resolution: "zodiac-roles-deployments@npm:2.5.0"
+  checksum: 10/845c6d3af62ccd9ee1f8ad01d38f5bf877d08a968dd6f46eff8152bc09cebb746e4046eb5c47efe41cf2615e4a7279b08106f05a7b26d462a235fa78e21d7ff0
   languageName: node
   linkType: hard
 
