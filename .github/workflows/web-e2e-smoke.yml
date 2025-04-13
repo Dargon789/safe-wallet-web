@@ -25,7 +25,7 @@ jobs:
 
       - uses: ./.github/actions/cypress
         with:
-          secrets: ${{ toJSON(secrets) }}
+          secrets: ${{ secrets.NEEDED_SECRET_1 }},${{ secrets.NEEDED_SECRET_2 }}
           spec: cypress/e2e/smoke/*.cy.js
           group: 'Smoke tests'
           tag: 'smoke'
