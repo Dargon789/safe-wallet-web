@@ -7523,7 +7523,7 @@ __metadata:
     "@types/lodash": "npm:^4.17.13"
     "@types/node": "npm:^22.13.1"
     "@types/qrcode": "npm:^1.5.5"
-    "@types/react": "npm:~18.3.12"
+    "@types/react": "npm:~19.1.1"
     babel-loader: "npm:^8.4.1"
     babel-plugin-react-native-web: "npm:^0.19.13"
     blo: "npm:^1.2.0"
@@ -7557,7 +7557,7 @@ __metadata:
     jest-expo: "npm:~52.0.4"
     lodash: "npm:^4.17.21"
     moti: "npm:^0.29.0"
-    react: "npm:18.3.1"
+    react: "npm:19.1.0"
     react-dom: "npm:^18.3.1"
     react-hook-form: "npm:^7.54.2"
     react-native: "npm:0.76.7"
@@ -7862,7 +7862,7 @@ __metadata:
     "@types/mdx": "npm:^2.0.13"
     "@types/node": "npm:22.13.1"
     "@types/qrcode": "npm:^1.5.5"
-    "@types/react": "npm:^19.0.0"
+    "@types/react": "npm:^19.1.1"
     "@types/react-dom": "npm:^19.0.0"
     "@types/semver": "npm:^7.3.10"
     "@typescript-eslint/eslint-plugin": "npm:^7.6.0"
@@ -7906,7 +7906,7 @@ __metadata:
     papaparse: "npm:^5.3.2"
     prettier: "npm:^3.3.3"
     qrcode.react: "npm:^3.1.0"
-    react: "npm:^19.0.0"
+    react: "npm:^19.1.0"
     react-dom: "npm:^19.0.0"
     react-dropzone: "npm:^14.3.8"
     react-hook-form: "npm:7.41.1"
@@ -11707,7 +11707,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/prop-types@npm:*, @types/prop-types@npm:^15.7.14":
+"@types/prop-types@npm:^15.7.14":
   version: 15.7.14
   resolution: "@types/prop-types@npm:15.7.14"
   checksum: 10/d0c5407b9ccc3dd5fae0ccf9b1007e7622ba5e6f1c18399b4f24dff33619d469da4b9fa918a374f19dc0d9fe6a013362aab0b844b606cfc10676efba3f5f736d
@@ -11750,13 +11750,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:~18.3.12":
-  version: 18.3.18
-  resolution: "@types/react@npm:18.3.18"
+"@types/react@npm:^19.1.1, @types/react@npm:~19.1.1":
+  version: 19.1.1
+  resolution: "@types/react@npm:19.1.1"
   dependencies:
-    "@types/prop-types": "npm:*"
     csstype: "npm:^3.0.2"
-  checksum: 10/7fdd8b853e0d291d4138133f93f8d5c333da918e5804afcea61a923aab4bdfc9bb15eb21a5640959b452972b8715ddf10ffb12b3bd071898b9e37738636463f2
+  checksum: 10/f267c2a7afddd1f463bd4cf18553ddea132c609a6dc29938c5e83ae392c75e0acdbace2d03ad26178183b10da733e476324e2f25f48bd7fa6c232de708c35563
   languageName: node
   linkType: hard
 
@@ -27613,7 +27612,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:18.3.1, react@npm:^16.8.0 || ^17.0.0 || ^18.0.0":
+"react@npm:19.1.0, react@npm:^19.1.0":
+  version: 19.1.0
+  resolution: "react@npm:19.1.0"
+  checksum: 10/d0180689826fd9de87e839c365f6f361c561daea397d61d724687cae88f432a307d1c0f53a0ee95ddbe3352c10dac41d7ff1ad85530fb24951b27a39e5398db4
+  languageName: node
+  linkType: hard
+
+"react@npm:^16.8.0 || ^17.0.0 || ^18.0.0":
   version: 18.3.1
   resolution: "react@npm:18.3.1"
   dependencies:
