@@ -7501,7 +7501,7 @@ __metadata:
     "@shopify/flash-list": "npm:1.7.6"
     "@storybook/addon-essentials": "npm:^8.4.6"
     "@storybook/addon-interactions": "npm:^8.4.6"
-    "@storybook/addon-onboarding": "npm:^8.4.6"
+    "@storybook/addon-onboarding": "npm:^8.6.12"
     "@storybook/addon-ondevice-actions": "npm:^8.4.4"
     "@storybook/addon-ondevice-controls": "npm:^8.4.2"
     "@storybook/addon-react-native-web": "npm:^0.0.26"
@@ -7844,7 +7844,7 @@ __metadata:
     "@storybook/addon-essentials": "npm:^8.0.6"
     "@storybook/addon-interactions": "npm:^8.0.6"
     "@storybook/addon-links": "npm:^8.3.4"
-    "@storybook/addon-onboarding": "npm:^8.0.6"
+    "@storybook/addon-onboarding": "npm:^8.6.12"
     "@storybook/addon-themes": "npm:^8.0.6"
     "@storybook/blocks": "npm:^8.0.6"
     "@storybook/nextjs": "npm:^8.0.6"
@@ -8566,14 +8566,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/addon-onboarding@npm:^8.0.6, @storybook/addon-onboarding@npm:^8.4.6":
-  version: 8.4.7
-  resolution: "@storybook/addon-onboarding@npm:8.4.7"
-  dependencies:
-    react-confetti: "npm:^6.1.0"
+"@storybook/addon-onboarding@npm:^8.6.12":
+  version: 8.6.12
+  resolution: "@storybook/addon-onboarding@npm:8.6.12"
   peerDependencies:
-    storybook: ^8.4.7
-  checksum: 10/d5a87f8aae2519a1b2c0f1da93497f7bfe7987c154613895e079780dc80eccf9c9b8fece4a7485dea019eda1b99a17121b0955b797bad9fe4582aca0dc344390
+    storybook: ^8.6.12
+  checksum: 10/433d1cc849094b99f694a3da17c206617657c85cc5bd0c3fa184684a04be45d06fc513220426d4122738a80ac1b8d0cb3604eb3c5b6ac46015c7e1eda98d3666
   languageName: node
   linkType: hard
 
