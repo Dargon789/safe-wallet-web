@@ -5,7 +5,6 @@ on:
 
   push:
     branches:
-      - dev
       - main
     paths:
       - apps/web/**
@@ -108,5 +107,3 @@ jobs:
             **Storybook:**
             https://${{ steps.extract_branch.outputs.branch }}--walletweb.review.5afe.dev/storybook/
           message-failure: |
-            ## Branch preview
-            ❌  Deploy failed!
