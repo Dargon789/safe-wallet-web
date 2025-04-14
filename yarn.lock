@@ -6588,16 +6588,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-firebase/messaging@npm:^21.12.0":
-  version: 21.12.0
-  resolution: "@react-native-firebase/messaging@npm:21.12.0"
+"@react-native-firebase/messaging@npm:^21.13.0":
+  version: 21.13.0
+  resolution: "@react-native-firebase/messaging@npm:21.13.0"
   peerDependencies:
-    "@react-native-firebase/app": 21.12.0
+    "@react-native-firebase/app": 21.13.0
     expo: ">=47.0.0"
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10/3295e7e7b0c308d5588f87ddebc6e899e8ea46f6eeb1a83e373403afe68cdaf3a6a9647e954e46cc63710bfe1831ec9b5b4a23831bae6ebe1a15186c09f6e576
+  checksum: 10/208e1baf5337d7e068c81d7acc22cea4ea89f829aedf301331a642889c8153ebfe1dcf56d44ebf5da8390ef90640a077dd6145ad191da5ea67e5398d08900b46
   languageName: node
   linkType: hard
 
@@ -7426,7 +7426,7 @@ __metadata:
     "@react-native-firebase/analytics": "npm:^21.12.0"
     "@react-native-firebase/app": "npm:^21.12.0"
     "@react-native-firebase/crashlytics": "npm:^21.12.0"
-    "@react-native-firebase/messaging": "npm:^21.12.0"
+    "@react-native-firebase/messaging": "npm:^21.13.0"
     "@react-native-menu/menu": "npm:^1.1.6"
     "@react-native/babel-preset": "npm:^0.76.2"
     "@react-navigation/material-top-tabs": "npm:^7.1.0"
