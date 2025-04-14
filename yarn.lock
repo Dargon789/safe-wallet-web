@@ -7465,7 +7465,7 @@ __metadata:
     "@types/react": "npm:~18.3.12"
     babel-loader: "npm:^8.4.1"
     babel-plugin-react-native-web: "npm:^0.19.13"
-    blo: "npm:^1.2.0"
+    blo: "npm:^2.0.0"
     burnt: "npm:^0.12.2"
     date-fns: "npm:^4.1.0"
     deepmerge: "npm:^4.3.1"
@@ -7812,7 +7812,7 @@ __metadata:
     "@web3-onboard/core": "npm:2.24.0"
     "@web3-onboard/injected-wallets": "npm:^2.11.2"
     "@web3-onboard/walletconnect": "npm:^2.6.1"
-    blo: "npm:^1.1.1"
+    blo: "npm:^2.0.0"
     cheerio: "npm:^1.0.0"
     classnames: "npm:^2.5.1"
     cross-env: "npm:^7.0.3"
@@ -14041,10 +14041,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"blo@npm:^1.1.1, blo@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "blo@npm:1.2.0"
-  checksum: 10/17ec61e41b201bbba8ab3c874cad94696604b6ac4029de5050c92ea5817dff6814d8642b9b2948e0d6804194437b751fa2755652201f26fa5d606913c489b757
+"blo@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "blo@npm:2.0.0"
+  checksum: 10/a03c33f46349ee114825f3615e45038bc165cb74fdb38959dbc84e96841b33f24bd79aa732cbfe967877dfae2c684878d57bfa8a9f28618059028072de8f5a5e
   languageName: node
   linkType: hard
 
