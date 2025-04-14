@@ -7443,7 +7443,7 @@ __metadata:
     "@storybook/addon-onboarding": "npm:^8.6.12"
     "@storybook/addon-ondevice-actions": "npm:^8.4.4"
     "@storybook/addon-ondevice-controls": "npm:^8.4.2"
-    "@storybook/addon-react-native-web": "npm:^0.0.26"
+    "@storybook/addon-react-native-web": "npm:^0.0.29"
     "@storybook/addon-webpack5-compiler-babel": "npm:^3.0.5"
     "@storybook/addon-webpack5-compiler-swc": "npm:^1.0.5"
     "@storybook/blocks": "npm:^8.4.6"
@@ -8564,16 +8564,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/addon-react-native-web@npm:^0.0.26":
-  version: 0.0.26
-  resolution: "@storybook/addon-react-native-web@npm:0.0.26"
+"@storybook/addon-react-native-web@npm:^0.0.29":
+  version: 0.0.29
+  resolution: "@storybook/addon-react-native-web@npm:0.0.29"
   peerDependencies:
     "@babel/preset-react": "*"
     "@react-native/babel-preset": "*"
     babel-plugin-react-native-web: "*"
     metro-react-native-babel-preset: "*"
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
   peerDependenciesMeta:
     "@react-native/babel-preset":
       optional: true
@@ -8583,7 +8583,7 @@ __metadata:
       optional: true
     react-dom:
       optional: true
-  checksum: 10/35195eb648783dae1cf94dcbade40fbc2cb77e2a7fce37aabf7d5f77694ff6592ea0441da41849d56423d61497dd24348d1970a42a38b8f85a165cf6dd2f8f7e
+  checksum: 10/984c4d81d0593a47308f3ff2eea8acdf1943c64bd1f632c8ddb91dc3a1b5b1158ef809d0e19be4be5c775b9ae94b74c8180a1b5224f2a90c84b13d016917c8fb
   languageName: node
   linkType: hard
 
