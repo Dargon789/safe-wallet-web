@@ -6588,16 +6588,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-firebase/messaging@npm:^21.12.0":
-  version: 21.12.0
-  resolution: "@react-native-firebase/messaging@npm:21.12.0"
+"@react-native-firebase/messaging@npm:^21.13.0":
+  version: 21.13.0
+  resolution: "@react-native-firebase/messaging@npm:21.13.0"
   peerDependencies:
-    "@react-native-firebase/app": 21.12.0
+    "@react-native-firebase/app": 21.13.0
     expo: ">=47.0.0"
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10/3295e7e7b0c308d5588f87ddebc6e899e8ea46f6eeb1a83e373403afe68cdaf3a6a9647e954e46cc63710bfe1831ec9b5b4a23831bae6ebe1a15186c09f6e576
+  checksum: 10/208e1baf5337d7e068c81d7acc22cea4ea89f829aedf301331a642889c8153ebfe1dcf56d44ebf5da8390ef90640a077dd6145ad191da5ea67e5398d08900b46
   languageName: node
   linkType: hard
 
@@ -7426,7 +7426,7 @@ __metadata:
     "@react-native-firebase/analytics": "npm:^21.12.0"
     "@react-native-firebase/app": "npm:^21.12.0"
     "@react-native-firebase/crashlytics": "npm:^21.12.0"
-    "@react-native-firebase/messaging": "npm:^21.12.0"
+    "@react-native-firebase/messaging": "npm:^21.13.0"
     "@react-native-menu/menu": "npm:^1.1.6"
     "@react-native/babel-preset": "npm:^0.76.2"
     "@react-navigation/material-top-tabs": "npm:^7.1.0"
@@ -7440,10 +7440,10 @@ __metadata:
     "@shopify/flash-list": "npm:1.7.6"
     "@storybook/addon-essentials": "npm:^8.4.6"
     "@storybook/addon-interactions": "npm:^8.4.6"
-    "@storybook/addon-onboarding": "npm:^8.4.6"
+    "@storybook/addon-onboarding": "npm:^8.6.12"
     "@storybook/addon-ondevice-actions": "npm:^8.4.4"
     "@storybook/addon-ondevice-controls": "npm:^8.4.2"
-    "@storybook/addon-react-native-web": "npm:^0.0.26"
+    "@storybook/addon-react-native-web": "npm:^0.0.29"
     "@storybook/addon-webpack5-compiler-babel": "npm:^3.0.5"
     "@storybook/addon-webpack5-compiler-swc": "npm:^1.0.5"
     "@storybook/blocks": "npm:^8.4.6"
@@ -7465,7 +7465,7 @@ __metadata:
     "@types/react": "npm:~18.3.12"
     babel-loader: "npm:^8.4.1"
     babel-plugin-react-native-web: "npm:^0.19.13"
-    blo: "npm:^1.2.0"
+    blo: "npm:^2.0.0"
     burnt: "npm:^0.12.2"
     date-fns: "npm:^4.1.0"
     deepmerge: "npm:^4.3.1"
@@ -7783,7 +7783,7 @@ __metadata:
     "@storybook/addon-essentials": "npm:^8.0.6"
     "@storybook/addon-interactions": "npm:^8.0.6"
     "@storybook/addon-links": "npm:^8.3.4"
-    "@storybook/addon-onboarding": "npm:^8.0.6"
+    "@storybook/addon-onboarding": "npm:^8.6.12"
     "@storybook/addon-themes": "npm:^8.0.6"
     "@storybook/blocks": "npm:^8.0.6"
     "@storybook/nextjs": "npm:^8.0.6"
@@ -7812,7 +7812,7 @@ __metadata:
     "@web3-onboard/core": "npm:2.24.0"
     "@web3-onboard/injected-wallets": "npm:^2.11.2"
     "@web3-onboard/walletconnect": "npm:^2.6.1"
-    blo: "npm:^1.1.1"
+    blo: "npm:^2.0.0"
     cheerio: "npm:^1.0.0"
     classnames: "npm:^2.5.1"
     cross-env: "npm:^7.0.3"
@@ -7844,7 +7844,7 @@ __metadata:
     next: "patch:next@15.1.2#../../.yarn/patches/next-npm-15.1.2-24e7411703.patch"
     papaparse: "npm:^5.3.2"
     prettier: "npm:^3.3.3"
-    qrcode.react: "npm:^3.1.0"
+    qrcode.react: "npm:^4.2.0"
     react: "npm:^19.0.0"
     react-dom: "npm:^19.0.0"
     react-dropzone: "npm:^14.3.8"
@@ -8505,14 +8505,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/addon-onboarding@npm:^8.0.6, @storybook/addon-onboarding@npm:^8.4.6":
-  version: 8.4.7
-  resolution: "@storybook/addon-onboarding@npm:8.4.7"
-  dependencies:
-    react-confetti: "npm:^6.1.0"
+"@storybook/addon-onboarding@npm:^8.6.12":
+  version: 8.6.12
+  resolution: "@storybook/addon-onboarding@npm:8.6.12"
   peerDependencies:
-    storybook: ^8.4.7
-  checksum: 10/d5a87f8aae2519a1b2c0f1da93497f7bfe7987c154613895e079780dc80eccf9c9b8fece4a7485dea019eda1b99a17121b0955b797bad9fe4582aca0dc344390
+    storybook: ^8.6.12
+  checksum: 10/433d1cc849094b99f694a3da17c206617657c85cc5bd0c3fa184684a04be45d06fc513220426d4122738a80ac1b8d0cb3604eb3c5b6ac46015c7e1eda98d3666
   languageName: node
   linkType: hard
 
@@ -8566,16 +8564,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/addon-react-native-web@npm:^0.0.26":
-  version: 0.0.26
-  resolution: "@storybook/addon-react-native-web@npm:0.0.26"
+"@storybook/addon-react-native-web@npm:^0.0.29":
+  version: 0.0.29
+  resolution: "@storybook/addon-react-native-web@npm:0.0.29"
   peerDependencies:
     "@babel/preset-react": "*"
     "@react-native/babel-preset": "*"
     babel-plugin-react-native-web: "*"
     metro-react-native-babel-preset: "*"
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
   peerDependenciesMeta:
     "@react-native/babel-preset":
       optional: true
@@ -8585,7 +8583,7 @@ __metadata:
       optional: true
     react-dom:
       optional: true
-  checksum: 10/35195eb648783dae1cf94dcbade40fbc2cb77e2a7fce37aabf7d5f77694ff6592ea0441da41849d56423d61497dd24348d1970a42a38b8f85a165cf6dd2f8f7e
+  checksum: 10/984c4d81d0593a47308f3ff2eea8acdf1943c64bd1f632c8ddb91dc3a1b5b1158ef809d0e19be4be5c775b9ae94b74c8180a1b5224f2a90c84b13d016917c8fb
   languageName: node
   linkType: hard
 
@@ -14043,10 +14041,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"blo@npm:^1.1.1, blo@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "blo@npm:1.2.0"
-  checksum: 10/17ec61e41b201bbba8ab3c874cad94696604b6ac4029de5050c92ea5817dff6814d8642b9b2948e0d6804194437b751fa2755652201f26fa5d606913c489b757
+"blo@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "blo@npm:2.0.0"
+  checksum: 10/a03c33f46349ee114825f3615e45038bc165cb74fdb38959dbc84e96841b33f24bd79aa732cbfe967877dfae2c684878d57bfa8a9f28618059028072de8f5a5e
   languageName: node
   linkType: hard
 
@@ -26684,12 +26682,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"qrcode.react@npm:^3.1.0":
-  version: 3.2.0
-  resolution: "qrcode.react@npm:3.2.0"
+"qrcode.react@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "qrcode.react@npm:4.2.0"
   peerDependencies:
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: 10/00d3625f9be5333ff18b638b6bb4b2839ddddf79b71be9a8054bac5e30d78dc36ec3d77247a365ea4aaabd5c8b97f810e6ee28173523156879194079371e41b5
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10/665036d88b160e6d5de4e24d101bc63bd2b76712802e874bbffe56c6b6e5fe50c63f02c3cba2975b2e2b555c1f1e112cbb42987f8cb3a626ce2d17023cfde6ac
   languageName: node
   linkType: hard
 
