@@ -5,25 +5,21 @@ import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BlurView } from 'expo-blur'
-import crashlytics from '@react-native-firebase/crashlytics'
-import { Alert } from 'react-native'
-import { COMING_SOON_MESSAGE, COMING_SOON_TITLE } from '@/src/config/constants'
+import { getCrashlytics } from '@react-native-firebase/crashlytics'
+import { getAnalytics } from '@react-native-firebase/analytics'
 
 export const GetStarted = () => {
   const router = useRouter()
   const insets = useSafeAreaInsets()
 
   const enableCrashlytics = async () => {
-    await crashlytics().setCrashlyticsCollectionEnabled(true)
+    await getCrashlytics().setCrashlyticsCollectionEnabled(true)
+    await getAnalytics().setAnalyticsCollectionEnabled(true)
   }
 
   const onPressAddAccount = useCallback(async () => {
     await enableCrashlytics()
     router.navigate('/(import-accounts)')
-  }, [])
-
-  const onPressJoinAccount = useCallback(() => {
-    Alert.alert(COMING_SOON_TITLE, COMING_SOON_MESSAGE)
   }, [])
 
   return (
@@ -55,14 +51,7 @@ export const GetStarted = () => {
         >
           How would you like to continue?
         </Text>
-        <SafeButton
-          outlined
-          icon={<SafeFontIcon name={'add-owner'} />}
-          onPress={onPressJoinAccount}
-          testID={'join-account-button'}
-        >
-          Join account
-        </SafeButton>
+
         <SafeButton
           outlined
           icon={<SafeFontIcon name={'plus-outlined'} />}
