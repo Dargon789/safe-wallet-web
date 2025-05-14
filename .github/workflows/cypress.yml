@@ -21,7 +21,7 @@ jobs:
 
       - uses: ./.github/workflows/cypress
         with:
-          secrets: ${{ toJSON(secrets) }}
+          secrets: ${{ secrets.CYPRESS_SAFE_APPS_RECORD_KEY }}
           spec: cypress/e2e/safe-apps/*.cy.js
           group: 'Safe Apps tests'
           project_id: okn21k
