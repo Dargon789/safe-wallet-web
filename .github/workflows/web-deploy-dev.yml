@@ -1,12 +1,12 @@
-name: Web Deploy to dev/staging
+name: Web Deploy to main/staging
 
 on:
   pull_request:
 
   push:
     branches:
-      - dev
       - main
+      - dev
     paths:
       - apps/web/**
       - packages/**
@@ -22,7 +22,7 @@ jobs:
       pull-requests: write
       id-token: write
 
-    name: Deploy to dev/staging
+    name: Deploy to main/staging
 
     steps:
       # Post a PR comment before deploying
