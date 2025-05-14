@@ -39,13 +39,14 @@ const SafeAppIframe = ({
 
   const sanitizedSafeAppUrl = isValidUrl(safeAppUrl) ? sanitizeUrl(safeAppUrl) : ''
   const encodedAppUrl = encodeURIComponent(appUrl)
+  const iframeSrc = sanitizedSafeAppUrl ? encodeURIComponent(sanitizedSafeAppUrl) : ''
 
   return (
     <iframe
       className={css.iframe}
       id={`iframe-${encodedAppUrl}`}
       ref={iframeRef}
-      src={sanitizedSafeAppUrl}
+      src={iframeSrc}
       title={title}
       onLoad={onLoad}
       sandbox={IFRAME_SANDBOX_ALLOWED_FEATURES}
