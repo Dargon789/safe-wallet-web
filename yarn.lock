@@ -1643,7 +1643,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.11.2, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.14.6, @babel/runtime@npm:^7.17.8, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.20.0, @babel/runtime@npm:^7.21.0, @babel/runtime@npm:^7.23.2, @babel/runtime@npm:^7.24.4, @babel/runtime@npm:^7.25.0, @babel/runtime@npm:^7.25.4, @babel/runtime@npm:^7.25.7, @babel/runtime@npm:^7.26.0, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.8.7":
+"@babel/runtime@npm:^7.11.2, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.14.6, @babel/runtime@npm:^7.17.8, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.20.0, @babel/runtime@npm:^7.21.0, @babel/runtime@npm:^7.23.2, @babel/runtime@npm:^7.24.4, @babel/runtime@npm:^7.25.0, @babel/runtime@npm:^7.25.4, @babel/runtime@npm:^7.26.0, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.8.7":
   version: 7.26.0
   resolution: "@babel/runtime@npm:7.26.0"
   dependencies:
@@ -1652,7 +1652,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.26.9":
+"@babel/runtime@npm:^7.26.9, @babel/runtime@npm:^7.27.1":
   version: 7.27.1
   resolution: "@babel/runtime@npm:7.27.1"
   checksum: 10/34cefcbf781ea5a4f1b93f8563327b9ac82694bebdae91e8bd9d7f58d084cbe5b9a6e7f94d77076e15b0bcdaa0040a36cb30737584028df6c4673b4c67b2a31d
@@ -5343,12 +5343,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@formatjs/intl-getcanonicallocales@npm:2.5.4, @formatjs/intl-getcanonicallocales@npm:^2.5.4":
+"@formatjs/intl-getcanonicallocales@npm:2.5.4":
   version: 2.5.4
   resolution: "@formatjs/intl-getcanonicallocales@npm:2.5.4"
   dependencies:
     tslib: "npm:2"
   checksum: 10/69c2cf0b0fc9f85cd7845b27733b5c9796a935f30968ab446f6d32a8563edeba9ee1abd680763e66e7543d17244729d3f474e06582b217ef63023237490d73d9
+  languageName: node
+  linkType: hard
+
+"@formatjs/intl-getcanonicallocales@npm:^2.5.5":
+  version: 2.5.5
+  resolution: "@formatjs/intl-getcanonicallocales@npm:2.5.5"
+  dependencies:
+    tslib: "npm:^2.8.0"
+  checksum: 10/2a32202765c9a4f16fc36f4e4afca7fd5f4f35885ad2ca671352a7bba1a19d5ec81933d52ab1855c8570e73247213739d9d2d95d2438bd9f02a1f0db7cb9b8a9
   languageName: node
   linkType: hard
 
@@ -6578,23 +6587,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/utils@npm:^5.16.6 || ^6.0.0":
-  version: 6.2.1
-  resolution: "@mui/utils@npm:6.2.1"
+"@mui/types@npm:^7.4.2":
+  version: 7.4.2
+  resolution: "@mui/types@npm:7.4.2"
   dependencies:
-    "@babel/runtime": "npm:^7.26.0"
-    "@mui/types": "npm:^7.2.20"
-    "@types/prop-types": "npm:^15.7.14"
-    clsx: "npm:^2.1.1"
-    prop-types: "npm:^15.8.1"
-    react-is: "npm:^19.0.0"
+    "@babel/runtime": "npm:^7.27.1"
   peerDependencies:
     "@types/react": ^17.0.0 || ^18.0.0 || ^19.0.0
-    react: ^17.0.0 || ^18.0.0 || ^19.0.0
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10/6fc5e14ed0a7aba178640ad5f01a050980a24700fa71cf57485d5f2b1795717be51a90b39ef7fbeb58b43820f1d26436efe1b3a13fd5feb3d2ad6253534172ba
+  checksum: 10/0fedf7ed5f8f9fe88df2657a704bf674e5e4b03f726765e7797044fe4ef7504c60b88aa65edaef00e23e412153bf990d5421f125c3865790071899d049fd597b
   languageName: node
   linkType: hard
 
@@ -6618,24 +6621,44 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/x-date-pickers@npm:^7.23.3":
-  version: 7.23.3
-  resolution: "@mui/x-date-pickers@npm:7.23.3"
+"@mui/utils@npm:^7.0.2":
+  version: 7.1.0
+  resolution: "@mui/utils@npm:7.1.0"
   dependencies:
-    "@babel/runtime": "npm:^7.25.7"
-    "@mui/utils": "npm:^5.16.6 || ^6.0.0"
-    "@mui/x-internals": "npm:7.23.0"
-    "@types/react-transition-group": "npm:^4.4.11"
+    "@babel/runtime": "npm:^7.27.1"
+    "@mui/types": "npm:^7.4.2"
+    "@types/prop-types": "npm:^15.7.14"
+    clsx: "npm:^2.1.1"
+    prop-types: "npm:^15.8.1"
+    react-is: "npm:^19.1.0"
+  peerDependencies:
+    "@types/react": ^17.0.0 || ^18.0.0 || ^19.0.0
+    react: ^17.0.0 || ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  checksum: 10/8fbfc343331f600fe0691474032aa1b91d5ffff920ee1404b4e4626931e5852320b023b10eec680d2f1b24d469f8aec5439d1e81fc4aa20eaacb488a56a5b68e
+  languageName: node
+  linkType: hard
+
+"@mui/x-date-pickers@npm:^8.2.0":
+  version: 8.3.1
+  resolution: "@mui/x-date-pickers@npm:8.3.1"
+  dependencies:
+    "@babel/runtime": "npm:^7.27.1"
+    "@mui/utils": "npm:^7.0.2"
+    "@mui/x-internals": "npm:8.3.1"
+    "@types/react-transition-group": "npm:^4.4.12"
     clsx: "npm:^2.1.1"
     prop-types: "npm:^15.8.1"
     react-transition-group: "npm:^4.4.5"
   peerDependencies:
     "@emotion/react": ^11.9.0
     "@emotion/styled": ^11.8.1
-    "@mui/material": ^5.15.14 || ^6.0.0
-    "@mui/system": ^5.15.14 || ^6.0.0
+    "@mui/material": ^5.15.14 || ^6.0.0 || ^7.0.0
+    "@mui/system": ^5.15.14 || ^6.0.0 || ^7.0.0
     date-fns: ^2.25.0 || ^3.2.0 || ^4.0.0
-    date-fns-jalali: ^2.13.0-0 || ^3.2.0-0
+    date-fns-jalali: ^2.13.0-0 || ^3.2.0-0 || ^4.0.0-0
     dayjs: ^1.10.7
     luxon: ^3.0.2
     moment: ^2.29.4
@@ -6662,19 +6685,19 @@ __metadata:
       optional: true
     moment-jalaali:
       optional: true
-  checksum: 10/8abd73645f614741f7e97f72f3516413a792c1b5f2ddbba4180f17bcb2282a55e4e22d6e429c72791e3a7b4d458c4580fd5a9fba806babddbf9846b3089b16ef
+  checksum: 10/c4eb28ca692ea5ff83bd6c18c44d07bd3925ec7291a07ddc0f37481923fcc9e76882ce775178fa0753b1f547fee038e64cb00d7aaf4a320505ad948241345af5
   languageName: node
   linkType: hard
 
-"@mui/x-internals@npm:7.23.0":
-  version: 7.23.0
-  resolution: "@mui/x-internals@npm:7.23.0"
+"@mui/x-internals@npm:8.3.1":
+  version: 8.3.1
+  resolution: "@mui/x-internals@npm:8.3.1"
   dependencies:
-    "@babel/runtime": "npm:^7.25.7"
-    "@mui/utils": "npm:^5.16.6 || ^6.0.0"
+    "@babel/runtime": "npm:^7.27.1"
+    "@mui/utils": "npm:^7.0.2"
   peerDependencies:
     react: ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10/a09f78ce26a9452f8b14a1514c38306c9069f89af650932af8a982a58a8946a25d18c0babe3bec42863c3962fb9016551bf2d8ffa92cb7db7e1c86379b498358
+  checksum: 10/f4db3241ae8963321753e436956fcff96285100a173fee9e1c1c39c7517694826be9c5c103fac217e2ec26a5b79920b2c63060c5ebd0f3c28f721a4fa9001e4b
   languageName: node
   linkType: hard
 
@@ -8212,7 +8235,7 @@ __metadata:
     "@expo/config-plugins": "npm:~10.0.0"
     "@expo/vector-icons": "npm:^14.1.0"
     "@faker-js/faker": "npm:^9.0.3"
-    "@formatjs/intl-getcanonicallocales": "npm:^2.5.4"
+    "@formatjs/intl-getcanonicallocales": "npm:^2.5.5"
     "@formatjs/intl-locale": "npm:^4.2.10"
     "@formatjs/intl-numberformat": "npm:^8.15.3"
     "@formatjs/intl-pluralrules": "npm:^5.4.3"
@@ -8395,6 +8418,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@safe-global/protocol-kit@npm:^6.0.4":
+  version: 6.0.4
+  resolution: "@safe-global/protocol-kit@npm:6.0.4"
+  dependencies:
+    "@noble/curves": "npm:^1.6.0"
+    "@peculiar/asn1-schema": "npm:^2.3.13"
+    "@safe-global/safe-deployments": "npm:^1.37.32"
+    "@safe-global/safe-modules-deployments": "npm:^2.2.8"
+    "@safe-global/types-kit": "npm:^2.0.1"
+    abitype: "npm:^1.0.2"
+    semver: "npm:^7.7.1"
+    viem: "npm:^2.21.8"
+  dependenciesMeta:
+    "@noble/curves":
+      optional: true
+    "@peculiar/asn1-schema":
+      optional: true
+  checksum: 10/2c7f9cbd842c613d0722d6a32badc76befb2f29b95cbbec86b2bb645a9705e2ad06237f7ac613737d688cf8af237cefefad341ed67cfc0c132fcf39b5566e423
+  languageName: node
+  linkType: hard
+
 "@safe-global/safe-apps-sdk@npm:^9.1.0":
   version: 9.1.0
   resolution: "@safe-global/safe-apps-sdk@npm:9.1.0"
@@ -8473,6 +8517,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@safe-global/safe-wallet@workspace:."
   dependencies:
+    "@safe-global/protocol-kit": "npm:^6.0.4"
     husky: "npm:^9.1.6"
     lint-staged: "npm:^15.2.10"
     msw: "npm:^2.7.3"
@@ -8531,6 +8576,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@safe-global/types-kit@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "@safe-global/types-kit@npm:2.0.1"
+  dependencies:
+    abitype: "npm:^1.0.2"
+  checksum: 10/6a8dc0a15805550df2d780c54e4916f105d08daa710e2e04f50f5929e6fa7fd580fad5557a814fa8629d5c4b298209a5e1e0593b821016ebae75aabfcf891f62
+  languageName: node
+  linkType: hard
+
 "@safe-global/utils@workspace:^, @safe-global/utils@workspace:packages/utils":
   version: 0.0.0-use.local
   resolution: "@safe-global/utils@workspace:packages/utils"
@@ -8568,7 +8622,7 @@ __metadata:
     "@mdx-js/react": "npm:^3.0.1"
     "@mui/icons-material": "npm:^6.1.6"
     "@mui/material": "npm:^6.3.0"
-    "@mui/x-date-pickers": "npm:^7.23.3"
+    "@mui/x-date-pickers": "npm:^8.2.0"
     "@next/bundle-analyzer": "npm:^15.0.4"
     "@next/mdx": "npm:^15.0.4"
     "@next/third-parties": "npm:^15.2.0"
@@ -12425,7 +12479,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-transition-group@npm:^4.4.11, @types/react-transition-group@npm:^4.4.12":
+"@types/react-transition-group@npm:^4.4.12":
   version: 4.4.12
   resolution: "@types/react-transition-group@npm:4.4.12"
   peerDependencies:
@@ -27699,6 +27753,13 @@ __metadata:
   version: 19.0.0
   resolution: "react-is@npm:19.0.0"
   checksum: 10/6cd3695c462ec3f0d4db98583f0c1b9a439248d60214f6c42c2b0e2951a1066339d0eefa74707f03484042e043fca87750282a35b652492c035f5f3da0d6498a
+  languageName: node
+  linkType: hard
+
+"react-is@npm:^19.1.0":
+  version: 19.1.0
+  resolution: "react-is@npm:19.1.0"
+  checksum: 10/4aceca94492032a19411138bf68c6ca7dce4abee7ae6c7f23db9291d2dff14d6a643717b176ef9a151e8cdf6a2b71fdbc59fd998328e086a6f752512304a252b
   languageName: node
   linkType: hard
 

@@ -36,5 +36,8 @@
       "built": true
     }
   },
-  "packageManager": "yarn@4.6.0"
+  "packageManager": "yarn@4.6.0",
+  "dependencies": {
+    "@safe-global/protocol-kit": "^6.0.4"
+  }
 }
