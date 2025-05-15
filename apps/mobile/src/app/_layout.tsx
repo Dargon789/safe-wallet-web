@@ -35,14 +35,19 @@ configureReanimatedLogger({
   strict: false,
 })
 
-// Initialize store-side effects
-store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
-
 const HooksInitializer = () => {
   useInitWeb3()
   useInitSafeCoreSDK()
   return null
 }
+
+persistor.subscribe(() => {
+  const { bootstrapped } = persistor.getState()
+  if (bootstrapped) {
+    // The chain config is persisted in the store, but might be outdated.
+    store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(undefined, { forceRefetch: true }))
+  }
+})
 
 function RootLayout() {
   useScreenTracking()
