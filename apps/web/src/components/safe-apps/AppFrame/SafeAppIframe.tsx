@@ -27,17 +27,23 @@ const SafeAppIframe = ({
   // Use the original URL with parameters if available, otherwise fallback to the provided URL
   const safeAppUrl = safeApp?.originalUrl || appUrl
 
-  // Ensure the URL is valid and sanitized
-  const isValidUrl = (url: string): boolean => {
+  // Define a whitelist of trusted domains
+  const TRUSTED_DOMAINS = ['example.com', 'trustedapp.com']
+
+  // Ensure the URL is valid, sanitized, and belongs to a trusted domain
+  const isTrustedUrl = (url: string): boolean => {
     try {
       const parsedUrl = new URL(url)
-      return ['http:', 'https:'].includes(parsedUrl.protocol)
+      return (
+        ['http:', 'https:'].includes(parsedUrl.protocol) &&
+        TRUSTED_DOMAINS.some((domain) => parsedUrl.hostname.endsWith(domain))
+      )
     } catch {
       return false
     }
   }
 
-  const sanitizedSafeAppUrl = isValidUrl(safeAppUrl) ? sanitizeUrl(safeAppUrl) : ''
+  const sanitizedSafeAppUrl = isTrustedUrl(safeAppUrl) ? sanitizeUrl(safeAppUrl) : ''
   const encodedAppUrl = encodeURIComponent(appUrl)
   const iframeSrc = sanitizedSafeAppUrl ? encodeURIComponent(sanitizedSafeAppUrl) : ''
 
