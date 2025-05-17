@@ -38,6 +38,6 @@
   },
   "packageManager": "yarn@4.6.0",
   "dependencies": {
-    "@safe-global/protocol-kit": "^6.0.4"
+    "@safe-global/protocol-kit": "^5.2.1"
   }
 }
