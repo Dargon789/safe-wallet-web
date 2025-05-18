@@ -38,6 +38,9 @@
   },
   "packageManager": "yarn@4.6.0",
   "dependencies": {
-    "@safe-global/protocol-kit": "^5.2.1"
+    "@safe-global/protocol-kit": "^5.2.1",
+    "next": "^15.3.2",
+    "next.js": "^1.0.3",
+    "react-dom": "^19.1.0"
   }
 }
