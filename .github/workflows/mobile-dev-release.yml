@@ -12,6 +12,9 @@ on:
       - apps/mobile/**
       - packages/**
 
+permissions:
+  contents: read
+
 jobs:
   build:
     if: >
