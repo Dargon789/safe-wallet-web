@@ -9073,7 +9073,7 @@ __metadata:
     mockdate: "npm:^3.0.5"
     msw: "npm:^2.7.3"
     next: "patch:next@15.2.4#../../.yarn/patches/next-npm-15.2.4-06a6671f62.patch"
-    papaparse: "npm:^5.3.2"
+    papaparse: "npm:^5.5.3"
     prettier: "npm:^3.3.3"
     qrcode.react: "npm:^3.1.0"
     react: "npm:^19.0.0"
@@ -27717,10 +27717,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"papaparse@npm:^5.3.2, papaparse@npm:^5.4.1":
+"papaparse@npm:^5.4.1":
   version: 5.4.1
   resolution: "papaparse@npm:5.4.1"
   checksum: 10/5e6dc978187182ad2efa1d264ffe73d2042cd23b8fb1dcb0b0f5c8c7c772c11e3eb4e166fb0893880ed24529a96abe9065d704cc5b4cb96abf037413cfe43788
+  languageName: node
+  linkType: hard
+
+"papaparse@npm:^5.5.3":
+  version: 5.5.3
+  resolution: "papaparse@npm:5.5.3"
+  checksum: 10/383e38f8ff910be48b684e7f47b84dbe5e67708669c13bb21f316a0591ef183ff670dfc7eb9f6d0a8b67e21a5b0e8934712cda96ff8fb678d6591e597d108bd1
   languageName: node
   linkType: hard
 
