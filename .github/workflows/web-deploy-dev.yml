@@ -43,7 +43,12 @@ jobs:
 
       - uses: ./.github/actions/build
         with:
-          secrets: ${{ toJSON(secrets) }}
+          secrets: |
+            {
+              "AWS_ROLE": "${{ secrets.AWS_ROLE }}",
+              "AWS_REGION": "${{ secrets.AWS_REGION }}",
+              "AWS_STAGING_BUCKET_NAME": "${{ secrets.AWS_STAGING_BUCKET_NAME }}"
+            }
           # if: startsWith(github.ref, 'refs/heads/main')
 
       #- uses: ./.github/workflows/build-storybook
