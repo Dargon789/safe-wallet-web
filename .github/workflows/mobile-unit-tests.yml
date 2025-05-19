@@ -1,4 +1,6 @@
 name: Mobile Tests and Coverage
+permissions:
+  contents: read
 
 on:
   push:
