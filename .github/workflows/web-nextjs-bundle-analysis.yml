@@ -30,7 +30,7 @@ jobs:
       - name: Build next.js app
         uses: ./.github/actions/build
         with:
-          secrets: ${{ toJSON(secrets) }}
+          secrets: ${{ secrets.REQUIRED_SECRET_NAME }}
 
       - name: Analyze bundle
         run: |
