@@ -10,9 +10,10 @@ import {
   isSwapOrderTxInfo,
   isAnyStakingTxInfo,
   isNestedConfirmationTxInfo,
+  isAnyEarnTxInfo,
 } from '@/utils/transaction-guards'
 import { BRIDGE_WIDGET_URL } from '@/features/bridge/components/BridgeWidget'
-
+import { SWAP_WIDGET_URL } from '@/features/swap/components/FallbackSwapWidget'
 export const getTransactionTrackingType = (
   details: TransactionDetails | undefined,
   origin?: string,
@@ -29,8 +30,14 @@ export const getTransactionTrackingType = (
   const { txInfo } = details
 
   const isNativeBridge = origin?.includes(BRIDGE_WIDGET_URL)
+  const isLiFiSwap = origin?.includes(SWAP_WIDGET_URL)
+
   if (isNativeBridge) {
     return TX_TYPES.native_bridge
+  }
+
+  if (isLiFiSwap) {
+    return TX_TYPES.native_swap_lifi
   }
 
   if (isTransferTxInfo(txInfo)) {
@@ -46,6 +53,11 @@ export const getTransactionTrackingType = (
 
   if (isAnyStakingTxInfo(txInfo)) {
     return txInfo.type
+  }
+
+  //@ts-ignore TODO: Fix types after removing old sdk
+  if (isAnyEarnTxInfo(txInfo)) {
+    return TX_TYPES.native_earn
   }
 
   if (isSettingsChangeTxInfo(txInfo)) {

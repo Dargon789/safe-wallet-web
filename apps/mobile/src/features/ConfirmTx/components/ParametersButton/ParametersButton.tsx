@@ -7,7 +7,7 @@ interface ParametersButtonProps {
 }
 
 export function ParametersButton({ txId }: ParametersButtonProps) {
-  const handleViewParameters = () => {
+  const goToAdvancedDetails = () => {
     router.push({
       pathname: '/transaction-parameters',
       params: { txId },
@@ -21,12 +21,12 @@ export function ParametersButton({ txId }: ParametersButtonProps) {
         height="$10"
         borderRadius="$3"
         backgroundColor="$borderLight"
-        fontWeight="500"
+        fontWeight="600"
         size="$5"
         fullscreen
-        onPress={handleViewParameters}
+        onPress={goToAdvancedDetails}
       >
-        View Parameters
+        Transaction details
       </Button>
     </View>
   )

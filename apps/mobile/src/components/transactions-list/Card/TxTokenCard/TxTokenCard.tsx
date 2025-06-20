@@ -1,10 +1,9 @@
 import React from 'react'
-import { Text, View } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { isERC721Transfer, isOutgoingTransfer, isTxQueued } from '@/src/utils/transaction-guards'
 import { TransferDirection } from '@safe-global/store/gateway/types'
 import { TransferTransactionInfo, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Logo } from '@/src/components/Logo'
+import { TokenIcon } from '@/src/components/TokenIcon'
 import { useTokenDetails } from '@/src/hooks/useTokenDetails'
 import { TokenAmount } from '@/src/components/TokenAmount'
 interface TxTokenCardProps {
@@ -33,21 +32,17 @@ export function TxTokenCard({ bordered, inQueue, txStatus, executionInfo, txInfo
       type={type}
       onPress={onPress}
       bordered={bordered}
-      leftNode={<Logo logoUri={logoUri} accessibilityLabel={name} />}
+      leftNode={<TokenIcon logoUri={logoUri} accessibilityLabel={name} />}
       rightNode={
-        <View maxWidth="34%">
-          <Text>
-            <TokenAmount
-              value={value}
-              decimals={decimals}
-              tokenSymbol={!isERC721 ? tokenSymbol : ''}
-              direction={txInfo.direction}
-              preciseAmount
-              displayPositiveSign
-              textProps={{ color: isOutgoing ? '$color' : '$primary', textAlign: 'right', fontWeight: 400 }}
-            />
-          </Text>
-        </View>
+        <TokenAmount
+          value={value}
+          decimals={decimals}
+          tokenSymbol={!isERC721 ? tokenSymbol : ''}
+          direction={txInfo.direction}
+          preciseAmount
+          displayPositiveSign
+          textProps={{ color: isOutgoing ? '$color' : '$primary', textAlign: 'right', fontWeight: 400 }}
+        />
       }
     />
   )

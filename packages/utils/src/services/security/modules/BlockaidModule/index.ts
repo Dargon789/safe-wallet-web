@@ -1,7 +1,7 @@
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 import { normalizeTypedData } from '@safe-global/utils/utils/web3'
-import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import { type SafeTransaction } from '@safe-global/types-kit'
 import { generateTypedData } from '@safe-global/protocol-kit/dist/src/utils/eip-712'
 import { type SecurityResponse, type SecurityModule, SecuritySeverity } from '../types'
 import type {
@@ -139,7 +139,7 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
       balanceChange = simulation.assets_diffs[safeAddress]
       contractManagement = simulation.contract_management?.[safeAddress] || []
     } else if (simulation?.status === 'Error') {
-      error = new Error('Simulation failed')
+      error = new Error(simulation.error)
     }
 
     // Sometimes the validation is missing

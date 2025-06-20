@@ -1,5 +1,5 @@
 import { fireEvent, render, within } from '@/tests/test-utils'
-import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import { type SafeTransaction } from '@safe-global/types-kit'
 import DecodedTx from '.'
 import { waitFor } from '@testing-library/react'
 import { createMockTransactionDetails } from '@/tests/transactions'
@@ -99,6 +99,10 @@ const txDetails = createMockTransactionDetails({
     rejectors: [],
     trusted: false,
     proposer: {
+      value: '0xDa5e9FA404881Ff36DDa97b41Da402dF6430EE6b',
+      name: '',
+    },
+    proposedByDelegate: {
       value: '0xDa5e9FA404881Ff36DDa97b41Da402dF6430EE6b',
       name: '',
     },

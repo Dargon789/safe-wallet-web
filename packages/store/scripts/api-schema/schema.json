@@ -2157,6 +2157,88 @@
         "tags": ["users"]
       }
     },
+    "/v1/spaces/{spaceId}/address-book": {
+      "get": {
+        "operationId": "addressBooksGetAddressBookItemsV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Address Book Items found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceAddressBookDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Signer not authorized."
+          },
+          "404": {
+            "description": "User, member or space not found"
+          }
+        },
+        "tags": ["spaces"]
+      },
+      "put": {
+        "operationId": "addressBooksUpsertAddressBookItemsV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertAddressBookItemsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Address Book updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceAddressBookDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Signer not authorized."
+          },
+          "404": {
+            "description": "User, member or space not found"
+          }
+        },
+        "tags": ["spaces"]
+      }
+    },
     "/v1/spaces": {
       "post": {
         "operationId": "spacesCreateV1",
@@ -2624,6 +2706,39 @@
             "description": "Signer or space not found"
           }
         },
+        "tags": ["spaces"]
+      },
+      "delete": {
+        "description": "Remove own membership from a space.",
+        "operationId": "membersSelfRemoveV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membership deleted"
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer or space not found"
+          },
+          "409": {
+            "description": "Cannot remove last admin"
+          }
+        },
+        "summary": "Leave a space",
         "tags": ["spaces"]
       }
     },
@@ -4182,7 +4297,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main",
+    "version": "",
     "contact": {}
   },
   "tags": [],
@@ -4297,17 +4412,20 @@
       "AddressBookItem": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string"
-          },
           "name": {
             "type": "string"
           },
           "address": {
             "type": "string"
+          },
+          "chainIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
-        "required": ["id", "name", "address"]
+        "required": ["name", "address", "chainIds"]
       },
       "AddressBook": {
         "type": "object",
@@ -4750,6 +4868,9 @@
           "isTestnet": {
             "type": "boolean"
           },
+          "zk": {
+            "type": "boolean"
+          },
           "nativeCurrency": {
             "$ref": "#/components/schemas/NativeCurrency"
           },
@@ -4826,6 +4947,7 @@
           "description",
           "l2",
           "isTestnet",
+          "zk",
           "nativeCurrency",
           "transactionService",
           "blockExplorerUriTemplate",
@@ -6088,6 +6210,57 @@
         },
         "required": ["id"]
       },
+      "SpaceAddressBookItemDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "chainIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "lastUpdatedBy": {
+            "type": "string"
+          }
+        },
+        "required": ["name", "address", "chainIds", "createdBy", "lastUpdatedBy"]
+      },
+      "SpaceAddressBookDto": {
+        "type": "object",
+        "properties": {
+          "spaceId": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpaceAddressBookItemDto"
+            }
+          }
+        },
+        "required": ["spaceId", "data"]
+      },
+      "UpsertAddressBookItemsDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressBookItem"
+            }
+          }
+        },
+        "required": ["items"]
+      },
       "CreateSpaceDto": {
         "type": "object",
         "properties": {
@@ -6754,7 +6927,8 @@
               "SwapTransfer",
               "Transfer",
               "TwapOrder",
-              "VaultDeposit"
+              "VaultDeposit",
+              "VaultRedeem"
             ]
           },
           "humanDescription": {
@@ -7827,17 +8001,45 @@
         },
         "required": ["type", "value", "tokenInfo", "validators"]
       },
-      "VaultDepositAdditionalRewards": {
+      "VaultInfo": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dashboardUri": {
+            "type": "string",
+            "nullable": true
+          },
+          "logoUri": {
+            "type": "string"
+          }
+        },
+        "required": ["address", "name", "description", "logoUri"]
+      },
+      "VaultExtraReward": {
         "type": "object",
         "properties": {
           "tokenInfo": {
             "$ref": "#/components/schemas/TokenInfo"
           },
-          "returnRate": {
+          "nrr": {
             "type": "number"
+          },
+          "claimable": {
+            "type": "string"
+          },
+          "claimableNext": {
+            "type": "string"
           }
         },
-        "required": ["tokenInfo", "returnRate"]
+        "required": ["tokenInfo", "nrr", "claimable", "claimableNext"]
       },
       "VaultDepositTransactionInfo": {
         "type": "object",
@@ -7850,64 +8052,103 @@
             "type": "string",
             "nullable": true
           },
-          "chainId": {
+          "value": {
             "type": "string"
           },
-          "expectedMonthlyReward": {
+          "baseNrr": {
             "type": "number"
           },
-          "expectedAnnualReward": {
+          "fee": {
             "type": "number"
           },
           "tokenInfo": {
             "$ref": "#/components/schemas/TokenInfo"
           },
-          "value": {
-            "type": "number"
+          "vaultInfo": {
+            "$ref": "#/components/schemas/VaultInfo"
           },
-          "returnRate": {
-            "type": "number"
-          },
-          "vaultAddress": {
+          "currentReward": {
             "type": "string"
           },
-          "vaultName": {
-            "type": "string"
-          },
-          "vaultDisplayName": {
-            "type": "string"
-          },
-          "vaultDescription": {
-            "type": "string"
-          },
-          "vaultDashboardURL": {
-            "type": "string",
-            "nullable": true
-          },
-          "vaultTVL": {
+          "additionalRewardsNrr": {
             "type": "number"
           },
           "additionalRewards": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/VaultDepositAdditionalRewards"
+              "$ref": "#/components/schemas/VaultExtraReward"
+            }
+          },
+          "expectedMonthlyReward": {
+            "type": "string"
+          },
+          "expectedAnnualReward": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "value",
+          "baseNrr",
+          "fee",
+          "tokenInfo",
+          "vaultInfo",
+          "currentReward",
+          "additionalRewardsNrr",
+          "additionalRewards",
+          "expectedMonthlyReward",
+          "expectedAnnualReward"
+        ]
+      },
+      "VaultRedeemTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["VaultRedeem"]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string"
+          },
+          "baseNrr": {
+            "type": "number"
+          },
+          "fee": {
+            "type": "number"
+          },
+          "tokenInfo": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "vaultInfo": {
+            "$ref": "#/components/schemas/VaultInfo"
+          },
+          "currentReward": {
+            "type": "string"
+          },
+          "additionalRewardsNrr": {
+            "type": "number"
+          },
+          "additionalRewards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VaultExtraReward"
             }
           }
         },
         "required": [
           "type",
-          "chainId",
-          "expectedMonthlyReward",
-          "expectedAnnualReward",
-          "tokenInfo",
           "value",
-          "returnRate",
-          "vaultAddress",
-          "vaultName",
-          "vaultDisplayName",
-          "vaultDescription",
-          "vaultDashboardURL",
-          "vaultTVL"
+          "baseNrr",
+          "fee",
+          "tokenInfo",
+          "vaultInfo",
+          "currentReward",
+          "additionalRewardsNrr",
+          "additionalRewards"
         ]
       },
       "TransactionData": {
@@ -7941,6 +8182,26 @@
           },
           "addressInfoIndex": {
             "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AddressInfo"
+            },
+            "nullable": true
+          },
+          "tokenInfoIndex": {
+            "type": "object",
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/NativeToken"
+                },
+                {
+                  "$ref": "#/components/schemas/Erc20Token"
+                },
+                {
+                  "$ref": "#/components/schemas/Erc721Token"
+                }
+              ]
+            },
             "nullable": true
           }
         },
@@ -8139,6 +8400,9 @@
               },
               {
                 "$ref": "#/components/schemas/VaultDepositTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/VaultRedeemTransactionInfo"
               }
             ],
             "allOf": [
@@ -8431,6 +8695,9 @@
               },
               {
                 "$ref": "#/components/schemas/VaultDepositTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/VaultRedeemTransactionInfo"
               }
             ],
             "allOf": [
@@ -8672,6 +8939,9 @@
               },
               {
                 "$ref": "#/components/schemas/VaultDepositTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/VaultRedeemTransactionInfo"
               }
             ],
             "allOf": [

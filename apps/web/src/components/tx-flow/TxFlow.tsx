@@ -3,13 +3,14 @@ import useTxStepper from './useTxStepper'
 import SafeTxProvider from './SafeTxProvider'
 import { TxInfoProvider } from './TxInfoProvider'
 import { TxSecurityProvider } from '../tx/security/shared/TxSecurityContext'
-import TxFlowProvider, { type TxFlowContextType } from './TxFlowProvider'
+import TxFlowProvider, { type TxFlowProviderProps, type TxFlowContextType } from './TxFlowProvider'
 import { TxFlowContent } from './common/TxFlowContent'
 import ReviewTransaction from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
-import { TxChecks, TxNote, SignerSelect } from './features'
+import { TxChecks, TxNote, SignerSelect, Blockaid } from './features'
 import { Batching, ComboSubmit, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
 import { SlotProvider } from './slots'
+import { useTrackTimeSpent } from '../tx/SignOrExecuteForm/tracking'
 
 type SubmitCallbackProps = { txId?: string; isExecuted?: boolean }
 export type SubmitCallback = (args?: SubmitCallbackProps) => void
@@ -18,11 +19,14 @@ export type SubmitCallbackWithData<T> = (args: SubmitCallbackProps & { data?: T 
 type TxFlowProps<T extends unknown> = {
   children?: ReactNode[] | ReactNode
   initialData?: T
-  txId?: string
   onSubmit?: SubmitCallbackWithData<T>
-  onlyExecute?: boolean
-  isExecutable?: boolean
-  isRejection?: boolean
+  txId?: TxFlowProviderProps<T>['txId']
+  txNonce?: TxFlowProviderProps<T>['txNonce']
+  onlyExecute?: TxFlowProviderProps<T>['onlyExecute']
+  isExecutable?: TxFlowProviderProps<T>['isExecutable']
+  isRejection?: TxFlowProviderProps<T>['isRejection']
+  isBatch?: TxFlowProviderProps<T>['isBatch']
+  isBatchable?: TxFlowProviderProps<T>['isBatchable']
   ReviewTransactionComponent?: typeof ReviewTransaction
   eventCategory?: string
 } & TxFlowContextType['txLayoutProps']
@@ -37,10 +41,13 @@ export const TxFlow = <T extends unknown>({
   children = [],
   initialData,
   txId,
+  txNonce,
   onSubmit,
   onlyExecute,
   isExecutable,
   isRejection,
+  isBatch,
+  isBatchable,
   ReviewTransactionComponent = ReviewTransaction,
   eventCategory,
   ...txLayoutProps
@@ -54,26 +61,14 @@ export const TxFlow = <T extends unknown>({
     [step, childrenArray.length],
   )
 
+  const trackTimeSpent = useTrackTimeSpent()
+
   const handleFlowSubmit = useCallback<SubmitCallback>(
     (props) => {
       onSubmit?.({ ...props, data })
+      trackTimeSpent()
     },
-    [onSubmit, data],
-  )
-
-  const submit = (
-    <>
-      <Counterfactual />
-      <ExecuteThroughRole />
-
-      <ComboSubmit>
-        <Sign />
-        <Execute />
-        <Batching />
-      </ComboSubmit>
-
-      <Propose />
-    </>
+    [onSubmit, data, trackTimeSpent],
   )
 
   return (
@@ -88,23 +83,36 @@ export const TxFlow = <T extends unknown>({
               prevStep={prevStep}
               progress={progress}
               txId={txId}
+              txNonce={txNonce}
               txLayoutProps={txLayoutProps}
               onlyExecute={onlyExecute}
               isExecutable={isExecutable}
               isRejection={isRejection}
+              isBatch={isBatch}
+              isBatchable={isBatchable}
             >
               <TxFlowContent>
                 {...childrenArray}
 
-                <ReviewTransactionComponent onSubmit={handleFlowSubmit}>
+                <ReviewTransactionComponent onSubmit={() => nextStep()}>
                   <TxChecks />
                   <TxNote />
                   <SignerSelect />
-
-                  {submit}
+                  <Blockaid />
                 </ReviewTransactionComponent>
 
-                <ConfirmTxReceipt onSubmit={handleFlowSubmit}>{submit}</ConfirmTxReceipt>
+                <ConfirmTxReceipt onSubmit={handleFlowSubmit}>
+                  <Counterfactual />
+                  <ExecuteThroughRole />
+
+                  <ComboSubmit>
+                    <Sign />
+                    <Execute />
+                    <Batching />
+                  </ComboSubmit>
+
+                  <Propose />
+                </ConfirmTxReceipt>
               </TxFlowContent>
             </TxFlowProvider>
           </SlotProvider>

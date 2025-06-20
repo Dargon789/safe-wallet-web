@@ -42,6 +42,7 @@ export type TxFlowContextType<T extends unknown = any> = {
   trackTxEvent: (txId: string, isExecuted?: boolean, isRoleExecution?: boolean, isProposerCreation?: boolean) => void
 
   txId?: string
+  txNonce?: number
   isCreation: boolean
   isRejection: boolean
   onlyExecute: boolean
@@ -52,8 +53,12 @@ export type TxFlowContextType<T extends unknown = any> = {
   shouldExecute: boolean
   setShouldExecute: Dispatch<SetStateAction<boolean>>
 
-  isSubmittable: boolean
-  setIsSubmittable: Dispatch<SetStateAction<boolean>>
+  isSubmitLoading: boolean
+  setIsSubmitLoading: Dispatch<SetStateAction<boolean>>
+
+  isSubmitDisabled: boolean
+  setIsSubmitDisabled: Dispatch<SetStateAction<boolean>>
+
   submitError?: Error
   setSubmitError: Dispatch<SetStateAction<Error | undefined>>
   isRejectedByUser: boolean
@@ -64,6 +69,7 @@ export type TxFlowContextType<T extends unknown = any> = {
   txDetails?: TransactionDetails
   txDetailsLoading?: boolean
   isBatch: boolean
+  isBatchable: boolean
   role?: Role
 }
 
@@ -88,8 +94,12 @@ export const initialContext: TxFlowContextType = {
   shouldExecute: false,
   setShouldExecute: () => {},
 
-  isSubmittable: true,
-  setIsSubmittable: () => {},
+  isSubmitLoading: false,
+  setIsSubmitLoading: () => {},
+
+  isSubmitDisabled: false,
+  setIsSubmitDisabled: () => {},
+
   submitError: undefined,
   setSubmitError: () => {},
   isRejectedByUser: false,
@@ -98,6 +108,7 @@ export const initialContext: TxFlowContextType = {
   willExecuteThroughRole: false,
   canExecuteThroughRole: false,
   isBatch: false,
+  isBatchable: true,
 }
 
 export const TxFlowContext = createContext<TxFlowContextType>(initialContext)
@@ -110,11 +121,13 @@ export type TxFlowProviderProps<T extends unknown> = {
   nextStep: (data: T) => void
   progress?: number
   txId?: string
+  txNonce?: TxFlowContextType['txNonce']
   isExecutable?: boolean
   onlyExecute?: TxFlowContextType['onlyExecute']
   isRejection?: TxFlowContextType['isRejection']
   txLayoutProps?: TxFlowContextType['txLayoutProps']
   isBatch?: TxFlowContextType['isBatch']
+  isBatchable?: TxFlowContextType['isBatchable']
 }
 
 const TxFlowProvider = <T extends unknown>({
@@ -125,11 +138,13 @@ const TxFlowProvider = <T extends unknown>({
   prevStep,
   progress = 0,
   txId,
+  txNonce,
   isExecutable = false,
   onlyExecute = initialContext.onlyExecute,
   txLayoutProps: defaultTxLayoutProps = initialContext.txLayoutProps,
   isRejection = initialContext.isRejection,
   isBatch = initialContext.isBatch,
+  isBatchable = initialContext.isBatchable,
 }: TxFlowProviderProps<T>): ReactElement => {
   const signer = useSigner()
   const isSafeOwner = useIsSafeOwner()
@@ -139,7 +154,8 @@ const TxFlowProvider = <T extends unknown>({
   const isCorrectNonce = useValidateNonce(safeTx)
   const { transactionExecution } = useAppSelector(selectSettings)
   const [shouldExecute, setShouldExecute] = useState<boolean>(transactionExecution)
-  const [isSubmittable, setIsSubmittable] = useState<boolean>(initialContext.isSubmittable)
+  const [isSubmitLoading, setIsSubmitLoading] = useState<boolean>(initialContext.isSubmitLoading)
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState<boolean>(initialContext.isSubmitDisabled)
   const [submitError, setSubmitError] = useState<Error | undefined>(initialContext.submitError)
   const [isRejectedByUser, setIsRejectedByUser] = useState<boolean>(initialContext.isRejectedByUser)
   const [txLayoutProps, setTxLayoutProps] = useState<TxFlowContextType['txLayoutProps']>(defaultTxLayoutProps)
@@ -202,6 +218,7 @@ const TxFlowProvider = <T extends unknown>({
     trackTxEvent,
 
     txId,
+    txNonce,
     isCreation,
     isRejection,
     onlyExecute,
@@ -212,8 +229,12 @@ const TxFlowProvider = <T extends unknown>({
     shouldExecute,
     setShouldExecute,
 
-    isSubmittable,
-    setIsSubmittable,
+    isSubmitLoading,
+    setIsSubmitLoading,
+
+    isSubmitDisabled: isSubmitDisabled || isSubmitLoading,
+    setIsSubmitDisabled,
+
     submitError,
     setSubmitError,
     isRejectedByUser,
@@ -225,6 +246,7 @@ const TxFlowProvider = <T extends unknown>({
     txDetails,
     txDetailsLoading,
     isBatch,
+    isBatchable,
   }
 
   return <TxFlowContext.Provider value={value}>{children}</TxFlowContext.Provider>

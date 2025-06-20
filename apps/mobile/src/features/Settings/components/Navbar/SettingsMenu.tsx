@@ -1,6 +1,5 @@
-import { getTokenValue, Theme, useTheme } from 'tamagui'
-import { Pressable } from 'react-native-gesture-handler'
-import { Linking, Platform, Alert, View } from 'react-native'
+import { getTokenValue, Theme, useTheme, View } from 'tamagui'
+import { Linking, Platform, Pressable, Alert } from 'react-native'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import React from 'react'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
@@ -15,6 +14,8 @@ import { type Address } from '@/src/types/address'
 import { router } from 'expo-router'
 import { FloatingMenu } from '../FloatingMenu'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { trackEvent } from '@/src/services/analytics/firebaseAnalytics'
+import { createAppSettingsOpenEvent, createSettingsMenuActionEvent } from '@/src/services/analytics/events/settings'
 type Props = {
   safeAddress: string | undefined
 }
@@ -48,28 +49,46 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
           right: -10,
         }}
       >
-        <Pressable
-          testID={'settings-screen-header-app-settings-button'}
-          hitSlop={{ top: 20, bottom: 20, left: 20 }}
-          style={{
-            zIndex: 2,
-            backgroundColor: '$backgroundSkeleton',
-            borderRadius: 16,
-            marginRight: 4,
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 32,
-            height: 32,
-          }}
-          onPress={() => {
-            router.push('/app-settings')
-          }}
+        <View
+          backgroundColor={'$backgroundSkeleton'}
+          alignItems={'center'}
+          justifyContent={'center'}
+          borderRadius={16}
+          height={32}
+          width={32}
+          marginRight={4}
         >
-          <SafeFontIcon name={'settings'} size={20} />
-        </Pressable>
+          <Pressable
+            testID={'settings-screen-header-app-settings-button'}
+            hitSlop={{ top: 40, bottom: 40, left: 40 }}
+            onPressIn={() => {
+              try {
+                const event = createAppSettingsOpenEvent()
+                trackEvent(event)
+              } catch (error) {
+                console.error('Error tracking app settings open event:', error)
+              }
+              router.push('/app-settings')
+            }}
+          >
+            <SafeFontIcon name={'settings'} size={20} color={'$color'} />
+          </Pressable>
+        </View>
 
         <FloatingMenu
           onPressAction={({ nativeEvent }) => {
+            const action = nativeEvent.event as 'rename' | 'explorer' | 'copy' | 'share' | 'remove'
+
+            // Track analytics for supported actions (copy is already tracked via useCopyAndDispatchToast)
+            if (action !== 'copy') {
+              try {
+                const event = createSettingsMenuActionEvent(action)
+                trackEvent(event)
+              } catch (error) {
+                console.error('Error tracking settings menu action:', error)
+              }
+            }
+
             if (nativeEvent.event === 'rename') {
               router.push({
                 pathname: '/signers/[address]',
@@ -163,20 +182,20 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
           ]}
         >
           <Pressable
-            hitSlop={{ top: 20, bottom: 20, right: 20 }}
-            style={{
-              zIndex: 2,
-              backgroundColor: '$backgroundSkeleton',
-              borderRadius: 16,
-              marginLeft: 4,
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 32,
-              height: 32,
-            }}
+            hitSlop={{ top: 40, bottom: 40, right: 40 }}
             testID={'settings-screen-header-more-settings-button'}
           >
-            <SafeFontIcon name={'options-horizontal'} size={20} />
+            <View
+              backgroundColor={'$backgroundSkeleton'}
+              alignItems={'center'}
+              justifyContent={'center'}
+              borderRadius={16}
+              marginLeft={4}
+              height={32}
+              width={32}
+            >
+              <SafeFontIcon name={'options-horizontal'} size={20} color={'$color'} />
+            </View>
           </Pressable>
         </FloatingMenu>
       </View>

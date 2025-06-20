@@ -10,16 +10,24 @@ import { RootState } from '@/src/store'
 import { useAppSelector } from '@/src/store/hooks'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { selectChainById } from '@/src/store/chains'
+import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
+import { ParametersButton } from '../../ParametersButton'
 
 interface SendNFTProps {
+  txId: string
   txInfo: TransferTransactionInfo
   executionInfo: MultisigExecutionDetails
 }
 
-export function SendNFT({ txInfo, executionInfo }: SendNFTProps) {
+export function SendNFT({ txId, txInfo, executionInfo }: SendNFTProps) {
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
-  const items = useMemo(() => formatSendNFTItems(txInfo, activeChain), [txInfo, activeChain])
+  const viewOnExplorer = useOpenExplorer(txInfo.recipient.value)
+
+  const items = useMemo(
+    () => formatSendNFTItems(txInfo, activeChain, viewOnExplorer),
+    [txInfo, activeChain, viewOnExplorer],
+  )
   const { value, tokenSymbol } = useTokenDetails(txInfo)
 
   return (
@@ -32,7 +40,9 @@ export function SendNFT({ txInfo, executionInfo }: SendNFTProps) {
         submittedAt={executionInfo.submittedAt}
       />
 
-      <ListTable items={items} />
+      <ListTable items={items}>
+        <ParametersButton txId={txId} />
+      </ListTable>
     </YStack>
   )
 }

@@ -1,20 +1,25 @@
 import React, { useCallback } from 'react'
 import { Link, useRouter } from 'expo-router'
-import { View, Text, YStack } from 'tamagui'
+import { View, Text, YStack, styled } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BlurView } from 'expo-blur'
-import crashlytics from '@react-native-firebase/crashlytics'
-import { Alert } from 'react-native'
-import { COMING_SOON_MESSAGE, COMING_SOON_TITLE } from '@/src/config/constants'
+import { getCrashlytics } from '@react-native-firebase/crashlytics'
+import { setAnalyticsCollectionEnabled } from '@/src/services/analytics'
+
+const StyledText = styled(Text, {
+  fontSize: '$3',
+  color: '$colorSecondary',
+})
 
 export const GetStarted = () => {
   const router = useRouter()
   const insets = useSafeAreaInsets()
 
   const enableCrashlytics = async () => {
-    await crashlytics().setCrashlyticsCollectionEnabled(true)
+    await getCrashlytics().setCrashlyticsCollectionEnabled(true)
+    await setAnalyticsCollectionEnabled(true)
   }
 
   const onPressAddAccount = useCallback(async () => {
@@ -22,9 +27,10 @@ export const GetStarted = () => {
     router.navigate('/(import-accounts)')
   }, [])
 
-  const onPressJoinAccount = useCallback(() => {
-    Alert.alert(COMING_SOON_TITLE, COMING_SOON_MESSAGE)
-  }, [])
+  const onPressImportAccount = useCallback(async () => {
+    await enableCrashlytics()
+    router.navigate('/import-data')
+  }, [router])
 
   return (
     <YStack justifyContent={'flex-end'} flex={1} testID={'get-started-screen'}>
@@ -55,14 +61,7 @@ export const GetStarted = () => {
         >
           How would you like to continue?
         </Text>
-        <SafeButton
-          outlined
-          icon={<SafeFontIcon name={'add-owner'} />}
-          onPress={onPressJoinAccount}
-          testID={'join-account-button'}
-        >
-          Join account
-        </SafeButton>
+
         <SafeButton
           outlined
           icon={<SafeFontIcon name={'plus-outlined'} />}
@@ -71,21 +70,27 @@ export const GetStarted = () => {
         >
           Add account
         </SafeButton>
-        <Text paddingHorizontal={'$10'} marginTop={'$2'} textAlign={'center'} fontSize={'$3'} color={'$colorSecondary'}>
-          By continuing, you agree to our{' '}
-          <Link href={'https://app.safe.global/terms'} target={'_blank'}>
-            <Text textDecorationLine={'underline'} color={'$colorSecondary'}>
-              User Terms
-            </Text>
-          </Link>{' '}
-          and{' '}
-          <Link href={'https://app.safe.global/privacy'} target={'_blank'} asChild>
-            <Text textDecorationLine={'underline'} color={'$colorSecondary'}>
-              Privacy Policy
-            </Text>
+        <SafeButton outlined icon={<SafeFontIcon name={'upload'} />} onPress={onPressImportAccount}>
+          Import account
+        </SafeButton>
+        <View
+          paddingHorizontal={'$10'}
+          marginTop={'$2'}
+          flexDirection="row"
+          alignItems="center"
+          flexWrap="wrap"
+          justifyContent="center"
+        >
+          <StyledText>By continuing, you agree to our </StyledText>
+          <Link href={'https://app.safe.global/terms'} target={'_blank'} asChild>
+            <StyledText textDecorationLine={'underline'}>User Terms</StyledText>
           </Link>
-          .
-        </Text>
+          <StyledText> and </StyledText>
+          <Link href={'https://app.safe.global/privacy'} target={'_blank'} asChild>
+            <StyledText textDecorationLine={'underline'}>Privacy Policy</StyledText>
+          </Link>
+          <StyledText>.</StyledText>
+        </View>
       </YStack>
     </YStack>
   )

@@ -6,6 +6,7 @@ import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounte
 import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
 import type { SubmitCallback } from '../../TxFlow'
 import { useAlreadySigned } from '@/components/tx/SignOrExecuteForm/hooks'
+import useSafeInfo from '@/hooks/useSafeInfo'
 
 export const Sign = ({
   onSubmit,
@@ -14,7 +15,7 @@ export const Sign = ({
   ...props
 }: SlotComponentProps<SlotName.ComboSubmit>) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
-  const { txId, trackTxEvent, isSubmittable } = useContext(TxFlowContext)
+  const { txId, trackTxEvent, isSubmitDisabled } = useContext(TxFlowContext)
 
   const handleSubmitSuccess = useCallback<SubmitCallback>(
     async ({ txId, isExecuted = false } = {}) => {
@@ -26,7 +27,7 @@ export const Sign = ({
 
   return (
     <SignForm
-      disableSubmit={!isSubmittable || disabled}
+      disableSubmit={isSubmitDisabled || disabled}
       origin={txOrigin}
       safeTx={safeTx}
       onSubmit={onSubmit}
@@ -42,8 +43,11 @@ const useShouldRegisterSlot = () => {
   const { safeTx } = useContext(SafeTxContext)
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const hasSigned = useAlreadySigned(safeTx)
+  const { safe } = useSafeInfo()
 
-  return !!safeTx && !hasSigned && !isCounterfactualSafe && !willExecuteThroughRole && !isProposing
+  const isFullySigned = safeTx ? safeTx.signatures.size >= safe.threshold : false
+
+  return !!safeTx && !hasSigned && !isFullySigned && !isCounterfactualSafe && !willExecuteThroughRole && !isProposing
 }
 
 const SignSlot = withSlot({

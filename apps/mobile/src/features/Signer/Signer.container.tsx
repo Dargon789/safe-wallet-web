@@ -1,5 +1,6 @@
 import { SignerView } from '@/src/features/Signer/components/SignerView'
-import { useLocalSearchParams, useNavigation } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
+import { useNavigation } from '@react-navigation/native'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress, upsertContact } from '@/src/store/addressBookSlice'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -54,7 +55,7 @@ export const SignerContainer = () => {
   })
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    dispatch(upsertContact({ ...contact, value: address, name: data.name }))
+    dispatch(upsertContact({ ...contact, value: address, name: data.name, chainIds: contact?.chainIds || [] }))
 
     clearErrors()
     reset(data, { keepValues: true })

@@ -7,10 +7,10 @@ export const badgeTheme = {
   },
   dark_badge_success: {
     color: tokens.color.backgroundMainDark,
-    background: tokens.color.primaryMainDark,
+    background: tokens.color.backgroundLightDark,
   },
   light_badge_success_variant1: {
-    background: tokens.color.successDarkDark,
+    background: tokens.color.successBackgroundLight,
     color: tokens.color.successMainLight,
   },
   dark_badge_success_variant1: {
@@ -26,7 +26,7 @@ export const badgeTheme = {
     color: tokens.color.primaryMainLight,
   },
   light_badge_warning: {
-    color: tokens.color.warning1MainLight,
+    color: tokens.color.warning1ContrastTextLight,
     background: tokens.color.warningBackgroundLight,
   },
   dark_badge_warning: {
@@ -56,6 +56,7 @@ export const badgeTheme = {
   light_badge_background: {
     color: tokens.color.textPrimaryLight,
     background: tokens.color.logoBackgroundLight,
+    borderColor: tokens.color.logoBackgroundLight,
   },
   light_badge_error: {
     color: tokens.color.errorMainLight,

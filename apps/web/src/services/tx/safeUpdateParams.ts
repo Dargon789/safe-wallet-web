@@ -1,6 +1,6 @@
 import type { SafeContractImplementationType } from '@safe-global/protocol-kit/dist/src/types/contracts'
-import type { MetaTransactionData, SafeVersion } from '@safe-global/safe-core-sdk-types'
-import { OperationType } from '@safe-global/safe-core-sdk-types'
+import type { MetaTransactionData, SafeVersion } from '@safe-global/types-kit'
+import { OperationType } from '@safe-global/types-kit'
 import type { ChainInfo, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import semverSatisfies from 'semver/functions/satisfies'
@@ -25,9 +25,7 @@ const getChangeFallbackHandlerCallData = async (
     return '0x'
   }
 
-  const fallbackHandlerAddress = await (
-    await getReadOnlyFallbackHandlerContract(getLatestSafeVersion(chain))
-  ).getAddress()
+  const fallbackHandlerAddress = (await getReadOnlyFallbackHandlerContract(getLatestSafeVersion(chain))).getAddress()
   // @ts-ignore
   return safeContractInstance.encode('setFallbackHandler', [fallbackHandlerAddress])
 }
@@ -48,12 +46,10 @@ export const createUpdateSafeTxs = async (safe: SafeState, chain: ChainInfo): Pr
   }
 
   // For older Safes, we need to create two transactions
-  const latestMasterCopyAddress = await (
-    await getReadOnlyGnosisSafeContract(chain, getLatestSafeVersion(chain))
-  ).getAddress()
+  const latestMasterCopyAddress = (await getReadOnlyGnosisSafeContract(chain, getLatestSafeVersion(chain))).getAddress()
   const currentReadOnlySafeContract = await getReadOnlyGnosisSafeContract(chain, safe.version)
 
-  const updatedReadOnlySafeContract = await getReadOnlyGnosisSafeContract(chain, getLatestSafeVersion(chain, true))
+  const updatedReadOnlySafeContract = await getReadOnlyGnosisSafeContract(chain, getLatestSafeVersion(chain))
 
   // @ts-expect-error this was removed in 1.3.0 but we need to support it for older safe versions
   const changeMasterCopyCallData = currentReadOnlySafeContract.encode('changeMasterCopy', [latestMasterCopyAddress])
