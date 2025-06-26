@@ -6850,7 +6850,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/hashes@npm:1.6.1, @noble/hashes@npm:^1.3.3, @noble/hashes@npm:^1.4.0, @noble/hashes@npm:^1.5.0, @noble/hashes@npm:~1.6.0":
+"@noble/hashes@npm:1.6.1, @noble/hashes@npm:^1.4.0, @noble/hashes@npm:^1.5.0, @noble/hashes@npm:~1.6.0":
   version: 1.6.1
   resolution: "@noble/hashes@npm:1.6.1"
   checksum: 10/74d9ad7b1437a22ba3b877584add3367587fbf818113152f293025d20d425aa74c191d18d434797312f2270458bc9ab3241c34d14ec6115fb16438b3248f631f
@@ -7367,19 +7367,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/protocol-kit@npm:^4.1.1":
-  version: 4.1.7
-  resolution: "@safe-global/protocol-kit@npm:4.1.7"
+"@safe-global/protocol-kit@npm:^5.0.0":
+  version: 5.2.9
+  resolution: "@safe-global/protocol-kit@npm:5.2.9"
   dependencies:
-    "@noble/hashes": "npm:^1.3.3"
-    "@safe-global/safe-core-sdk-types": "npm:^5.1.0"
-    "@safe-global/safe-deployments": "npm:^1.37.31"
-    "@safe-global/safe-modules-deployments": "npm:^2.2.1"
+    "@noble/curves": "npm:^1.6.0"
+    "@peculiar/asn1-schema": "npm:^2.3.13"
+    "@safe-global/safe-deployments": "npm:^1.37.36"
+    "@safe-global/safe-modules-deployments": "npm:^2.2.10"
+    "@safe-global/types-kit": "npm:^1.0.5"
     abitype: "npm:^1.0.2"
-    ethereumjs-util: "npm:^7.1.5"
-    ethers: "npm:^6.13.1"
-    semver: "npm:^7.6.2"
-  checksum: 10/5d2c46dc053fc921948777c7a8cf460c4fa3c1df52982543aaf5f9f79c2e761b752ad291788c02a329925aa3e9a220ab428141aabcae039532cfc1c1b38aa8d2
+    semver: "npm:^7.6.3"
+    viem: "npm:^2.21.8"
+  dependenciesMeta:
+    "@noble/curves":
+      optional: true
+    "@peculiar/asn1-schema":
+      optional: true
+  checksum: 10/688c6d2542b5d91902fbf0952ea4a6426b667101147140062fd96a7c42943a06c6f2cb55bf921b4915c6e9238058ff0c626bf6268d39a1eef511093066e86e82
   languageName: node
   linkType: hard
 
@@ -7414,7 +7419,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-core-sdk-types@npm:^5.0.1, @safe-global/safe-core-sdk-types@npm:^5.1.0":
+"@safe-global/safe-core-sdk-types@npm:^5.0.1":
   version: 5.1.0
   resolution: "@safe-global/safe-core-sdk-types@npm:5.1.0"
   dependencies:
@@ -7423,12 +7428,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-deployments@npm:^1.37.22, @safe-global/safe-deployments@npm:^1.37.31":
+"@safe-global/safe-deployments@npm:^1.37.22":
   version: 1.37.31
   resolution: "@safe-global/safe-deployments@npm:1.37.31"
   dependencies:
     semver: "npm:^7.6.2"
   checksum: 10/990eee8be3dd2e420e641bd6f6b998f20f8a2a36b9fe2348485a038bd25aa22b3bd2c11d5dd3639cf3abaa6011c15022c8ce53d30f146623e769255e660a0661
+  languageName: node
+  linkType: hard
+
+"@safe-global/safe-deployments@npm:^1.37.36":
+  version: 1.37.36
+  resolution: "@safe-global/safe-deployments@npm:1.37.36"
+  dependencies:
+    semver: "npm:^7.6.2"
+  checksum: 10/d8f9447353e65009ccb9a09753f79e4d2390926783c3d056979ede875a500ee4d53829cad82996cd1c6ad622a9806842ea99b2a720abe0fe55034b34137e65c3
   languageName: node
   linkType: hard
 
@@ -7462,12 +7476,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@safe-global/safe-modules-deployments@npm:^2.2.10":
+  version: 2.2.10
+  resolution: "@safe-global/safe-modules-deployments@npm:2.2.10"
+  checksum: 10/4ba0c25ca0a9c5776bda98ab74d9423b7a825316a67f4699a057fc762e1921c57646dcd86b12462e1634aacccd8c5020d045b9a0a35d2e14bbf1f33ceb081b57
+  languageName: node
+  linkType: hard
+
 "@safe-global/types-kit@npm:^1.0.1":
   version: 1.0.1
   resolution: "@safe-global/types-kit@npm:1.0.1"
   dependencies:
     abitype: "npm:^1.0.2"
   checksum: 10/2b740301a7aa8280f34ba1e7c74f7e9993e60a38b7a303ee65496f0116beff691690c957adc2d49667cc112f44c63141da2ae010c0ef39cb33ad0693a1d39512
+  languageName: node
+  linkType: hard
+
+"@safe-global/types-kit@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "@safe-global/types-kit@npm:1.0.5"
+  dependencies:
+    abitype: "npm:^1.0.2"
+  checksum: 10/732e8312458dab14557f0d08676ce2a55cb74b8296487ccacbb14564fdad44ff80ac1804ab75c73b8f21fc5ae6bc354d033ca968a6f1344e29316ec4b4018311
   languageName: node
   linkType: hard
 
@@ -10064,19 +10094,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:18.11.18":
-  version: 18.11.18
-  resolution: "@types/node@npm:18.11.18"
-  checksum: 10/da05cf3a0036ef05cd695ac4cb265948593acbe723ba818f0ca0ce466b13ba99e1aac3a363086d6b8c7ea8f30c9233478e0293ac878a6f4b1d5515b10c392257
-  languageName: node
-  linkType: hard
-
 "@types/node@npm:22.7.5":
   version: 22.7.5
   resolution: "@types/node@npm:22.7.5"
   dependencies:
     undici-types: "npm:~6.19.2"
   checksum: 10/e8ba102f8c1aa7623787d625389be68d64e54fcbb76d41f6c2c64e8cf4c9f4a2370e7ef5e5f1732f3c57529d3d26afdcb2edc0101c5e413a79081449825c57ac
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:24.0.4":
+  version: 24.0.4
+  resolution: "@types/node@npm:24.0.4"
+  dependencies:
+    undici-types: "npm:~7.8.0"
+  checksum: 10/81cd63dfeea7b7cd0d13a6435c3aa38de48da1eb59a5572f3528396dd5a8d9ff6811d947a2a6856d38e3b813ac26207abb1b44eb98848f78553a8fb4b2886e37
   languageName: node
   linkType: hard
 
@@ -16297,7 +16329,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethers@npm:^6.11.1, ethers@npm:^6.13.1, ethers@npm:^6.9.2":
+"ethers@npm:^6.11.1, ethers@npm:^6.9.2":
   version: 6.14.4
   resolution: "ethers@npm:6.14.4"
   dependencies:
@@ -24611,7 +24643,7 @@ __metadata:
     "@openzeppelin/contracts": "npm:^4.9.6"
     "@reduxjs/toolkit": "npm:^2.2.6"
     "@safe-global/api-kit": "npm:^2.4.6"
-    "@safe-global/protocol-kit": "npm:^4.1.1"
+    "@safe-global/protocol-kit": "npm:^5.0.0"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
     "@safe-global/safe-core-sdk-types": "npm:^5.0.1"
     "@safe-global/safe-deployments": "npm:^1.37.8"
@@ -24640,7 +24672,7 @@ __metadata:
     "@types/js-cookie": "npm:^3.0.6"
     "@types/lodash": "npm:^4.14.182"
     "@types/mdx": "npm:^2.0.13"
-    "@types/node": "npm:18.11.18"
+    "@types/node": "npm:24.0.4"
     "@types/qrcode": "npm:^1.5.5"
     "@types/react": "npm:^18.3.10"
     "@types/react-dom": "npm:^18.3.0"
@@ -27066,6 +27098,13 @@ __metadata:
   version: 6.20.0
   resolution: "undici-types@npm:6.20.0"
   checksum: 10/583ac7bbf4ff69931d3985f4762cde2690bb607844c16a5e2fbb92ed312fe4fa1b365e953032d469fa28ba8b224e88a595f0b10a449332f83fa77c695e567dbe
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~7.8.0":
+  version: 7.8.0
+  resolution: "undici-types@npm:7.8.0"
+  checksum: 10/fcff3fbab234f067fbd69e374ee2c198ba74c364ceaf6d93db7ca267e784457b5518cd01d0d2329b075f412574205ea3172a9a675facb49b4c9efb7141cd80b7
   languageName: node
   linkType: hard
 
