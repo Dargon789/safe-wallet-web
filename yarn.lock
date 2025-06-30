@@ -7465,17 +7465,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-modules-deployments@npm:^2.2.1, @safe-global/safe-modules-deployments@npm:^2.2.4":
-  version: 2.2.7
-  resolution: "@safe-global/safe-modules-deployments@npm:2.2.7"
-  checksum: 73fadef510c172f282bf73ff99d650fad7b9b70da79f09abd3d5e5907b8a33e42bf85021ceca8f345d9c57ddddffd562d2e90d4bc89b95b5dc1faf256d65cd49
-  languageName: node
-  linkType: hard
-
 "@safe-global/safe-modules-deployments@npm:^2.2.10":
   version: 2.2.10
   resolution: "@safe-global/safe-modules-deployments@npm:2.2.10"
   checksum: 0b9c0c33ca2d13f44baf22e55faa9a9e9a1e796d32cb16383366e28e449e00e0eedeedd57b334d0ec71866aa153003aa87376e5aa046468aae761a97931499a5
+  languageName: node
+  linkType: hard
+
+"@safe-global/safe-modules-deployments@npm:^2.2.4":
+  version: 2.2.7
+  resolution: "@safe-global/safe-modules-deployments@npm:2.2.7"
+  checksum: 73fadef510c172f282bf73ff99d650fad7b9b70da79f09abd3d5e5907b8a33e42bf85021ceca8f345d9c57ddddffd562d2e90d4bc89b95b5dc1faf256d65cd49
   languageName: node
   linkType: hard
 
@@ -24644,7 +24644,7 @@ __metadata:
     "@safe-global/safe-core-sdk-types": ^5.0.1
     "@safe-global/safe-deployments": ^1.37.8
     "@safe-global/safe-gateway-typescript-sdk": 3.22.3-beta.15
-    "@safe-global/safe-modules-deployments": ^2.2.1
+    "@safe-global/safe-modules-deployments": ^2.2.10
     "@sentry/react": ^7.91.0
     "@sentry/types": ^7.74.0
     "@spindl-xyz/attribution-lite": ^1.4.0
