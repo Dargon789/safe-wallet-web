@@ -59,7 +59,7 @@
     "@safe-global/safe-apps-sdk": "^9.1.0",
     "@safe-global/safe-deployments": "^1.37.8",
     "@safe-global/safe-gateway-typescript-sdk": "3.22.3-beta.15",
-    "@safe-global/safe-modules-deployments": "^2.2.1",
+    "@safe-global/safe-modules-deployments": "^2.2.10",
     "@sentry/react": "^7.91.0",
     "@spindl-xyz/attribution-lite": "^1.4.0",
     "@walletconnect/utils": "^2.16.1",
