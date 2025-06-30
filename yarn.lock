@@ -8602,29 +8602,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/addon-designs@npm:^8.0.3":
-  version: 8.0.4
-  resolution: "@storybook/addon-designs@npm:8.0.4"
+"@storybook/addon-designs@npm:^10.0.1":
+  version: 10.0.1
+  resolution: "@storybook/addon-designs@npm:10.0.1"
   dependencies:
-    "@figspec/react": "npm:^1.0.0"
+    "@figspec/react": ^1.0.0
   peerDependencies:
-    "@storybook/blocks": ^8.0.0 || ^8.1.0-0 || ^8.2.0-0 || ^8.3.0-0 || ^8.4.0-0 || ^8.5.0-0 || ^8.6.0-0
-    "@storybook/components": ^8.0.0 || ^8.1.0-0 || ^8.2.0-0 || ^8.3.0-0 || ^8.4.0-0 || ^8.5.0-0 || ^8.6.0-0
-    "@storybook/theming": ^8.0.0 || ^8.1.0-0 || ^8.2.0-0 || ^8.3.0-0 || ^8.4.0-0 || ^8.5.0-0 || ^8.6.0-0
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+    "@storybook/addon-docs": ^0.0.0-0 || ^9.0.0 || ^9.1.0-0
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    storybook: ^0.0.0-0 || ^9.0.0 || ^9.1.0-0
   peerDependenciesMeta:
-    "@storybook/blocks":
-      optional: true
-    "@storybook/components":
-      optional: true
-    "@storybook/theming":
+    "@storybook/addon-docs":
       optional: true
     react:
       optional: true
     react-dom:
       optional: true
-  checksum: 530bbc5c1004ad9426449a1999495a07a81f28aadc01c82630da2fc0c8c3c178c61e2fb3af0f196ff3b65f85aa96299e92b33a2a1c832efd16e3e0463174008b
+  checksum: 078c3df8d1c9e563797c3587765ee7926052bf616ef8db067fdd42905ff150f15882ef043f60f9fa035a8a8d479958865a04a6e97295428478e38a70aca03b0a
   languageName: node
   linkType: hard
 
@@ -24655,7 +24650,7 @@ __metadata:
     "@sentry/react": ^7.91.0
     "@sentry/types": ^7.74.0
     "@spindl-xyz/attribution-lite": ^1.4.0
-    "@storybook/addon-designs": ^8.0.3
+    "@storybook/addon-designs": ^10.0.1
     "@storybook/addon-essentials": ^8.0.6
     "@storybook/addon-interactions": ^8.0.6
     "@storybook/addon-links": ^8.0.6
