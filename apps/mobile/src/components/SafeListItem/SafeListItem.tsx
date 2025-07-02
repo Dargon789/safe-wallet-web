@@ -7,6 +7,7 @@ import { isMultisigExecutionInfo } from '@/src/utils/transaction-guards'
 import { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Badge } from '../Badge'
 import { Tag } from '../Tag'
+import { ProposalBadge } from '../ProposalBadge'
 
 interface SafeListItemProps {
   type?: string
@@ -41,6 +42,9 @@ export function SafeListItem({
   onPress,
   tag,
 }: SafeListItemProps) {
+  // TODO: Replace this with proposedByDelegate once EN-149 is implemented
+  const isProposedTx = isMultisigExecutionInfo(executionInfo) ? executionInfo.confirmationsSubmitted === 0 : false
+
   return (
     <Container
       spaced={spaced}
@@ -80,23 +84,27 @@ export function SafeListItem({
 
       {inQueue && executionInfo && isMultisigExecutionInfo(executionInfo) ? (
         <View alignItems="center" flexDirection="row">
-          <Badge
-            circular={false}
-            content={
-              <View alignItems="center" flexDirection="row" gap="$1">
-                <SafeFontIcon size={12} name="owners" />
+          {isProposedTx ? (
+            <ProposalBadge />
+          ) : (
+            <Badge
+              circular={false}
+              content={
+                <View alignItems="center" flexDirection="row" gap="$1">
+                  <SafeFontIcon size={12} name="owners" />
 
-                <Text fontWeight={600} color={'$color'}>
-                  {executionInfo?.confirmationsSubmitted}/{executionInfo?.confirmationsRequired}
-                </Text>
-              </View>
-            }
-            themeName={
-              executionInfo?.confirmationsRequired === executionInfo?.confirmationsSubmitted
-                ? 'badge_success_variant1'
-                : 'badge_warning_variant1'
-            }
-          />
+                  <Text fontWeight={600} color={'$color'}>
+                    {executionInfo?.confirmationsSubmitted}/{executionInfo?.confirmationsRequired}
+                  </Text>
+                </View>
+              }
+              themeName={
+                executionInfo?.confirmationsRequired === executionInfo?.confirmationsSubmitted
+                  ? 'badge_success_variant1'
+                  : 'badge_warning_variant1'
+              }
+            />
+          )}
 
           <SafeFontIcon name="chevron-right" />
         </View>
