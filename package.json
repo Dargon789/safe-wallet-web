@@ -34,7 +34,7 @@
     "build-storybook": "storybook build --quiet"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "resolutions": {
     "@safe-global/safe-core-sdk-types/**/ethers": "^6.11.1",
