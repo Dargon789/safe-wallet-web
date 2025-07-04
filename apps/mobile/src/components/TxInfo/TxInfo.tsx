@@ -163,11 +163,27 @@ function TxInfoComponent({ tx, bordered, inQueue, onPress }: TxInfoProps) {
   }
 
   if (isVaultDepositTxInfo(txInfo)) {
-    return <VaultTxDepositCard info={txInfo} />
+    return (
+      <VaultTxDepositCard
+        info={txInfo}
+        onPress={onCardPress}
+        bordered={bordered}
+        executionInfo={tx.executionInfo}
+        inQueue={inQueue}
+      />
+    )
   }
 
   if (isVaultRedeemTxInfo(txInfo)) {
-    return <VaultTxRedeemCard info={txInfo} />
+    return (
+      <VaultTxRedeemCard
+        info={txInfo}
+        onPress={onCardPress}
+        bordered={bordered}
+        executionInfo={tx.executionInfo}
+        inQueue={inQueue}
+      />
+    )
   }
 
   return <></>

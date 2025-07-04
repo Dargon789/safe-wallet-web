@@ -6,6 +6,8 @@ import {
   TransactionData,
   TransactionDetails,
   TransferTransactionInfo,
+  VaultDepositTransactionInfo,
+  VaultRedeemTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TokenTransfer } from '../confirmation-views/TokenTransfer'
 import { AddSigner } from '../confirmation-views/AddSigner'
@@ -18,6 +20,9 @@ import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { RemoveSigner } from '../confirmation-views/RemoveSigner'
 import { GenericView } from '../confirmation-views/GenericView'
 import { NormalizedSettingsChangeTransaction } from './types'
+import { VaultDeposit } from '@/src/features/ConfirmTx/components/confirmation-views/VaultDeposit'
+import { VaultRedeem } from '../confirmation-views/VaultRedeem'
+
 interface ConfirmationViewProps {
   txDetails: TransactionDetails
 }
@@ -73,6 +78,22 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
           txId={txDetails.txId}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as CustomTransactionInfo}
+        />
+      )
+    case ETxType.VAULT_DEPOSIT:
+      return (
+        <VaultDeposit
+          txId={txDetails.txId}
+          executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          txInfo={txDetails.txInfo as VaultDepositTransactionInfo}
+        />
+      )
+    case ETxType.VAULT_REDEEM:
+      return (
+        <VaultRedeem
+          txId={txDetails.txId}
+          executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          txInfo={txDetails.txInfo as VaultRedeemTransactionInfo}
         />
       )
     default:
