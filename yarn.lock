@@ -4446,10 +4446,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@faker-js/faker@npm:^9.0.3":
-  version: 9.3.0
-  resolution: "@faker-js/faker@npm:9.3.0"
-  checksum: 0ee845a9b7dc0d6bc5bd9b7d89fc0a86b31bf0b4a55128feab5dd24c0e8e0b5f80f9ab40f639bf259b3edf62370677c1ebfd420cd8e51d4ca69b94d2ff208ba9
+"@faker-js/faker@npm:^9.9.0":
+  version: 9.9.0
+  resolution: "@faker-js/faker@npm:9.9.0"
+  checksum: bbc5b57c3b0f480d26dea9fc8e40a5c1bd4d2b0ad8c9d7d22ac4650d0d9f959469af4f2c443c34ff64b7a7d3b9135ce525eae2a1e5822b9223257e184036efd0
   languageName: node
   linkType: hard
 
@@ -24458,7 +24458,7 @@ __metadata:
     "@emotion/react": ^11.13.3
     "@emotion/server": ^11.11.0
     "@emotion/styled": ^11.14.1
-    "@faker-js/faker": ^9.0.3
+    "@faker-js/faker": ^9.9.0
     "@gnosis.pm/zodiac": ^4.0.3
     "@mdx-js/loader": ^3.0.1
     "@mdx-js/react": ^3.0.1
