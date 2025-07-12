@@ -9,7 +9,7 @@ import { Badge } from '../Badge'
 import { Tag } from '../Tag'
 import { ProposalBadge } from '../ProposalBadge'
 
-interface SafeListItemProps {
+export interface SafeListItemProps {
   type?: string
   label: string | React.ReactNode
   icon?: IconProps['name']
@@ -109,7 +109,7 @@ export function SafeListItem({
                 themeName={
                   executionInfo?.confirmationsRequired === executionInfo?.confirmationsSubmitted
                     ? 'badge_success_variant1'
-                    : 'badge_warning_variant1'
+                    : 'badge_warning'
                 }
               />
             )}

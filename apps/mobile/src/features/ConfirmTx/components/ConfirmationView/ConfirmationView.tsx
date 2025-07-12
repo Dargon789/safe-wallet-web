@@ -8,6 +8,11 @@ import {
   TransferTransactionInfo,
   VaultDepositTransactionInfo,
   VaultRedeemTransactionInfo,
+  NativeStakingDepositTransactionInfo,
+  NativeStakingValidatorsExitTransactionInfo,
+  NativeStakingWithdrawTransactionInfo,
+  BridgeAndSwapTransactionInfo,
+  SwapTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TokenTransfer } from '../confirmation-views/TokenTransfer'
 import { AddSigner } from '../confirmation-views/AddSigner'
@@ -22,6 +27,10 @@ import { GenericView } from '../confirmation-views/GenericView'
 import { NormalizedSettingsChangeTransaction } from './types'
 import { VaultDeposit } from '@/src/features/ConfirmTx/components/confirmation-views/VaultDeposit'
 import { VaultRedeem } from '../confirmation-views/VaultRedeem'
+import { CancelTx } from '@/src/features/ConfirmTx/components/confirmation-views/CancelTx'
+import { StakingDeposit, StakingWithdrawRequest, StakingExit } from '../confirmation-views/Stake'
+import { BridgeTransaction } from '../confirmation-views/BridgeTransaction'
+import { LifiSwapTransaction } from '../confirmation-views/LifiSwapTransaction'
 
 interface ConfirmationViewProps {
   txDetails: TransactionDetails
@@ -67,9 +76,18 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
     case ETxType.SWAP_ORDER:
       return (
         <SwapOrder
+          txId={txDetails.txId}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as OrderTransactionInfo}
           decodedData={txDetails.txData?.dataDecoded}
+        />
+      )
+    case ETxType.CANCEL_TX:
+      return (
+        <CancelTx
+          txId={txDetails.txId}
+          executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          txInfo={txDetails.txInfo as CustomTransactionInfo}
         />
       )
     case ETxType.CONTRACT_INTERACTION:
@@ -80,12 +98,21 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
           txInfo={txDetails.txInfo as CustomTransactionInfo}
         />
       )
+    case ETxType.STAKE_DEPOSIT:
+      return (
+        <StakingDeposit
+          txId={txDetails.txId}
+          executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          txInfo={txDetails.txInfo as NativeStakingDepositTransactionInfo}
+        />
+      )
     case ETxType.VAULT_DEPOSIT:
       return (
         <VaultDeposit
           txId={txDetails.txId}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as VaultDepositTransactionInfo}
+          decodedData={txDetails.txData?.dataDecoded}
         />
       )
     case ETxType.VAULT_REDEEM:
@@ -94,6 +121,38 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
           txId={txDetails.txId}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as VaultRedeemTransactionInfo}
+        />
+      )
+    case ETxType.STAKE_WITHDRAW_REQUEST:
+      return (
+        <StakingWithdrawRequest
+          txId={txDetails.txId}
+          executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          txInfo={txDetails.txInfo as NativeStakingValidatorsExitTransactionInfo}
+        />
+      )
+    case ETxType.STAKE_EXIT:
+      return (
+        <StakingExit
+          txId={txDetails.txId}
+          executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          txInfo={txDetails.txInfo as NativeStakingWithdrawTransactionInfo}
+        />
+      )
+    case ETxType.BRIDGE_ORDER:
+      return (
+        <BridgeTransaction
+          _txId={txDetails.txId}
+          _executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          txInfo={txDetails.txInfo as BridgeAndSwapTransactionInfo}
+        />
+      )
+    case ETxType.LIFI_SWAP:
+      return (
+        <LifiSwapTransaction
+          _txId={txDetails.txId}
+          _executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          txInfo={txDetails.txInfo as SwapTransactionInfo}
         />
       )
     default:
