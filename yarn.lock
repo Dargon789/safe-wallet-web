@@ -10026,12 +10026,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:24.0.4":
-  version: 24.0.4
-  resolution: "@types/node@npm:24.0.4"
+"@types/node@npm:24.1.0":
+  version: 24.1.0
+  resolution: "@types/node@npm:24.1.0"
   dependencies:
-    undici-types: "npm:~7.8.0"
-  checksum: db036e3f1fea5a92fd6cd76064cf07d517b245ace73d6f46bcd8e35f38ff856f86f3311aabc7c7406de2bdae9f8308070541dacfce20fec2510d42b3cd00bb9e
+    undici-types: ~7.8.0
+  checksum: 01f9a97909eec619d937af3bc00ac49461e1846656b4d060f648145df06508eb6d77c200637a792481ee93a73976ced46cfbbdfe307e79be0f58ccdc415dfcd2
   languageName: node
   linkType: hard
 
@@ -24499,7 +24499,7 @@ __metadata:
     "@types/js-cookie": ^3.0.6
     "@types/lodash": ^4.14.182
     "@types/mdx": ^2.0.13
-    "@types/node": 24.0.4
+    "@types/node": 24.1.0
     "@types/qrcode": ^1.5.5
     "@types/react": ^19.1.8
     "@types/react-dom": ^18.3.0
