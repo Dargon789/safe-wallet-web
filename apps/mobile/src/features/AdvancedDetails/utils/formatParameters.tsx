@@ -27,7 +27,8 @@ const formatParameters = ({ txData }: formatParametersProps): ListTableItem[] =>
         <Badge
           circleProps={badgeProps}
           themeName="badge_background"
-          fontSize={12}
+          fontSize={13}
+          textContentProps={{ fontFamily: 'DM Mono' }}
           circular={false}
           content={String(txData?.dataDecoded?.method || txData?.to.value)}
         />
@@ -58,7 +59,7 @@ const formatParameters = ({ txData }: formatParametersProps): ListTableItem[] =>
     const hexData = txData.hexData
 
     items.push({
-      label: 'Hex Data:',
+      label: 'Hex Data',
       render: () => (
         <InfoSheet title="Hex Data" info={hexData}>
           <View flexDirection="row" alignItems="center" gap="$1">

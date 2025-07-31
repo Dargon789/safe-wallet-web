@@ -1,6 +1,6 @@
 import React from 'react'
 import { Container } from '../Container'
-import { Text, Theme, ThemeName, View, YStackProps } from 'tamagui'
+import { Text, Theme, ThemeName, View, ViewProps, YStackProps } from 'tamagui'
 import { IconProps, SafeFontIcon } from '../SafeFontIcon/SafeFontIcon'
 import { ellipsis } from '@/src/utils/formatters'
 import { isMultisigExecutionInfo } from '@/src/utils/transaction-guards'
@@ -26,6 +26,7 @@ export interface SafeListItemProps {
   tag?: string
   paddingVertical?: YStackProps['paddingVertical']
   bottomContent?: React.ReactNode
+  pressStyle?: ViewProps['pressStyle']
 }
 
 export function SafeListItem({
@@ -45,6 +46,7 @@ export function SafeListItem({
   tag,
   paddingVertical = '$4',
   bottomContent,
+  pressStyle,
 }: SafeListItemProps) {
   // TODO: Replace this with proposedByDelegate once EN-149 is implemented
   const isProposedTx = isMultisigExecutionInfo(executionInfo) ? executionInfo.confirmationsSubmitted === 0 : false
@@ -62,6 +64,8 @@ export function SafeListItem({
       flexDirection="column"
       justifyContent="flex-start"
       paddingVertical={paddingVertical}
+      // If just set pressStyle to undefined, then the onPress doesn't work, that's why we need this hack
+      {...(pressStyle ? { pressStyle } : {})}
     >
       <View flexDirection="row" width="100%" alignItems="center" justifyContent="space-between">
         <View flexDirection="row" maxWidth={rightNode ? '55%' : '100%'} alignItems="center" gap={12}>
@@ -69,18 +73,18 @@ export function SafeListItem({
 
           <View>
             {type && (
-              <View flexDirection="row" alignItems="center" gap={4} marginBottom={4}>
+              <View flexDirection="row" alignItems="center" gap={4}>
                 {icon && (
                   <SafeFontIcon testID={`safe-list-${icon}-icon`} name={icon} size={10} color="$colorSecondary" />
                 )}
-                <Text fontSize="$3" color="$colorSecondary" marginBottom={2}>
+                <Text fontSize="$2" lineHeight={20} color="$colorSecondary">
                   {type}
                 </Text>
               </View>
             )}
 
             {typeof label === 'string' ? (
-              <Text fontSize="$4" fontWeight={600}>
+              <Text fontSize="$4" lineHeight={20} fontWeight={600} letterSpacing={-0.01}>
                 {ellipsis(label, rightNode || inQueue ? 21 : 30)}
               </Text>
             ) : (
@@ -91,17 +95,18 @@ export function SafeListItem({
         </View>
 
         {inQueue && executionInfo && isMultisigExecutionInfo(executionInfo) ? (
-          <View alignItems="center" flexDirection="row">
+          <View alignItems="center" flexDirection="row" gap="$2">
             {isProposedTx ? (
               <ProposalBadge />
             ) : (
               <Badge
+                circleProps={{ paddingHorizontal: 8, paddingVertical: 2 }}
                 circular={false}
                 content={
                   <View alignItems="center" flexDirection="row" gap="$1">
                     <SafeFontIcon size={12} name="owners" />
 
-                    <Text fontWeight={600} color={'$color'}>
+                    <Text fontWeight={600} color={'$color'} fontSize="$2" lineHeight={18}>
                       {executionInfo?.confirmationsSubmitted}/{executionInfo?.confirmationsRequired}
                     </Text>
                   </View>
@@ -114,7 +119,7 @@ export function SafeListItem({
               />
             )}
 
-            <SafeFontIcon name="chevron-right" />
+            <SafeFontIcon name="chevron-right" size={16} />
           </View>
         ) : (
           rightNode

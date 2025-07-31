@@ -6,14 +6,16 @@ import { formatUnits } from 'ethers'
 import { EthAddress } from '@/src/components/EthAddress'
 import { type ListTableItem } from '../../ListTable'
 import { LifiSwapHeader } from './LifiSwapHeader'
+import { ParametersButton } from '../../ParametersButton'
+import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 
 interface LifiSwapTransactionProps {
-  _txId: string
-  _executionInfo: MultisigExecutionDetails
+  txId: string
+  executionInfo: MultisigExecutionDetails
   txInfo: SwapTransactionInfo
 }
 
-export function LifiSwapTransaction({ _txId, _executionInfo, txInfo }: LifiSwapTransactionProps) {
+export function LifiSwapTransaction({ txId, executionInfo, txInfo }: LifiSwapTransactionProps) {
   const lifiSwapItems = useMemo(() => {
     const items: ListTableItem[] = []
 
@@ -26,7 +28,7 @@ export function LifiSwapTransaction({ _txId, _executionInfo, txInfo }: LifiSwapT
       label: 'Price',
       render: () => (
         <Text>
-          1 {txInfo.fromToken.symbol} = {exchangeRate.toFixed(6)} {txInfo.toToken.symbol}
+          1 {txInfo.fromToken.symbol} = {formatAmount(exchangeRate)} {txInfo.toToken.symbol}
         </Text>
       ),
     })
@@ -63,8 +65,10 @@ export function LifiSwapTransaction({ _txId, _executionInfo, txInfo }: LifiSwapT
 
   return (
     <YStack gap="$4">
-      <LifiSwapHeader txInfo={txInfo} executionInfo={_executionInfo} />
-      <ListTable items={lifiSwapItems} />
+      <LifiSwapHeader txInfo={txInfo} executionInfo={executionInfo} />
+      <ListTable items={lifiSwapItems}>
+        <ParametersButton txId={txId} />
+      </ListTable>
     </YStack>
   )
 }

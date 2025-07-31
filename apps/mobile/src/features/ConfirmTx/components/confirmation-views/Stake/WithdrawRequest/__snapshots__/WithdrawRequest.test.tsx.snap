@@ -168,15 +168,16 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
             <View
               style={
                 {
+                  "alignItems": "center",
                   "backgroundColor": "#EEEFF0",
-                  "borderBottomLeftRadius": 100,
-                  "borderBottomRightRadius": 100,
-                  "borderTopLeftRadius": 100,
-                  "borderTopRightRadius": 100,
-                  "paddingBottom": 8,
-                  "paddingLeft": 8,
-                  "paddingRight": 8,
-                  "paddingTop": 8,
+                  "borderBottomLeftRadius": 0,
+                  "borderBottomRightRadius": 0,
+                  "borderTopLeftRadius": 0,
+                  "borderTopRightRadius": 0,
+                  "display": "flex",
+                  "height": 40,
+                  "justifyContent": "center",
+                  "width": 40,
                 }
               }
             >
@@ -187,7 +188,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                   [
                     {
                       "color": "#A1A3A7",
-                      "fontSize": 24,
+                      "fontSize": 16,
                     },
                     undefined,
                     {
@@ -210,7 +211,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
         style={
           {
             "alignItems": "center",
-            "gap": 4,
+            "gap": 8,
           }
         }
       >
@@ -252,6 +253,8 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
             {
               "color": "#A1A3A7",
               "fontFamily": "DM Sans",
+              "fontSize": 12,
+              "lineHeight": 16,
             }
           }
           suppressHighlighting={true}
@@ -421,23 +424,23 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
               "alignItems": "center",
               "backgroundColor": "#DCDEE0",
               "borderBottomColor": "transparent",
-              "borderBottomLeftRadius": 7,
-              "borderBottomRightRadius": 7,
-              "borderBottomWidth": 1,
+              "borderBottomLeftRadius": 8,
+              "borderBottomRightRadius": 8,
+              "borderBottomWidth": 0,
               "borderLeftColor": "transparent",
-              "borderLeftWidth": 1,
+              "borderLeftWidth": 0,
               "borderRightColor": "transparent",
-              "borderRightWidth": 1,
+              "borderRightWidth": 0,
               "borderStyle": "solid",
               "borderTopColor": "transparent",
-              "borderTopLeftRadius": 7,
-              "borderTopRightRadius": 7,
-              "borderTopWidth": 1,
+              "borderTopLeftRadius": 8,
+              "borderTopRightRadius": 8,
+              "borderTopWidth": 0,
               "bottom": 0,
               "flexDirection": "row",
               "flexWrap": "nowrap",
-              "fontWeight": "600",
-              "height": 40,
+              "fontWeight": "700",
+              "height": 36,
               "justifyContent": "center",
               "left": 0,
               "paddingLeft": 8,
@@ -456,10 +459,10 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                 "color": "#121312",
                 "flexGrow": 0,
                 "flexShrink": 1,
-                "fontFamily": "DMSans-SemiBold",
-                "fontSize": 16,
+                "fontFamily": "DMSans-Bold",
+                "fontSize": 14,
                 "letterSpacing": 0,
-                "lineHeight": 17.6,
+                "lineHeight": 15.400000000000002,
                 "userSelect": "none",
               }
             }
@@ -491,94 +494,131 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
       }
     >
       <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": true,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={false}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
         style={
           {
-            "alignItems": "flex-start",
-            "backgroundColor": "#FFECC2",
-            "borderBottomLeftRadius": 5,
-            "borderBottomRightRadius": 5,
-            "borderTopLeftRadius": 5,
-            "borderTopRightRadius": 5,
-            "flexDirection": "row",
-            "gap": 12,
-            "paddingBottom": 12,
-            "paddingLeft": 16,
-            "paddingRight": 16,
-            "paddingTop": 12,
+            "opacity": 1,
           }
         }
       >
         <View
           style={
             {
-              "alignItems": "center",
+              "flexDirection": "row",
               "justifyContent": "center",
+              "width": "100%",
             }
           }
-          testID="alert-start-icon"
         >
           <View
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": "#FF8C00",
-                "borderBottomLeftRadius": 34,
-                "borderBottomRightRadius": 34,
-                "borderTopLeftRadius": 34,
-                "borderTopRightRadius": 34,
-                "display": "flex",
+                "backgroundColor": "#FFECC2",
+                "borderBottomLeftRadius": 5,
+                "borderBottomRightRadius": 5,
+                "borderTopLeftRadius": 5,
+                "borderTopRightRadius": 5,
+                "flexDirection": "row",
+                "gap": 12,
                 "justifyContent": "center",
-                "paddingBottom": 4,
-                "paddingLeft": 4,
-                "paddingRight": 4,
-                "paddingTop": 4,
+                "paddingBottom": 8,
+                "paddingLeft": 16,
+                "paddingRight": 16,
+                "paddingTop": 8,
+                "width": "100%",
               }
             }
           >
-            <Text
-              allowFontScaling={false}
-              selectable={false}
+            <View
               style={
-                [
-                  {
-                    "color": "#FFFFFF",
-                    "fontSize": 16,
-                  },
-                  undefined,
-                  {
-                    "fontFamily": "SafeIcons",
-                    "fontStyle": "normal",
-                    "fontWeight": "normal",
-                  },
-                  {},
-                ]
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#FF8C00",
+                  "borderBottomLeftRadius": 34,
+                  "borderBottomRightRadius": 34,
+                  "borderTopLeftRadius": 34,
+                  "borderTopRightRadius": 34,
+                  "display": "flex",
+                  "justifyContent": "center",
+                  "paddingBottom": 4,
+                  "paddingLeft": 4,
+                  "paddingRight": 4,
+                  "paddingTop": 4,
+                }
               }
-              testID="warning-icon"
             >
-              
-            </Text>
-          </View>
-        </View>
-        <View
-          style={
-            {
-              "flex": 1,
-              "gap": 4,
-            }
-          }
-        >
-          <Text
-            style={
-              {
-                "color": "#6C2D19",
-                "fontFamily": "DM Sans",
-                "fontSize": 13,
+              <Text
+                allowFontScaling={false}
+                selectable={false}
+                style={
+                  [
+                    {
+                      "color": "#FFFFFF",
+                      "fontSize": 16,
+                    },
+                    undefined,
+                    {
+                      "fontFamily": "SafeIcons",
+                      "fontStyle": "normal",
+                      "fontWeight": "normal",
+                    },
+                    {},
+                  ]
+                }
+                testID="warning-icon"
+              >
+                
+              </Text>
+            </View>
+            <View
+              style={
+                {
+                  "flexShrink": 1,
+                  "gap": 4,
+                }
               }
-            }
-            suppressHighlighting={true}
-          >
-            This transaction is a withdrawal request. After it's executed, you'll need to complete a separate withdrawal transaction.
-          </Text>
+            >
+              <Text
+                style={
+                  {
+                    "color": "#6C2D19",
+                    "fontFamily": "DMSans-SemiBold",
+                    "fontSize": 14,
+                  }
+                }
+                suppressHighlighting={true}
+              >
+                This transaction is a withdrawal request. After it's executed, you'll need to complete a separate withdrawal transaction.
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
     </View>

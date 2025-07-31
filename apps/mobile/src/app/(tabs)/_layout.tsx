@@ -3,22 +3,15 @@ import React from 'react'
 import { TabBarIcon } from '@/src/components/navigation/TabBarIcon'
 import { Navbar as AssetsNavbar } from '@/src/features/Assets/components/Navbar/Navbar'
 import { Pressable, StyleSheet } from 'react-native'
-import { getTokenValue } from 'tamagui'
-import { useTheme } from '@/src/theme/hooks/useTheme'
+import { useTheme } from 'tamagui'
+import TransactionHeader from '@/src/features/TxHistory/components/TransactionHeader'
 
 export default function TabLayout() {
-  const { currentTheme } = useTheme()
+  const theme = useTheme()
 
-  let activeTintColor, inactiveTintColor, borderTopColor
-  if (currentTheme === 'light') {
-    activeTintColor = getTokenValue('$color.textPrimaryLight')
-    inactiveTintColor = getTokenValue('$color.primaryLightLight')
-    borderTopColor = getTokenValue('$color.borderLightLight')
-  } else {
-    activeTintColor = getTokenValue('$color.textPrimaryDark')
-    inactiveTintColor = getTokenValue('$color.primaryLightDark')
-    borderTopColor = getTokenValue('$color.borderLightDark')
-  }
+  const activeTintColor = theme.color.get()
+  const inactiveTintColor = theme.borderMain.get()
+  const borderTopColor = theme.borderLight.get()
 
   return (
     <>
@@ -51,8 +44,11 @@ export default function TabLayout() {
           name="transactions"
           options={{
             title: 'Transactions',
-            headerShown: false,
+            headerTitle: () => <TransactionHeader />,
+            headerStyle: { shadowColor: 'transparent' },
+            headerLeftContainerStyle: { flexGrow: 0 },
             tabBarButtonTestID: 'transactions-tab',
+            tabBarLabel: 'Transactions',
             tabBarButton: ({ children, ...rest }) => {
               return (
                 <Pressable {...rest} style={styles.tabButton}>

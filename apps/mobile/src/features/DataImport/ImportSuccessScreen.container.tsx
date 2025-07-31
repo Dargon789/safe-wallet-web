@@ -1,20 +1,21 @@
 import React from 'react'
 import { useRouter } from 'expo-router'
-import { useTheme } from 'tamagui'
+import { getTokenValue } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectAllSafes, SafesSlice } from '@/src/store/safesSlice'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { SafeInfo } from '@/src/types/address'
 import { ImportSuccessScreenView } from './components/ImportSuccessScreenView'
+import { useDataImportContext } from './context/DataImportProvider'
 
 export const ImportSuccessScreen = () => {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const dispatch = useAppDispatch()
   const allSafes = useAppSelector(selectAllSafes) as SafesSlice
-  const theme = useTheme()
-  const colors: [string, string] = [theme.success.get(), 'transparent']
+  const { notImportedKeys } = useDataImportContext()
+  const colors: [string, string] = [getTokenValue('$color.successBackgroundLight'), 'transparent']
 
   const handleContinue = () => {
     const safeAddresses = Object.keys(allSafes)
@@ -47,5 +48,12 @@ export const ImportSuccessScreen = () => {
     router.replace('/(tabs)')
   }
 
-  return <ImportSuccessScreenView bottomInset={insets.bottom} gradientColors={colors} onContinue={handleContinue} />
+  return (
+    <ImportSuccessScreenView
+      bottomInset={insets.bottom}
+      gradientColors={colors}
+      onContinue={handleContinue}
+      notImportedKeys={notImportedKeys}
+    />
+  )
 }
