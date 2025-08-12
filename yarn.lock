@@ -7585,6 +7585,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/core@npm:10.4.0":
+  version: 10.4.0
+  resolution: "@sentry/core@npm:10.4.0"
+  checksum: 02d856182100f0b016b59fbdbc393d0d1e1044f78e3f1f114035ce07d15faed3cdf182ae9d778430d25155ccc453fcbb7ae5c8e45e6f86521b727220f5c6ef20
+  languageName: node
+  linkType: hard
+
 "@sentry/core@npm:7.120.2":
   version: 7.120.2
   resolution: "@sentry/core@npm:7.120.2"
@@ -7634,10 +7641,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/types@npm:7.120.2, @sentry/types@npm:^7.74.0":
+"@sentry/types@npm:7.120.2":
   version: 7.120.2
   resolution: "@sentry/types@npm:7.120.2"
   checksum: 45a46cd13f2b7a0590439c0b98e14b50cd1a0a610d8b5d977934a82336ad88a9fd0efb6a93c86063ae25ae2e587994b6b7ad122e808c82110d71c132cc55b02b
+  languageName: node
+  linkType: hard
+
+"@sentry/types@npm:^10.4.0":
+  version: 10.4.0
+  resolution: "@sentry/types@npm:10.4.0"
+  dependencies:
+    "@sentry/core": 10.4.0
+  checksum: cd2840e6342032e99b2736ba112d964ca76fd8c598144864a7d26403db9277893ac77c175d9f805e2408beb8ae0a9e738368ebf7d39bb5f7e3f26f57385ce265
   languageName: node
   linkType: hard
 
@@ -24477,7 +24493,7 @@ __metadata:
     "@safe-global/safe-gateway-typescript-sdk": 3.22.3-beta.15
     "@safe-global/safe-modules-deployments": ^2.2.10
     "@sentry/react": ^7.91.0
-    "@sentry/types": ^7.74.0
+    "@sentry/types": ^10.4.0
     "@spindl-xyz/attribution-lite": ^1.4.0
     "@storybook/addon-designs": ^10.0.1
     "@storybook/addon-essentials": ^8.0.6
