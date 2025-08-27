@@ -71,6 +71,7 @@ export const altImgSwaps = 'svg[alt="Swap order"]'
 export const altImgLimitOrder = 'svg[alt="Limit order"]'
 export const altImgTwapOrder = 'svg[alt="Twap Order"]'
 export const txShareBlock = '[data-testid="share-block"]'
+export const txShareBlockHeader = '[data-testid="share-block-header"]'
 export const txShareBlockDetails = '[data-testid="share-block-details"]'
 const copyLinkBtn = '[data-testid="copy-link-btn"]'
 export const noteTextField = '[data-testid="tx-note-textfield"]'
@@ -98,6 +99,7 @@ const insufficientFundsErrorStr = 'Insufficient funds'
 const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
 const QueueLabel = 'needs to be executed first'
+export const hashesText = 'Hashes'
 const TransactionSummary = 'Send '
 const transactionsPerHrStr = 'free transactions left today'
 const txHashesStr = 'Transaction hashes'
@@ -166,6 +168,7 @@ export const txAccordionDetails = '[data-testid="decoded-tx-details"]'
 
 //Arrays for the Transaction Details on Tx creation for different type of txs
 export const MultisendData = ['Call', 'multiSend', 'on', 'Safe: MultiSendCallOnly 1.4.1']
+export const SafeProxy = ['Call', 'createProxyWithNonce', 'on', 'SafeProxyFactory 1.4.1']
 
 export const tx_status = {
   execution_needed: 'Execution needed',
@@ -186,9 +189,9 @@ export const advancedDetailsViewOptions = {
   table: 'table',
   grid: 'grid',
 }
-
+//tbr - will check if it should be removed ( we can cound by data-testid="tx-hexData" elements)
 export function checkHashesExist(count) {
-  cy.contains(txHashesStr)
+  cy.contains(txAccordionDetails)
     .next()
     .within(() => {
       main.verifyElementsCount(txHexDataRow, count)
@@ -198,6 +201,10 @@ export function checkHashesExist(count) {
           .should('match', /0x[a-fA-F0-9]{64}/)
       })
     })
+}
+
+export function clickOnHashes() {
+  cy.contains(hashesText).click()
 }
 export function clickOnReplaceTxOption() {
   cy.get(replaceChoiceBtn).find('button').click()
@@ -250,12 +257,15 @@ export function verifyDeleteChoiceBtnStatus(option) {
 }
 
 export function typeNoteText(text) {
-  cy.get(noteTextField).find('input').clear().type(text)
+  const input = cy.get(noteTextField).find('input')
+  input.clear()
+  input.type(text)
 }
 
 export function checkMaxNoteLength() {
   typeNoteText(main.generateRandomString(61))
-  cy.get(noteTextField).should('exist').contains('60/60').should('be.visible')
+  cy.get(noteTextField).should('exist')
+  cy.get(noteTextField).contains('60/60').should('be.visible')
 }
 
 export function checkNoteWarningMsg() {
@@ -294,7 +304,7 @@ export function verifyCopiedURL() {
 }
 
 export function expandTxShareBlock() {
-  cy.get(txShareBlock).click()
+  cy.get(txShareBlockHeader).click()
   cy.get(txShareBlockDetails).should('be.visible')
 }
 
@@ -527,7 +537,11 @@ export function expandAdvancedDetails(data) {
 export function verifytxAccordionDetails(data) {
   main.checkTextsExistWithinElement(txAccordionDetails, data)
 }
-// Function to check elements inside Transaction details/DecodedDataRoot
+//Search in the element with the scroll
+export function verifytxAccordionDetailsScroll(data) {
+  main.checkTextsExistWithinElementScroll(txAccordionDetails, data)
+}
+
 export function checkDataDecodingRoot(data) {
   main.checkTextsExistWithinElement(decodedDataTop, data)
 }
@@ -838,10 +852,6 @@ export function clickOnProposeTransactionBtn() {
 
 export function clickOnContinueSignTransactionBtn() {
   cy.get(continueSignBtn).click()
-}
-
-export function clickOnAcknowledgement() {
-  cy.contains(txAcknowledgementStr).click()
 }
 
 export function clickOnConfirmTransactionBtn() {
