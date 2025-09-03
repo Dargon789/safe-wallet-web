@@ -137,7 +137,7 @@
     "cypress": "^13.0.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-visual-regression": "^5.0.2",
-    "eslint": "^8.57.0",
+    "eslint": "^9.34.0",
     "eslint-config-next": "^15.3.4",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-no-only-tests": "^3.1.0",
