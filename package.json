@@ -51,7 +51,7 @@
     "@emotion/styled": "^11.14.1",
     "@gnosis.pm/zodiac": "^4.0.3",
     "@mui/icons-material": "^5.14.20",
-    "@mui/material": "^5.14.20",
+    "@mui/material": "^7.3.2",
     "@mui/x-date-pickers": "^8.10.2",
     "@reduxjs/toolkit": "^2.2.6",
     "@safe-global/api-kit": "^2.4.6",
