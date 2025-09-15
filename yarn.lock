@@ -11197,7 +11197,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@walletconnect/types@npm:2.21.3, @walletconnect/types@npm:^2.16.1":
+"@walletconnect/types@npm:2.21.3":
   version: 2.21.3
   resolution: "@walletconnect/types@npm:2.21.3"
   dependencies:
@@ -11208,6 +11208,20 @@ __metadata:
     "@walletconnect/logger": "npm:2.1.2"
     events: "npm:3.3.0"
   checksum: eba6ccbbc672d3b5c7c998ca65543b759061e36d6a3e518b9fdbdfc5a12087309413dd38743bbf2de6a6712a942257e81730c56f641b751028692cb4b4600f62
+  languageName: node
+  linkType: hard
+
+"@walletconnect/types@npm:^2.21.8":
+  version: 2.21.8
+  resolution: "@walletconnect/types@npm:2.21.8"
+  dependencies:
+    "@walletconnect/events": 1.0.1
+    "@walletconnect/heartbeat": 1.2.2
+    "@walletconnect/jsonrpc-types": 1.0.4
+    "@walletconnect/keyvaluestorage": 1.1.1
+    "@walletconnect/logger": 2.1.2
+    events: 3.3.0
+  checksum: 6cee511f1e25b4c3a1574b9ce2c4cd72b9817b8f2b752ea34856cbc115a5c0ce7eac2537fd15b325b46f6d350fddb682a6bd2cc5d61ea7f3366a615cf086e1fc
   languageName: node
   linkType: hard
 
@@ -24629,7 +24643,7 @@ __metadata:
     "@types/react-gtm-module": ^2.0.3
     "@types/semver": ^7.3.10
     "@typescript-eslint/eslint-plugin": ^7.6.0
-    "@walletconnect/types": ^2.16.1
+    "@walletconnect/types": ^2.21.8
     "@walletconnect/utils": ^2.16.1
     "@walletconnect/web3wallet": ^1.15.1
     "@web3-onboard/coinbase": ^2.2.6
