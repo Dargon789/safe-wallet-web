@@ -62,7 +62,7 @@
     "@safe-global/safe-modules-deployments": "^2.2.10",
     "@sentry/react": "^7.91.0",
     "@spindl-xyz/attribution-lite": "^1.4.0",
-    "@walletconnect/utils": "^2.16.1",
+    "@walletconnect/utils": "^2.21.9",
     "@walletconnect/web3wallet": "^1.15.1",
     "@web3-onboard/coinbase": "^2.2.6",
     "@web3-onboard/core": "^2.21.4",
