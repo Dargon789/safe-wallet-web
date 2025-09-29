@@ -24145,17 +24145,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"remark-mdx-frontmatter@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "remark-mdx-frontmatter@npm:5.0.0"
+"remark-mdx-frontmatter@npm:^5.2.0":
+  version: 5.2.0
+  resolution: "remark-mdx-frontmatter@npm:5.2.0"
   dependencies:
-    "@types/mdast": "npm:^4.0.0"
-    estree-util-is-identifier-name: "npm:^3.0.0"
-    estree-util-value-to-estree: "npm:^3.0.0"
-    toml: "npm:^3.0.0"
-    unified: "npm:^11.0.0"
-    yaml: "npm:^2.0.0"
-  checksum: 31323fba5b2c44aecbede7a817d2a31606409395a049e3f278e09946c7c3798b9c15437e094dff0b7e477df36595c1cc483727279c03edf0f8b64c029a2fdc0c
+    "@types/mdast": ^4.0.0
+    estree-util-value-to-estree: ^3.0.0
+    toml: ^3.0.0
+    unified: ^11.0.0
+    unist-util-mdx-define: ^1.0.0
+    yaml: ^2.0.0
+  checksum: 938eae955610c15f5eb197ad22c94496e2b89c36f2311d9af7d30a6083fe2cd4145f3ad1816f0e6c4673b3ee8debb0764510f83eb943608a863fbe413ba0e37f
   languageName: node
   linkType: hard
 
@@ -24782,7 +24782,7 @@ __metadata:
     remark-frontmatter: ^5.0.0
     remark-gfm: ^4.0.0
     remark-heading-id: ^1.0.1
-    remark-mdx-frontmatter: ^5.0.0
+    remark-mdx-frontmatter: ^5.2.0
     semver: ^7.6.3
     storybook: ^9.1.5
     ts-prune: ^0.10.3
@@ -27289,6 +27289,21 @@ __metadata:
   dependencies:
     "@types/unist": "npm:^3.0.0"
   checksum: f630a925126594af9993b091cf807b86811371e465b5049a6283e08537d3e6ba0f7e248e1e7dab52cfe33f9002606acef093441137181b327f6fe504884b20e2
+  languageName: node
+  linkType: hard
+
+"unist-util-mdx-define@npm:^1.0.0":
+  version: 1.1.2
+  resolution: "unist-util-mdx-define@npm:1.1.2"
+  dependencies:
+    "@types/estree": ^1.0.0
+    "@types/hast": ^3.0.0
+    "@types/mdast": ^4.0.0
+    estree-util-is-identifier-name: ^3.0.0
+    estree-util-scope: ^1.0.0
+    estree-walker: ^3.0.0
+    vfile: ^6.0.0
+  checksum: d74258e12be0f225fb768b9ed472d34eb1c8d31805d89fd1cf26f0bc29e42595a91b9ebb6feba37e20eae743227a44a1e171b416ceab0b05144440fa1c2ad6d9
   languageName: node
   linkType: hard
 
