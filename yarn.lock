@@ -11222,7 +11222,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@walletconnect/types@npm:2.21.3, @walletconnect/types@npm:^2.16.1":
+"@walletconnect/types@npm:2.21.3":
   version: 2.21.3
   resolution: "@walletconnect/types@npm:2.21.3"
   dependencies:
@@ -11236,7 +11236,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@walletconnect/types@npm:2.21.9":
+"@walletconnect/types@npm:2.21.9, @walletconnect/types@npm:^2.21.9":
   version: 2.21.9
   resolution: "@walletconnect/types@npm:2.21.9"
   dependencies:
@@ -24731,7 +24731,7 @@ __metadata:
     "@types/react-gtm-module": ^2.0.3
     "@types/semver": ^7.3.10
     "@typescript-eslint/eslint-plugin": ^7.6.0
-    "@walletconnect/types": ^2.16.1
+    "@walletconnect/types": ^2.21.9
     "@walletconnect/utils": ^2.21.9
     "@walletconnect/web3wallet": ^1.15.1
     "@web3-onboard/coinbase": ^2.2.6
