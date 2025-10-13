@@ -44,11 +44,11 @@ export const badgeTheme = {
   },
   dark_badge_background: {
     color: tokens.color.textPrimaryDark,
-    background: tokens.color.backgroundSecondaryDark,
+    background: tokens.color.backgroundMainDark,
   },
   light_badge_background: {
     color: tokens.color.textPrimaryLight,
-    background: tokens.color.backgroundSecondaryLight,
+    background: tokens.color.backgroundPaperLight,
     borderColor: tokens.color.logoBackgroundLight,
   },
   light_badge_error: {
@@ -68,5 +68,13 @@ export const badgeTheme = {
   dark_badge_background_inverted: {
     color: tokens.color.logoBackgroundDark,
     background: tokens.color.textPrimaryDark,
+  },
+  light_badge_outline: {
+    background: 'transparent',
+    borderColor: tokens.color.borderLightLight,
+  },
+  dark_badge_outline: {
+    background: 'transparent',
+    borderColor: tokens.color.borderLightDark,
   },
 }

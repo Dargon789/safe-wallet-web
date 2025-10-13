@@ -2,7 +2,6 @@ import React from 'react'
 import {
   CustomTransactionInfo,
   MultisigExecutionDetails,
-  SettingsChangeTransaction,
   TransactionData,
   TransactionDetails,
   TransferTransactionInfo,
@@ -104,6 +103,7 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
           txId={txDetails.txId}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as NativeStakingDepositTransactionInfo}
+          txData={txDetails.txData as TransactionData}
         />
       )
     case ETxType.VAULT_DEPOSIT:
@@ -129,6 +129,7 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
           txId={txDetails.txId}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as NativeStakingValidatorsExitTransactionInfo}
+          txData={txDetails.txData as TransactionData}
         />
       )
     case ETxType.STAKE_EXIT:
@@ -160,7 +161,7 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
         <GenericView
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txId={txDetails.txId}
-          txInfo={txDetails.txInfo as SettingsChangeTransaction}
+          txInfo={txDetails.txInfo}
           txData={txDetails.txData as TransactionData}
         />
       )
