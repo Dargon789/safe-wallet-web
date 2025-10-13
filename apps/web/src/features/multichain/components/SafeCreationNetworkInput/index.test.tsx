@@ -1,5 +1,5 @@
 import * as useChains from '@/hooks/useChains'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { FormProvider, useForm } from 'react-hook-form'
 import SafeCreationNetworkInput from '.'
 import { chainBuilder } from '@/tests/builders/chains'
@@ -10,7 +10,7 @@ import * as router from 'next/router'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const TestForm = ({ isAdvancedFlow = false }: { isAdvancedFlow?: boolean }) => {
-  const formMethods = useForm<{ networks: ChainInfo[] }>({
+  const formMethods = useForm<{ networks: Chain[] }>({
     mode: 'all',
     defaultValues: {
       networks: [],
@@ -73,6 +73,7 @@ describe('NetworkMultiSelector', () => {
         chains: {
           data: mockChains,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -176,6 +177,7 @@ describe('NetworkMultiSelector', () => {
         chains: {
           data: mockChains,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -228,6 +230,7 @@ describe('NetworkMultiSelector', () => {
         chains: {
           data: mockChains,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -273,6 +276,7 @@ describe('NetworkMultiSelector', () => {
         chains: {
           data: mockChains,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -338,6 +342,7 @@ describe('NetworkMultiSelector', () => {
         chains: {
           data: mockChains,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -387,6 +392,7 @@ describe('NetworkMultiSelector', () => {
         chains: {
           data: mockChains,
           loading: false,
+          loaded: true,
         },
       },
     })

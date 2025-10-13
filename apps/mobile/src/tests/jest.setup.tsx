@@ -8,6 +8,8 @@ import { server } from './server'
 
 jest.useFakeTimers()
 
+jest.mock('react-native-permissions', () => require('react-native-permissions/mock'))
+
 /**
  *  This mock is necessary because useFonts is async and we get an error
  *  Warning: An update to FontProvider inside a test was not wrapped in act(...)
@@ -151,7 +153,7 @@ jest.mock('@notifee/react-native', () => {
 jest.mock('@gorhom/bottom-sheet', () => {
   const reactNative = jest.requireActual('react-native')
   const { useState, forwardRef, useImperativeHandle } = jest.requireActual('react')
-  const { View } = reactNative
+  const { View, ScrollView, TouchableOpacity: RNTouchableOpacity } = reactNative
   const MockBottomSheetComponent = forwardRef(
     (
       {
@@ -193,6 +195,8 @@ jest.mock('@gorhom/bottom-sheet', () => {
     BottomSheetModal: MockBottomSheetComponent,
     BottomSheetModalProvider: View,
     BottomSheetView: View,
+    BottomSheetScrollView: ScrollView,
+    TouchableOpacity: RNTouchableOpacity,
     useBottomSheetModal: () => ({
       dismiss: () => {
         return null
@@ -246,6 +250,26 @@ jest.mock('react-native-quick-crypto', () => ({
 }))
 
 jest.mock('react-native-safe-area-context', () => mockSafeAreaContext)
+
+// Mock the logger globally for all tests
+jest.mock('@/src/utils/logger', () => ({
+  __esModule: true,
+  default: {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    trace: jest.fn(),
+    setLevel: jest.fn(),
+    shouldLog: jest.fn(),
+    setShouldLogErrorToSentry: jest.fn(),
+  },
+  LogLevel: {
+    TRACE: 0,
+    INFO: 1,
+    WARN: 2,
+    ERROR: 3,
+  },
+}))
 
 jest.mock('@react-native-firebase/analytics', () => {
   const mockAnalytics = {

@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Box, Skeleton, Typography, Paper, Card, Stack } from '@mui/material'
+import { Box, Skeleton, Typography, Paper, Card, Stack, Divider } from '@mui/material'
 import useBalances from '@/hooks/useBalances'
 import TokenAmount from '@/components/common/TokenAmount'
 import SwapButton from '@/features/swap/components/SwapButton'
@@ -17,13 +17,13 @@ import { FiatChange } from '@/components/balances/AssetsTable/FiatChange'
 import { isEligibleEarnToken } from '@/features/earn/utils'
 import EarnButton from '@/features/earn/components/EarnButton'
 import { EARN_LABELS } from '@/services/analytics/events/earn'
-import useIsEarnFeatureEnabled from '@/features/earn/hooks/useIsEarnFeatureEnabled'
+import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEnabled'
+import useIsStakingPromoEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
 import useChainId from '@/hooks/useChainId'
 import TokenIcon from '@/components/common/TokenIcon'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import StakeButton from '@/features/stake/components/StakeButton'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
-import useIsStakingFeatureEnabled from '@/features/stake/hooks/useIsStakingFeatureEnabled'
 import NoAssetsIcon from '@/public/images/common/no-assets.svg'
 
 const MAX_ASSETS = 4
@@ -69,14 +69,10 @@ const AssetRow = ({
         <TokenIcon tokenSymbol={item.tokenInfo.symbol} logoUri={item.tokenInfo.logoUri ?? undefined} size={32} />
         <Box>
           <Typography fontWeight="600">{item.tokenInfo.name}</Typography>
-          <Typography variant="body2">{item.tokenInfo.symbol}</Typography>
+          <Typography variant="body2" className={css.tokenAmount}>
+            <TokenAmount value={item.balance} decimals={item.tokenInfo.decimals} tokenSymbol={item.tokenInfo.symbol} />
+          </Typography>
         </Box>
-      </Stack>
-
-      <Stack display={['none', 'flex']} direction="row" alignItems="center" gap={1}>
-        <Typography className={css.tokenAmount}>
-          <TokenAmount value={item.balance} decimals={item.tokenInfo.decimals} tokenSymbol={item.tokenInfo.symbol} />
-        </Typography>
       </Stack>
 
       <Box flex={1} display="block" textAlign="right" height="44px">
@@ -105,21 +101,23 @@ const AssetRow = ({
 
 const AssetList = ({ items }: { items: Balances['items'] }) => {
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
-  const isEarnFeatureEnabled = useIsEarnFeatureEnabled()
-  const isStakingFeatureEnabled = useIsStakingFeatureEnabled()
+  const isEarnPromoEnabled = useIsEarnPromoEnabled()
+  const isStakingPromoEnabled = useIsStakingPromoEnabled()
   const chainId = useChainId()
 
   return (
     <Box display="flex" flexDirection="column">
-      {items.map((item) => (
-        <AssetRow
-          item={item}
-          key={item.tokenInfo.address}
-          chainId={chainId}
-          showSwap={isSwapFeatureEnabled}
-          showEarn={isEarnFeatureEnabled}
-          showStake={isStakingFeatureEnabled}
-        />
+      {items.map((item, index) => (
+        <Box key={item.tokenInfo.address}>
+          {index > 0 && <Divider sx={{ opacity: 0.5, marginLeft: '56px' }} />}
+          <AssetRow
+            item={item}
+            chainId={chainId}
+            showSwap={isSwapFeatureEnabled}
+            showEarn={isEarnPromoEnabled}
+            showStake={isStakingPromoEnabled}
+          />
+        </Box>
       ))}
     </Box>
   )
@@ -150,7 +148,7 @@ const AssetsWidget = () => {
   if (isLoading) return <AssetsSkeleton />
 
   return (
-    <Card data-testid="assets-widget" sx={{ px: 1.5, py: 2.5 }}>
+    <Card data-testid="assets-widget" sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5 }}>
       <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
         <Typography fontWeight={700}>Top assets</Typography>
 

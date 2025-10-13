@@ -10,6 +10,7 @@ import ExternalLink from '../ExternalLink'
 import MUILink from '@mui/material/Link'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
+import { IS_PRODUCTION, COMMIT_HASH } from '@/config/constants'
 
 const footerPages = [
   AppRoutes.welcome.index,
@@ -34,6 +35,9 @@ const FooterLink = ({ children, href }: { children: ReactNode; href: string }): 
 const Footer = (): ReactElement | null => {
   const router = useRouter()
   const isOfficialHost = useIsOfficialHost()
+  const initialYear = 2025
+  const currentYear = new Date().getFullYear()
+  const copyrightYear = initialYear === currentYear ? initialYear : `${initialYear}–${currentYear}`
 
   if (!footerPages.some((path) => router.pathname.startsWith(path))) {
     return null
@@ -49,7 +53,7 @@ const Footer = (): ReactElement | null => {
         {isOfficialHost ? (
           <>
             <li>
-              <Typography variant="caption">&copy;2022–{new Date().getFullYear()} Core Contributors GmbH</Typography>
+              <Typography variant="caption">&copy;{copyrightYear} Safe Labs GmbH</Typography>
             </li>
             <li>
               <FooterLink href={getHref(AppRoutes.terms)}>Terms</FooterLink>
@@ -84,6 +88,14 @@ const Footer = (): ReactElement | null => {
             <SvgIcon component={GitHubIcon} inheritViewBox fontSize="inherit" sx={{ mr: 0.5 }} /> v{packageJson.version}
           </ExternalLink>
         </li>
+
+        {!IS_PRODUCTION && COMMIT_HASH && (
+          <li>
+            <ExternalLink href={`${packageJson.homepage}/commit/${COMMIT_HASH}`} noIcon>
+              {COMMIT_HASH.slice(0, 7)}
+            </ExternalLink>
+          </li>
+        )}
       </ul>
     </footer>
   )

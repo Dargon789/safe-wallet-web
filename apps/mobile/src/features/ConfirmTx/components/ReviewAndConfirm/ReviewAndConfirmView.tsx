@@ -1,19 +1,19 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 import { useTheme, View } from 'tamagui'
 import { Tabs, MaterialTabBar } from 'react-native-collapsible-tab-view'
 import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ReviewHeader } from './ReviewHeader'
-import { ReviewFooter } from './ReviewFooter'
 import { DataTab } from './tabs/DataTab'
 import { JSONTab } from './tabs/JSONTab'
+import { HashesTab } from './tabs/HashesTab'
 import { useTheme as useCurrentTheme } from '@/src/theme/hooks/useTheme'
 
 interface ReviewAndConfirmViewProps {
   txDetails: TransactionDetails
-  txId: string
+  children: ReactNode
 }
 
-export function ReviewAndConfirmView({ txDetails, txId }: ReviewAndConfirmViewProps) {
+export function ReviewAndConfirmView({ txDetails, children }: ReviewAndConfirmViewProps) {
   const { isDark } = useCurrentTheme()
   const theme = useTheme()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -27,7 +27,7 @@ export function ReviewAndConfirmView({ txDetails, txId }: ReviewAndConfirmViewPr
       labelStyle={{ color: theme.color.get(), fontSize: 16, fontWeight: '600' }}
       activeColor={theme.color.get()}
       inactiveColor={theme.colorSecondary.get()}
-      width={200}
+      width={300}
     />
   )
 
@@ -47,12 +47,15 @@ export function ReviewAndConfirmView({ txDetails, txId }: ReviewAndConfirmViewPr
         <Tabs.Tab name="Data" label="Data">
           <DataTab />
         </Tabs.Tab>
+        <Tabs.Tab name="Hashes" label="Hashes">
+          <HashesTab txDetails={txDetails} />
+        </Tabs.Tab>
         <Tabs.Tab name="JSON" label="JSON">
           <JSONTab txDetails={txDetails} />
         </Tabs.Tab>
       </Tabs.Container>
 
-      <ReviewFooter txId={txId} />
+      {children}
     </View>
   )
 }

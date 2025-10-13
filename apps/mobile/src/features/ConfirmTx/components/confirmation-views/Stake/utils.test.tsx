@@ -1,10 +1,12 @@
 import React from 'react'
-import { render } from '@/src/tests/test-utils'
+import { renderWithStore, createTestStore } from '@/src/tests/test-utils'
 import { formatStakingDepositItems, formatStakingValidatorItems, formatStakingWithdrawRequestItems } from './utils'
 import {
   NativeStakingDepositTransactionInfo,
   NativeStakingValidatorsExitTransactionInfo,
+  Operation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 
 const mockDepositTxInfo: NativeStakingDepositTransactionInfo = {
   type: 'NativeStakingDeposit',
@@ -53,11 +55,32 @@ const mockWithdrawRequestTxInfo: NativeStakingValidatorsExitTransactionInfo = {
 }
 
 describe('Staking Utils', () => {
-  describe('formatStakingDepositItems', () => {
-    it('formats deposit information correctly', () => {
-      const items = formatStakingDepositItems(mockDepositTxInfo)
+  let store: ReturnType<typeof createTestStore>
 
-      expect(items).toHaveLength(4)
+  beforeEach(async () => {
+    store = createTestStore({
+      activeSafe: {
+        address: '0x1234567890123456789012345678901234567890',
+        chainId: '1',
+      },
+    })
+
+    await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(undefined))
+  })
+  describe('formatStakingDepositItems', () => {
+    it('formats deposit information correctly with minimal txData', () => {
+      const minimalTxData = {
+        to: {
+          value: '0x1234567890123456789012345678901234567890',
+          name: null,
+          logoUri: null,
+        },
+        operation: 0 as Operation,
+      }
+
+      const items = formatStakingDepositItems(mockDepositTxInfo, minimalTxData)
+
+      expect(items).toHaveLength(6)
 
       const rewardsRateItem = items[0] as { label: string; value: string }
       expect(rewardsRateItem.label).toBe('Rewards rate')
@@ -66,6 +89,60 @@ describe('Staking Utils', () => {
       const widgetFeeItem = items[3] as { label: string; value: string }
       expect(widgetFeeItem.label).toBe('Widget fee')
       expect(widgetFeeItem.value).toBe('5.00%')
+
+      const contractItem = items[4] as { label: string; render?: () => React.ReactNode }
+      expect(contractItem.label).toBe('Contract')
+      expect(contractItem.render).toBeDefined()
+
+      const networkItem = items[5] as { label: string; render?: () => React.ReactNode }
+      expect(networkItem.label).toBe('Network')
+      expect(networkItem.render).toBeDefined()
+    })
+
+    it('includes contract and network information when provided', () => {
+      const mockTxData = {
+        to: {
+          value: '0x123456789abcdef123456789abcdef123456789a',
+          name: 'Staking Contract',
+          logoUri: null,
+        },
+        operation: 0 as Operation,
+      }
+
+      const items = formatStakingDepositItems(mockDepositTxInfo, mockTxData)
+
+      expect(items).toHaveLength(6) // 4 original + contract + network
+
+      const contractItem = items[4] as { label: string; render?: () => React.ReactNode }
+      expect(contractItem.label).toBe('Contract')
+      expect(contractItem.render).toBeDefined()
+
+      const networkItem = items[5] as { label: string; render?: () => React.ReactNode }
+      expect(networkItem.label).toBe('Network')
+      expect(networkItem.render).toBeDefined()
+    })
+
+    it('always includes contract and network information', () => {
+      const basicTxData = {
+        to: {
+          value: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd',
+          name: null,
+          logoUri: null,
+        },
+        operation: 0 as Operation,
+      }
+
+      const items = formatStakingDepositItems(mockDepositTxInfo, basicTxData)
+
+      expect(items).toHaveLength(6)
+
+      const contractItem = items[4] as { label: string; render?: () => React.ReactNode }
+      expect(contractItem.label).toBe('Contract')
+      expect(contractItem.render).toBeDefined()
+
+      const networkItem = items[5] as { label: string; render?: () => React.ReactNode }
+      expect(networkItem.label).toBe('Network')
+      expect(networkItem.render).toBeDefined()
     })
   })
 
@@ -73,7 +150,7 @@ describe('Staking Utils', () => {
     it('formats validator information correctly', () => {
       const items = formatStakingValidatorItems(mockDepositTxInfo)
 
-      expect(items).toHaveLength(3)
+      expect(items).toHaveLength(4)
 
       const validatorItem = items[0] as { label: string; value: string }
       expect(validatorItem.label).toBe('Validator')
@@ -85,61 +162,127 @@ describe('Staking Utils', () => {
       const rewardsItem = items[2] as { label: string; value: string }
       expect(rewardsItem.label).toBe('Rewards')
       expect(rewardsItem.value).toBe('Approx. every 5 days after activation')
+
+      const validatorStatusItem = items[3] as { label: string; render?: () => React.ReactNode }
+      expect(validatorStatusItem.label).toBe('Validator status')
+      expect(validatorStatusItem.render).toBeDefined()
     })
   })
 
   describe('formatStakingWithdrawRequestItems', () => {
     it('formats withdraw request information correctly', () => {
-      const items = formatStakingWithdrawRequestItems(mockWithdrawRequestTxInfo)
+      const mockTxData = {
+        to: {
+          value: '0x1234567890123456789012345678901234567890',
+          name: 'Staking Contract',
+          logoUri: null,
+        },
+        operation: 0 as Operation,
+      }
 
-      expect(items).toHaveLength(3)
+      const items = formatStakingWithdrawRequestItems(mockWithdrawRequestTxInfo, mockTxData)
 
-      const exitItem = items[0] as { label: string; value: string }
+      expect(items).toHaveLength(6)
+
+      const contractItem = items[0] as { label: string; render?: () => React.ReactNode }
+      expect(contractItem.label).toBe('Contract')
+      expect(contractItem.render).toBeDefined()
+
+      const networkItem = items[1] as { label: string; render?: () => React.ReactNode }
+      expect(networkItem.label).toBe('Network')
+      expect(networkItem.render).toBeDefined()
+
+      const exitItem = items[2] as { label: string; render?: () => React.ReactNode }
       expect(exitItem.label).toBe('Exit')
-      expect(exitItem.value).toBe('1 Validator')
+      expect(exitItem.render).toBeDefined()
 
-      const receiveItem = items[1] as { label: string }
+      const receiveItem = items[3] as { label: string }
       expect(receiveItem.label).toBe('Receive')
 
-      const withdrawInItem = items[2] as { label: string; value: string }
+      const withdrawInItem = items[4] as { label: string; value: string }
       expect(withdrawInItem.label).toBe('Withdraw in')
       expect(withdrawInItem.value).toMatch(/Up to.*day/)
+
+      const validatorStatusItem = items[5] as { label: string; render?: () => React.ReactNode }
+      expect(validatorStatusItem.label).toBe('Validator status')
+      expect(validatorStatusItem.render).toBeDefined()
     })
 
     it('handles multiple validators correctly', () => {
+      const mockTxData = {
+        to: {
+          value: '0x1234567890123456789012345678901234567890',
+          name: 'Staking Contract',
+          logoUri: null,
+        },
+        operation: 0 as Operation,
+      }
+
       const multiValidatorInfo = {
         ...mockWithdrawRequestTxInfo,
         numValidators: 5,
+        validators: ['0x123...abc', '0x456...def', '0x789...ghi', '0xabc...jkl', '0xdef...mno'],
       }
 
-      const items = formatStakingWithdrawRequestItems(multiValidatorInfo)
-      const exitItem = items[0] as { label: string; value: string }
+      const items = formatStakingWithdrawRequestItems(multiValidatorInfo, mockTxData)
+      const exitItem = items[2] as { label: string; render?: () => React.ReactNode }
 
-      expect(exitItem.value).toBe('5 Validators')
+      expect(exitItem.label).toBe('Exit')
+      expect(exitItem.render).toBeDefined()
+
+      if (exitItem.render) {
+        const { getByText } = renderWithStore(<>{exitItem.render()}</>, store)
+        expect(getByText('Validator 1')).toBeTruthy()
+      }
     })
 
     it('handles single validator correctly', () => {
+      const mockTxData = {
+        to: {
+          value: '0x1234567890123456789012345678901234567890',
+          name: 'Staking Contract',
+          logoUri: null,
+        },
+        operation: 0 as Operation,
+      }
+
       const singleValidatorInfo = {
         ...mockWithdrawRequestTxInfo,
         numValidators: 1,
+        validators: ['0x123...abc'],
       }
 
-      const items = formatStakingWithdrawRequestItems(singleValidatorInfo)
-      const exitItem = items[0] as { label: string; value: string }
+      const items = formatStakingWithdrawRequestItems(singleValidatorInfo, mockTxData)
+      const exitItem = items[2] as { label: string; render?: () => React.ReactNode }
 
-      expect(exitItem.value).toBe('1 Validator')
+      expect(exitItem.label).toBe('Exit')
+      expect(exitItem.render).toBeDefined()
+
+      if (exitItem.render) {
+        const { getByText } = renderWithStore(<>{exitItem.render()}</>, store)
+        expect(getByText('Validator 1')).toBeTruthy()
+      }
     })
 
     it('renders receive token amount', () => {
-      const items = formatStakingWithdrawRequestItems(mockWithdrawRequestTxInfo)
-      const receiveItem = items.find((_item, index) => index === 1) as { label: string; render?: () => React.ReactNode }
+      const mockTxData = {
+        to: {
+          value: '0x1234567890123456789012345678901234567890',
+          name: 'Staking Contract',
+          logoUri: null,
+        },
+        operation: 0 as Operation,
+      }
+
+      const items = formatStakingWithdrawRequestItems(mockWithdrawRequestTxInfo, mockTxData)
+      const receiveItem = items[3] as { label: string; render?: () => React.ReactNode }
 
       expect(receiveItem).toBeDefined()
       expect(receiveItem.label).toBe('Receive')
       expect(receiveItem.render).toBeDefined()
 
       if (receiveItem.render) {
-        const { getByText } = render(<>{receiveItem.render()}</>)
+        const { getByText } = renderWithStore(<>{receiveItem.render()}</>, store)
         expect(getByText(/32.*ETH/)).toBeTruthy()
       }
     })

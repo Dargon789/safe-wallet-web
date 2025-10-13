@@ -11,8 +11,15 @@ on:
     paths:
       - apps/mobile/**
       - packages/**
+      - .github/workflows/mobile-unit-tests.yml
+
 jobs:
   test-and-coverage:
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
     runs-on: ubuntu-latest
 
     steps:
@@ -24,7 +31,7 @@ jobs:
         run: corepack enable
 
       # Set up Node.js
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '22.11.0' # jod
           cache: 'yarn'

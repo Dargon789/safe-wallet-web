@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import type { EIP1193Provider, OnboardAPI, WalletState } from '@web3-onboard/core'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getConnectedWallet, switchWallet, trackWalletType } from '../useOnboard'
 
 // mock wallets
@@ -15,7 +15,7 @@ jest.mock('@/services/analytics', () => ({
     CONNECT: { action: 'connect_wallet' },
     WALLET_CONNECT: { action: 'wallet_connect' },
   },
-  MixPanelEventParams: {
+  MixpanelEventParams: {
     EOA_WALLET_LABEL: 'EOA Wallet Label',
     EOA_WALLET_ADDRESS: 'EOA Wallet Address',
     EOA_WALLET_NETWORK: 'EOA Wallet Network',
@@ -153,7 +153,7 @@ describe('useOnboard', () => {
       trackEvent.mockClear()
     })
 
-    it('should track wallet connection with proper MixPanel parameters', () => {
+    it('should track wallet connection with proper Mixpanel parameters', () => {
       const wallet = {
         label: 'MetaMask',
         chainId: '1',
@@ -166,7 +166,7 @@ describe('useOnboard', () => {
           chainId: '1',
           chainName: 'Ethereum',
         },
-      ] as ChainInfo[]
+      ] as Chain[]
 
       trackWalletType(wallet, configs)
 
@@ -193,7 +193,7 @@ describe('useOnboard', () => {
           chainId: '1',
           chainName: 'Ethereum',
         },
-      ] as ChainInfo[]
+      ] as Chain[]
 
       trackWalletType(wallet, configs)
 
@@ -230,7 +230,7 @@ describe('useOnboard', () => {
           chainId: '1',
           chainName: 'Ethereum',
         },
-      ] as ChainInfo[]
+      ] as Chain[]
 
       trackWalletType(wallet, configs)
 

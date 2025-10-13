@@ -1,10 +1,12 @@
 import React from 'react'
-import { render } from '@/src/tests/test-utils'
+import { renderWithStore, createTestStore } from '@/src/tests/test-utils'
 import { StakingWithdrawRequest } from './WithdrawRequest'
 import {
   NativeStakingValidatorsExitTransactionInfo,
   MultisigExecutionDetails,
+  Operation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 
 const mockWithdrawRequestTxInfo: NativeStakingValidatorsExitTransactionInfo = {
   type: 'NativeStakingValidatorsExit',
@@ -44,19 +46,42 @@ const mockExecutionInfo: MultisigExecutionDetails = {
   trusted: true,
 }
 
+const mockTxData = {
+  to: {
+    value: '0x1234567890123456789012345678901234567890',
+    name: 'Staking Contract',
+    logoUri: null,
+  },
+  operation: 0 as Operation,
+}
+
 const mockProps = {
   txInfo: mockWithdrawRequestTxInfo,
   executionInfo: mockExecutionInfo,
   txId: 'test-tx-id',
+  txData: mockTxData,
 }
 
 describe('StakingWithdrawRequest', () => {
+  let store: ReturnType<typeof createTestStore>
+
+  beforeEach(async () => {
+    store = createTestStore({
+      activeSafe: {
+        address: '0x1234567890123456789012345678901234567890',
+        chainId: '1',
+      },
+    })
+
+    await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(undefined))
+  })
+
   it('renders correctly with withdraw request information', () => {
-    const { getByText, getAllByText } = render(<StakingWithdrawRequest {...mockProps} />)
+    const { getByText, getAllByText } = renderWithStore(<StakingWithdrawRequest {...mockProps} />, store)
 
     expect(getAllByText(/32.*ETH/)).toHaveLength(2) // TokenAmount in header and receive row
     expect(getByText('Exit')).toBeTruthy() // Exit label
-    expect(getByText('1 Validator')).toBeTruthy() // Validator count
+    expect(getByText('Validator 1')).toBeTruthy() // Validator link
     expect(getAllByText('Receive')).toHaveLength(2) // Receive label (header and table)
     expect(getByText('Withdraw in')).toBeTruthy() // Withdraw in label
     expect(getByText(/Up to/)).toBeTruthy() // Withdraw timing
@@ -70,17 +95,20 @@ describe('StakingWithdrawRequest', () => {
       txInfo: {
         ...mockWithdrawRequestTxInfo,
         numValidators: 3,
+        validators: ['0x123...abc', '0x456...def', '0x789...ghi'],
       },
     }
 
-    const { getByText } = render(<StakingWithdrawRequest {...multiValidatorProps} />)
+    const { getByText } = renderWithStore(<StakingWithdrawRequest {...multiValidatorProps} />, store)
 
     expect(getByText('Exit')).toBeTruthy()
-    expect(getByText('3 Validators')).toBeTruthy() // Multiple validators with plural form
+    expect(getByText('Validator 1')).toBeTruthy()
+    expect(getByText('Validator 2')).toBeTruthy()
+    expect(getByText('Validator 3')).toBeTruthy()
   })
 
   it('matches snapshot', () => {
-    const component = render(<StakingWithdrawRequest {...mockProps} />)
+    const component = renderWithStore(<StakingWithdrawRequest {...mockProps} />, store)
     expect(component).toMatchSnapshot()
   })
 })

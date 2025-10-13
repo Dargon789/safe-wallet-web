@@ -1,12 +1,12 @@
 import { useEffect } from 'react'
 import { type WalletState, type OnboardAPI } from '@web3-onboard/core'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { Eip1193Provider } from 'ethers'
 import { getAddress } from 'ethers'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { logError, Errors } from '@/services/exceptions'
-import { trackEvent, WALLET_EVENTS, MixPanelEventParams } from '@/services/analytics'
+import { trackEvent, WALLET_EVENTS, MixpanelEventParams } from '@/services/analytics'
 import { useAppSelector, useAppDispatch } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
@@ -29,8 +29,8 @@ export type ConnectedWallet = {
 const { getStore, setStore, useStore } = new ExternalStore<OnboardAPI>()
 
 export const initOnboard = async (
-  chainConfigs: ChainInfo[],
-  currentChain: ChainInfo,
+  chainConfigs: Chain[],
+  currentChain: Chain,
   rpcConfig: EnvState['rpc'] | undefined,
 ) => {
   const { createOnboard } = await import('@/services/onboard')
@@ -89,16 +89,16 @@ export const getWalletConnectLabel = (wallet: ConnectedWallet): string | undefin
   return peerWalletV2 || UNKNOWN_PEER
 }
 
-export const trackWalletType = (wallet: ConnectedWallet, configs: ChainInfo[]) => {
+export const trackWalletType = (wallet: ConnectedWallet, configs: Chain[]) => {
   const chainInfo = configs.find((config) => config.chainId === wallet.chainId)
   const networkName = chainInfo?.chainName || `Chain ${wallet.chainId}`
 
   trackEvent(
     { ...WALLET_EVENTS.CONNECT, label: wallet.label },
     {
-      [MixPanelEventParams.EOA_WALLET_LABEL]: wallet.label,
-      [MixPanelEventParams.EOA_WALLET_ADDRESS]: wallet.address,
-      [MixPanelEventParams.EOA_WALLET_NETWORK]: networkName,
+      [MixpanelEventParams.EOA_WALLET_LABEL]: wallet.label,
+      [MixpanelEventParams.EOA_WALLET_ADDRESS]: wallet.address,
+      [MixpanelEventParams.EOA_WALLET_NETWORK]: networkName,
     },
   )
 
