@@ -9,6 +9,7 @@ import {
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import {
   FETCH_STATUS,
+  NestedTxStatus,
   type StateObject,
   type TenderlySimulatePayload,
   type TenderlySimulation,
@@ -19,9 +20,7 @@ import { UseSimulationReturn } from './useSimulation'
 
 const TENDERLY_DASHBOARD_URL = 'https://dashboard.tenderly.co'
 
-const getTenderlyProjectFromUrl = (
-  tenderlyUrl?: string,
-): { org: string; project: string } | undefined => {
+const getTenderlyProjectFromUrl = (tenderlyUrl?: string): { org: string; project: string } | undefined => {
   if (!tenderlyUrl) {
     return
   }
@@ -61,10 +60,7 @@ const getTenderlyProjectFromUrl = (
   }
 }
 
-export const getSimulationLink = (
-  simulationId: string,
-  customTenderly?: EnvState['tenderly'],
-): string => {
+export const getSimulationLink = (simulationId: string, customTenderly?: EnvState['tenderly']): string => {
   const parsedTenderly = getTenderlyProjectFromUrl(customTenderly?.url)
 
   if (parsedTenderly) {
@@ -100,6 +96,21 @@ export const isTxSimulationEnabled = (chain?: Pick<Chain, 'features'>): boolean 
 
   return isSimulationEnvSet && hasFeature(chain, FEATURES.TX_SIMULATION)
 }
+
+export const isSimulationError = (status: SimulationStatus, nestedTx: NestedTxStatus, isNested: boolean) => {
+  const mainIsSuccess = status.isSuccess && !status.isError
+  const nestedIsSuccess = isNested ? nestedTx.status.isSuccess && !nestedTx.status.isError : true
+  const isSimulationSuccess = mainIsSuccess && nestedIsSuccess
+
+  const mainIsFinished = status.isFinished
+  const nestedIsFinished = isNested ? nestedTx.status.isFinished : true
+  const isSimulationFinished = mainIsFinished && nestedIsFinished
+
+  const isLoading = status.isLoading || (isNested && nestedTx.status.isLoading)
+
+  return isSimulationFinished && !isSimulationSuccess && !isLoading
+}
+
 export const getSimulation = async (
   tx: TenderlySimulatePayload,
   customTenderly: EnvState['tenderly'] | undefined,

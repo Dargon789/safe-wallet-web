@@ -1,6 +1,6 @@
+import type { CustomTransactionInfo, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
 import React, { useMemo } from 'react'
-import type { Custom, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import { Stack, Typography } from '@mui/material'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import TokenIcon from '@/components/common/TokenIcon'
@@ -14,14 +14,15 @@ import type { SpendingLimitMethods } from '@/utils/transaction-guards'
 import { isSetAllowance } from '@/utils/transaction-guards'
 import chains from '@/config/chains'
 import TxDetailsRow from '@/components/tx/ConfirmTxDetails/TxDetailsRow'
+import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 
 type SpendingLimitsProps = {
-  txData?: TransactionData
-  txInfo: Custom
+  txData?: TransactionData | null
+  txInfo: CustomTransactionInfo
   type: SpendingLimitMethods
 }
 
-export const SpendingLimits = ({ txData, txInfo, type }: SpendingLimitsProps): ReactElement | null => {
+export const SpendingLimits = ({ txData, type }: SpendingLimitsProps): ReactElement | null => {
   const chain = useCurrentChain()
   const tokens = useAppSelector(selectTokens)
   const isSetAllowanceMethod = useMemo(() => isSetAllowance(type), [type])
@@ -37,7 +38,6 @@ export const SpendingLimits = ({ txData, txInfo, type }: SpendingLimitsProps): R
     () => tokens.find(({ address }) => sameAddress(address, tokenAddress as string)),
     [tokenAddress, tokens],
   )
-  const txTo = txInfo.to
 
   if (!txData) return null
 
@@ -49,9 +49,7 @@ export const SpendingLimits = ({ txData, txInfo, type }: SpendingLimitsProps): R
 
       <TxDetailsRow label="Beneficiary" grid>
         <EthHashInfo
-          address={(beneficiary as string) || txTo?.value || '0x'}
-          name={txTo.name}
-          customAvatar={txTo.logoUri}
+          address={(beneficiary as string) || ZERO_ADDRESS}
           shortAddress={false}
           showCopyButton
           hasExplorer

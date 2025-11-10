@@ -1,6 +1,6 @@
 import { canMigrateUnsupportedMastercopy, isValidMasterCopy, isMigrationToL2Possible } from '../safeContracts'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
+import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import type { BytecodeComparisonResult } from '../bytecodeComparison'
 
 describe('safeContracts', () => {
