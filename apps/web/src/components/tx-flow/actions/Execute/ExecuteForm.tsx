@@ -1,9 +1,8 @@
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
-import { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
+import { type ReactElement, type SyntheticEvent, useContext, useState, useEffect } from 'react'
 import { Box, CardActions, Divider, Tooltip } from '@mui/material'
 import classNames from 'classnames'
-
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -14,6 +13,9 @@ import { useIsExecutionLoop, useTxActions } from '@/components/tx/SignOrExecuteF
 import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import useWalletCanRelay from '@/hooks/useWalletCanRelay'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
+import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
+import useGasTooHigh from '@/features/no-fee-november/hooks/useGasTooHigh'
+import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
 import { hasRemainingRelays } from '@/utils/relaying'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
@@ -22,15 +24,14 @@ import useGasLimit from '@/hooks/useGasLimit'
 import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParams'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
-
 import css from './styles.module.css'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { TxSecurityContext } from '@/components/tx/security/shared/TxSecurityContext'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
 import SplitMenuButton from '@/components/common/SplitMenuButton'
 import type { SlotComponentProps, SlotName } from '../../slots'
 import { TxFlowContext } from '../../TxFlowProvider'
+import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 
 export const ExecuteForm = ({
   safeTx,
@@ -57,7 +58,7 @@ export const ExecuteForm = ({
   isOwner: ReturnType<typeof useIsSafeOwner>
   isExecutionLoop: ReturnType<typeof useIsExecutionLoop>
   txActions: ReturnType<typeof useTxActions>
-  txSecurity: ReturnType<typeof useTxSecurityContext>
+  txSecurity: ReturnType<typeof useSafeShield>
   isCreation?: boolean
   safeTx?: SafeTransaction
   tooltip?: string
@@ -69,19 +70,55 @@ export const ExecuteForm = ({
   const currentChain = useCurrentChain()
   const { executeTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
-  const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = txSecurity
+  const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
   const { isSubmitDisabled, isSubmitLoading, setIsSubmitLoading, setSubmitError, setIsRejectedByUser } =
     useContext(TxFlowContext)
-
-  // We default to relay, but the option is only shown if we canRelay
-  const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
 
   // SC wallets can relay fully signed transactions
   const [walletCanRelay] = useWalletCanRelay(safeTx)
   const relays = useRelaysBySafe()
-  // The transaction can/will be relayed
-  const canRelay = walletCanRelay && hasRemainingRelays(relays[0])
-  const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
+  const { isEligible: isNoFeeNovember, remaining, limit, blockedAddress } = useNoFeeNovemberEligibility()
+  const isNoFeeNovemberEnabled = useIsNoFeeNovemberFeatureEnabled()
+  const gasTooHigh = useGasTooHigh(safeTx)
+
+  // We default to relay, but the option is only shown if we canRelay
+  const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
+
+  // No-fee November REPLACES relay when eligible AND not blocked AND gas is not too high AND has remaining
+  const canRelay = (!isNoFeeNovember || !isNoFeeNovemberEnabled) && walletCanRelay && hasRemainingRelays(relays[0])
+  const canNoFeeNovember =
+    isNoFeeNovemberEnabled && isNoFeeNovember && !blockedAddress && !gasTooHigh && !!remaining && remaining > 0
+  const isLimitReached = isNoFeeNovemberEnabled && isNoFeeNovember && !blockedAddress && remaining === 0
+
+  // If gas is too high or limit reached, force WALLET method
+  useEffect(() => {
+    if (gasTooHigh || isLimitReached) {
+      setExecutionMethod(ExecutionMethod.WALLET)
+    }
+  }, [gasTooHigh, isLimitReached])
+
+  // Handle execution method changes
+  const handleExecutionMethodChange = (method: ExecutionMethod | ((prev: ExecutionMethod) => ExecutionMethod)) => {
+    const newMethod = typeof method === 'function' ? method(executionMethod) : method
+    setExecutionMethod(newMethod)
+  }
+
+  // Show execution selector when either no-fee november OR relay is available
+  // Also show if gas is too high but feature is otherwise available (to show disabled state)
+  // Or if limit is reached (to show 0/X available state)
+  const showExecutionSelector =
+    canNoFeeNovember ||
+    canRelay ||
+    (isNoFeeNovemberEnabled && isNoFeeNovember && !blockedAddress && gasTooHigh) ||
+    isLimitReached
+
+  // Determine which method will be used
+  const willRelay = !!(canRelay && executionMethod === ExecutionMethod.RELAY)
+  const willNoFeeNovember = !!(
+    isNoFeeNovemberEnabled &&
+    canNoFeeNovember &&
+    executionMethod === ExecutionMethod.NO_FEE_NOVEMBER
+  )
 
   // Estimate gas limit
   const { gasLimit, gasLimitError } = useGasLimit(safeTx)
@@ -97,11 +134,6 @@ export const ExecuteForm = ({
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()
 
-    if (needsRiskConfirmation && !isRiskConfirmed) {
-      setIsRiskIgnored(true)
-      return
-    }
-
     setIsSubmitLoading(true)
     setIsSubmitLoadingLocal(true)
     setSubmitError(undefined)
@@ -113,7 +145,7 @@ export const ExecuteForm = ({
 
     let executedTxId: string
     try {
-      executedTxId = await executeTx(txOptions, safeTx, txId, origin, willRelay)
+      executedTxId = await executeTx(txOptions, safeTx, txId, origin, willRelay || willNoFeeNovember)
     } catch (_err) {
       const err = asError(_err)
       if (isWalletRejection(err)) {
@@ -159,14 +191,25 @@ export const ExecuteForm = ({
             onFormSubmit={setAdvancedParams}
             gasLimitError={gasLimitError}
             willRelay={willRelay}
+            noFeeNovember={
+              (canNoFeeNovember || isLimitReached) && executionMethod !== ExecutionMethod.WALLET
+                ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 }
+                : undefined
+            }
           />
 
-          {canRelay && (
+          {showExecutionSelector && (
             <div className={css.noTopBorder}>
               <ExecutionMethodSelector
                 executionMethod={executionMethod}
-                setExecutionMethod={setExecutionMethod}
-                relays={relays[0]}
+                setExecutionMethod={handleExecutionMethodChange}
+                relays={canNoFeeNovember ? undefined : relays[0]}
+                noFeeNovember={
+                  isNoFeeNovember && !blockedAddress
+                    ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 }
+                    : undefined
+                }
+                gasTooHigh={gasTooHigh}
               />
             </div>
           )}
@@ -179,13 +222,13 @@ export const ExecuteForm = ({
           <ErrorMessage>
             Cannot execute a transaction from the Safe Account itself, please connect a different account.
           </ErrorMessage>
-        ) : !walletCanPay && !willRelay ? (
+        ) : !walletCanPay && !willRelay && !willNoFeeNovember ? (
           <ErrorMessage level="info">
             Your connected wallet doesn&apos;t have enough funds to execute this transaction.
           </ErrorMessage>
         ) : (
           (executionValidationError || gasLimitError) && (
-            <ErrorMessage error={executionValidationError || gasLimitError}>
+            <ErrorMessage error={executionValidationError || gasLimitError} context="estimation">
               This transaction will most likely fail.
               {` To save gas costs, ${isCreation ? 'avoid creating' : 'reject'} this transaction.`}
             </ErrorMessage>
@@ -218,11 +261,9 @@ export const ExecuteForm = ({
   )
 }
 
-const useTxSecurityContext = () => useContext(TxSecurityContext)
-
 export default madProps(ExecuteForm, {
   isOwner: useIsSafeOwner,
   isExecutionLoop: useIsExecutionLoop,
   txActions: useTxActions,
-  txSecurity: useTxSecurityContext,
+  txSecurity: useSafeShield,
 })

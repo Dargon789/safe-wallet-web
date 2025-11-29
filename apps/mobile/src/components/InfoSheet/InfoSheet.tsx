@@ -29,6 +29,8 @@ export const InfoSheet = ({
     bottomSheetModalRef.current?.present()
   }, [])
 
+  const renderBackdrop = useCallback(() => <BackdropComponent shouldNavigateBack={false} />, [])
+
   return (
     <>
       <TouchableOpacity onPress={handlePresentModalPress}>
@@ -41,10 +43,11 @@ export const InfoSheet = ({
         containerComponent={Platform.OS === 'ios' ? FullWindowOverlay : undefined}
         ref={bottomSheetModalRef}
         backgroundComponent={BackgroundComponent}
-        backdropComponent={() => <BackdropComponent shouldNavigateBack={false} />}
+        backdropComponent={renderBackdrop}
         topInset={insets.top}
         enableDynamicSizing
         handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
+        accessible={false}
       >
         <BottomSheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom }}>
           <YStack gap="$4" padding="$4" alignItems="center" justifyContent="center">

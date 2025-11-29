@@ -1,5 +1,5 @@
 import { Box, Button, MenuItem, Select, Typography, Grid, FormControl, InputLabel } from '@mui/material'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
@@ -7,7 +7,7 @@ import type { UrlObject } from 'url'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { useAppSelector } from '@/store'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
-import { selectChains } from '@/store/chainsSlice'
+import useChains from '@/hooks/useChains'
 import useLastSafe from '@/hooks/useLastSafe'
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import SafeIcon from '@/components/common/SafeIcon'
@@ -31,12 +31,12 @@ const AppActions = ({ wallet, onConnectWallet, chain, appUrl, app }: Props): Rea
   const lastUsedSafe = useLastSafe()
   const ownedSafes = useOwnedSafes()
   const addressBook = useAppSelector(selectAllAddressBooks)
-  const chains = useAppSelector(selectChains)
+  const { configs: chains } = useChains()
   const compatibleChains = app.chainIds
 
   const compatibleSafes = useMemo(
-    () => getCompatibleSafes(ownedSafes, compatibleChains, chains.data),
-    [ownedSafes, compatibleChains, chains.data],
+    () => getCompatibleSafes(ownedSafes, compatibleChains, chains),
+    [ownedSafes, compatibleChains, chains],
   )
 
   const [safeToUse, setSafeToUse] = useState<CompatibleSafesType>()

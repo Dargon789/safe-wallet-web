@@ -1,6 +1,5 @@
 import { Provider } from 'react-redux'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
-import * as gateway from '@safe-global/safe-gateway-typescript-sdk'
 import * as router from 'next/router'
 
 import * as web3 from '@/hooks/wallets/web3'
@@ -22,6 +21,7 @@ import { useGetHref } from '@/features/myAccounts/hooks/useGetHref'
 import { wcPopupStore } from '@/features/walletconnect/components'
 import { wcChainSwitchStore } from '@/features/walletconnect/components/WcChainSwitchModal/store'
 import walletConnectInstance from '@/features/walletconnect/services/walletConnectInstance'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 jest.mock('@/features/walletconnect/services/walletConnectInstance', () => ({
   __esModule: true,
@@ -68,6 +68,15 @@ describe('useSafeWalletProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     updateSessionsMock.mockClear()
+
+    jest.spyOn(chainHooks, 'default').mockImplementation(() => ({
+      configs: [
+        chainBuilder().with({ chainId: '1', shortName: 'eth', chainName: 'Ethereum' }).build(),
+        chainBuilder().with({ chainId: '5', shortName: 'gor', chainName: 'Goerli' }).build(),
+      ],
+      error: undefined,
+      loading: false,
+    }))
 
     jest.spyOn(chainHooks, 'useCurrentChain').mockImplementation(() => {
       return chainBuilder().with({ chainId: '1', recommendedMasterCopyVersion: '1.4.1' }).build()
@@ -350,16 +359,31 @@ describe('useSafeWalletProvider', () => {
     })
 
     it('should get tx by safe tx hash', async () => {
-      jest.spyOn(gateway as any, 'getTransactionDetails').mockImplementation(() => ({
-        hash: '0x123',
-      }))
+      const mockTxDetails: TransactionDetails = {
+        txInfo: {
+          type: 'Custom',
+          to: {
+            value: '0x123',
+            name: 'Test',
+            logoUri: null,
+          },
+          dataSize: '100',
+          value: null,
+          isCancellation: false,
+          methodName: 'test',
+        },
+        safeAddress: '0x456',
+        txId: '0x123456789000',
+        txStatus: 'AWAITING_CONFIRMATIONS',
+      }
+
+      jest.spyOn(require('@/utils/transactions'), 'getTransactionDetails').mockResolvedValue(mockTxDetails)
 
       const { result } = renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'))
 
       const resp = await result.current?.getBySafeTxHash('0x123456789000')
 
-      expect(gateway.getTransactionDetails).toHaveBeenCalledWith('1', '0x123456789000')
-      expect(resp).toEqual({ hash: '0x123' })
+      expect(resp).toEqual(mockTxDetails)
     })
 
     it('should request a Safe selection when switching chains', async () => {
@@ -381,32 +405,7 @@ describe('useSafeWalletProvider', () => {
         query: {},
       } as unknown as router.NextRouter)
 
-      const store = makeStore(
-        {
-          chains: {
-            data: [
-              {
-                chainId: '1',
-                shortName: 'eth',
-                chainName: 'Ethereum',
-                zk: false,
-                beaconChainExplorerUriTemplate: {},
-              } as any,
-              {
-                chainId: '5',
-                shortName: 'gor',
-                chainName: 'Goerli',
-                zk: false,
-                beaconChainExplorerUriTemplate: {},
-              } as any,
-            ],
-            loading: false,
-            loaded: true,
-            error: undefined,
-          },
-        } as Partial<RootState>,
-        { skipBroadcast: true },
-      )
+      const store = makeStore({} as Partial<RootState>, { skipBroadcast: true })
 
       wcPopupStore.setStore(true)
 
@@ -465,32 +464,7 @@ describe('useSafeWalletProvider', () => {
         query: {},
       } as unknown as router.NextRouter)
 
-      const store = makeStore(
-        {
-          chains: {
-            data: [
-              {
-                chainId: '1',
-                shortName: 'eth',
-                chainName: 'Ethereum',
-                zk: false,
-                beaconChainExplorerUriTemplate: {},
-              } as any,
-              {
-                chainId: '5',
-                shortName: 'gor',
-                chainName: 'Goerli',
-                zk: false,
-                beaconChainExplorerUriTemplate: {},
-              } as any,
-            ],
-            loading: false,
-            loaded: true,
-            error: undefined,
-          },
-        } as Partial<RootState>,
-        { skipBroadcast: true },
-      )
+      const store = makeStore({} as Partial<RootState>, { skipBroadcast: true })
 
       const { result } = renderHook(() => useTxFlowApi('1', currentSafeAddress), {
         wrapper: ({ children }) => (
@@ -536,32 +510,7 @@ describe('useSafeWalletProvider', () => {
         query: {},
       } as unknown as router.NextRouter)
 
-      const store = makeStore(
-        {
-          chains: {
-            data: [
-              {
-                chainId: '1',
-                shortName: 'eth',
-                chainName: 'Ethereum',
-                zk: false,
-                beaconChainExplorerUriTemplate: {},
-              } as any,
-              {
-                chainId: '5',
-                shortName: 'gor',
-                chainName: 'Goerli',
-                zk: false,
-                beaconChainExplorerUriTemplate: {},
-              } as any,
-            ],
-            loading: false,
-            loaded: true,
-            error: undefined,
-          },
-        } as Partial<RootState>,
-        { skipBroadcast: true },
-      )
+      const store = makeStore({} as Partial<RootState>, { skipBroadcast: true })
 
       const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
         wrapper: ({ children }) => (
@@ -617,32 +566,7 @@ describe('useSafeWalletProvider', () => {
         query: {},
       } as unknown as router.NextRouter)
 
-      const store = makeStore(
-        {
-          chains: {
-            data: [
-              {
-                chainId: '1',
-                shortName: 'eth',
-                chainName: 'Ethereum',
-                zk: false,
-                beaconChainExplorerUriTemplate: {},
-              } as any,
-              {
-                chainId: '5',
-                shortName: 'gor',
-                chainName: 'Goerli',
-                zk: false,
-                beaconChainExplorerUriTemplate: {},
-              } as any,
-            ],
-            loading: false,
-            loaded: true,
-            error: undefined,
-          },
-        } as Partial<RootState>,
-        { skipBroadcast: true },
-      )
+      const store = makeStore({} as Partial<RootState>, { skipBroadcast: true })
 
       const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
         wrapper: ({ children }) => (

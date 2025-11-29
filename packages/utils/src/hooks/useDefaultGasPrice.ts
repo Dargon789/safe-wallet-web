@@ -1,6 +1,6 @@
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { JsonRpcProvider, type FeeData } from 'ethers'
-import { GAS_PRICE_TYPE } from '@safe-global/safe-gateway-typescript-sdk'
+import { GAS_PRICE_TYPE } from '@safe-global/store/gateway/types'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
@@ -237,8 +237,9 @@ export const useDefaultGasPrice = (
         maxPriorityFeePerGas: undefined,
       }
     },
+    // intervalCounter is intentionally included to trigger periodic re-fetching
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [gasPriceConfigs, provider, intervalCounter, isEIP1559],
+    [gasPriceConfigs, provider, intervalCounter, isEIP1559, isSpeedUp, logError],
     false,
   )
 

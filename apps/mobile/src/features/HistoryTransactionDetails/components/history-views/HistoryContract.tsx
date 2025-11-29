@@ -44,22 +44,36 @@ export function HistoryContract({ txId, txInfo }: HistoryContractProps) {
         </View>
       </HistoryTransactionHeader>
 
-      <Container padding="$4" gap="$4" borderRadius="$3">
+      <Container padding="$4" gap="$4" borderRadius="$3" testID="history-contract-container" collapsable={false}>
         {/* Method Call Badge */}
-        <View alignItems="center" flexDirection="row" justifyContent="space-between">
-          <Text color="$textSecondaryLight">Call</Text>
-          <Badge
-            circleProps={methodBadgeProps}
-            themeName="badge_background"
-            fontSize={13}
-            textContentProps={{ fontFamily: 'DM Mono' }}
-            circular={false}
-            content={txInfo.methodName ?? ''}
-          />
-        </View>
+        {txInfo.methodName && (
+          <View
+            alignItems="center"
+            flexDirection="row"
+            justifyContent="space-between"
+            collapsable={false}
+            testID="history-contract-call-badge"
+          >
+            <Text color="$textSecondaryLight">Call</Text>
+            <Badge
+              circleProps={methodBadgeProps}
+              themeName="badge_background"
+              fontSize={13}
+              textContentProps={{ fontFamily: 'DM Mono' }}
+              circular={false}
+              content={txInfo.methodName}
+            />
+          </View>
+        )}
 
         {/* Contract Information */}
-        <View alignItems="center" flexDirection="row" justifyContent="space-between">
+        <View
+          alignItems="center"
+          flexDirection="row"
+          justifyContent="space-between"
+          testID="history-contract-information"
+          collapsable={false}
+        >
           <Text color="$textSecondaryLight">Contract</Text>
           <HashDisplay value={txInfo.to} />
         </View>

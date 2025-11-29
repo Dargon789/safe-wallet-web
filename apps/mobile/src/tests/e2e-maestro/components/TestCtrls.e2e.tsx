@@ -1,36 +1,26 @@
 import { LogBox, Pressable } from 'react-native'
 import { View } from 'tamagui'
 import { useDispatch } from 'react-redux'
-import { addSafe } from '@/src/store/safesSlice'
-import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { useRouter } from 'expo-router'
-import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { SafeInfo, Address } from '@/src/types/address'
+import { setupOnboardedAccount, setupTestOnboarding, setupSeedPhraseImportAccount } from '../setup/onboardingSetup'
+import { setupOnboardedAccountForAssets } from '../setup/assetsSetup'
+import {
+  setupAllPendingTxSafes,
+  setupPendingTxsSafe1,
+  setupPendingTxsSafe2,
+  setupPendingTxsSafe3,
+  setupPendingTxsSafe4,
+} from '../setup/pendingTxSetup'
+import { setupHistory, setupTransactionHistory, setupTransactionHistoryDirect } from '../setup/historySetup'
 
 LogBox.ignoreAllLogs()
 
-const mockedActiveAccount: SafeInfo = {
-  address: '0x2f3e600a3F38b66aDcbe6530B191F2BE55c2Fbb6',
-  chainId: '11155111',
-}
-const mockedActiveSafeInfo: SafeOverview = {
-  address: { value: '0x2f3e600a3F38b66aDcbe6530B191F2BE55c2Fbb6', name: null, logoUri: null },
-  awaitingConfirmation: null,
-  chainId: mockedActiveAccount.chainId,
-  fiatTotal: '0',
-  owners: [
-    { value: '0x3336745b7EA628F5134Bd9d08aa68b4979fA3472', name: null, logoUri: null },
-    { value: '0x81BdB0a66065363F704A105D67D53d090aD14fec', name: null, logoUri: null },
-    { value: '0x4d5CF9E6df9a95F4c1F5398706cA27218add5949', name: null, logoUri: null },
-  ],
-  queued: 1,
-  threshold: 1,
-}
-
 /**
  * This utility component is only included in the test simulator
- * build. It gives some quick triggers which help improve the pace
- * of the tests dramatically.
+ * build. It provides quick triggers that set up various test scenarios
+ * to dramatically improve test execution pace.
+ *
+ * Each button sets up specific Redux state and navigates to the appropriate screen.
  */
 
 const BTN = { height: 1, width: 1, backgroundColor: 'red' }
@@ -38,29 +28,90 @@ const BTN = { height: 1, width: 1, backgroundColor: 'red' }
 export function TestCtrls() {
   const dispatch = useDispatch()
   const router = useRouter()
-  const onPressOnboardedAccount = async () => {
-    dispatch(
-      addSafe({
-        address: mockedActiveSafeInfo.address.value as Address,
-        info: { [mockedActiveSafeInfo.chainId]: mockedActiveSafeInfo },
-      }),
-    )
-    dispatch(setActiveSafe(mockedActiveAccount))
-    router.replace('/(tabs)')
-  }
-  const onPressTestOnboarding = async () => {
-    router.replace('/onboarding')
-  }
 
   return (
     <View position={'absolute'} top={100} right={0} zIndex={99999}>
+      {/* Onboarding */}
       <Pressable
         testID="e2eOnboardedAccount"
-        onPress={onPressOnboardedAccount}
+        onPress={() => setupOnboardedAccount(dispatch, router)}
         accessibilityRole="button"
         style={BTN}
       />
-      <Pressable testID="e2eTestOnboarding" onPress={onPressTestOnboarding} accessibilityRole="button" style={BTN} />
+      <Pressable
+        testID="e2eTestOnboarding"
+        onPress={() => setupTestOnboarding(router)}
+        accessibilityRole="button"
+        style={BTN}
+      />
+      <Pressable
+        testID="e2eSeedPhraseImportAccount"
+        onPress={() => setupSeedPhraseImportAccount(dispatch, router)}
+        accessibilityRole="button"
+        style={BTN}
+      />
+
+      {/* Assets */}
+      <Pressable
+        testID="e2eOnboardedAccountTestAssets"
+        onPress={() => setupOnboardedAccountForAssets(dispatch, router)}
+        accessibilityRole="button"
+        style={BTN}
+      />
+
+      {/* Transaction History */}
+      <Pressable
+        testID="e2eHistory"
+        onPress={() => setupHistory(dispatch, router)}
+        accessibilityRole="button"
+        style={BTN}
+      />
+      <Pressable
+        testID="e2eTransactionHistory"
+        onPress={() => setupTransactionHistory(dispatch, router)}
+        accessibilityRole="button"
+        style={BTN}
+      />
+      <Pressable
+        testID="e2eTransactionHistoryDirect"
+        onPress={() => setupTransactionHistoryDirect(dispatch, router)}
+        accessibilityRole="button"
+        style={BTN}
+      />
+
+      {/* Pending Transactions - Bulk Setup */}
+      <Pressable
+        testID="e2ePendingTxs"
+        onPress={() => setupAllPendingTxSafes(dispatch, router)}
+        accessibilityRole="button"
+        style={BTN}
+      />
+
+      {/* Pending Transactions - Per Safe Direct Navigation */}
+      <Pressable
+        testID="e2ePendingTxsSafe1"
+        onPress={() => setupPendingTxsSafe1(dispatch, router)}
+        accessibilityRole="button"
+        style={BTN}
+      />
+      <Pressable
+        testID="e2ePendingTxsSafe2"
+        onPress={() => setupPendingTxsSafe2(dispatch, router)}
+        accessibilityRole="button"
+        style={BTN}
+      />
+      <Pressable
+        testID="e2ePendingTxsSafe3"
+        onPress={() => setupPendingTxsSafe3(dispatch, router)}
+        accessibilityRole="button"
+        style={BTN}
+      />
+      <Pressable
+        testID="e2ePendingTxsSafe4"
+        onPress={() => setupPendingTxsSafe4(dispatch, router)}
+        accessibilityRole="button"
+        style={BTN}
+      />
     </View>
   )
 }

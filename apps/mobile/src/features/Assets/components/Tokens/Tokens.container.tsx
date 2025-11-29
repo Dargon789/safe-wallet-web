@@ -18,13 +18,16 @@ import { NoFunds } from '@/src/features/Assets/components/NoFunds'
 import { AssetError } from '@/src/features/Assets/Assets.error'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectCurrency, selectTokenList, TOKEN_LISTS } from '@/src/store/settingsSlice'
+import { useHasFeature } from '@/src/hooks/useHasFeature'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 export function TokensContainer() {
   const activeSafe = useSelector(selectActiveSafe)
   const currency = useAppSelector(selectCurrency)
   const tokenList = useAppSelector(selectTokenList)
+  const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
 
-  const trusted = tokenList === TOKEN_LISTS.TRUSTED
+  const trusted = hasDefaultTokenlist ? tokenList === TOKEN_LISTS.TRUSTED : false
 
   const { data, isFetching, error, isLoading, refetch } = useBalancesGetBalancesV1Query(
     !activeSafe
@@ -45,6 +48,7 @@ export function TokensContainer() {
       const fiatBalance = item.fiatBalance
       return (
         <AssetsCard
+          testID={`token-${item.tokenInfo.symbol}`}
           name={item.tokenInfo.name}
           logoUri={item.tokenInfo.logoUri}
           description={`${formatVisualAmount(item.balance, item.tokenInfo.decimals as number)} ${
@@ -52,7 +56,12 @@ export function TokensContainer() {
           }`}
           rightNode={
             <View alignItems="flex-end">
-              <Text fontSize="$4" fontWeight={600} color="$color">
+              <Text
+                fontSize="$4"
+                fontWeight={600}
+                color="$color"
+                testID={`token-${item.tokenInfo.symbol}-fiat-balance`}
+              >
                 {shouldDisplayPreciseBalance(fiatBalance, 7)
                   ? formatCurrencyPrecise(fiatBalance, currency)
                   : formatCurrency(fiatBalance, currency)}

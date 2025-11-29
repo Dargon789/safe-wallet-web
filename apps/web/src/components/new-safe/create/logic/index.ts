@@ -1,9 +1,10 @@
 import type { SafeVersion, TransactionOptions } from '@safe-global/types-kit'
 import { type TransactionResponse, type Eip1193Provider, type Provider } from 'ethers'
 import semverSatisfies from 'semver/functions/satisfies'
-
-import { getSafeInfo, type SafeInfo, relayTransaction } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState, cgwApi as safesApi } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { cgwApi as relayApi } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { getStoreInstance } from '@/store'
 import { getReadOnlyProxyFactoryContract } from '@/services/contracts/safeContracts'
 import type { UrlObject } from 'url'
 import { AppRoutes } from '@/config/routes'
@@ -141,17 +142,42 @@ export const estimateSafeCreationGas = async (
   return gas
 }
 
-export const pollSafeInfo = async (chainId: string, safeAddress: string): Promise<SafeInfo> => {
-  // exponential delay between attempts for around 4 min
-  return backOff(() => getSafeInfo(chainId, safeAddress), {
-    startingDelay: 750,
-    maxDelay: 20000,
-    numOfAttempts: 19,
-    retry: (e) => {
-      console.info('waiting for client-gateway to provide safe information', e)
-      return true
+/**
+ * Poll for safe info after creation until the safe is indexed by client-gateway
+ * Uses RTK Query with exponential backoff retry (19 attempts over ~4 minutes)
+ */
+export const pollSafeInfo = async (chainId: string, safeAddress: string): Promise<SafeState> => {
+  const store = getStoreInstance()
+
+  // Use exponential backoff to retry RTK Query calls
+  return backOff(
+    async () => {
+      const queryAction = safesApi.endpoints.safesGetSafeV1.initiate(
+        { chainId, safeAddress },
+        {
+          subscribe: false,
+          forceRefetch: true,
+        },
+      )
+
+      const queryPromise = store.dispatch(queryAction)
+      try {
+        const result = await queryPromise.unwrap()
+        return result
+      } finally {
+        queryPromise.unsubscribe()
+      }
     },
-  })
+    {
+      startingDelay: 750,
+      maxDelay: 20000,
+      numOfAttempts: 19,
+      retry: (e) => {
+        console.info('waiting for client-gateway to provide safe information', e)
+        return true
+      },
+    },
+  )
 }
 
 export const getRedirect = (
@@ -184,15 +210,21 @@ export const getRedirect = (
 }
 
 export const relaySafeCreation = async (chain: Chain, undeployedSafeProps: UndeployedSafeProps) => {
+  const store = getStoreInstance()
+
   const replayedSafeProps = assertNewUndeployedSafeProps(undeployedSafeProps, chain)
   const encodedSafeCreationTx = encodeSafeCreationTx(replayedSafeProps, chain)
 
-  const relayResponse = await relayTransaction(chain.chainId, {
-    to: replayedSafeProps.factoryAddress,
-    data: encodedSafeCreationTx,
-    version: replayedSafeProps.safeVersion,
+  const relayAction = relayApi.endpoints.relayRelayV1.initiate({
+    chainId: chain.chainId,
+    relayDto: {
+      to: replayedSafeProps.factoryAddress,
+      data: encodedSafeCreationTx,
+      version: replayedSafeProps.safeVersion,
+    },
   })
 
+  const relayResponse = await store.dispatch(relayAction).unwrap()
   return relayResponse.taskId
 }
 
