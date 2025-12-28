@@ -1,0 +1,58 @@
+import React from 'react'
+import { Text, View } from 'tamagui'
+import { SafeListItem } from '@/src/components/SafeListItem'
+import { TokenIcon } from '@/src/components/TokenIcon'
+import { ellipsis } from '@/src/utils/formatters'
+
+interface AssetsCardProps {
+  name: string
+  description?: string
+  logoUri?: string | null
+  rightNode?: string | React.ReactNode
+  accessibilityLabel?: string
+  transparent?: boolean
+  onPress?: () => void
+  testID?: string
+}
+
+export function AssetsCard({
+  name,
+  description,
+  logoUri,
+  accessibilityLabel,
+  rightNode,
+  transparent = true,
+  onPress,
+  testID,
+}: AssetsCardProps) {
+  return (
+    <SafeListItem
+      testID={testID}
+      onPress={onPress}
+      label={
+        <View>
+          <Text fontSize="$4" fontWeight={600} lineHeight={20}>
+            {name}
+          </Text>
+          {description && (
+            <Text fontSize="$4" color="$colorSecondary" fontWeight={400} lineHeight={20}>
+              {description}
+            </Text>
+          )}
+        </View>
+      }
+      transparent={transparent}
+      leftNode={<TokenIcon logoUri={logoUri} accessibilityLabel={accessibilityLabel} size={'$8'} />}
+      rightNode={
+        typeof rightNode === 'string' ? (
+          <Text fontSize="$4" fontWeight={400} color="$color">
+            {ellipsis(rightNode, 10)}
+          </Text>
+        ) : (
+          rightNode
+        )
+      }
+      paddingVertical={'$2'}
+    />
+  )
+}

@@ -1,143 +1,210 @@
-# <img src="/public/images/logo.svg" height="60" valign="middle" alt="Safe{Wallet}" style="background: #fff; padding: 20px; margin: 0 -20px" />
+# <img src="https://github.com/user-attachments/assets/b8249113-d515-4c91-a12a-f134813614e8" height="60" valign="middle" alt="Safe{Wallet}" style="background: #fff; padding: 20px; margin: 0 -20px" />
 
-[![License](https://img.shields.io/github/license/safe-global/safe-wallet-web)](https://github.com/safe-global/safe-wallet-web/blob/main/LICENSE)
-![Tests](https://img.shields.io/github/actions/workflow/status/safe-global/safe-wallet-web/test.yml?branch=main&label=tests)
-![GitHub package.json version (branch)](https://img.shields.io/github/package-json/v/safe-global/safe-wallet-web)
-[![GitPOAP Badge](https://public-api.gitpoap.io/v1/repo/safe-global/safe-wallet-web/badge)](https://www.gitpoap.io/gh/safe-global/safe-wallet-web)
+# Safe{Wallet} monorepo
 
-Safe{Wallet} is a smart contract wallet for Ethereum and other EVM chains. Based on Gnosis Safe multisig contracts.
+🌐 [Safe{Wallet} web app](/apps/web/README.md) ・ 📱 [Safe{Wallet} mobile app](/apps/mobile/README.md)
 
-This repository is the frontend of the Safe{Wallet} app.
+## Overview
 
-## Contributing
+Welcome to the Safe{Wallet} monorepo! Safe (formerly Gnosis Safe) is a multi-signature smart contract wallet for Ethereum and other EVM chains, requiring multiple signatures to execute transactions.
 
-Contributions, be it a bug report or a pull request, are very welcome. Please check our [contribution guidelines](CONTRIBUTING.md) beforehand.
+This repository houses both web and mobile applications along with shared packages, managed under a unified structure using Yarn Workspaces. The monorepo setup simplifies dependency management and ensures consistent development practices across projects.
 
-## Getting started with local development
+### Key components
 
-### Environment variables
+- **apps/web** - Next.js web application
+- **apps/mobile** - Expo/React Native mobile application
+- **packages/store** - Shared Redux store used by both platforms
+- **packages/utils** - Shared utilities and TypeScript types
+- **config/** - Shared configuration files
 
-Create a `.env` file with environment variables. You can use the `.env.example` file as a reference.
+## Getting started
 
-Here's the list of all the environment variables:
+To get started, ensure you have the required tools installed and follow these steps:
 
-| Env variable                                      | Description                                                                                                                                                             |
-| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_INFURA_TOKEN`                        | [Infura](https://docs.infura.io/infura/networks/ethereum/how-to/secure-a-project/project-id) RPC API token                                                              |
-| `NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN`              | Infura token for Safe Apps, falls back to `NEXT_PUBLIC_INFURA_TOKEN`                                                                                                    |
-| `NEXT_PUBLIC_IS_PRODUCTION`                       | Set to `true` to build a minified production app                                                                                                                        |
-| `NEXT_PUBLIC_GATEWAY_URL_PRODUCTION`              | The base URL for the [Safe Client Gateway](https://github.com/safe-global/safe-client-gateway)                                                                          |
-| `NEXT_PUBLIC_GATEWAY_URL_STAGING`                 | The base CGW URL on staging                                                                                                                                             |
-| `NEXT_PUBLIC_SAFE_VERSION`                        | The latest version of the Safe contract, defaults to 1.4.1                                                                                                              |
-| `NEXT_PUBLIC_WC_PROJECT_ID`                       | [WalletConnect v2](https://docs.walletconnect.com/2.0/cloud/relay) project ID                                                                                           |
-| `NEXT_PUBLIC_TENDERLY_ORG_NAME`                   | [Tenderly](https://tenderly.co) org name for Transaction Simulation                                                                                                     |
-| `NEXT_PUBLIC_TENDERLY_PROJECT_NAME`               | Tenderly project name                                                                                                                                                   |
-| `NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL`      | Tenderly simulation URL                                                                                                                                                 |
-| `NEXT_PUBLIC_BEAMER_ID`                           | [Beamer](https://www.getbeamer.com) is a news feed for in-app announcements                                                                                             |
-| `NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID`               | [GTM](https://tagmanager.google.com) project id                                                                                                                         |
-| `NEXT_PUBLIC_GOOGLE_TAG_MANAGER_DEVELOPMENT_AUTH` | Dev GTM key                                                                                                                                                             |
-| `NEXT_PUBLIC_GOOGLE_TAG_MANAGER_LATEST_AUTH`      | Preview GTM key                                                                                                                                                         |
-| `NEXT_PUBLIC_GOOGLE_TAG_MANAGER_LIVE_AUTH`        | Production GTM key                                                                                                                                                      |
-| `NEXT_PUBLIC_SENTRY_DSN`                          | [Sentry](https://sentry.io) id for tracking runtime errors                                                                                                              |
-| `NEXT_PUBLIC_IS_OFFICIAL_HOST`                    | Whether it's the official distribution of the app, or a fork; has legal implications. Set to true only if you also update the legal pages like Imprint and Terms of use |
-| `NEXT_PUBLIC_REDEFINE_API`                        | Redefine API base URL                                                                                                                                                   |
-| `NEXT_PUBLIC_FIREBASE_OPTIONS_PRODUCTION`         | Firebase Cloud Messaging (FCM) `initializeApp` options on production                                                                                                    |
-| `NEXT_PUBLIC_FIREBASE_VAPID_KEY_PRODUCTION`       | FCM vapid key on production                                                                                                                                             |
-| `NEXT_PUBLIC_FIREBASE_OPTIONS_STAGING`            | FCM `initializeApp` options on staging                                                                                                                                  |
-| `NEXT_PUBLIC_FIREBASE_VAPID_KEY_STAGING`          | FCM vapid key on staging                                                                                                                                                |
-| `NEXT_PUBLIC_SPINDL_SDK_KEY`                      | [Spindl](http://spindl.xyz) SDK key                                                                                                                                     |
+### Prerequisites
 
-If you don't provide some of the variables, the corresponding features will be disabled in the UI.
+- **Node.js**: Install the latest stable version from [Node.js](https://nodejs.org/).
+- **Yarn**: Use Yarn version 4.5.3 or later
 
-### Running the app locally
+to install it with the latest node version you can simply do
 
-Install the dependencies:
+```bash
+corepack enable
+```
+
+and then just run
 
 ```bash
 yarn
 ```
 
-Generate types:
+This will install the required version of yarn and resolve all dependencies.
+
+> [!NOTE]
+>
+> Corepack is a tool to help with managing versions of your package managers. It exposes binary proxies for each supported package manager that, when called, will identify whatever package manager is
+> configured for the current project, download it if needed, and finally run it.
+
+### Initial setup
+
+1. Clone the repository:
 
 ```bash
-yarn postinstall
+git clone <repo-url>
+cd monorepo
 ```
 
-Run the development server:
+2. Install dependencies:
 
 ```bash
-yarn start
+yarn install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the app.
+### Quick start commands
 
-## Lint
+```bash
+# Run web app in development mode
+yarn workspace @safe-global/web dev
 
-ESLint:
+# Run mobile app in development mode
+yarn workspace @safe-global/mobile start
 
+# Run tests for web
+yarn workspace @safe-global/web test
+
+# Run Storybook for web
+yarn workspace @safe-global/web storybook
 ```
-yarn lint --fix
+
+## Monorepo commands
+
+Here are some essential commands to help you navigate the monorepo:
+
+### Workspace management
+
+- **Run a script in a specific workspace:**
+
+```bash
+yarn workspace <workspace-name> <script>
 ```
 
-Prettier:
+Example:
 
+```bash
+yarn workspace @safe-global/web dev
 ```
+
+- **Add a dependency to a specific workspace:**
+
+```bash
+yarn workspace <workspace-name> add <package-name>
+```
+
+- **Remove a dependency from a specific workspace:**
+
+```bash
+yarn workspace <workspace-name> remove <package-name>
+```
+
+> [!Note]
+>
+> Yarn treats commands that contain a colon as global commands. For example if you have a
+> command in a workspace that has a colon and there isn't another workspace that has the same command,
+> you can run the command without specifying the workspace name. For example:
+>
+> ```bash
+> yarn cypress:open
+> ```
+>
+> is equivalent to:
+>
+> ```bash
+> yarn workspace @safe-global/web cypress:open
+> ```
+
+### Linting, formatting, and type-checking
+
+- **Run ESLint across all workspaces:**
+
+```bash
+yarn lint
+```
+
+- **Run Prettier to check formatting:**
+
+```bash
 yarn prettier
 ```
 
-## Tests
+- **Run type-check for a workspace:**
 
-Unit tests:
-
-```
-yarn test --watch
-```
-
-### Cypress tests
-
-Build a static site:
-
-```
-yarn build
+```bash
+yarn workspace @safe-global/web type-check
+yarn workspace @safe-global/mobile type-check
 ```
 
-Serve the static files:
+### Testing
 
-```
-yarn serve
-```
+- **Run unit tests across all workspaces:**
 
-Launch the Cypress UI:
-
-```
-yarn cypress:open
+```bash
+yarn test
 ```
 
-You can then choose which e2e tests to run.
-Some tests will require signer private keys, please include them in your .env file
+- **Run E2E tests (web only):**
 
-## Component template
-
-To create a new component from a template:
-
-```
-yarn cmp MyNewComponent
+```bash
+yarn workspace @safe-global/web cypress:open  # Interactive mode
+yarn workspace @safe-global/web cypress:run   # Headless mode
 ```
 
-## Pre-push hooks
+## Contributing
 
-This repo has a pre-push hook that runs the linter (always) and the tests (if the `RUN_TESTS_ON_PUSH` env variable is set to true)
-before pushing. If you want to skip the hooks, you can use the `--no-verify` flag.
+### Adding a new workspace
 
-## Frameworks
+1. Create a new directory under `apps/` or `packages/`.
+2. Add a `package.json` file with the appropriate configuration.
+3. Run:
 
-This app is built using the following frameworks:
+```bash
+yarn install
+```
 
-- [Safe Core SDK](https://github.com/safe-global/safe-core-sdk)
-- [Safe Gateway SDK](https://github.com/safe-global/safe-gateway-typescript-sdk)
-- Next.js
-- React
-- Redux
-- MUI
-- ethers.js
-- web3-onboard
+### Best practices
+
+- Use Yarn Workspaces commands for managing dependencies.
+- Ensure type-check, lint, prettier, and tests pass before pushing changes.
+- Follow the [semantic commit message guidelines](https://www.conventionalcommits.org/).
+- For AI contributors, see [AGENTS.md](AGENTS.md) for detailed guidelines.
+
+### Tools & configurations
+
+- **Husky**: Pre-commit hooks for linting, formatting, and type-checking.
+- **ESLint & Prettier**: Enforce coding standards and formatting.
+- **Jest**: Unit testing framework.
+- **Cypress**: E2E testing for the web app.
+- **Storybook**: Component documentation and development for the web app.
+- **Expo**: Mobile app framework for the `mobile` workspace.
+- **Next.js**: React framework for the `web` workspace.
+- **Tamagui**: UI component library for the mobile app.
+
+## Release process
+
+For information on releasing the web app, see the [Automated Release Procedure](apps/web/docs/release-procedure-automated.md).
+
+## Useful links
+
+- [Yarn Workspaces Documentation](https://yarnpkg.com/features/workspaces)
+- [Expo Documentation](https://docs.expo.dev/)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Storybook Documentation](https://storybook.js.org/docs)
+- [Jest Documentation](https://jestjs.io/)
+- [ESLint Documentation](https://eslint.org/)
+- [Prettier Documentation](https://prettier.io/)
+- [Safe Developer Docs](https://docs.safe.global/)
+
+---
+
+If you have any questions or run into issues, feel free to open a discussion or contact the maintainers. Happy coding!
+🚀
