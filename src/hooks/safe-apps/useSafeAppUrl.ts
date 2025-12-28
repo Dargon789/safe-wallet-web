@@ -22,7 +22,7 @@ const useSafeAppUrl = (): string | undefined => {
     } else {
       setAppUrl(undefined)
     }
-  }, [router])
+  }, [router.isReady, router.query.appUrl])
 
   return useMemo(() => appUrl, [appUrl])
 }
