@@ -8,6 +8,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { generateTypedData } from '../utils/generateTypedData'
 import { isSafeTransaction } from '../../../utils/safeTransaction'
 import { ErrorType, getErrorInfo } from '../utils/errors'
+import { transformThreatAnalysisResponse } from '../utils/transformThreatAnalysisResponse'
 
 type UseThreatAnalysisProps = {
   safeAddress: `0x${string}`
@@ -50,7 +51,7 @@ export function useThreatAnalysis({
     }
 
     setData(dataProp)
-  }, [dataProp])
+  }, [dataProp, data])
 
   // Parse origin if it's a JSON string containing url
   const origin = useMemo<string | undefined>(() => {
@@ -106,7 +107,7 @@ export function useThreatAnalysis({
     if (fetchError) {
       return { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.THREAT)] }
     }
-    return threatData as ThreatAnalysisResults | undefined
+    return transformThreatAnalysisResponse(threatData)
   }, [threatData, fetchError])
 
   return [threatAnalysisResult, fetchError, isLoading]

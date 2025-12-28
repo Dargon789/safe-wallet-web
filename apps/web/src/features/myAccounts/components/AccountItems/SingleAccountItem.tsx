@@ -10,7 +10,7 @@ import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { selectChainById } from '@/store/chainsSlice'
+import { useChain } from '@/hooks/useChains'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import css from './styles.module.css'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
@@ -47,18 +47,21 @@ type AccountItemProps = {
   isSpaceSafe?: boolean
   onSelectSafe?: (safeItem: SafeItem) => void | Promise<void>
   showActions?: boolean
+  showChainBadge?: boolean
 }
 
 const SingleAccountItem = ({
   onLinkClick,
   safeItem,
+  safeOverview: providedSafeOverview,
   isMultiChainItem = false,
   isSpaceSafe = false,
   onSelectSafe,
   showActions = true,
+  showChainBadge = true,
 }: AccountItemProps) => {
   const { chainId, address, isReadOnly, isPinned } = safeItem
-  const chain = useAppSelector((state) => selectChainById(state, chainId))
+  const chain = useChain(chainId)
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, chainId, address))
   const safeAddress = useSafeAddress()
   const currChainId = useChainId()
@@ -97,8 +100,8 @@ const SingleAccountItem = ({
   const isReplayable =
     addNetworkFeatureEnabled && !isReadOnly && (!undeployedSafe || !isPredictedSafeProps(undeployedSafe.props))
 
-  const { data: safeOverview } = useGetSafeOverviewQuery(
-    undeployedSafe || !isVisible
+  const { data: fetchedSafeOverview } = useGetSafeOverviewQuery(
+    undeployedSafe || !isVisible || providedSafeOverview !== undefined
       ? skipToken
       : {
           chainId: safeItem.chainId,
@@ -106,6 +109,8 @@ const SingleAccountItem = ({
           walletAddress,
         },
   )
+
+  const safeOverview = providedSafeOverview ?? fetchedSafeOverview
 
   const safeThreshold = safeOverview?.threshold ?? counterfactualSetup?.threshold ?? defaultSafeInfo.threshold
   const safeOwners =
@@ -186,7 +191,7 @@ const SingleAccountItem = ({
             shortAddress
             chainId={chain?.chainId}
             showAvatar={false}
-            copyAddress={!isMobile}
+            copyAddress={false}
           />
         )}
         {!isMobile && (
@@ -204,7 +209,7 @@ const SingleAccountItem = ({
         )}
       </Typography>
 
-      {!isMultiChainItem ? (
+      {!isMultiChainItem && showChainBadge ? (
         <ChainIndicator chainId={chainId} responsive onlyLogo className={css.chainIndicator} />
       ) : (
         <div />
