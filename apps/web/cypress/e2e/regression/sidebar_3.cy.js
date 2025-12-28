@@ -23,7 +23,7 @@ describe('Sidebar tests 3', () => {
 
   it('Verify the empty state of the pinned safes list', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
-    cy.intercept('GET', constants.safeListEndpoint, {})
+    cy.intercept('GET', constants.safeListEndpoint, { 1: [], 137: [], 143: [], 17000: null, 560048: [], 11155111: [] })
     wallet.connectSigner(signer)
     sideBar.openSidebar()
     sideBar.verifyPinnedListIsEmpty()
@@ -31,12 +31,14 @@ describe('Sidebar tests 3', () => {
 
   it('Verify connected user is redirected from welcome page to accounts page', () => {
     cy.visit(constants.welcomeUrl + '?chain=sep')
+    cy.get(create_wallet.welcomeLoginScreen).should('be.visible')
+    cy.get(create_wallet.connectWalletBtn).should('be.visible').click()
     wallet.connectSigner(signer)
-    create_wallet.clickOnContinueWithWalletBtn()
-
+    // cy.get(create_wallet.continueWithWalletBtnConnected).should('be.visible').click()
     cy.location().should((loc) => {
       expect(loc.pathname).to.eq('/welcome/accounts')
     })
+    cy.get(create_wallet.accountInfoHeader).should('be.visible')
   })
 
   it('Verify that the user see safes that he owns in the list', () => {

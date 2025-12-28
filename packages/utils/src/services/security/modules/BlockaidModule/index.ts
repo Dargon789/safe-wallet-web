@@ -1,7 +1,7 @@
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 import { normalizeTypedData } from '@safe-global/utils/utils/web3'
-import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import { type SafeTransaction } from '@safe-global/types-kit'
 import { generateTypedData } from '@safe-global/protocol-kit/dist/src/utils/eip-712'
 import { type SecurityResponse, type SecurityModule, SecuritySeverity } from '../types'
 import type {
@@ -60,7 +60,11 @@ type BlockaidPayload = {
     params: [string, string]
   }
   options: ['simulation', 'validation']
+  state_override?: Record<string, { stateDiff?: Record<string, string> }>
 }
+
+// Safe Smart Account Storage Slot for Guard
+const GUARD_STORAGE_POSITION = '0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8'
 
 export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, BlockaidModuleResponse> {
   static prepareMessage(request: BlockaidModuleRequest): string {
@@ -92,6 +96,22 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
     const { chainId, safeAddress, walletAddress } = request
     const message = BlockaidModule.prepareMessage(request)
 
+    // Parse origin if it's a JSON string containing url and name
+    let domain: string | undefined
+    if (request.origin) {
+      try {
+        const parsed = JSON.parse(request.origin)
+        // Only use parsed.url if it's a non-empty string
+        if (typeof parsed.url === 'string' && parsed.url.length > 0) {
+          domain = parsed.url
+        }
+        // Otherwise leave domain undefined to fall back to non_dapp
+      } catch {
+        // Not JSON - use the original string as-is
+        domain = request.origin
+      }
+    }
+
     const payload: BlockaidPayload = {
       chain: numberToHex(chainId),
       account_address: walletAddress,
@@ -100,13 +120,21 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
         params: [safeAddress, message],
       },
       options: ['simulation', 'validation'],
-      metadata: request.origin
+      metadata: domain
         ? {
-            domain: request.origin,
+            domain,
           }
         : {
             non_dapp: true,
           },
+      state_override: {
+        [safeAddress]: {
+          stateDiff: {
+            // Set the Guard storage slot to zero address to disable guard
+            [GUARD_STORAGE_POSITION]: '0x0000000000000000000000000000000000000000000000000000000000000000',
+          },
+        },
+      },
     }
     const res = await fetch(`${BLOCKAID_API}/v0/evm/json-rpc/scan`, {
       method: 'POST',
@@ -150,7 +178,7 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
     return {
       severity: result.validation?.result_type
         ? blockaidSeverityMap[result.validation.result_type]
-        : (SecuritySeverity.NONE ?? SecuritySeverity.NONE),
+        : SecuritySeverity.NONE,
       payload: {
         description: result.validation?.description,
         classification: result.validation?.classification,

@@ -1,21 +1,21 @@
-import { StyleSheet } from 'react-native'
-import { LinearGradient } from 'expo-linear-gradient'
 import React from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { ScrollView, Text, useTheme, View } from 'tamagui'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { getTokenValue, ScrollView, Text, useTheme, View } from 'tamagui'
 import { Badge } from '@/src/components/Badge'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { LargeHeaderTitle } from '@/src/components/Title'
 import { SafeButton } from '@/src/components/SafeButton'
-import { router } from 'expo-router'
+import { useRouter } from 'expo-router'
+import { AbsoluteLinearGradient } from '@/src/components/LinearGradient'
 
-export default function SignError({ onRetryPress, description }: { onRetryPress: () => void; description?: string }) {
+export function SignError({ description }: { description?: string }) {
+  const router = useRouter()
   const theme = useTheme()
-  const colors: [string, string] = [theme.errorDark.get(), 'transparent']
-
+  const colors: [string, string] = [theme.errorDark?.get(), 'transparent']
+  const { bottom } = useSafeAreaInsets()
   return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
-      <LinearGradient colors={colors} style={styles.background} />
+    <View flex={1} paddingBottom={Math.max(bottom, getTokenValue('$4'))}>
+      <AbsoluteLinearGradient colors={colors} style={{ opacity: 1 }} />
       <View flex={1} justifyContent="space-between">
         <View flex={1}>
           <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -47,22 +47,9 @@ export default function SignError({ onRetryPress, description }: { onRetryPress:
         </View>
 
         <View paddingHorizontal="$4" gap="$4">
-          <SafeButton onPress={onRetryPress}>Retry</SafeButton>
-          <SafeButton text onPress={router.back}>
-            View transaction
-          </SafeButton>
+          <SafeButton onPress={router.back}>Close</SafeButton>
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   )
 }
-
-const styles = StyleSheet.create({
-  background: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    height: 300,
-  },
-})

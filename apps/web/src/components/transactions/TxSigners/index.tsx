@@ -1,3 +1,5 @@
+import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { DetailedExecutionInfo } from '@safe-global/store/gateway/types'
 import { useState, type ReactElement } from 'react'
 import {
   Box,
@@ -11,16 +13,11 @@ import {
   Typography,
   type ListItemIconProps,
 } from '@mui/material'
-import type {
-  DetailedExecutionInfo,
-  TransactionDetails,
-  TransactionSummary,
-} from '@safe-global/safe-gateway-typescript-sdk'
 
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsPending from '@/hooks/useIsPending'
 import { isCancellationTxInfo, isExecutable, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
-import EthHashInfo from '@/components/common/EthHashInfo'
+import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 
 import css from './styles.module.css'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -90,7 +87,7 @@ const StyledListItemIcon = ({
   />
 )
 
-const shouldHideConfirmations = (detailedExecutionInfo?: DetailedExecutionInfo): boolean => {
+const shouldHideConfirmations = (detailedExecutionInfo?: DetailedExecutionInfo | null): boolean => {
   if (!detailedExecutionInfo || !isMultisigDetailedExecutionInfo(detailedExecutionInfo)) {
     return true
   }
@@ -104,7 +101,7 @@ const shouldHideConfirmations = (detailedExecutionInfo?: DetailedExecutionInfo):
 
 type TxSignersProps = {
   txDetails: TransactionDetails
-  txSummary: TransactionSummary
+  txSummary: Transaction
   isTxFromProposer: boolean
   proposer?: string
 }
@@ -167,22 +164,20 @@ export const TxSigners = ({
               <Dot />
             </StyledListItemIcon>
             <ListItemText data-testid="signer">
-              <EthHashInfo address={proposer} hasExplorer showCopyButton />
+              <NamedAddressInfo address={proposer} hasExplorer showCopyButton />
             </ListItemText>
           </ListItem>
         )}
 
-        {confirmations.length > 0 && (
-          <ListItem>
-            <StyledListItemIcon $state={isConfirmed ? StepState.CONFIRMED : StepState.ACTIVE}>
-              {isConfirmed ? <Check /> : <MissingConfirmation />}
-            </StyledListItemIcon>
-            <ListItemText data-testid="confirmation-action" primaryTypographyProps={{ fontWeight: 700 }}>
-              Confirmations{' '}
-              <Box className={css.confirmationsTotal}>({`${confirmationsCount} of ${confirmationsRequired}`})</Box>
-            </ListItemText>
-          </ListItem>
-        )}
+        <ListItem>
+          <StyledListItemIcon $state={isConfirmed ? StepState.CONFIRMED : StepState.ACTIVE}>
+            {isConfirmed ? <Check /> : <MissingConfirmation />}
+          </StyledListItemIcon>
+          <ListItemText data-testid="confirmation-action" primaryTypographyProps={{ fontWeight: 700 }}>
+            Confirmations{' '}
+            <Box className={css.confirmationsTotal}>({`${confirmationsCount} of ${confirmationsRequired}`})</Box>
+          </ListItemText>
+        </ListItem>
 
         {!hideConfirmations &&
           confirmations.map(({ signer }) => (
@@ -191,7 +186,7 @@ export const TxSigners = ({
                 <Dot />
               </StyledListItemIcon>
               <ListItemText data-testid="signer">
-                <EthHashInfo address={signer.value} name={signer.name} hasExplorer showCopyButton />
+                <NamedAddressInfo address={signer.value} name={signer.name} hasExplorer showCopyButton />
               </ListItemText>
             </ListItem>
           ))}
@@ -235,7 +230,7 @@ export const TxSigners = ({
       </List>
       {executor ? (
         <Box data-testid="executor" className={css.listFooter}>
-          <EthHashInfo
+          <NamedAddressInfo
             address={executor.value}
             name={executor.name}
             customAvatar={executor.logoUri}

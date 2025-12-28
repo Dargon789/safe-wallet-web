@@ -1,9 +1,10 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContracts'
 import { SENTINEL_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import type { ChainInfo, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { getTransactionDetails } from '@/utils/transactions'
 import type { AddOwnerTxParams, RemoveOwnerTxParams, SwapOwnerTxParams } from '@safe-global/protocol-kit'
-import type { MetaTransactionData, SafeTransaction, SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types'
+import type { MetaTransactionData, SafeTransaction, SafeTransactionDataPartial } from '@safe-global/types-kit'
 import extractTxInfo from '../extractTxInfo'
 import { getAndValidateSafeSDK } from './sdk'
 
@@ -31,14 +32,14 @@ export const createRemoveOwnerTx = async (txParams: RemoveOwnerTxParams): Promis
 }
 
 export const createAddOwnerTx = async (
-  chain: ChainInfo,
+  chain: Chain,
   isDeployed: boolean,
   txParams: AddOwnerTxParams,
 ): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
   if (isDeployed) return safeSDK.createAddOwnerTx(txParams)
 
-  const safeVersion = await safeSDK.getContractVersion()
+  const safeVersion = safeSDK.getContractVersion()
 
   const contract = await getReadOnlyGnosisSafeContract(chain, safeVersion)
   // @ts-ignore
@@ -56,14 +57,14 @@ export const createAddOwnerTx = async (
 }
 
 export const createSwapOwnerTx = async (
-  chain: ChainInfo,
+  chain: Chain,
   isDeployed: boolean,
   txParams: SwapOwnerTxParams,
 ): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
   if (isDeployed) return safeSDK.createSwapOwnerTx(txParams)
 
-  const safeVersion = await safeSDK.getContractVersion()
+  const safeVersion = safeSDK.getContractVersion()
 
   const contract = await getReadOnlyGnosisSafeContract(chain, safeVersion)
   // @ts-ignore SwapOwnerTxParams is a union type and the method expects a specific one

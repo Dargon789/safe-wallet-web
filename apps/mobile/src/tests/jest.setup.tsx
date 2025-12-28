@@ -8,6 +8,8 @@ import { server } from './server'
 
 jest.useFakeTimers()
 
+jest.mock('react-native-permissions', () => require('react-native-permissions/mock'))
+
 /**
  *  This mock is necessary because useFonts is async and we get an error
  *  Warning: An update to FontProvider inside a test was not wrapped in act(...)
@@ -23,37 +25,23 @@ jest.mock('@/src/navigation/useScrollableHeader', () => ({
   }),
 }))
 
-jest.mock('react-native-mmkv', () => ({
-  MMKV: function () {
-    // @ts-ignore
-    this.getString = jest.fn()
-    // @ts-ignore
-    this.delete = jest.fn()
-    // @ts-ignore
-    this.set = jest.fn()
-  },
+jest.mock('react-native-device-info', () => mockRNDeviceInfo)
+jest.mock('react-native-device-crypto', () => ({
+  getOrCreateAsymmetricKey: jest.fn(),
+  getOrCreateSymmetricKey: jest.fn(),
+  encrypt: jest.fn(),
+  decrypt: jest.fn(),
+  deleteKey: jest.fn(),
 }))
 
-jest.mock('react-native-device-info', () => mockRNDeviceInfo)
-jest.mock('react-native-device-crypto', () => {
-  return {
-    getOrCreateAsymmetricKey: jest.fn(),
-    encrypt: jest.fn((_asymmetricKey: string, privateKey: string) => {
-      return Promise.resolve({
-        encryptedText: 'encryptedText',
-        iv: privateKey + '000',
-      })
-    }),
-    decrypt: jest.fn((_name, _password, iv) => Promise.resolve(iv.slice(0, -3))),
-  }
-})
-
 jest.mock('react-native-keychain', () => {
+  const actual = jest.requireActual('react-native-keychain')
   let password: string | null = null
   return {
+    ...actual,
+    getSupportedBiometryType: jest.fn(),
     setGenericPassword: jest.fn((_user, newPassword: string) => {
       password = newPassword
-
       return Promise.resolve(password)
     }),
     getGenericPassword: jest.fn(() =>
@@ -65,12 +53,6 @@ jest.mock('react-native-keychain', () => {
       password = null
       Promise.resolve(null)
     }),
-    ACCESS_CONTROL: {
-      BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE: 'BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE',
-    },
-    ACCESSIBLE: {
-      WHEN_UNLOCKED_THIS_DEVICE_ONLY: 'WHEN_UNLOCKED_THIS_DEVICE_ONLY',
-    },
   }
 })
 
@@ -119,34 +101,12 @@ jest.mock('@react-native-firebase/messaging', () => {
   return module
 })
 
-jest.mock('@notifee/react-native', () => {
-  const notifee = {
-    getInitialNotification: jest.fn().mockResolvedValue(null),
-    displayNotification: jest.fn().mockResolvedValue({}),
-    onForegroundEvent: jest.fn().mockReturnValue(jest.fn()),
-    onBackgroundEvent: jest.fn(),
-    createChannelGroup: jest.fn().mockResolvedValue('channel-group-id'),
-    createChannel: jest.fn().mockResolvedValue({}),
-  }
-
-  return {
-    ...jest.requireActual('@notifee/react-native/dist/types/Notification'),
-    __esModule: true,
-    default: notifee,
-    AndroidImportance: {
-      NONE: 0,
-      MIN: 1,
-      LOW: 2,
-      DEFAULT: 3,
-      HIGH: 4,
-    },
-  }
-})
+jest.mock('@notifee/react-native', () => require('@notifee/react-native/jest-mock'))
 
 jest.mock('@gorhom/bottom-sheet', () => {
   const reactNative = jest.requireActual('react-native')
   const { useState, forwardRef, useImperativeHandle } = jest.requireActual('react')
-  const { View } = reactNative
+  const { View, ScrollView, TouchableOpacity: RNTouchableOpacity } = reactNative
   const MockBottomSheetComponent = forwardRef(
     (
       {
@@ -188,6 +148,8 @@ jest.mock('@gorhom/bottom-sheet', () => {
     BottomSheetModal: MockBottomSheetComponent,
     BottomSheetModalProvider: View,
     BottomSheetView: View,
+    BottomSheetScrollView: ScrollView,
+    TouchableOpacity: RNTouchableOpacity,
     useBottomSheetModal: () => ({
       dismiss: () => {
         return null
@@ -201,7 +163,114 @@ jest.mock('@react-native-clipboard/clipboard', () => ({
   getString: jest.fn(),
 }))
 
+jest.mock('react-native-quick-crypto', () => ({
+  default: {
+    randomBytes: jest.fn((size) => Buffer.alloc(size)),
+    createHash: jest.fn(() => ({
+      update: jest.fn().mockReturnThis(),
+      digest: jest.fn(() => Buffer.from('mockedHash')),
+    })),
+    pbkdf2Sync: jest.fn(() => Buffer.alloc(32)),
+    createCipheriv: jest.fn(() => ({
+      update: jest.fn(() => Buffer.from([])),
+      final: jest.fn(() => Buffer.from([])),
+      getAuthTag: jest.fn(() => Buffer.alloc(16)),
+      setAuthTag: jest.fn(),
+    })),
+    createDecipheriv: jest.fn(() => ({
+      update: jest.fn(() => Buffer.from([])),
+      final: jest.fn(() => Buffer.from([])),
+      setAuthTag: jest.fn(),
+    })),
+  },
+  randomBytes: jest.fn((size) => Buffer.alloc(size)),
+  createHash: jest.fn(() => ({
+    update: jest.fn().mockReturnThis(),
+    digest: jest.fn(() => Buffer.from('mockedHash')),
+  })),
+  pbkdf2Sync: jest.fn(() => Buffer.alloc(32)),
+  createCipheriv: jest.fn(() => ({
+    update: jest.fn(() => Buffer.from([])),
+    final: jest.fn(() => Buffer.from([])),
+    getAuthTag: jest.fn(() => Buffer.alloc(16)),
+    setAuthTag: jest.fn(),
+  })),
+  createDecipheriv: jest.fn(() => ({
+    update: jest.fn(() => Buffer.from([])),
+    final: jest.fn(() => Buffer.from([])),
+    setAuthTag: jest.fn(),
+  })),
+}))
+
 jest.mock('react-native-safe-area-context', () => mockSafeAreaContext)
+
+// Mock the logger globally for all tests
+jest.mock('@/src/utils/logger', () => ({
+  __esModule: true,
+  default: {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    trace: jest.fn(),
+    setLevel: jest.fn(),
+    shouldLog: jest.fn(),
+    setShouldLogErrorToSentry: jest.fn(),
+  },
+  LogLevel: {
+    TRACE: 0,
+    INFO: 1,
+    WARN: 2,
+    ERROR: 3,
+  },
+}))
+
+jest.mock('@react-native-firebase/analytics', () => {
+  const mockAnalytics = {
+    logEvent: jest.fn(() => Promise.resolve()),
+    setAnalyticsCollectionEnabled: jest.fn(() => Promise.resolve()),
+    setUserId: jest.fn(() => Promise.resolve()),
+    setUserProperty: jest.fn(() => Promise.resolve()),
+    setUserProperties: jest.fn(() => Promise.resolve()),
+    resetAnalyticsData: jest.fn(() => Promise.resolve()),
+    setDefaultEventParameters: jest.fn(() => Promise.resolve()),
+    setSessionTimeoutDuration: jest.fn(() => Promise.resolve()),
+  }
+
+  return {
+    __esModule: true,
+    default: () => mockAnalytics,
+    getAnalytics: jest.fn(() => mockAnalytics),
+    firebase: {
+      analytics: jest.fn(() => mockAnalytics),
+    },
+  }
+})
+
+jest.mock('@react-native-firebase/crashlytics', () => {
+  const mockCrashlytics = {
+    crash: jest.fn(() => Promise.resolve()),
+    log: jest.fn(() => Promise.resolve()),
+    recordError: jest.fn(() => Promise.resolve()),
+    setAttribute: jest.fn(() => Promise.resolve()),
+    setAttributes: jest.fn(() => Promise.resolve()),
+    setUserId: jest.fn(() => Promise.resolve()),
+    setCrashlyticsCollectionEnabled: jest.fn(() => Promise.resolve()),
+    checkForUnsentReports: jest.fn(() => Promise.resolve(false)),
+    deleteUnsentReports: jest.fn(() => Promise.resolve()),
+    didCrashOnPreviousExecution: jest.fn(() => Promise.resolve(false)),
+    sendUnsentReports: jest.fn(() => Promise.resolve()),
+    setCustomKey: jest.fn(() => Promise.resolve()),
+  }
+
+  return {
+    __esModule: true,
+    default: () => mockCrashlytics,
+    getCrashlytics: jest.fn(() => mockCrashlytics),
+    firebase: {
+      crashlytics: jest.fn(() => mockCrashlytics),
+    },
+  }
+})
 
 beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())

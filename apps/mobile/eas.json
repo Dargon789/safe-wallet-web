@@ -61,14 +61,17 @@
     },
     "build-and-maestro-test": {
       "withoutCredentials": true,
+      "environment": "development",
       "env": {
-        "RN_SRC_EXT": "e2e.ts,e2e.tsx"
+        "RN_SRC_EXT": "e2e.ts,e2e.tsx",
+        "EXPO_PUBLIC_SECURITY_RASP_ENABLED": "false"
       },
       "config": "build-and-maestro-test.yml",
       "android": {
         "buildType": "apk",
         "image": "latest"
       },
+
       "ios": {
         "simulator": true,
         "image": "latest",
@@ -79,7 +82,7 @@
   "submit": {
     "development": {
       "ios": {
-        "ascAppId": "6741803832"
+        "ascAppId": "6748754891"
       },
       "android": {
         "applicationId": "global.safe.mobileapp.dev",
@@ -88,7 +91,7 @@
     },
     "production": {
       "ios": {
-        "ascAppId": "6738784305"
+        "ascAppId": "6748754793"
       },
       "android": {
         "releaseStatus": "draft"

@@ -4,4 +4,6 @@ export {
   useTransactionsGetTransactionsHistoryV1Query as useGetTxsHistoryQuery,
 } from './AUTO_GENERATED/transactions'
 
-export { useGetTxsHistoryInfiniteQuery } from './transactions'
+export { useGetTxsHistoryInfiniteQuery, useGetPendingTxsInfiniteQuery } from './transactions'
+export { useGetCollectiblesInfiniteQuery } from './collectibles'
+export { useGetChainsConfigQuery, chainsAdapter } from './chains'

@@ -19,7 +19,7 @@ export default [
   {
     ignores: ['**/node_modules/', '**/.next/', '**/.github/', '**/cypress/', '**/src/types/contracts/'],
   },
-  ...compat.extends('next', 'prettier', 'plugin:prettier/recommended', 'plugin:storybook/recommended'),
+  ...compat.extends('next', 'prettier', 'plugin:storybook/recommended'),
   {
     plugins: {
       'unused-imports': unusedImports,
@@ -72,6 +72,14 @@ export default [
           children: 'never',
         },
       ],
+    },
+  },
+  // Override for story files: allow type-only imports from @storybook/react
+  // since @storybook/nextjs re-exports these types but TypeScript doesn't always resolve them correctly
+  {
+    files: ['**/*.stories.tsx', '**/*.stories.ts'],
+    rules: {
+      'storybook/no-renderer-packages': 'off',
     },
   },
 ]

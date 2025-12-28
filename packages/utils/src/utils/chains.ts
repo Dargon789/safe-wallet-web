@@ -1,5 +1,5 @@
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
+import type { SafeVersion } from '@safe-global/types-kit'
 import { getSafeSingletonDeployment } from '@safe-global/safe-deployments'
 import semverSatisfies from 'semver/functions/satisfies'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
@@ -30,7 +30,7 @@ export enum FEATURES {
   NATIVE_SWAPS_COW = 'NATIVE_SWAPS_COW',
   ZODIAC_ROLES = 'ZODIAC_ROLES',
   STAKING = 'STAKING',
-  STAKING_BANNER = 'STAKING_BANNER',
+  STAKING_PROMO = 'STAKING_PROMO',
   MULTI_CHAIN_SAFE_CREATION = 'MULTI_CHAIN_SAFE_CREATION',
   MULTI_CHAIN_SAFE_ADD_NETWORK = 'MULTI_CHAIN_SAFE_ADD_NETWORK',
   PROPOSERS = 'PROPOSERS',
@@ -41,6 +41,17 @@ export enum FEATURES {
   NESTED_SAFES = 'NESTED_SAFES',
   MASS_PAYOUTS = 'MASS_PAYOUTS',
   SPACES = 'SPACES',
+  EARN = 'EARN',
+  EARN_PROMO = 'EARN_PROMO',
+  MIXPANEL = 'MIXPANEL',
+  POSITIONS = 'POSITIONS',
+  PORTFOLIO_ENDPOINT = 'PORTFOLIO_ENDPOINT',
+  NATIVE_COW_SWAP_FEE_V2 = 'NATIVE_COW_SWAP_FEE_V2',
+  CSV_TX_EXPORT = 'CSV_TX_EXPORT',
+  SAFE_LABS_TERMS_DISABLED = 'SAFE_LABS_TERMS_DISABLED',
+  NO_FEE_NOVEMBER = 'NO_FEE_NOVEMBER',
+  HYPERNATIVE = 'HYPERNATIVE',
+  HYPERNATIVE_RELAX_GUARD_CHECK = 'HYPERNATIVE_RELAX_GUARD_CHECK',
 }
 
 const MIN_SAFE_VERSION = '1.3.0'

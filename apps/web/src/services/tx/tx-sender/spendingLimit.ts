@@ -4,14 +4,14 @@ import {
   getLatestSpendingLimitAddress,
   getDeployedSpendingLimitModuleAddress,
 } from '@/services/contracts/spendingLimitContracts'
-import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
+import type { MetaTransactionData } from '@safe-global/types-kit'
 import {
   createAddDelegateTx,
   createEnableModuleTx,
   createResetAllowanceTx,
   createSetAllowanceTx,
 } from '@/services/tx/spendingLimitParams'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { parseUnits } from 'ethers'
 import { currentMinutes } from '@safe-global/utils/utils/date'
@@ -28,7 +28,7 @@ export const createNewSpendingLimitTx = async (
   data: NewSpendingLimitData,
   spendingLimits: SpendingLimitState[],
   chainId: string,
-  chain: ChainInfo,
+  chain: Chain,
   safeModules: SafeState['modules'],
   deployed: boolean,
   tokenDecimals?: number | null,
@@ -50,7 +50,7 @@ export const createNewSpendingLimitTx = async (
     const enableModuleTx = await createEnableModuleTx(
       chain,
       await sdk.getAddress(),
-      await sdk.getContractVersion(),
+      sdk.getContractVersion(),
       spendingLimitAddress,
     )
 

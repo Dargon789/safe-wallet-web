@@ -1,22 +1,30 @@
+import type { AddressInfo, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
 import { Stack, Typography } from '@mui/material'
-import { type AddressEx, type TransactionDetails, Operation } from '@safe-global/safe-gateway-typescript-sdk'
-
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { MethodDetails } from '@/components/transactions/TxDetails/TxData/DecodedData/MethodDetails'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
 import SendToBlock from '@/components/tx/SendToBlock'
 import MethodCall from './MethodCall'
-import { DelegateCallWarning } from '@/components/transactions/Warning'
 import { useNativeTokenInfo } from '@/hooks/useNativeTokenInfo'
+import { DelegateCallWarning, UntrustedFallbackHandlerWarning } from '@/components/transactions/Warning'
+import { useSetsUntrustedFallbackHandler } from '@/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert'
 
 interface Props {
   txData: TransactionDetails['txData']
-  toInfo?: AddressEx
+  toInfo?: AddressInfo
+  isTxExecuted?: boolean
+  isWarningEnabled?: boolean
 }
 
-export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
+export const DecodedData = ({
+  txData,
+  toInfo,
+  isTxExecuted = false,
+  isWarningEnabled = false,
+}: Props): ReactElement | null => {
   const nativeTokenInfo = useNativeTokenInfo()
+  const setsUntrustedFallbackHandler = useSetsUntrustedFallbackHandler(txData)
 
   // nothing to render
   if (!txData) {
@@ -34,7 +42,6 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
   }
 
   const amountInWei = txData.value ?? '0'
-  const isDelegateCall = txData.operation === Operation.DELEGATE
   const toAddress = toInfo?.value || txData.to?.value
   const method = txData.dataDecoded?.method || ''
   const addressInfo = txData.addressInfoIndex?.[toAddress]
@@ -43,7 +50,8 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
 
   return (
     <Stack spacing={2}>
-      {isDelegateCall && <DelegateCallWarning showWarning={!txData.trustedDelegateCallTarget} />}
+      {setsUntrustedFallbackHandler && <UntrustedFallbackHandlerWarning isTxExecuted={isTxExecuted} />}
+      <DelegateCallWarning txData={txData} showWarning={isWarningEnabled} />
 
       {method ? (
         <MethodCall contractAddress={toAddress} contractName={name} contractLogo={avatar} method={method} />
@@ -56,7 +64,7 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
       {txData.dataDecoded ? (
         <MethodDetails data={txData.dataDecoded} hexData={txData.hexData} addressInfoIndex={txData.addressInfoIndex} />
       ) : txData.hexData ? (
-        <Typography variant="body2" component="div">
+        <Typography data-testid="hexData" variant="body2" component="div">
           <HexEncodedData title="Data" hexData={txData.hexData} />
         </Typography>
       ) : null}

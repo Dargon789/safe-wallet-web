@@ -4,7 +4,7 @@ import type { ReactElement } from 'react'
 
 import AddIcon from '@/public/images/common/add.svg'
 import { ModalDialogTitle } from '@/components/common/ModalDialog'
-import { CreateNestedSafe } from '@/components/tx-flow/flows/CreateNestedSafe'
+import { CreateNestedSafeFlow } from '@/components/tx-flow/flows'
 import { TxModalContext } from '@/components/tx-flow'
 import { NestedSafesList } from '@/components/sidebar/NestedSafesList'
 import { NestedSafeInfo } from '@/components/sidebar/NestedSafeInfo'
@@ -26,7 +26,7 @@ export function NestedSafesPopover({
   const { setTxFlow } = useContext(TxModalContext)
 
   const onAdd = () => {
-    setTxFlow(<CreateNestedSafe />)
+    setTxFlow(<CreateNestedSafeFlow />)
     onClose()
   }
 
@@ -46,7 +46,7 @@ export function NestedSafesPopover({
       slotProps={{
         paper: {
           sx: {
-            width: '300px',
+            width: '370px',
             maxHeight: '590px',
             display: 'flex',
             flexDirection: 'column',
@@ -58,7 +58,7 @@ export function NestedSafesPopover({
       <ModalDialogTitle
         hideChainIndicator
         onClose={onClose}
-        sx={{ borderBottom: ({ palette }) => `1px solid ${palette.border.light}` }}
+        sx={{ mt: -0.5, borderBottom: ({ palette }) => `1px solid ${palette.border.light}` }}
       >
         Nested Safes
       </ModalDialogTitle>
