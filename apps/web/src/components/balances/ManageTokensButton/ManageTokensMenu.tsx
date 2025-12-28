@@ -12,6 +12,7 @@ import { DUST_THRESHOLD } from '@/config/constants'
 import useHiddenTokens from '@/hooks/useHiddenTokens'
 import Track from '@/components/common/Track'
 import { ASSETS_EVENTS } from '@/services/analytics'
+import useSafeInfo from '@/hooks/useSafeInfo'
 import css from './ManageTokensMenu.module.css'
 
 interface ManageTokensMenuProps {
@@ -40,6 +41,7 @@ const ManageTokensMenu = ({
   const settings = useAppSelector(selectSettings)
   const hasDefaultTokenlistFromHook = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const hiddenTokens = useHiddenTokens()
+  const { safe } = useSafeInfo()
 
   const hasDefaultTokenlist = _hasDefaultTokenlist ?? hasDefaultTokenlistFromHook
 
@@ -79,9 +81,15 @@ const ManageTokensMenu = ({
       PaperProps={{
         className: css.menu,
       }}
+      data-testid="manage-tokens-menu"
     >
       {hasDefaultTokenlist && (
-        <MenuItem onClick={handleToggleShowAllTokens} className={css.menuItem} sx={menuItemHoverSx}>
+        <MenuItem
+          onClick={handleToggleShowAllTokens}
+          className={css.menuItem}
+          sx={menuItemHoverSx}
+          data-testid="show-all-tokens-menu-item"
+        >
           <Box className={css.menuItemContent}>
             <Box className={css.menuItemLeft}>
               <Typography variant="body2">Show all tokens</Typography>
@@ -91,6 +99,7 @@ const ManageTokensMenu = ({
                     Learn more about <ExternalLink href={HelpCenterArticle.SPAM_TOKENS}>default tokens</ExternalLink>
                   </Typography>
                 }
+                data-testid="show-all-tokens-info-tooltip"
               />
             </Box>
             <Track {...(showAllTokens ? ASSETS_EVENTS.SHOW_ALL_TOKENS : ASSETS_EVENTS.SHOW_DEFAULT_TOKENS)}>
@@ -99,30 +108,47 @@ const ManageTokensMenu = ({
                 checked={showAllTokens}
                 onClick={(e) => e.stopPropagation()}
                 onChange={handleToggleShowAllTokens}
+                data-testid="show-all-tokens-switch"
               />
             </Track>
           </Box>
         </MenuItem>
       )}
 
-      <MenuItem className={css.menuItem} sx={menuItemHoverSx} onClick={handleToggleHideDust}>
-        <Box className={css.menuItemContent}>
-          <Box className={css.menuItemLeft}>
-            <Typography variant="body2">Hide small balances</Typography>
-            <InfoTooltip title={<Typography>Hide tokens with a value less than ${DUST_THRESHOLD}</Typography>} />
+      {safe.deployed && (
+        <MenuItem
+          className={css.menuItem}
+          sx={menuItemHoverSx}
+          onClick={handleToggleHideDust}
+          data-testid="hide-small-balances-menu-item"
+        >
+          <Box className={css.menuItemContent}>
+            <Box className={css.menuItemLeft}>
+              <Typography variant="body2">Hide small balances</Typography>
+              <InfoTooltip
+                title={<Typography>Hide tokens with a value less than ${DUST_THRESHOLD}</Typography>}
+                data-testid="hide-small-balances-info-tooltip"
+              />
+            </Box>
+            <Switch
+              size="small"
+              checked={hideDust}
+              onClick={(e) => e.stopPropagation()}
+              onChange={handleToggleHideDust}
+              data-testid="hide-small-balances-switch"
+            />
           </Box>
-          <Switch
-            size="small"
-            checked={hideDust}
-            onClick={(e) => e.stopPropagation()}
-            onChange={handleToggleHideDust}
-          />
-        </Box>
-      </MenuItem>
+        </MenuItem>
+      )}
 
-      <Divider />
+      <Divider data-testid="manage-tokens-menu-divider" />
 
-      <MenuItem onClick={handleHideTokens} className={css.menuItem} sx={menuItemHoverSx}>
+      <MenuItem
+        onClick={handleHideTokens}
+        className={css.menuItem}
+        sx={menuItemHoverSx}
+        data-testid="hide-tokens-menu-item"
+      >
         <Track {...ASSETS_EVENTS.SHOW_HIDDEN_ASSETS}>
           <Typography variant="body2">Hide tokens{hiddenTokensCount > 0 && ` (${hiddenTokensCount})`}</Typography>
         </Track>
