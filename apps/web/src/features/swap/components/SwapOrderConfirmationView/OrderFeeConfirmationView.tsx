@@ -1,5 +1,8 @@
-import type { SwapOrderConfirmationView, TwapOrderConfirmationView } from '@safe-global/safe-gateway-typescript-sdk'
-import { getOrderFeeBps } from '@/features/swap/helpers/utils'
+import type {
+  SwapOrderTransactionInfo,
+  TwapOrderTransactionInfo,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { getOrderFeeBps } from '@safe-global/utils/features/swap/helpers/utils'
 import { DataRow } from '@/components/common/Table/DataRow'
 import { BRAND_NAME } from '@/config/constants'
 import { HelpIconTooltip } from '@/features/swap/components/HelpIconTooltip'
@@ -9,7 +12,7 @@ import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 export const OrderFeeConfirmationView = ({
   order,
 }: {
-  order: Pick<SwapOrderConfirmationView | TwapOrderConfirmationView, 'fullAppData'>
+  order: Pick<SwapOrderTransactionInfo | TwapOrderTransactionInfo, 'fullAppData'>
 }) => {
   const bps = getOrderFeeBps(order)
 

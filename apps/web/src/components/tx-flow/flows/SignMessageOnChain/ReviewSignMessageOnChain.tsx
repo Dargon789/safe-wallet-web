@@ -6,7 +6,7 @@ import { Box } from '@mui/system'
 import { Typography, SvgIcon } from '@mui/material'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import { type EIP712TypedData, Methods, type RequestId } from '@safe-global/safe-apps-sdk'
-import { OperationType } from '@safe-global/safe-core-sdk-types'
+import { OperationType } from '@safe-global/types-kit'
 
 import SendFromBlock from '@/components/tx/SendFromBlock'
 import { InfoDetails } from '@/components/transactions/InfoDetails'
@@ -18,7 +18,7 @@ import { getDecodedMessage } from '@/components/safe-apps/utils'
 import { createTx } from '@/services/tx/tx-sender'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useHighlightHiddenTab from '@/hooks/useHighlightHiddenTab'
-import { type SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 import ApprovalEditor from '@/components/tx/ApprovalEditor'
@@ -51,7 +51,7 @@ const ReviewSignMessageOnChain = ({ message, method, children, ...props }: SignM
 
   useEffect(() => {
     if (!readOnlySignMessageLibContract) return
-    readOnlySignMessageLibContract.getAddress().then(setSignMessageAddress)
+    setSignMessageAddress(readOnlySignMessageLibContract.getAddress())
   }, [readOnlySignMessageLibContract])
 
   const [decodedMessage, readableMessage] = useMemo(() => {
@@ -67,10 +67,12 @@ const ReviewSignMessageOnChain = ({ message, method, children, ...props }: SignM
   useEffect(() => {
     let txData
 
-    if (!readOnlySignMessageLibContract) return
+    if (!readOnlySignMessageLibContract || !signMessageAddress) return
 
     if (isTextMessage) {
-      txData = readOnlySignMessageLibContract.encode('signMessage', [hashMessage(getDecodedMessage(message))])
+      txData = readOnlySignMessageLibContract.encode('signMessage', [
+        hashMessage(getDecodedMessage(message)) as `0x${string}`,
+      ])
     } else if (isTypedMessage) {
       const typesCopy = { ...message.types }
 

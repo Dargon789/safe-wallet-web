@@ -1,6 +1,5 @@
 import { cgwClient } from '../cgwClient'
 import { SafesGetSafeOverviewV1ApiArg, SafesGetSafeOverviewV1ApiResponse } from '../AUTO_GENERATED/safes'
-import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import { addTagTypes } from '../AUTO_GENERATED/safes'
 
 function chunkArray<T>(array: T[], size: number): T[][] {
@@ -13,7 +12,7 @@ function chunkArray<T>(array: T[], size: number): T[][] {
 
 const MAX_SAFES_PER_REQUEST = 10
 
-const additionalSafesRtkApi = cgwClient
+export const additionalSafesRtkApi = cgwClient
   .enhanceEndpoints({
     addTagTypes,
   })
@@ -52,7 +51,7 @@ const additionalSafesRtkApi = cgwClient
             })
 
             if (result.error) {
-              return { error: result.error as FetchBaseQueryError }
+              return { error: result.error }
             }
 
             combinedData = combinedData.concat(result.data as SafesGetSafeOverviewV1ApiResponse)

@@ -2,11 +2,17 @@
 // Learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom'
 import { server } from '@/tests/server'
+import { faker } from '@faker-js/faker'
+
+// Seed faker for deterministic test data
+faker.seed(123)
+
+// Set timezone to UTC for consistent date formatting across environments
+process.env.TZ = 'UTC'
 
 jest.mock('@web3-onboard/coinbase', () => jest.fn())
 jest.mock('@web3-onboard/injected-wallets', () => ({ ProviderLabel: { MetaMask: 'MetaMask' } }))
 jest.mock('@web3-onboard/walletconnect', () => jest.fn())
-jest.mock('@safe-global/safe-client-gateway-sdk')
 
 const mockOnboardState = {
   chains: [],

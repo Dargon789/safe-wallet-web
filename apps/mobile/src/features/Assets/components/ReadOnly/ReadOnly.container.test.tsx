@@ -1,14 +1,14 @@
 import { render, screen } from '@/src/tests/test-utils'
 import { ReadOnlyContainer } from './ReadOnly.container'
 import { RootState } from '@/src/store'
-import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { SignerInfo } from '@/src/types/address'
 
 describe('ReadOnlyContainer', () => {
   const mockSafeAddress = '0x123'
-  const mockSigners: Record<string, AddressInfo> = {
-    '0x456': { value: '0x456', name: 'Signer 1' },
-    '0x789': { value: '0x789', name: 'Signer 2' },
+  const mockSigners: Record<string, SignerInfo> = {
+    '0x456': { value: '0x456', name: 'Signer 1', type: 'private-key' as const },
+    '0x789': { value: '0x789', name: 'Signer 2', type: 'private-key' as const },
   }
 
   const mockSafeInfo: SafeOverview = {
@@ -20,11 +20,14 @@ describe('ReadOnlyContainer', () => {
     queued: 0,
   }
 
-  const createInitialState = (signers: Record<string, AddressInfo>, safeInfo: SafeOverview): Partial<RootState> => ({
+  const createInitialState = (
+    signers: Record<string, SignerInfo>,
+    safeInfo: SafeOverview,
+    warningDismissed = false,
+  ): Partial<RootState> => ({
     safes: {
       [mockSafeAddress]: {
-        SafeInfo: safeInfo,
-        chains: ['1'],
+        '1': safeInfo,
       },
     },
     signers: signers,
@@ -32,6 +35,15 @@ describe('ReadOnlyContainer', () => {
       address: mockSafeAddress,
       chainId: '1',
     },
+    safesSettings: warningDismissed
+      ? {
+          [mockSafeAddress]: {
+            global: {
+              readOnlyWarningDismissed: true,
+            },
+          },
+        }
+      : {},
   })
 
   it('should render read-only message when there are no signers', () => {
@@ -43,7 +55,7 @@ describe('ReadOnlyContainer', () => {
     )
     render(<ReadOnlyContainer />, { initialStore: initialState })
 
-    expect(screen.getByText('This is a read-only account')).toBeTruthy()
+    expect(screen.getByText('Read-only mode')).toBeTruthy()
   })
 
   it("should render read-only message when signers don't match owners", () => {
@@ -53,13 +65,26 @@ describe('ReadOnlyContainer', () => {
     })
     render(<ReadOnlyContainer />, { initialStore: initialState })
 
-    expect(screen.getByText('This is a read-only account')).toBeTruthy()
+    expect(screen.getByText('Read-only mode')).toBeTruthy()
   })
 
   it('should not render read-only message when there are signers', () => {
     const initialState = createInitialState(mockSigners, mockSafeInfo)
     render(<ReadOnlyContainer />, { initialStore: initialState })
 
-    expect(screen.queryByText('This is a read-only account')).toBeNull()
+    expect(screen.queryByText('Read-only mode')).toBeNull()
+  })
+
+  it('should not render read-only message when warning is dismissed', () => {
+    const initialState = createInitialState(
+      {},
+      {
+        ...mockSafeInfo,
+      },
+      true,
+    )
+    render(<ReadOnlyContainer />, { initialStore: initialState })
+
+    expect(screen.queryByText('Read-only mode')).toBeNull()
   })
 })

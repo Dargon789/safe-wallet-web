@@ -14,6 +14,7 @@ import { useAppDispatch } from '@/store'
 import { txHistorySlice } from '@/store/txHistorySlice'
 import { recoveryDispatch, RecoveryEvent, RecoveryTxType } from '@/features/recovery/services/recoveryEvents'
 import RecoveryContextHooks from '../RecoveryContextHooks'
+import { ConflictType } from '@safe-global/store/gateway/types'
 
 jest.mock('@/features/recovery/services/delay-modifier')
 jest.mock('@/features/recovery/services/recovery-state')
@@ -54,6 +55,7 @@ describe('useRecoveryState', () => {
           { type: 'DATE_LABEL' },
           {
             type: 'TRANSACTION',
+            conflictType: ConflictType.NONE,
             transaction: {
               txInfo: {
                 type: 'Custom',
@@ -98,6 +100,7 @@ describe('useRecoveryState', () => {
           { type: 'DATE_LABEL' },
           {
             type: 'TRANSACTION',
+            conflictType: ConflictType.NONE,
             transaction: {
               txInfo: {
                 type: 'Custom',
@@ -141,6 +144,7 @@ describe('useRecoveryState', () => {
           { type: 'DATE_LABEL' },
           {
             type: 'TRANSACTION',
+            conflictType: ConflictType.NONE,
             transaction: {
               txInfo: {
                 type: 'Custom',
@@ -186,10 +190,12 @@ describe('useRecoveryState', () => {
         dispatch(
           txHistorySlice.actions.set({
             loading: false,
+            loaded: true,
             data: {
               results: [
                 {
                   type: 'TRANSACTION',
+                  conflictType: ConflictType.NONE,
                   transaction: {
                     txInfo: {
                       type: 'Custom',

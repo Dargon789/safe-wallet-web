@@ -5,29 +5,37 @@ import Signature from '@/assets/images/signature.png'
 import { Identicon } from '@/src/components/Identicon'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { router } from 'expo-router'
-import { Contact } from '@/src/features/AddressBook'
+import { ContactDisplayNameContainer } from '@/src/features/AddressBook'
 import { Address } from '@/src/types/address'
+import { ActionType } from '@/src/features/ChangeSignerSheet/utils'
 
 type Props = {
   address: Address
   txId: string
+  disabled?: boolean
 }
 
-export function SelectSigner({ address, txId }: Props) {
+export function SelectSigner({ address, txId, disabled = false }: Props) {
   return (
     <View
-      onPress={() => router.push({ pathname: '/change-signer-sheet', params: { txId } })}
+      onPress={() => {
+        if (disabled) {
+          return
+        }
+        router.push({ pathname: '/change-signer-sheet', params: { txId, actionType: ActionType.SIGN } })
+      }}
       flexDirection="row"
       justifyContent="center"
       alignItems="center"
       gap={'$2'}
+      opacity={disabled ? 0.5 : 1}
     >
       <Image testID="signature-button-image" width={16} height={16} source={Signature} />
       <Text fontWeight={700}>Sign with</Text>
 
       <Identicon address={address} size={24} />
 
-      <Contact address={address} />
+      <ContactDisplayNameContainer address={address} />
 
       <SafeFontIcon name="chevron-right" />
     </View>

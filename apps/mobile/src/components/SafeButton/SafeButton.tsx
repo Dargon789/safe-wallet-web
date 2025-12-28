@@ -1,6 +1,8 @@
+import React from 'react'
 import { styled, Button } from 'tamagui'
-
-export const SafeButton = styled(Button, {
+import { Loader } from '@/src/components/Loader'
+// Create base styled button
+const BaseButton = styled(Button, {
   variants: {
     rounded: {
       true: {
@@ -49,7 +51,7 @@ export const SafeButton = styled(Button, {
       true: {
         backgroundColor: 'transparent',
         borderWidth: 2,
-        borderColor: '$color',
+        borderColor: '$backgroundSecondary',
         color: '$color',
       },
     },
@@ -73,12 +75,22 @@ export const SafeButton = styled(Button, {
     },
 
     size: {
+      $xl: () => ({
+        fontSize: 14,
+        fontWeight: 700,
+        height: 'auto',
+        margin: 0,
+        paddingVertical: '$3',
+        textProps: {
+          lineHeight: 24,
+        },
+      }),
       $md: () => ({
         height: 'auto',
         paddingVertical: 14,
         paddingHorizontal: 20,
         margin: 0,
-        fontWeight: 600,
+        fontWeight: 700,
         letterSpacing: -0.1,
         fontSize: 14,
         scaleIcon: 0.9,
@@ -106,3 +118,26 @@ export const SafeButton = styled(Button, {
     primary: true,
   },
 })
+
+// Extended props to support loading state
+export interface SafeButtonProps extends React.ComponentProps<typeof BaseButton> {
+  loading?: boolean
+  loadingText?: string
+}
+
+// Wrapper component that handles loading state
+export const SafeButton = React.forwardRef<React.ElementRef<typeof BaseButton>, SafeButtonProps>(
+  ({ loading = false, loadingText, children, disabled, icon, ...props }, ref) => {
+    const buttonText = loading && loadingText ? loadingText : children
+    const buttonIcon = loading ? <Loader size={16} thickness={1} /> : icon
+    const isDisabled = loading || disabled
+
+    return (
+      <BaseButton ref={ref} disabled={isDisabled} icon={buttonIcon} {...props}>
+        {buttonText}
+      </BaseButton>
+    )
+  },
+)
+
+SafeButton.displayName = 'SafeButton'

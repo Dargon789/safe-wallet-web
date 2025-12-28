@@ -1,15 +1,16 @@
 import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
 import type { SafeListProps } from '@/features/myAccounts/components/SafesList'
 import SpaceSafeContextMenu from '@/features/spaces/components/SafeAccounts/SpaceSafeContextMenu'
-import { type SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
-import { useMemo, useRef } from 'react'
+import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { useCallback, useMemo, useRef } from 'react'
+import type { MouseEvent } from 'react'
 import { ListItemButton, Box, Typography, IconButton, SvgIcon, Skeleton, useTheme, useMediaQuery } from '@mui/material'
 import Link from 'next/link'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { selectChainById } from '@/store/chainsSlice'
+import { useChain } from '@/hooks/useChains'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import css from './styles.module.css'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
@@ -44,16 +45,23 @@ type AccountItemProps = {
   onLinkClick?: SafeListProps['onLinkClick']
   isMultiChainItem?: boolean
   isSpaceSafe?: boolean
+  onSelectSafe?: (safeItem: SafeItem) => void | Promise<void>
+  showActions?: boolean
+  showChainBadge?: boolean
 }
 
 const SingleAccountItem = ({
   onLinkClick,
   safeItem,
+  safeOverview: providedSafeOverview,
   isMultiChainItem = false,
   isSpaceSafe = false,
+  onSelectSafe,
+  showActions = true,
+  showChainBadge = true,
 }: AccountItemProps) => {
   const { chainId, address, isReadOnly, isPinned } = safeItem
-  const chain = useAppSelector((state) => selectChainById(state, chainId))
+  const chain = useChain(chainId)
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, chainId, address))
   const safeAddress = useSafeAddress()
   const currChainId = useChainId()
@@ -92,8 +100,8 @@ const SingleAccountItem = ({
   const isReplayable =
     addNetworkFeatureEnabled && !isReadOnly && (!undeployedSafe || !isPredictedSafeProps(undeployedSafe.props))
 
-  const { data: safeOverview } = useGetSafeOverviewQuery(
-    undeployedSafe || !isVisible
+  const { data: fetchedSafeOverview } = useGetSafeOverviewQuery(
+    undeployedSafe || !isVisible || providedSafeOverview !== undefined
       ? skipToken
       : {
           chainId: safeItem.chainId,
@@ -101,6 +109,8 @@ const SingleAccountItem = ({
           walletAddress,
         },
   )
+
+  const safeOverview = providedSafeOverview ?? fetchedSafeOverview
 
   const safeThreshold = safeOverview?.threshold ?? counterfactualSetup?.threshold ?? defaultSafeInfo.threshold
   const safeOwners =
@@ -177,10 +187,11 @@ const SingleAccountItem = ({
           <EthHashInfo
             address={address}
             name={name}
+            showName={isSpaceSafe ? !!safeItem.name : true}
             shortAddress
             chainId={chain?.chainId}
             showAvatar={false}
-            copyAddress={!isMobile}
+            copyAddress={false}
           />
         )}
         {!isMobile && (
@@ -198,7 +209,7 @@ const SingleAccountItem = ({
         )}
       </Typography>
 
-      {!isMultiChainItem ? (
+      {!isMultiChainItem && showChainBadge ? (
         <ChainIndicator chainId={chainId} responsive onlyLogo className={css.chainIndicator} />
       ) : (
         <div />
@@ -268,20 +279,38 @@ const SingleAccountItem = ({
     </>
   )
 
+  const handleSelect = useCallback(
+    (event: MouseEvent<HTMLElement>) => {
+      if (!onSelectSafe) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+
+      void onSelectSafe(safeItem)
+    },
+    [onSelectSafe, safeItem],
+  )
+
   return (
     <ListItemButton
       ref={elementRef}
       data-testid="safe-list-item"
       selected={isCurrentSafe}
-      className={classnames(css.listItem, { [css.currentListItem]: isCurrentSafe })}
+      className={classnames(css.listItem, {
+        [css.currentListItem]: isCurrentSafe,
+        [css.noActions]: !showActions,
+      })}
+      onClick={onSelectSafe ? handleSelect : undefined}
     >
       <Track {...OVERVIEW_EVENTS.OPEN_SAFE} label={trackingLabel}>
-        <Link onClick={onLinkClick} href={href} className={css.safeLink}>
+        <Link onClick={onSelectSafe ? handleSelect : onLinkClick} href={href} className={css.safeLink}>
           {content}
         </Link>
       </Track>
 
-      {actions}
+      {showActions ? actions : null}
     </ListItemButton>
   )
 }

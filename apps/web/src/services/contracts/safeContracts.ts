@@ -10,22 +10,23 @@ import {
 } from '@safe-global/protocol-kit/dist/src/contracts/contractInstances'
 import type SafeBaseContract from '@safe-global/protocol-kit/dist/src/contracts/Safe/SafeBaseContract'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import semver from 'semver'
-import { getSafeMigrationDeployment } from '@safe-global/safe-deployments'
-import { SAFE_TO_L2_MIGRATION_VERSION } from '@/utils/safe-migrations'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import { _getValidatedGetContractProps } from '@safe-global/utils/services/contracts/safeContracts'
 
 // GnosisSafe
 
 const getGnosisSafeContract = async (safe: SafeState, safeProvider: SafeProvider) => {
-  return getSafeContractInstance(
-    _getValidatedGetContractProps(safe.version).safeVersion,
-    safeProvider,
-    safe.address.value,
-  )
+  // For unsupported mastercopies, use the SDK version if available
+  let version = safe.version
+  if (!version) {
+    const safeSDK = getSafeSDK()
+    version = safeSDK?.getContractVersion() ?? null
+  }
+
+  return getSafeContractInstance(_getValidatedGetContractProps(version).safeVersion, safeProvider, safe.address.value)
 }
 
 export const getReadOnlyCurrentGnosisSafeContract = async (safe: SafeState): Promise<SafeBaseContract<any>> => {
@@ -46,7 +47,7 @@ export const getCurrentGnosisSafeContract = async (safe: SafeState, provider: st
 }
 
 export const getReadOnlyGnosisSafeContract = async (
-  chain: ChainInfo,
+  chain: Chain,
   safeVersion: SafeState['version'],
   isL1?: boolean,
 ) => {
@@ -85,7 +86,10 @@ export const getReadOnlyMultiSendCallOnlyContract = async (safeVersion: SafeStat
 
   const safeProvider = safeSDK.getSafeProvider()
 
-  return getMultiSendCallOnlyContractInstance(_getValidatedGetContractProps(safeVersion).safeVersion, safeProvider)
+  // For unsupported mastercopies, use the SDK version if available
+  const version = safeVersion ?? safeSDK.getContractVersion()
+
+  return getMultiSendCallOnlyContractInstance(_getValidatedGetContractProps(version).safeVersion, safeProvider)
 }
 
 // GnosisSafeProxyFactory
@@ -93,10 +97,16 @@ export const getReadOnlyMultiSendCallOnlyContract = async (safeVersion: SafeStat
 export const getReadOnlyProxyFactoryContract = async (safeVersion: SafeState['version'], contractAddress?: string) => {
   const safeProvider = getSafeProvider()
 
+  // For unsupported mastercopies, use the SDK version if available
+  let version = safeVersion
+  if (!version) {
+    const safeSDK = getSafeSDK()
+    version = safeSDK?.getContractVersion() ?? null
+  }
+
   return getSafeProxyFactoryContractInstance(
-    _getValidatedGetContractProps(safeVersion).safeVersion,
+    _getValidatedGetContractProps(version).safeVersion,
     safeProvider,
-    safeProvider.getExternalProvider(),
     contractAddress,
   )
 }
@@ -106,8 +116,15 @@ export const getReadOnlyProxyFactoryContract = async (safeVersion: SafeState['ve
 export const getReadOnlyFallbackHandlerContract = async (safeVersion: SafeState['version']) => {
   const safeProvider = getSafeProvider()
 
+  // For unsupported mastercopies, use the SDK version if available
+  let version = safeVersion
+  if (!version) {
+    const safeSDK = getSafeSDK()
+    version = safeSDK?.getContractVersion() ?? null
+  }
+
   return getCompatibilityFallbackHandlerContractInstance(
-    _getValidatedGetContractProps(safeVersion).safeVersion,
+    _getValidatedGetContractProps(version).safeVersion,
     safeProvider,
   )
 }
@@ -122,16 +139,8 @@ export const getReadOnlySignMessageLibContract = async (safeVersion: SafeState['
 
   const safeProvider = safeSDK.getSafeProvider()
 
-  return getSignMessageLibContractInstance(_getValidatedGetContractProps(safeVersion).safeVersion, safeProvider)
-}
+  // For unsupported mastercopies, use the SDK version if available
+  const version = safeVersion ?? safeSDK.getContractVersion()
 
-export const isMigrationToL2Possible = (safe: SafeState): boolean => {
-  return (
-    safe.nonce === 0 &&
-    Boolean(
-      getSafeMigrationDeployment({ network: safe.chainId, version: SAFE_TO_L2_MIGRATION_VERSION })?.networkAddresses[
-        safe.chainId
-      ],
-    )
-  )
+  return getSignMessageLibContractInstance(_getValidatedGetContractProps(version).safeVersion, safeProvider)
 }

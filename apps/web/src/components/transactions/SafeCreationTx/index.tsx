@@ -1,5 +1,5 @@
+import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import React from 'react'
-import type { TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
 import { Box } from '@mui/system'
 import css from './styles.module.css'
 import { InfoDetails } from '@/components/transactions/InfoDetails'
@@ -8,9 +8,10 @@ import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDet
 import { dateString } from '@safe-global/utils/utils/formatters'
 import { isCreationTxInfo } from '@/utils/transaction-guards'
 import { NOT_AVAILABLE } from '@/components/transactions/TxDetails'
+import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 
 type SafeCreationTxProps = {
-  txSummary: TransactionSummary
+  txSummary: Transaction
 }
 
 const SafeCreationTx = ({ txSummary }: SafeCreationTxProps) => {
@@ -23,7 +24,13 @@ const SafeCreationTx = ({ txSummary }: SafeCreationTxProps) => {
     <>
       <Box className={css.txCreation}>
         <InfoDetails title="Creator:">
-          <EthHashInfo address={creator.value} shortAddress={false} showCopyButton hasExplorer />
+          <NamedAddressInfo
+            address={creator.value}
+            name={creator.name}
+            shortAddress={false}
+            showCopyButton
+            hasExplorer
+          />
         </InfoDetails>
         <InfoDetails title="Factory:">
           {factory ? (
