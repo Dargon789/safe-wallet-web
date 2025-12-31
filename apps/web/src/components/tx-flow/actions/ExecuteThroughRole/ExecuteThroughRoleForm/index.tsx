@@ -9,8 +9,8 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { getTxOptions } from '@/utils/transactions'
 import CheckWallet from '@/components/common/CheckWallet'
 
-import type { SignOrExecuteProps } from '@/components/tx/SignOrExecuteForm/SignOrExecuteFormV2'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SignOrExecuteProps } from '@/components/tx/shared/types'
+import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
 import { SuccessScreenFlow } from '@/components/tx-flow/flows'
 import AdvancedParams, { useAdvancedParams } from '../../../../tx/AdvancedParams'
@@ -19,9 +19,8 @@ import { isWalletRejection } from '@/utils/wallets'
 
 import css from './styles.module.css'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { TxSecurityContext } from '@/components/tx/security/shared/TxSecurityContext'
 
-import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
+import WalletRejectionError from '@/components/tx/shared/errors/WalletRejectionError'
 import { pollModuleTransactionId, useExecuteThroughRole, useGasLimit, useMetaTransactions, type Role } from './hooks'
 import { decodeBytes32String } from 'ethers'
 import useOnboard from '@/hooks/wallets/useOnboard'
@@ -30,6 +29,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { assertOnboard, assertWallet } from '@/utils/helpers'
 import { dispatchModuleTxExecution } from '@/services/tx/tx-sender'
 import { Status } from 'zodiac-roles-deployments'
+import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 
 const Role = ({ children }: { children: string }) => {
   let humanReadableRoleKey = children
@@ -50,7 +50,7 @@ export const ExecuteThroughRoleForm = ({
   safeTx?: SafeTransaction
   safeTxError?: Error
   role: Role
-  txSecurity: ReturnType<typeof useTxSecurityContext>
+  txSecurity: ReturnType<typeof useSafeShield>
 }): ReactElement => {
   const currentChain = useCurrentChain()
   const onboard = useOnboard()
@@ -64,7 +64,7 @@ export const ExecuteThroughRoleForm = ({
   const [submitError, setSubmitError] = useState<Error | undefined>()
 
   const { setTxFlow } = useContext(TxModalContext)
-  const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = txSecurity
+  const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
 
   const permissionsError = role.status !== null ? PermissionsErrorMessage[role.status] : null
   const metaTransactions = useMetaTransactions(safeTx)
@@ -84,11 +84,6 @@ export const ExecuteThroughRoleForm = ({
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()
 
-    if (needsRiskConfirmation && !isRiskConfirmed) {
-      setIsRiskIgnored(true)
-      return
-    }
-
     assertWallet(wallet)
     assertOnboard(onboard)
 
@@ -105,7 +100,12 @@ export const ExecuteThroughRoleForm = ({
 
     let txHash: string
     try {
-      txHash = await dispatchModuleTxExecution({ ...txThroughRole, ...txOptions }, wallet.provider, safe.address.value)
+      txHash = await dispatchModuleTxExecution(
+        { ...txThroughRole, ...txOptions },
+        wallet.provider,
+        safe.chainId,
+        safe.address.value,
+      )
     } catch (_err) {
       const err = asError(_err)
       if (isWalletRejection(err)) {
@@ -242,10 +242,8 @@ export const ExecuteThroughRoleForm = ({
   )
 }
 
-const useTxSecurityContext = () => useContext(TxSecurityContext)
-
 export default madProps(ExecuteThroughRoleForm, {
-  txSecurity: useTxSecurityContext,
+  txSecurity: useSafeShield,
 })
 
 const PermissionsErrorMessage: Record<Status, string | null> = {

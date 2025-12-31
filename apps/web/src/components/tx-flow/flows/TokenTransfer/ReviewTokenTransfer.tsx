@@ -4,7 +4,7 @@ import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
 import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender'
 import type { MultiTokenTransferParams } from '.'
 import { SafeTxContext } from '../../SafeTxProvider'
-import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
+import type { MetaTransactionData } from '@safe-global/types-kit'
 import { Divider, Stack } from '@mui/material'
 import ReviewRecipientRow from './ReviewRecipientRow'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -20,14 +20,10 @@ const ReviewTokenTransfer = ({
   onSubmit: () => void
   txNonce?: number
 }>) => {
-  const { setSafeTx, setSafeTxError, setNonce, setIsMassPayout } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, setNonce } = useContext(SafeTxContext)
   const { balances } = useBalances()
 
   const recipients = useMemo(() => params?.recipients || [], [params?.recipients])
-
-  useEffect(() => {
-    setIsMassPayout(recipients.length > 1)
-  }, [recipients, setIsMassPayout])
 
   useEffect(() => {
     if (txNonce !== undefined) {

@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from '@/tests/test-utils'
-import useGasPrice, { getTotalFee } from '@/hooks/useGasPrice'
+import useGasPrice from '@/hooks/useGasPrice'
 import { useCurrentChain } from '../useChains'
+import { getTotalFee } from '@safe-global/utils/hooks/useDefaultGasPrice'
 
 // mock useWeb3Readonly
 jest.mock('../wallets/web3', () => {
@@ -22,7 +23,7 @@ const currentChain = {
   gasPrice: [
     {
       type: 'oracle',
-      uri: 'https://api.etherscan.io/api?module=gastracker&action=gasoracle',
+      uri: 'https://api.etherscan.io/v2/api?chainid=4&module=gastracker&action=gasoracle',
       gasParameter: 'FastGasPrice',
       gweiFactor: '1000000000.000000000',
     },
@@ -82,7 +83,7 @@ describe('useGasPrice', () => {
       await Promise.resolve()
     })
 
-    expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/api?module=gastracker&action=gasoracle')
+    expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/v2/api?chainid=4&module=gastracker&action=gasoracle')
 
     // assert the hook is not loading
     expect(result.current[2]).toBe(false)
@@ -123,7 +124,7 @@ describe('useGasPrice', () => {
       await Promise.resolve()
     })
 
-    expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/api?module=gastracker&action=gasoracle')
+    expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/v2/api?chainid=4&module=gastracker&action=gasoracle')
 
     // assert the hook is not loading
     expect(result.current[2]).toBe(false)
@@ -164,7 +165,7 @@ describe('useGasPrice', () => {
       // assert the hook is not loading
       expect(result.current[2]).toBe(false)
 
-      expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/api?module=gastracker&action=gasoracle')
+      expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/v2/api?chainid=4&module=gastracker&action=gasoracle')
       expect(fetch).toHaveBeenCalledWith('https://ethgasstation.info/json/ethgasAPI.json')
     })
 
@@ -195,7 +196,7 @@ describe('useGasPrice', () => {
       await Promise.resolve()
     })
 
-    expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/api?module=gastracker&action=gasoracle')
+    expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/v2/api?chainid=4&module=gastracker&action=gasoracle')
     expect(fetch).toHaveBeenCalledWith('https://ethgasstation.info/json/ethgasAPI.json')
 
     // assert the hook is not loading

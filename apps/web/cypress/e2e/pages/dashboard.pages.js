@@ -2,25 +2,25 @@ import * as constants from '../../support/constants.js'
 import * as safeapps from './safeapps.pages.js'
 import * as main from './main.page.js'
 import * as createtx from './create_tx.pages.js'
-import staticSafes from '../../fixtures/safes/static.json'
+import staticSafes from '../../fixtures/safes/static.js'
 
 const transactionQueueStr = 'Pending transactions'
 const noTransactionStr = 'This Safe has no queued transactions'
-const overviewStr = 'Total asset value'
+const overviewStr = 'Total'
 const sendStr = 'Send'
 const receiveStr = 'Receive'
 const viewAllStr = 'View all'
-const safeAppStr = 'Safe Apps'
-const exploreSafeApps = 'Explore Safe Apps'
+const explorePossibleStr = "Explore what's possible"
+const swapSuggestion = 'Swap tokens instantly'
 export const copiedAppUrl = 'share/safe-app?appUrl'
 
 const copyShareBtn = '[data-testid="copy-btn-icon"]'
 const exploreAppsBtn = '[data-testid="explore-apps-btn"]'
 const viewAllLink = '[data-testid="view-all-link"][href^="/transactions/queue"]'
-const noTxIcon = '[data-testid="no-tx-icon"]'
 const noTxText = '[data-testid="no-tx-text"]'
 export const pendingTxWidget = '[data-testid="pending-tx-widget"]'
 export const pendingTxItem = '[data-testid="tx-pending-item"]'
+export const assetsWidget = '[data-testid="assets-widget"]'
 const singleTxDetailsHeader = '[data-testid="tx-details"]'
 
 export function clickOnTxByIndex(index) {
@@ -55,7 +55,7 @@ export function verifyTxItemInPendingTx(data) {
 }
 
 export function verifyEmptyTxSection() {
-  main.verifyElementsIsVisible([noTxIcon, noTxText])
+  main.verifyElementsIsVisible([noTxText])
 }
 
 export function clickOnViewAllBtn() {
@@ -117,7 +117,7 @@ export function verifyOverviewWidgetData() {
 
 export function verifyTxQueueWidget() {
   // Alias for the Transaction queue section
-  cy.contains('h2', transactionQueueStr).parents('section').as('txQueueSection')
+  cy.contains('p', transactionQueueStr).parents('section').as('txQueueSection')
 
   cy.get('@txQueueSection').within(() => {
     // There should be queued transactions
@@ -126,8 +126,10 @@ export function verifyTxQueueWidget() {
     // Queued txns
     cy.contains(
       `a[href^="/transactions/tx?id=multisig_0x"]`,
-      '14' + 'Send' + `-0.00002 ${constants.tokenAbbreviation.sep}` + '1 out of 1',
+      'Send' + `-0.00002 ${constants.tokenAbbreviation.sep}`,
     ).should('exist')
+
+    cy.contains(`a[href^="/transactions/tx?id=multisig_0x"]`, '1 out of 1').should('exist')
 
     cy.contains(
       `a[href="${constants.transactionQueueUrl}${encodeURIComponent(staticSafes.SEP_STATIC_SAFE_2)}"]`,
@@ -136,7 +138,7 @@ export function verifyTxQueueWidget() {
   })
 }
 
-export function verifySafeAppsSection() {
-  cy.contains('h2', safeAppStr).parents('section').as('safeAppsSection')
-  cy.get('@safeAppsSection').contains(exploreSafeApps)
+export function verifyExplorePossibleSection() {
+  cy.contains('h2', explorePossibleStr).parents('section').as('explorePossibleSection')
+  cy.get('@explorePossibleSection').contains(swapSuggestion)
 }

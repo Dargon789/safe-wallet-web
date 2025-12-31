@@ -1,8 +1,8 @@
 import { safeSignatureBuilder, safeTxBuilder } from '@/tests/builders/safeTx'
 import { act, fireEvent, getAllByTitle, render, waitFor } from '@/tests/test-utils'
 import ApprovalEditor from '.'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
-import { OperationType } from '@safe-global/safe-core-sdk-types'
+import { TransactionTokenType as TokenType } from '@safe-global/store/gateway/types'
+import { OperationType } from '@safe-global/types-kit'
 import * as approvalInfos from '@/components/tx/ApprovalEditor/hooks/useApprovalInfos'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { faker } from '@faker-js/faker'
@@ -12,16 +12,11 @@ import { getAndValidateSafeSDK } from '@/services/tx/tx-sender/sdk'
 import { parseUnits } from 'ethers'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import * as useBalances from '@/hooks/useBalances'
 jest.mock('@/services/tx/tx-sender/sdk', () => ({
   getAndValidateSafeSDK: jest.fn().mockReturnValue({
     createTransaction: jest.fn(),
   }),
-}))
-
-jest.mock('@safe-global/safe-gateway-typescript-sdk', () => ({
-  ...jest.requireActual('@safe-global/safe-gateway-typescript-sdk'),
-  getContract: jest.fn(() => undefined),
-  __esModule: true,
 }))
 
 const ERC20_INTERFACE = ERC20__factory.createInterface()
@@ -183,14 +178,11 @@ describe('ApprovalEditor', () => {
       ],
     }
 
-    const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />, {
-      initialReduxState: {
-        balances: {
-          data: mockBalances,
-          loading: false,
-        },
-      },
-    })
+    jest
+      .spyOn(useBalances, 'default')
+      .mockReturnValue({ balances: mockBalances, loaded: true, loading: false, error: undefined })
+
+    const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />)
 
     await waitFor(() => {
       const amountInput1 = result.container.querySelector('input[name="approvals.0"]') as HTMLInputElement
@@ -293,14 +285,11 @@ describe('ApprovalEditor', () => {
       ],
     }
 
-    const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />, {
-      initialReduxState: {
-        balances: {
-          data: mockBalances,
-          loading: false,
-        },
-      },
-    })
+    jest
+      .spyOn(useBalances, 'default')
+      .mockReturnValue({ balances: mockBalances, loaded: true, loading: false, error: undefined })
+
+    const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />)
 
     await waitFor(() => {
       const amountInput1 = result.container.querySelector('input[name="approvals.0"]') as HTMLInputElement

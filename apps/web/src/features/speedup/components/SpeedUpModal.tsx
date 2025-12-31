@@ -17,7 +17,7 @@ import { getTxOptions } from '@/utils/transactions'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
 import { isWalletRejection } from '@/utils/wallets'
-import { type TransactionOptions } from '@safe-global/safe-core-sdk-types'
+import { type TransactionOptions } from '@safe-global/types-kit'
 import { PendingTxType, type PendingProcessingTx } from '@/store/pendingTxsSlice'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
@@ -26,7 +26,7 @@ import { getTransactionTrackingType } from '@/services/analytics/tx-tracking'
 import { trackError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import CheckWallet from '@/components/common/CheckWallet'
-import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
+import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
@@ -60,7 +60,7 @@ export const SpeedUpModal = ({
   const safeAddress = useSafeAddress()
   const hasActions = signerAddress && signerAddress === wallet?.address
   const dispatch = useAppDispatch()
-  const [trigger] = useLazyGetTransactionDetailsQuery()
+  const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const isDisabled = waitingForConfirmation || !wallet || !speedUpFee || !onboard
   const [safeTx] = useAsync(() => {
     if (!chainInfo?.chainId) return
@@ -101,7 +101,7 @@ export const SpeedUpModal = ({
           safeAddress,
           safeTx.data.nonce,
         )
-        const { data: details } = await trigger({ chainId: chainInfo.chainId, txId })
+        const { data: details } = await trigger({ chainId: chainInfo.chainId, id: txId })
         const txType = getTransactionTrackingType(details)
         trackEvent({ ...TX_EVENTS.SPEED_UP, label: txType })
       } else {
@@ -111,7 +111,9 @@ export const SpeedUpModal = ({
           pendingTx.to,
           pendingTx.data,
           wallet.provider,
+          pendingTx.chainId,
           wallet.address,
+          pendingTx.safeAddress,
           pendingTx.nonce,
         )
         // Currently all custom txs are batch executes

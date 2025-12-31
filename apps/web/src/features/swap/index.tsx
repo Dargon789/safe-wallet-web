@@ -4,11 +4,8 @@ import type { OnTradeParamsPayload } from '@cowprotocol/events'
 import { type CowEventListeners, CowEvents } from '@cowprotocol/events'
 import { type MutableRefObject, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, useTheme } from '@mui/material'
-import {
-  SafeAppAccessPolicyTypes,
-  type SafeAppData,
-  SafeAppFeatures,
-} from '@safe-global/safe-gateway-typescript-sdk/dist/types/safe-apps'
+import { SafeAppAccessPolicyTypes, SafeAppFeatures } from '@safe-global/store/gateway/types'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useCustomAppCommunicator } from '@/hooks/safe-apps/useCustomAppCommunicator'
@@ -87,6 +84,7 @@ const SwapWidget = ({ sell }: Params) => {
   const wallet = useWallet()
   const { isConsentAccepted, onAccept } = useSwapConsent()
   const feeEnabled = useHasFeature(FEATURES.NATIVE_SWAPS_FEE_ENABLED)
+  const nativeCowSwapFeeV2Enabled = useHasFeature(FEATURES.NATIVE_COW_SWAP_FEE_V2)
   const useStagingCowServer = useHasFeature(FEATURES.NATIVE_SWAPS_USE_COW_STAGING_SERVER)
 
   const { data: isSafeAddressBlocked } = useGetIsSanctionedQuery(safeAddress || skipToken)
@@ -165,6 +163,7 @@ const SwapWidget = ({ sell }: Params) => {
       tags: ['safe-apps'],
       features: [SafeAppFeatures.BATCHED_TRANSACTIONS],
       socialProfiles: [],
+      featured: false,
     }),
     [darkMode],
   )
@@ -226,7 +225,7 @@ const SwapWidget = ({ sell }: Params) => {
         handler: (newTradeParams: OnTradeParamsPayload) => {
           const { orderType: tradeType, recipient, sellToken, buyToken } = newTradeParams
 
-          const newFeeBps = feeEnabled ? calculateFeePercentageInBps(newTradeParams) : 0
+          const newFeeBps = feeEnabled ? calculateFeePercentageInBps(newTradeParams, nativeCowSwapFeeV2Enabled) : 0
 
           setParams((params) => ({
             ...params,
@@ -251,7 +250,7 @@ const SwapWidget = ({ sell }: Params) => {
         },
       },
     ]
-  }, [dispatch, feeEnabled])
+  }, [dispatch, feeEnabled, nativeCowSwapFeeV2Enabled])
 
   useEffect(() => {
     setParams((params) => ({

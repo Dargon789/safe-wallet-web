@@ -1,4 +1,5 @@
 # This Docker image is meant to be used only by our safe-infrastructure repository
+
 name: Web Deploy to Dockerhub
 
 on:

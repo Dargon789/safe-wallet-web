@@ -20,11 +20,12 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useRouter } from 'next/router'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useMemo, useState } from 'react'
-import { useCompatibleNetworks } from '../../hooks/useCompatibleNetworks'
+import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
 import { MULTICHAIN_HELP_ARTICLE } from '@/config/constants'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
+import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
 
 type CreateSafeOnNewChainForm = {
   chainId: string
@@ -34,7 +35,7 @@ type ReplaySafeDialogProps = {
   safeAddress: string
   safeCreationResult: ReturnType<typeof useSafeCreationData>
   replayableChains?: ReturnType<typeof useCompatibleNetworks>
-  chain?: ChainInfo
+  chain?: Chain
   currentName: string | undefined
   open: boolean
   onClose: () => void
@@ -115,6 +116,7 @@ const ReplaySafeDialog = ({
       trackEvent({ ...CREATE_SAFE_EVENTS.CREATED_SAFE, label: 'counterfactual' })
 
       router.push({
+        pathname: UNDEPLOYED_SAFE_BLOCKED_ROUTES.includes(router.pathname) ? AppRoutes.home : router.pathname,
         query: {
           safe: `${selectedChain.shortName}:${safeAddress}`,
         },
@@ -210,7 +212,15 @@ const ReplaySafeDialog = ({
               ) : noChainsAvailable ? (
                 <ErrorMessage level="error">This Safe cannot be replayed on any chains.</ErrorMessage>
               ) : (
-                <>{!chain && <NetworkInput required name="chainId" chainConfigs={replayableChains ?? []} />}</>
+                <>
+                  {!chain && (
+                    <NetworkInput
+                      required
+                      name="chainId"
+                      chainConfigs={(replayableChains as (Chain & { available: boolean })[]) ?? []}
+                    />
+                  )}
+                </>
               )}
 
               {creationError && (
@@ -269,7 +279,7 @@ export const CreateSafeOnNewChain = ({
   )
 
   const safeCreationResult = useSafeCreationData(safeAddress, deployedChains)
-  const allCompatibleChains = useCompatibleNetworks(safeCreationResult[0])
+  const allCompatibleChains = useCompatibleNetworks(safeCreationResult[0], configs)
   const isUnsupportedSafeCreationVersion = Boolean(!allCompatibleChains?.length)
   const replayableChains = useMemo(
     () =>

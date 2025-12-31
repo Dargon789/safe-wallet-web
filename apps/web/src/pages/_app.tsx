@@ -8,13 +8,11 @@ import { Provider } from 'react-redux'
 import CssBaseline from '@mui/material/CssBaseline'
 import type { Theme } from '@mui/material/styles'
 import { ThemeProvider } from '@mui/material/styles'
-import { setBaseUrl as setGatewayBaseUrl } from '@safe-global/safe-gateway-typescript-sdk'
-import { setBaseUrl as setNewGatewayBaseUrl } from '@safe-global/safe-client-gateway-sdk'
 import { CacheProvider, type EmotionCache } from '@emotion/react'
 import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import '@/styles/globals.css'
 import { BRAND_NAME } from '@/config/constants'
-import { makeStore, useHydrateStore } from '@/store'
+import { makeStore, setStoreInstance, useHydrateStore } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
 import useLoadableStores from '@/hooks/useLoadableStores'
 import { useInitOnboard } from '@/hooks/wallets/useOnboard'
@@ -46,19 +44,23 @@ import CounterfactualHooks from '@/features/counterfactual/CounterfactualHooks'
 import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
+import usePortfolioRefetchOnTxHistory from '@/features/portfolio/hooks/usePortfolioRefetchOnTxHistory'
 import OutreachPopup from '@/features/targetedOutreach/components/OutreachPopup'
 import { GATEWAY_URL } from '@/config/gateway'
 import { useDatadog } from '@/services/datadog'
+import useMixpanel from '@/services/analytics/useMixpanel'
+import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
+import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
 
 const reduxStore = makeStore()
+setStoreInstance(reduxStore)
 
 const InitApp = (): null => {
-  setGatewayBaseUrl(GATEWAY_URL)
-  setNewGatewayBaseUrl(GATEWAY_URL)
   useHydrateStore(reduxStore)
   useAdjustUrl()
   useDatadog()
   useGtm()
+  useMixpanel()
   useNotificationTracking()
   useInitSession()
   useLoadableStores()
@@ -74,6 +76,8 @@ const InitApp = (): null => {
   useSafeMsgTracking()
   useBeamer()
   useVisitedSafes()
+  usePortfolioRefetchOnTxHistory()
+  useSafeLabsTerms() // Automatically disconnect wallets if terms not accepted and feature is enabled
 
   return null
 }
@@ -81,9 +85,12 @@ const InitApp = (): null => {
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache()
 
+const THEME_DARK = 'dark'
+const THEME_LIGHT = 'light'
+
 export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }) => {
   const isDarkMode = useDarkMode()
-  const themeMode = isDarkMode ? 'dark' : 'light'
+  const themeMode = isDarkMode ? THEME_DARK : THEME_LIGHT
 
   return (
     <SafeThemeProvider mode={themeMode}>
@@ -92,7 +99,9 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
           <SentryErrorBoundary showDialog fallback={ErrorBoundary}>
             <WalletProvider>
               <GeoblockingProvider>
-                <TxModalProvider>{children}</TxModalProvider>
+                <TxModalProvider>
+                  <AddressBookSourceProvider>{children}</AddressBookSourceProvider>
+                </TxModalProvider>
               </GeoblockingProvider>
             </WalletProvider>
           </SentryErrorBoundary>
@@ -104,6 +113,16 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
 
 interface SafeWalletAppProps extends AppProps {
   emotionCache?: EmotionCache
+}
+
+const TermsGate = ({ children }: { children: ReactNode }) => {
+  const { shouldShowContent } = useSafeLabsTerms()
+
+  if (!shouldShowContent) {
+    return null
+  }
+
+  return <>{children}</>
 }
 
 const SafeWalletApp = ({
@@ -127,23 +146,25 @@ const SafeWalletApp = ({
 
           <InitApp />
 
-          <PageLayout pathname={router.pathname}>
-            <Component {...pageProps} key={safeKey} />
-          </PageLayout>
+          <TermsGate>
+            <PageLayout pathname={router.pathname}>
+              <Component {...pageProps} key={safeKey} />
+            </PageLayout>
 
-          <CookieAndTermBanner />
+            <CookieAndTermBanner />
 
-          <OutreachPopup />
+            <OutreachPopup />
 
-          <Notifications />
+            <Notifications />
 
-          <Recovery />
+            <Recovery />
 
-          <CounterfactualHooks />
+            <CounterfactualHooks />
 
-          <Analytics />
+            <Analytics />
 
-          <PkModulePopup />
+            <PkModulePopup />
+          </TermsGate>
         </AppProviders>
       </CacheProvider>
     </Provider>

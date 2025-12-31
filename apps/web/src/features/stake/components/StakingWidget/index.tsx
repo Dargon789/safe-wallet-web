@@ -11,6 +11,7 @@ const StakingWidget = ({ asset }: { asset?: string }) => {
     () => ({
       ...getEmptySafeApp(),
       ...widgetAppData,
+      iconUrl: '/images/common/stake.svg',
       url,
     }),
     [url],
