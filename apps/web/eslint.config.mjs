@@ -17,7 +17,14 @@ const compat = new FlatCompat({
 
 export default [
   {
-    ignores: ['**/node_modules/', '**/.next/', '**/.github/', '**/cypress/', '**/src/types/contracts/'],
+    ignores: [
+      '**/node_modules/',
+      '**/.next/',
+      '**/.github/',
+      '**/cypress/',
+      '**/src/types/contracts/',
+      '**/.storybook/test-runner.mjs',
+    ],
   },
   ...compat.extends('next', 'prettier', 'plugin:storybook/recommended'),
   {
