@@ -127,6 +127,7 @@ export default [
             },
             // Same patterns for relative imports
             {
+              // Same for relative imports
               group: [
                 '../features/*/components',
                 '../features/*/components/**',
