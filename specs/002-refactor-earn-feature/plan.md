@@ -16,12 +16,13 @@ Refactor the earn feature to follow the standard feature architecture pattern es
 **Target Platform**: Web browsers (Chrome, Firefox, Safari, Edge)  
 **Project Type**: Web (Next.js monorepo workspace)  
 **Performance Goals**: Code splitting to prevent earn code from loading when feature disabled; lazy loading on-demand  
-**Constraints**: 
+**Constraints**:
+
 - Zero functional changes (pure refactoring)
 - All existing tests must pass without modification
 - External imports must be updated to use new public API
 - Bundle must not include earn code when EARN feature flag is disabled  
-**Scale/Scope**: 
+  **Scale/Scope**:
 - 1 feature with ~10 components
 - 2 external import locations to update (Assets dashboard widget, AssetsTable PromoButtons)
 - 2 hooks, 1 utility service file
@@ -192,18 +193,18 @@ _No violations detected - this section intentionally left empty._
 
 ### Key Decisions Documented
 
-| Decision Area | Choice | Rationale |
-|--------------|--------|-----------|
-| **Public API Components** | `EarnButton` only | Only component used outside feature |
-| **Public API Hooks** | `useIsEarnFeatureEnabled` only | Only hook used outside feature |
-| **Public API Types** | `EarnButtonProps` only | Only type needed by external consumers |
-| **Analytics** | Keep in global service | Already properly separated, used outside feature |
-| **Feature Flag Hook** | Add `undefined` return type | Preserve loading state per standard pattern |
-| **utils.ts Location** | Move to `services/utils.ts` | Align with standard structure |
-| **Type Extraction** | Extract `EarnButtonProps`, keep simple types inline | Balance between DRY and readability |
-| **Barrel Export Pattern** | Follow walletconnect pattern exactly | Proven, compliant reference implementation |
-| **Main Component Location** | Rename `index.tsx` to `components/EarnPage/index.tsx` | Separate concerns (component vs. barrel) |
-| **Testing Strategy** | Manual testing checklist | No automated tests exist currently |
+| Decision Area               | Choice                                                | Rationale                                        |
+| --------------------------- | ----------------------------------------------------- | ------------------------------------------------ |
+| **Public API Components**   | `EarnButton` only                                     | Only component used outside feature              |
+| **Public API Hooks**        | `useIsEarnFeatureEnabled` only                        | Only hook used outside feature                   |
+| **Public API Types**        | `EarnButtonProps` only                                | Only type needed by external consumers           |
+| **Analytics**               | Keep in global service                                | Already properly separated, used outside feature |
+| **Feature Flag Hook**       | Add `undefined` return type                           | Preserve loading state per standard pattern      |
+| **utils.ts Location**       | Move to `services/utils.ts`                           | Align with standard structure                    |
+| **Type Extraction**         | Extract `EarnButtonProps`, keep simple types inline   | Balance between DRY and readability              |
+| **Barrel Export Pattern**   | Follow walletconnect pattern exactly                  | Proven, compliant reference implementation       |
+| **Main Component Location** | Rename `index.tsx` to `components/EarnPage/index.tsx` | Separate concerns (component vs. barrel)         |
+| **Testing Strategy**        | Manual testing checklist                              | No automated tests exist currently               |
 
 **Output**: [research.md](./research.md)
 
@@ -216,6 +217,7 @@ _No violations detected - this section intentionally left empty._
 ### Data Model Designed
 
 The earn feature has a simple data model with 7 key entities:
+
 1. **Earn Consent State**: Boolean in LocalStorage (`lendDisclaimerAcceptedV1`)
 2. **Feature Flag State**: Boolean | undefined from CGW API (`FEATURES.EARN`)
 3. **Geoblocking State**: Boolean from global context
@@ -231,6 +233,7 @@ No Redux store needed - state managed through React hooks and browser APIs.
 ### API Contracts Defined
 
 TypeScript interface contract created defining the public API:
+
 - Default export: `EarnPage` component (lazy-loadable)
 - Named exports: `EarnButton`, `useIsEarnFeatureEnabled`, `EarnButtonProps`
 - Internal components/hooks/services documented but not exported
@@ -242,6 +245,7 @@ Contract includes usage examples and migration guide for updating deep imports.
 ### Quickstart Guide Created
 
 Comprehensive developer guide covering:
+
 - Quick reference for imports and folder structure
 - Usage examples for `EarnButton` and `useIsEarnFeatureEnabled`
 - Development workflow (type-check, lint, test)
@@ -254,6 +258,7 @@ Comprehensive developer guide covering:
 ### Agent Context Updated
 
 ✅ Claude Code context file updated with:
+
 - Language: TypeScript 5.x (Next.js web application)
 - Framework: React 18, Next.js 14, MUI, ethers.js, @safe-global/utils
 - Database: Browser LocalStorage, CGW API chain configs
@@ -303,10 +308,12 @@ Comprehensive developer guide covering:
 ### Reference Implementation
 
 This refactoring follows the walletconnect feature pattern documented in:
+
 - `apps/web/docs/feature-architecture.md` (architecture documentation)
 - `apps/web/src/features/walletconnect/` (reference implementation)
 
 Key patterns from walletconnect to replicate:
+
 1. Main `index.ts` uses `dynamic()` for default export component
 2. Types exported both individually and via barrel file
 3. Hooks barrel exports all public hooks
@@ -316,17 +323,20 @@ Key patterns from walletconnect to replicate:
 ### External Dependencies
 
 **Confirmed external imports** (must be updated):
+
 1. `apps/web/src/components/dashboard/Assets/index.tsx` - imports `EarnButton`
 2. `apps/web/src/components/balances/AssetsTable/PromoButtons.tsx` - imports `EarnButton`
 3. `apps/web/src/components/dashboard/index.tsx` - imports `useIsEarnFeatureEnabled`
 
 These imports currently use deep paths:
+
 ```typescript
 import EarnButton from '@/features/earn/components/EarnButton'
 import { useIsEarnFeatureEnabled as useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEnabled'
 ```
 
 After refactoring, they must use:
+
 ```typescript
 import { EarnButton } from '@/features/earn'
 import { useIsEarnFeatureEnabled as useIsEarnPromoEnabled } from '@/features/earn'
@@ -335,6 +345,7 @@ import { useIsEarnFeatureEnabled as useIsEarnPromoEnabled } from '@/features/ear
 ### Lazy Loading Current Status
 
 The earn page (`apps/web/src/pages/earn.tsx`) already uses `dynamic()` import:
+
 ```typescript
 const LazyEarnPage = dynamic(() => import('@/features/earn'), { ssr: false })
 ```
@@ -359,6 +370,7 @@ This is correct and compliant. However, the current `@/features/earn` exports th
 ### Success Validation
 
 After implementation, validate success by:
+
 1. ✅ Running type-check: `yarn workspace @safe-global/web type-check`
 2. ✅ Running tests: `yarn workspace @safe-global/web test`
 3. ✅ Running lint: `yarn workspace @safe-global/web lint`

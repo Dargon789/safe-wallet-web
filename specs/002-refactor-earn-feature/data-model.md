@@ -23,6 +23,7 @@ The earn feature is a UI-centric feature with minimal local state management. Mo
 **Key**: `lendDisclaimerAcceptedV1` (stored in `EARN_CONSENT_STORAGE_KEY` constant)
 
 **Schema**:
+
 ```typescript
 type EarnConsentState = boolean | undefined
 
@@ -32,17 +33,20 @@ type EarnConsentState = boolean | undefined
 ```
 
 **Lifecycle**:
+
 1. On first visit to `/earn`, state is `undefined` (loading from localStorage)
 2. Hook `useConsent` resolves to `false` if no consent stored
 3. User clicks "Continue" on disclaimer → state becomes `true`, stored in localStorage
 4. On subsequent visits, state immediately resolves to `true`
 
 **Validation Rules**:
+
 - Must be a boolean value when stored
 - No expiration (persists indefinitely until user clears storage)
 - Feature-specific (does not affect other features)
 
 **Dependencies**:
+
 - Used by: `EarnPage` component to determine whether to show disclaimer or widget
 - Hook: `useConsent(EARN_CONSENT_STORAGE_KEY)` from `@/hooks/useConsent`
 
@@ -57,6 +61,7 @@ type EarnConsentState = boolean | undefined
 **Key**: `FEATURES.EARN` from `@safe-global/utils/utils/chains`
 
 **Schema**:
+
 ```typescript
 type FeatureFlagState = boolean | undefined
 
@@ -66,17 +71,20 @@ type FeatureFlagState = boolean | undefined
 ```
 
 **Lifecycle**:
+
 1. On app load, chain config is fetched from CGW API
 2. Hook `useHasFeature(FEATURES.EARN)` returns `undefined` while loading
 3. Once loaded, returns `true` or `false` based on chain config
 4. Changes when user switches chains (re-evaluated per chain)
 
 **Validation Rules**:
+
 - Read-only (cannot be modified by client)
 - Per-chain configuration (different chains have different values)
 - Combines with geoblocking check in `useIsEarnFeatureEnabled`
 
 **Dependencies**:
+
 - Used by: `useIsEarnFeatureEnabled` hook (public API)
 - Used by: `earn.tsx` page to show/hide feature
 - Hook: `useHasFeature(FEATURES.EARN)` from `@/hooks/useChains`
@@ -90,6 +98,7 @@ type FeatureFlagState = boolean | undefined
 **Storage**: Global React Context (`GeoblockingContext`)
 
 **Schema**:
+
 ```typescript
 type GeoblockingState = boolean
 
@@ -98,16 +107,19 @@ type GeoblockingState = boolean
 ```
 
 **Lifecycle**:
+
 1. On app load, geolocation check is performed
 2. Context provider sets boolean value based on user's country
 3. Value is accessible throughout the app via `useContext(GeoblockingContext)`
 
 **Validation Rules**:
+
 - Read-only (cannot be modified by client)
 - Global state (not feature-specific, but affects earn)
 - Regulatory compliance requirement
 
 **Dependencies**:
+
 - Used by: `useIsEarnFeatureEnabled` hook to combine with feature flag
 - Context: `GeoblockingContext` from `@/components/common/GeoblockingProvider`
 
@@ -120,6 +132,7 @@ type GeoblockingState = boolean
 **Storage**: Determined by backend check
 
 **Schema**:
+
 ```typescript
 type BlockedAddressState = string | null
 
@@ -128,16 +141,19 @@ type BlockedAddressState = string | null
 ```
 
 **Lifecycle**:
+
 1. Hook `useBlockedAddress` checks current Safe against blocklist
 2. Returns `null` if not blocked, or the address string if blocked
 3. Re-evaluated when Safe address changes
 
 **Validation Rules**:
+
 - Read-only (cannot be modified by client)
 - Address-specific (not chain-specific)
 - Security/compliance requirement
 
 **Dependencies**:
+
 - Used by: `EarnPage` component to show blocked address message
 - Hook: `useBlockedAddress()` from `@/hooks/useBlockedAddress`
 
@@ -152,6 +168,7 @@ type BlockedAddressState = string | null
 **Key**: `asset_id` query parameter
 
 **Schema**:
+
 ```typescript
 type AssetSelectionState = string | undefined
 
@@ -161,6 +178,7 @@ type AssetSelectionState = string | undefined
 ```
 
 **Lifecycle**:
+
 1. User clicks `EarnButton` on an asset row
 2. Button navigates to `/earn?asset_id={chainId}_{tokenAddress}`
 3. `EarnView` component reads query parameter
@@ -168,12 +186,14 @@ type AssetSelectionState = string | undefined
 5. Widget pre-selects the asset for the user
 
 **Validation Rules**:
+
 - Format: `{chainId}_{tokenAddress}` (e.g., "1_0xABC...")
 - Chain ID must match current chain
 - Token address must be valid Ethereum address
 - Token must be eligible for earn (checked via `isEligibleEarnToken` utility)
 
 **Dependencies**:
+
 - Set by: `EarnButton` component when clicked
 - Read by: `EarnView` component via `useRouter().query`
 - Passed to: Kiln widget via `useGetWidgetUrl` hook
@@ -190,6 +210,7 @@ type AssetSelectionState = string | undefined
 **Key**: `hideEarnInfoV2` (stored in `hideEarnInfoStorageKey` constant)
 
 **Schema**:
+
 ```typescript
 type InfoPanelState = boolean | undefined
 
@@ -199,17 +220,20 @@ type InfoPanelState = boolean | undefined
 ```
 
 **Lifecycle**:
+
 1. On visit to `/earn`, state is checked from localStorage
 2. If `false` or `undefined`, show `EarnInfo` component
 3. User clicks "Get Started" → state becomes `true`, stored in localStorage
 4. On subsequent visits, show `EarnWidget` directly (skip info panel)
 
 **Validation Rules**:
+
 - Boolean value when stored
 - No expiration (persists indefinitely)
 - User can reset by clearing localStorage
 
 **Dependencies**:
+
 - Used by: `EarnView` component to determine which view to show
 - Hook: `useLocalStorage<boolean>(hideEarnInfoStorageKey)` from `@/services/local-storage/useLocalStorage`
 
@@ -222,15 +246,17 @@ type InfoPanelState = boolean | undefined
 **Storage**: Computed dynamically (not persisted)
 
 **Schema**:
+
 ```typescript
 interface WidgetConfiguration {
-  url: string              // Base URL (production or testnet)
-  theme: 'light' | 'dark'  // Theme based on user preference
-  asset_id?: string        // Optional pre-selected asset
+  url: string // Base URL (production or testnet)
+  theme: 'light' | 'dark' // Theme based on user preference
+  asset_id?: string // Optional pre-selected asset
 }
 ```
 
 **Lifecycle**:
+
 1. `useGetWidgetUrl` hook computes widget URL
 2. Checks if current chain is testnet → use `WIDGET_TESTNET_URL`
 3. Otherwise → use `WIDGET_PRODUCTION_URL`
@@ -238,11 +264,13 @@ interface WidgetConfiguration {
 5. Returns complete URL for iframe `src` attribute
 
 **Validation Rules**:
+
 - URL must be from approved Kiln domains
 - Theme must match user's dark mode preference
 - Asset ID (if provided) must match format from Asset Selection State
 
 **Dependencies**:
+
 - Generated by: `useGetWidgetUrl` hook in `hooks/useGetWidgetUrl.ts`
 - Used by: `EarnWidget` component to set iframe `src`
 - Depends on: `useDarkMode`, `useChains`, `useChainId` hooks
@@ -330,6 +358,7 @@ The earn feature uses **local component state** and **React hooks** rather than 
 **Decision**: The earn feature does NOT require a Redux store slice.
 
 **Rationale**:
+
 - State is localized to the feature
 - No complex state machines or async state
 - No need for time-travel debugging
@@ -337,15 +366,15 @@ The earn feature uses **local component state** and **React hooks** rather than 
 
 ### Hooks Used for State
 
-| Hook | Purpose | Source |
-|------|---------|--------|
-| `useConsent` | Manage consent state in localStorage | `@/hooks/useConsent` |
-| `useLocalStorage` | Manage info panel state in localStorage | `@/services/local-storage/useLocalStorage` |
-| `useHasFeature` | Read feature flag state from CGW config | `@/hooks/useChains` |
-| `useContext(GeoblockingContext)` | Read geoblocking state from context | React Context |
-| `useBlockedAddress` | Check if current address is blocked | `@/hooks/useBlockedAddress` |
-| `useRouter` | Read and write URL query parameters | Next.js router |
-| `useDarkMode` | Read user's theme preference | `@/hooks/useDarkMode` |
+| Hook                             | Purpose                                 | Source                                     |
+| -------------------------------- | --------------------------------------- | ------------------------------------------ |
+| `useConsent`                     | Manage consent state in localStorage    | `@/hooks/useConsent`                       |
+| `useLocalStorage`                | Manage info panel state in localStorage | `@/services/local-storage/useLocalStorage` |
+| `useHasFeature`                  | Read feature flag state from CGW config | `@/hooks/useChains`                        |
+| `useContext(GeoblockingContext)` | Read geoblocking state from context     | React Context                              |
+| `useBlockedAddress`              | Check if current address is blocked     | `@/hooks/useBlockedAddress`                |
+| `useRouter`                      | Read and write URL query parameters     | Next.js router                             |
+| `useDarkMode`                    | Read user's theme preference            | `@/hooks/useDarkMode`                      |
 
 ---
 
@@ -364,15 +393,15 @@ The earn feature uses **local component state** and **React hooks** rather than 
 
 ## Validation Summary
 
-| Entity | Validation | Enforced By |
-|--------|-----------|-------------|
-| Earn Consent | Boolean only | `useConsent` hook |
-| Feature Flag | Read-only from API | CGW API + `useHasFeature` |
-| Geoblocking | Read-only from context | `GeoblockingContext` |
-| Blocked Address | Read-only from hook | `useBlockedAddress` |
-| Asset Selection | Format `{chainId}_{address}` | `isEligibleEarnToken` utility |
-| Info Panel State | Boolean only | `useLocalStorage` hook |
-| Widget Config | URL from allowed domains | `useGetWidgetUrl` hook |
+| Entity           | Validation                   | Enforced By                   |
+| ---------------- | ---------------------------- | ----------------------------- |
+| Earn Consent     | Boolean only                 | `useConsent` hook             |
+| Feature Flag     | Read-only from API           | CGW API + `useHasFeature`     |
+| Geoblocking      | Read-only from context       | `GeoblockingContext`          |
+| Blocked Address  | Read-only from hook          | `useBlockedAddress`           |
+| Asset Selection  | Format `{chainId}_{address}` | `isEligibleEarnToken` utility |
+| Info Panel State | Boolean only                 | `useLocalStorage` hook        |
+| Widget Config    | URL from allowed domains     | `useGetWidgetUrl` hook        |
 
 ---
 
