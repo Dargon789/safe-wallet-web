@@ -203,7 +203,7 @@ const TxFlowProvider = <T extends unknown>({
     async (txId: string, isExecuted = false, isRoleExecution = false, isProposerCreation = false) => {
       const { data: details } = await trigger({ chainId, id: txId })
       // Compute isMassPayout from data (recipients.length > 1)
-      const isMassPayout = Array.isArray((data as { recipients?: unknown[] })?.recipients) && (data as { recipients: unknown[] }).recipients.length > 1
+      const isMassPayout = (data as any)?.recipients?.length > 1
       // Track tx event
       trackTxEvents(
         details,

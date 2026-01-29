@@ -18,7 +18,7 @@ import {
   Typography,
 } from '@mui/material'
 import partition from 'lodash/partition'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import ExpandMoreIcon from '@mui/icons-material/KeyboardArrowDownRounded'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
 import type { NextRouter } from 'next/router'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
@@ -31,17 +31,15 @@ import useSafeAddress from '@/hooks/useSafeAddress'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import uniq from 'lodash/uniq'
 import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
-import { useSafeCreationData } from '@/features/multichain/hooks/useSafeCreationData'
+import { useSafeCreationData, CreateSafeOnSpecificChain, hasMultiChainAddNetworkFeature } from '@/features/multichain'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import PlusIcon from '@/public/images/common/plus.svg'
 import useAddressBook from '@/hooks/useAddressBook'
-import { CreateSafeOnSpecificChain } from '@/features/multichain/components/CreateSafeOnNewChain'
 import { useGetSafeOverviewQuery } from '@/store/api/gateway'
 import useChainId from '@/hooks/useChainId'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { InfoOutlined } from '@mui/icons-material'
 import { selectUndeployedSafe } from '@/store/slices'
-import { hasMultiChainAddNetworkFeature } from '@/features/multichain/utils/utils'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
 import { AppRoutes } from '@/config/routes'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
@@ -354,9 +352,11 @@ const UndeployedNetworks = ({
 const NetworkSelector = ({
   onChainSelect,
   offerSafeCreation = false,
+  compactButton = false,
 }: {
   onChainSelect?: () => void
   offerSafeCreation?: boolean
+  compactButton?: boolean
 }): ReactElement => {
   const [open, setOpen] = useState<boolean>(false)
   const isDarkMode = useDarkMode()
@@ -418,12 +418,17 @@ const NetworkSelector = ({
             onClick={onChainSelect}
             className={css.item}
           >
-            <ChainIndicatorWithFiatBalance chain={chain} safeAddress={safeAddress} isSelected={isSelected} />
+            <ChainIndicator
+              responsive={isSelected}
+              chainId={chain.chainId}
+              inline
+              onlyLogo={compactButton && isSelected}
+            />
           </Link>
         </MenuItem>
       )
     },
-    [configs, onChainSelect, router, safeAddress, currentSafeApp],
+    [configs, onChainSelect, router, safeAddress, currentSafeApp, compactButton],
   )
 
   const handleClose = () => {
@@ -463,9 +468,21 @@ const NetworkSelector = ({
         },
       }}
       sx={{
+        backgroundColor: 'transparent',
+        '& .MuiInput-root::before': {
+          borderBottom: 'none',
+        },
+        '& .MuiInput-root::after': {
+          borderBottom: 'none',
+        },
         '& .MuiSelect-select': {
           py: 0,
         },
+        ...(compactButton && {
+          '& .MuiSelect-icon': {
+            fontSize: 16,
+          },
+        }),
       }}
     >
       {prodNets.map((chain) => renderMenuItem(chain.chainId, false))}
