@@ -64,7 +64,7 @@ export const _getSingleTransactionPayload = async (
 export const _getMultiSendCallOnlyPayload = async (
   params: MultiSendTransactionSimulationParams,
 ): Promise<Pick<TenderlySimulatePayload, 'to' | 'input'>> => {
-  const data = encodeMultiSendData(params.transactions)
+  const data = encodeMultiSendData(params.transactions) as `0x${string}`
   const readOnlyMultiSendContract = await getReadOnlyMultiSendCallOnlyContract(params.safe.version)
 
   return {
@@ -73,7 +73,7 @@ export const _getMultiSendCallOnlyPayload = async (
   }
 }
 
-const getLatestBlockGasLimit = async (): Promise<number> => {
+export const getLatestBlockGasLimit = async (): Promise<number> => {
   const web3ReadOnly = getWeb3ReadOnly()
   const latestBlock = await web3ReadOnly?.getBlock('latest')
   if (!latestBlock) {

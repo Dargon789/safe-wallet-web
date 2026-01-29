@@ -1,12 +1,13 @@
-import { BuyCryptoOptions } from '@/components/common/BuyCryptoButton'
 import CheckWallet from '@/components/common/CheckWallet'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ExternalLink from '@/components/common/ExternalLink'
 import ModalDialog from '@/components/common/ModalDialog'
 import QRCode from '@/components/common/QRCode'
 import Track from '@/components/common/Track'
-import FirstTxFlow from '@/features/counterfactual/FirstTxFlow'
-import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { CounterfactualFeature } from '@/features/counterfactual'
+import { useLoadFeature } from '@/features/__core__'
+import { selectUndeployedSafe } from '@/features/counterfactual/store'
+import { isReplayedSafeProps } from '@/features/counterfactual/services'
 import useBalances from '@/hooks/useBalances'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -14,19 +15,19 @@ import { OVERVIEW_EVENTS } from '@/services/analytics'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setQrShortName } from '@/store/settingsSlice'
 import { selectOutgoingTransactions } from '@/store/txHistorySlice'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import classnames from 'classnames'
 import { type ReactNode, useState } from 'react'
 import { Card, WidgetBody, WidgetContainer } from '@/components/dashboard/styled'
-import { Box, Button, CircularProgress, Divider, FormControlLabel, Grid, Switch, Typography } from '@mui/material'
+import { Box, Button, CircularProgress, FormControlLabel, Grid, Switch, Typography } from '@mui/material'
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded'
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded'
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
 import css from './styles.module.css'
-import ActivateAccountButton from '@/features/counterfactual/ActivateAccountButton'
-import { isReplayedSafeProps } from '@/features/counterfactual/utils'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
+import { HnDashboardBannerWithNoBalanceCheck } from '@/features/hypernative/components/HnDashboardBanner'
+import { BannerType, useBannerVisibility } from '@/features/hypernative/hooks'
 
 const calculateProgress = (items: boolean[]) => {
   const totalNumberOfItems = items.length
@@ -228,8 +229,7 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
                       mb: 2,
                     }}
                   >
-                    Add funds directly from your bank account or copy your address to send tokens from a different
-                    account.
+                    Copy your address to send tokens from a different account.
                   </Typography>
 
                   <Box
@@ -253,26 +253,6 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
                   </Box>
                 </Grid>
               </Grid>
-
-              <Box
-                sx={{
-                  mb: 4,
-                  position: 'relative',
-                  textAlign: 'center',
-                }}
-              >
-                <Typography className={css.orDivider}>or</Typography>
-                <Divider />
-              </Box>
-
-              <Typography
-                sx={{
-                  mb: 2,
-                }}
-              >
-                Buy crypto with fiat:
-              </Typography>
-              <BuyCryptoOptions />
             </Box>
           </ModalDialog>
         </>
@@ -281,7 +261,13 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
   )
 }
 
-const FirstTransactionWidget = ({ completed }: { completed: boolean }) => {
+const FirstTransactionWidget = ({
+  completed,
+  FirstTxFlow,
+}: {
+  completed: boolean
+  FirstTxFlow?: React.ComponentType<{ open: boolean; onClose: () => void }>
+}) => {
   const [open, setOpen] = useState<boolean>(false)
 
   const title = 'Create your first transaction'
@@ -318,12 +304,20 @@ const FirstTransactionWidget = ({ completed }: { completed: boolean }) => {
           </CheckWallet>
         )}
       </StatusCard>
-      <FirstTxFlow open={open} onClose={() => setOpen(false)} />
+      {FirstTxFlow && <FirstTxFlow open={open} onClose={() => setOpen(false)} />}
     </>
   )
 }
 
-const ActivateSafeWidget = ({ chain }: { chain: ChainInfo | undefined }) => {
+const ActivateSafeWidget = ({
+  chain,
+  ActivateAccountButton,
+  FirstTxFlow,
+}: {
+  chain: Chain | undefined
+  ActivateAccountButton?: React.ComponentType
+  FirstTxFlow?: React.ComponentType<{ open: boolean; onClose: () => void }>
+}) => {
   const [open, setOpen] = useState<boolean>(false)
 
   const title = `Activate account ${chain ? 'on ' + chain.chainName : ''}`
@@ -346,10 +340,10 @@ const ActivateSafeWidget = ({ chain }: { chain: ChainInfo | undefined }) => {
             mt: 2,
           }}
         >
-          <ActivateAccountButton />
+          {ActivateAccountButton && <ActivateAccountButton />}
         </Box>
       </StatusCard>
-      <FirstTxFlow open={open} onClose={() => setOpen(false)} />
+      {FirstTxFlow && <FirstTxFlow open={open} onClose={() => setOpen(false)} />}
     </>
   )
 }
@@ -381,6 +375,11 @@ const FirstSteps = () => {
   const outgoingTransactions = useAppSelector(selectOutgoingTransactions)
   const chain = useCurrentChain()
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, safe.chainId, safeAddress))
+  const { ActivateAccountButton, FirstTxFlow } = useLoadFeature(CounterfactualFeature)
+
+  // Check if banner should show (for conditional rendering of AccountReadyWidget)
+  // Use NoBalanceCheck for undeployed safes as the banner should be shown for all non-active safes as well
+  const { showBanner: showHnDashboardBanner } = useBannerVisibility(BannerType.NoBalanceCheck)
 
   const isMultiSig = safe.threshold > 1
   const isReplayedSafe = undeployedSafe && isReplayedSafeProps(undeployedSafe?.props)
@@ -485,14 +484,18 @@ const FirstSteps = () => {
             {isActivating ? (
               <UsefulHintsWidget />
             ) : isMultiSig || isReplayedSafe ? (
-              <ActivateSafeWidget chain={chain} />
+              <ActivateSafeWidget
+                chain={chain}
+                ActivateAccountButton={ActivateAccountButton}
+                FirstTxFlow={FirstTxFlow}
+              />
             ) : (
-              <FirstTransactionWidget completed={hasOutgoingTransactions} />
+              <FirstTransactionWidget completed={hasOutgoingTransactions} FirstTxFlow={FirstTxFlow} />
             )}
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <AccountReadyWidget />
+            {showHnDashboardBanner ? <HnDashboardBannerWithNoBalanceCheck /> : <AccountReadyWidget />}
           </Grid>
         </Grid>
       </WidgetBody>

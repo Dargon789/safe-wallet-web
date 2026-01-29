@@ -1,5 +1,5 @@
-import { AndroidChannel, AndroidImportance } from '@notifee/react-native'
-import { NotificationType } from '@safe-global/store/gateway/AUTO_GENERATED/notifications'
+import { AndroidChannel, AndroidImportance, AndroidVisibility } from '@notifee/react-native'
+import { NotificationTypeEnum } from '@safe-global/store/gateway/AUTO_GENERATED/notifications'
 import { HDNodeWallet, Wallet } from 'ethers'
 
 export enum ChannelId {
@@ -20,6 +20,7 @@ export const notificationChannels = [
     lights: true,
     vibration: true,
     importance: AndroidImportance.HIGH,
+    visibility: AndroidVisibility.PUBLIC,
     title: 'Transaction',
     subtitle: 'Transaction Complete',
   } as SafeAndroidChannel,
@@ -29,6 +30,7 @@ export const notificationChannels = [
     lights: true,
     vibration: true,
     importance: AndroidImportance.HIGH,
+    visibility: AndroidVisibility.PUBLIC,
     title: 'Announcement',
     subtitle: 'Safe Announcement',
   } as SafeAndroidChannel,
@@ -45,14 +47,14 @@ export function getSigner(signerPK: string): Wallet | HDNodeWallet {
   return signerAccount
 }
 
-export const REGULAR_NOTIFICATIONS: NotificationType[] = [
+export const REGULAR_NOTIFICATIONS: NotificationTypeEnum[] = [
   'DELETED_MULTISIG_TRANSACTION',
   'INCOMING_ETHER',
   'INCOMING_TOKEN',
   'MODULE_TRANSACTION',
   'EXECUTED_MULTISIG_TRANSACTION',
 ]
-export const OWNER_NOTIFICATIONS: NotificationType[] = [
+export const OWNER_NOTIFICATIONS: NotificationTypeEnum[] = [
   ...REGULAR_NOTIFICATIONS,
   'MESSAGE_CONFIRMATION_REQUEST',
   'CONFIRMATION_REQUEST',

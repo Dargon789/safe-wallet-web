@@ -4,15 +4,16 @@ import useBalances from '@/hooks/useBalances'
 import { type Approval, ApprovalModule } from '@safe-global/utils/services/security/modules/ApprovalModule'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getERC20TokenInfoOnChain, getErc721Symbol, isErc721Token } from '@/utils/tokens'
-import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import { type TokenInfo, TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeTransaction } from '@safe-global/types-kit'
+import { TokenType } from '@safe-global/store/gateway/types'
 import { useMemo } from 'react'
 import { PSEUDO_APPROVAL_VALUES } from '../utils/approvals'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import { UNLIMITED_APPROVAL_AMOUNT, UNLIMITED_PERMIT2_AMOUNT } from '@safe-global/utils/utils/tokens'
+import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 export type ApprovalInfo = {
-  tokenInfo: (Omit<TokenInfo, 'logoUri' | 'name'> & { logoUri?: string }) | undefined
+  tokenInfo: (Omit<Balance['tokenInfo'], 'logoUri' | 'name'> & { logoUri?: string }) | undefined
   tokenAddress: string
   spender: any
   amount: any
@@ -49,13 +50,13 @@ export const useApprovalInfos = (payload: {
 
       return Promise.all(
         approvals.payload.map(async (approval) => {
-          let tokenInfo: Omit<TokenInfo, 'name' | 'logoUri'> | undefined = balances.items.find((item) =>
+          let tokenInfo: Omit<Balance['tokenInfo'], 'name' | 'logoUri'> | undefined = balances.items.find((item) =>
             sameAddress(item.tokenInfo.address, approval.tokenAddress),
           )?.tokenInfo
 
           if (!tokenInfo) {
             try {
-              tokenInfo = await getERC20TokenInfoOnChain(approval.tokenAddress)
+              tokenInfo = (await getERC20TokenInfoOnChain(approval.tokenAddress))?.[0]
             } catch (e) {
               const isErc721 = await isErc721Token(approval.tokenAddress)
               const symbol = await getErc721Symbol(approval.tokenAddress)

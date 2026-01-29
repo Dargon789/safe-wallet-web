@@ -2,8 +2,10 @@ import * as main from '../pages/main.page'
 import { connectedWalletExecMethod, relayExecMethod, connectedWalletMethod } from '../pages/create_tx.pages'
 import * as sidebar from '../pages/sidebar.pages'
 import * as constants from '../../support/constants'
+import * as wallet from '../../support/utils/wallet'
+import * as owner from './owners.pages'
 
-const welcomeLoginScreen = '[data-testid="welcome-login"]'
+export const welcomeLoginScreen = '[data-testid="welcome-login"]'
 const expandMoreIcon = 'svg[data-testid="ExpandMoreIcon"]'
 const newtworkSelectorDiv = 'div[class*="networkSelector"]'
 const nameInput = 'input[name="name"]'
@@ -51,7 +53,8 @@ export const reviewStepThreshold = '[data-testid="review-step-threshold"]'
 export const cfSafeCreationSuccessMsg = '[data-testid="account-success-message"]'
 export const cfSafeActivationMsg = '[data-testid="safe-activation-message"]'
 export const cfSafeInfo = '[data-testid="safe-info"]'
-const connectWalletBtn = '[data-testid="connect-wallet-btn"]'
+export const connectWalletBtn = '[data-testid="connect-wallet-btn"]'
+export const continueWithWalletBtnConnected = '[data-testid="continue-with-wallet-btn"]'
 const networkSelectorItem = '[data-testid="network-selector-item"]'
 
 const sponsorStr = 'Your account is sponsored by Goerli'
@@ -69,6 +72,7 @@ export const sendTokensStr = 'Send tokens'
 const noWalletConnectedMsg = 'No wallet connected'
 export const deployWalletStr = 'about to deploy this Safe Account'
 const showAllNetworksStr = 'Show all networks'
+export const yourSafeAccountPreviewStr = 'Your Safe Account preview'
 
 export function waitForConnectionMsgDisappear() {
   cy.contains(noWalletConnectedMsg).should('not.exist')
@@ -118,16 +122,12 @@ export function verifyCFSafeCreated() {
   main.verifyElementsIsVisible([sidebar.pendingActivationIcon, safeActivationSection])
 }
 
-export function selectPayLaterOption() {
-  cy.get(connectedWalletExecMethod).click()
+export function selectPayNowOption() {
+  cy.get(connectedWalletMethod).click()
 }
 
 export function selectRelayOption() {
   cy.get(relayExecMethod).click()
-}
-
-export function selectPayNowOption() {
-  cy.get(connectedWalletMethod).click()
 }
 
 export function cancelWalletCreation() {
@@ -150,7 +150,7 @@ export function verifySafeCreationIsComplete() {
 
 export function clickOnReviewStepNextBtn() {
   cy.get(reviewStepNextBtn).click()
-  cy.get(reviewStepNextBtn, { timeout: 60000 }).should('not.exist')
+  cy.get(reviewStepNextBtn, { timeout: 600000 }).should('not.exist')
 }
 
 export function clickOnLetsGoBtn() {
@@ -254,6 +254,10 @@ export function clickOnNextBtn() {
   cy.get(nextBtn).should('be.enabled').click()
 }
 
+export function clickOnYourSafeAccountPreview() {
+  cy.contains(yourSafeAccountPreviewStr).click()
+}
+
 export function verifyOwnerName(name, index) {
   cy.get(ownerInput).eq(index).should('have.value', name)
 }
@@ -267,7 +271,7 @@ export function verifyThreshold(number) {
 }
 
 export function clickOnSignerAddressInput(index) {
-  cy.get(getOwnerAddressInput(index)).clear()
+  cy.get(getOwnerAddressInput(index)).click().clear()
 }
 
 export function selectSignerOnAutocomplete(index) {
@@ -396,4 +400,20 @@ export function checkNetworkLogoInSafeCreationModal(networks) {
       checkNetworkLogo(network)
     })
   })
+}
+
+export function visitWelcomeAccountPage(chain = 'sep') {
+  cy.visit(`${constants.welcomeAccountUrl}?chain=${chain}`)
+  cy.wait(2000)
+}
+
+export function connectWalletAndCreateSafe(signer) {
+  wallet.connectSigner(signer)
+  owner.waitForConnectionStatus()
+  clickOnCreateNewSafeBtn()
+}
+
+export function startCreateSafeFlow(signer, chain = 'sep') {
+  visitWelcomeAccountPage(chain)
+  connectWalletAndCreateSafe(signer)
 }

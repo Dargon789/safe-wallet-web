@@ -1,5 +1,5 @@
 import { Box, Button, CardActions, Divider, FormControl, Stack, SvgIcon, Typography } from '@mui/material'
-import { type SafeCollectibleResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import { FormProvider, useForm } from 'react-hook-form'
 import NftIcon from '@/public/images/common/nft.svg'
 import AddressBookInput from '@/components/common/AddressBookInput'
@@ -7,17 +7,15 @@ import type { NftTransferParams } from '.'
 import ImageFallback from '@/components/common/ImageFallback'
 import TxCard from '../../common/TxCard'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
+import { useContext, useMemo } from 'react'
+import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
+import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
 
 enum Field {
   recipient = 'recipient',
 }
 
 type FormData = Pick<NftTransferParams, Field.recipient>
-
-type SendNftBatchProps = {
-  onSubmit: (data: NftTransferParams) => void
-  params: NftTransferParams
-}
 
 const NftItem = ({ image, name, description }: { image: string; name: string; description?: string }) => (
   <Stack direction="row" spacing={1} flexWrap="nowrap" alignItems="flex-start">
@@ -59,13 +57,11 @@ const NftItem = ({ image, name, description }: { image: string; name: string; de
   </Stack>
 )
 
-export const NftItems = ({ tokens }: { tokens: SafeCollectibleResponse[] }) => {
+export const NftItems = ({ tokens }: { tokens: Collectible[] }) => {
   return (
-    <Box
+    <Stack
       data-testid="nft-item-list"
       sx={{
-        display: 'flex',
-        flexDirection: 'column',
         gap: 2,
         overflow: 'auto',
         maxHeight: '20vh',
@@ -80,16 +76,17 @@ export const NftItems = ({ tokens }: { tokens: SafeCollectibleResponse[] }) => {
           description={`Token ID: ${token.id}${token.name ? ` - ${token.name}` : ''}`}
         />
       ))}
-    </Box>
+    </Stack>
   )
 }
 
-const SendNftBatch = ({ params, onSubmit }: SendNftBatchProps) => {
-  const { tokens } = params
+const SendNftBatch = () => {
+  const { data, onNext } = useContext<TxFlowContextType<NftTransferParams>>(TxFlowContext)
+  const { tokens = [] } = data || {}
 
   const formMethods = useForm<FormData>({
     defaultValues: {
-      [Field.recipient]: params.recipient,
+      [Field.recipient]: data?.recipient,
     },
   })
   const {
@@ -101,8 +98,11 @@ const SendNftBatch = ({ params, onSubmit }: SendNftBatchProps) => {
   const recipient = watch(Field.recipient)
   const isAddressValid = !!recipient && !errors[Field.recipient]
 
+  const recipientArray = useMemo(() => [recipient], [recipient])
+  useSafeShieldForRecipients(recipientArray)
+
   const onFormSubmit = (data: FormData) => {
-    onSubmit({
+    onNext({
       recipient: data.recipient,
       tokens,
     })

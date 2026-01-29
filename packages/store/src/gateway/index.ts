@@ -3,3 +3,7 @@ export {
   useTransactionsGetTransactionQueueV1Query as useGetPendingTxsQuery,
   useTransactionsGetTransactionsHistoryV1Query as useGetTxsHistoryQuery,
 } from './AUTO_GENERATED/transactions'
+
+export { useGetTxsHistoryInfiniteQuery, useGetPendingTxsInfiniteQuery } from './transactions'
+export { useGetCollectiblesInfiniteQuery } from './collectibles'
+export { useGetChainsConfigQuery, chainsAdapter } from './chains'

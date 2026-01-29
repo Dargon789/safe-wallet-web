@@ -1,36 +1,72 @@
-import { Address, SignerInfo } from '@/src/types/address'
 import { SignForm } from '../SignForm'
 import React from 'react'
 import { ExecuteForm } from '../ExecuteForm'
-import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { AlreadySigned } from '../confirmation-views/AlreadySigned'
+import { CanNotSign } from '../CanNotSign'
+import { useTransactionSigner } from '../../hooks/useTransactionSigner'
+import { CanNotExecute } from '@/src/features/ExecuteTx/components/CanNotExecute'
+import { PendingTx } from '@/src/features/ConfirmTx/components/PendingTx'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
+
 interface ConfirmTxFormProps {
   hasEnoughConfirmations: boolean
-  activeSigner?: SignerInfo | undefined
   isExpired: boolean
+  isPending: boolean
   txId: string
-  hasSigned: boolean
+  highlightedSeverity?: Severity
+  riskAcknowledged: boolean
+  onRiskAcknowledgedChange: (acknowledged: boolean) => void
 }
 
 export function ConfirmTxForm({
   hasEnoughConfirmations,
-  activeSigner,
   isExpired,
+  isPending,
   txId,
-  hasSigned,
+  highlightedSeverity,
+  riskAcknowledged,
+  onRiskAcknowledgedChange,
 }: ConfirmTxFormProps) {
-  const activeSafe = useDefinedActiveSafe()
+  const { signerState } = useTransactionSigner(txId)
+  const { activeSigner, hasSigned, canSign } = signerState
+  const showRiskCheckbox = highlightedSeverity === Severity.CRITICAL
 
-  if (hasSigned) {
-    return <AlreadySigned txId={txId} safeAddress={activeSafe.address} chainId={activeSafe.chainId} />
+  if (isPending) {
+    return <PendingTx />
+  }
+
+  if (!activeSigner) {
+    return <CanNotExecute />
   }
 
   if (hasEnoughConfirmations) {
-    return <ExecuteForm safeAddress={activeSafe.address} chainId={activeSafe.chainId} />
+    return (
+      <ExecuteForm
+        txId={txId}
+        riskAcknowledged={riskAcknowledged}
+        onRiskAcknowledgedChange={onRiskAcknowledgedChange}
+        showRiskCheckbox={showRiskCheckbox}
+      />
+    )
+  }
+
+  if (hasSigned) {
+    return <AlreadySigned />
+  }
+
+  if (!canSign) {
+    return <CanNotSign />
   }
 
   if (activeSigner && !isExpired) {
-    return <SignForm txId={txId} address={activeSigner?.value as Address} />
+    return (
+      <SignForm
+        txId={txId}
+        showRiskCheckbox={showRiskCheckbox}
+        riskAcknowledged={riskAcknowledged}
+        onRiskAcknowledgedChange={onRiskAcknowledgedChange}
+      />
+    )
   }
 
   return null

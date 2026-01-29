@@ -58,7 +58,8 @@ function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSa
   )
 }
 
-const SAFE_ACCOUNTS_LIMIT = 10
+const safeAccountsLimitRaw = Number.parseInt(process.env.NEXT_PUBLIC_SPACES_SAFE_ACCOUNTS_LIMIT ?? '', 10)
+const SAFE_ACCOUNTS_LIMIT = !Number.isNaN(safeAccountsLimitRaw) ? safeAccountsLimitRaw : 40
 
 const AddAccounts = () => {
   const isAdmin = useIsAdmin()
@@ -165,7 +166,13 @@ const AddAccounts = () => {
     <>
       <Tooltip title={!isAdmin ? 'You need to be an Admin to add accounts' : ''} placement="top">
         <Box component="span">
-          <Button variant="contained" onClick={() => setOpen(true)} disabled={!isAdmin}>
+          <Button
+            data-testid="add-space-account-button"
+            variant="contained"
+            onClick={() => setOpen(true)}
+            disabled={!isAdmin}
+            sx={{ whiteSpace: 'nowrap' }}
+          >
             Add accounts
           </Button>
         </Box>
@@ -177,7 +184,7 @@ const AddAccounts = () => {
         hideChainIndicator
         PaperProps={{ sx: { backgroundColor: 'border.background' } }}
       >
-        <DialogContent sx={{ display: 'flex', alignItems: 'center' }}>
+        <DialogContent sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
           <Container fixed maxWidth="sm" disableGutters>
             <Typography component="div" variant="h1" mb={1}>
               Add Safe Accounts
@@ -189,7 +196,7 @@ const AddAccounts = () => {
             <Card>
               <FormProvider {...formMethods}>
                 <form onSubmit={onSubmit}>
-                  <Box mt={2} mx={2}>
+                  <Box m={2}>
                     <TextField
                       id="search-by-name"
                       placeholder="Search"
@@ -238,7 +245,12 @@ const AddAccounts = () => {
 
                   <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
-                    <Button variant="contained" disabled={selectedSafesLength === 0} type="submit">
+                    <Button
+                      data-testid="add-accounts-button"
+                      variant="contained"
+                      disabled={selectedSafesLength === 0}
+                      type="submit"
+                    >
                       Add Accounts ({selectedSafesLength})
                     </Button>
                   </DialogActions>

@@ -69,6 +69,10 @@ export const OVERVIEW_EVENTS = {
     action: 'Sidebar',
     category: OVERVIEW_CATEGORY,
   },
+  SIDEBAR_CLICKED: {
+    action: 'Sidebar clicked',
+    category: OVERVIEW_CATEGORY,
+  },
   WHATS_NEW: {
     action: "Open What's New",
     category: OVERVIEW_CATEGORY,
@@ -157,10 +161,6 @@ export const OVERVIEW_EVENTS = {
     action: 'Safe viewed',
     category: OVERVIEW_CATEGORY,
   },
-  BUY_CRYPTO_BUTTON: {
-    action: 'Buy crypto button',
-    category: OVERVIEW_CATEGORY,
-  },
   SHOW_MORE_SAFES: {
     action: 'Show more Safes',
     category: OVERVIEW_CATEGORY,
@@ -186,6 +186,33 @@ export const OVERVIEW_EVENTS = {
     action: 'Staking banner learn more',
     category: OVERVIEW_CATEGORY,
   },
+  OPEN_EARN_WIDGET: {
+    action: 'Open earn widget from banner',
+    category: OVERVIEW_CATEGORY,
+  },
+  HIDE_EARN_BANNER: {
+    action: 'Hide earn banner',
+    category: OVERVIEW_CATEGORY,
+  },
+  OPEN_EURCV_BOOST: {
+    action: 'Open EURCV boost from banner',
+    category: OVERVIEW_CATEGORY,
+  },
+  HIDE_EURCV_BOOST_BANNER: {
+    action: 'Hide EURCV boost banner',
+    category: OVERVIEW_CATEGORY,
+  },
+}
+
+export const EXPLORE_POSSIBLE_EVENTS = {
+  EXPLORE_POSSIBLE_CLICKED: {
+    action: 'Explore Possible clicked',
+    category: OVERVIEW_CATEGORY,
+  },
+  HORIZONTAL_CARD_CLICKED: {
+    action: 'HorizontalCardClicked',
+    category: OVERVIEW_CATEGORY,
+  },
 }
 
 export enum PIN_SAFE_LABELS {
@@ -194,16 +221,11 @@ export enum PIN_SAFE_LABELS {
 }
 
 export enum OPEN_SAFE_LABELS {
-  sidebar = 'sidebar',
-  after_create = 'after_create',
   after_add = 'after_add',
-  login_page = 'login_page',
 }
 
 export enum OVERVIEW_LABELS {
   sidebar = 'sidebar',
-  quick_add = 'quick_add',
-  quick_remove = 'quick_remove',
   top_bar = 'top_bar',
   welcome_page = 'welcome_page',
   login_page = 'login_page',

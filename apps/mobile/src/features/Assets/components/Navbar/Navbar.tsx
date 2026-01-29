@@ -1,8 +1,11 @@
 import React from 'react'
+import { View, Pressable } from 'react-native'
 import { Theme, XStack, getTokenValue } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Pressable } from 'react-native-gesture-handler'
 import { Identicon } from '@/src/components/Identicon'
+import { BadgeWrapper } from '@/src/components/BadgeWrapper'
+import { ThresholdBadge } from '@/src/components/ThresholdBadge'
+
 import { shortenAddress } from '@/src/utils/formatters'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useAppSelector } from '@/src/store/hooks'
@@ -11,6 +14,9 @@ import { DropdownLabel } from '@/src/components/Dropdown/DropdownLabel'
 import { selectAppNotificationStatus } from '@/src/store/notificationsSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
+import { selectSafeInfo } from '@/src/store/safesSlice'
+import { RootState } from '@/src/store'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 
 const dropdownLabelProps = {
   fontSize: '$5',
@@ -23,6 +29,7 @@ export const Navbar = () => {
   const activeSafe = useDefinedActiveSafe()
   const contact = useAppSelector(selectContactByAddress(activeSafe.address))
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
+  const { isDark } = useTheme()
 
   const handleNotificationAccess = () => {
     if (!isAppNotificationEnabled) {
@@ -32,34 +39,61 @@ export const Navbar = () => {
     }
   }
 
+  const activeSafeInfo = useAppSelector((state: RootState) => selectSafeInfo(state, activeSafe.address))
+  const chainSafe = activeSafeInfo ? activeSafeInfo[activeSafe.chainId] : undefined
+
   return (
     <Theme name="navbar">
       <XStack
-        paddingTop={getTokenValue('$2') + insets.top}
+        paddingTop={getTokenValue('$3') + insets.top}
         justifyContent={'space-between'}
         paddingHorizontal={16}
         alignItems={'center'}
         paddingBottom={'$2'}
-        backgroundColor={'$background'}
+        backgroundColor={isDark ? '$background' : '$backgroundFocus'}
       >
         <DropdownLabel
           label={contact ? contact.name : shortenAddress(activeSafe.address)}
           labelProps={dropdownLabelProps}
-          leftNode={<Identicon address={activeSafe.address} size={30} />}
+          leftNode={
+            <BadgeWrapper
+              badge={
+                <ThresholdBadge
+                  threshold={chainSafe?.threshold ?? 0}
+                  ownersCount={chainSafe?.owners.length ?? 0}
+                  size={18}
+                  fontSize={8}
+                  isLoading={!chainSafe}
+                  testID="threshold-info-badge"
+                />
+              }
+              testID="threshold-info-badge-wrapper"
+            >
+              <Identicon address={activeSafe.address} size={30} />
+            </BadgeWrapper>
+          }
           onPress={() => {
             router.push('/accounts-sheet')
           }}
+          hitSlop={4}
         />
-        <XStack alignItems={'center'} justifyContent={'center'} gap={12}>
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: 18,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           <Link href={'/share'} asChild>
-            <Pressable>
+            <Pressable hitSlop={10}>
               <SafeFontIcon name="qr-code-1" size={16} />
             </Pressable>
           </Link>
-          <Pressable onPress={handleNotificationAccess}>
+          <Pressable onPressIn={handleNotificationAccess} hitSlop={8}>
             <SafeFontIcon name="bell" size={20} />
           </Pressable>
-        </XStack>
+        </View>
       </XStack>
     </Theme>
   )

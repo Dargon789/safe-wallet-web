@@ -1,23 +1,23 @@
-import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
-import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
+import { selectUndeployedSafes } from '@/features/counterfactual/store'
+import { NetworkLogosList, getSafeSetups, getSharedSetup, hasMultiChainAddNetworkFeature } from '@/features/multichain'
 import type { SafeListProps } from '@/features/myAccounts/components/SafesList'
 import SpaceSafeContextMenu from '@/features/spaces/components/SafeAccounts/SpaceSafeContextMenu'
 import { showNotification } from '@/store/notificationsSlice'
 import SingleAccountItem from '@/features/myAccounts/components/AccountItems/SingleAccountItem'
-import type { SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useCallback, useMemo, useState } from 'react'
 import {
-  ListItemButton,
-  Box,
-  Typography,
-  Skeleton,
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Box,
   Divider,
-  Tooltip,
-  SvgIcon,
   IconButton,
+  ListItemButton,
+  Skeleton,
+  SvgIcon,
+  Tooltip,
+  Typography,
 } from '@mui/material'
 import SafeIcon from '@/components/common/SafeIcon'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
@@ -32,15 +32,14 @@ import FiatValue from '@/components/common/FiatValue'
 import { type MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import { getSafeSetups, getSharedSetup, hasMultiChainAddNetworkFeature } from '@/features/multichain/utils/utils'
 import { AddNetworkButton } from '../AddNetworkButton'
-import { isPredictedSafeProps } from '@/features/counterfactual/utils'
+import { isPredictedSafeProps } from '@/features/counterfactual/services'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import MultiAccountContextMenu from '@/components/sidebar/SafeListContextMenu/MultiAccountContextMenu'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import useWallet from '@/hooks/wallets/useWallet'
 import { selectCurrency } from '@/store/settingsSlice'
-import { selectChains } from '@/store/chainsSlice'
+import useChains from '@/hooks/useChains'
 import BookmarkIcon from '@/public/images/apps/bookmark.svg'
 import BookmarkedIcon from '@/public/images/apps/bookmarked.svg'
 import { addOrUpdateSafe, pinSafe, selectAllAddedSafes, unpinSafe } from '@/store/addedSafesSlice'
@@ -48,6 +47,8 @@ import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { getComparator } from '@/features/myAccounts/utils/utils'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
+import EthHashInfo from '@/components/common/EthHashInfo'
+import { ContactSource } from '@/hooks/useAllAddressBooks'
 
 export const MultichainIndicator = ({ safes }: { safes: SafeItem[] }) => {
   return (
@@ -93,7 +94,7 @@ function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem) {
   )
 
   const currency = useAppSelector(selectCurrency)
-  const { address: walletAddress = '' } = useWallet() || {}
+  const { address: walletAddress } = useWallet() || {}
 
   const { data: safeOverviews } = useGetMultipleSafeOverviewsQuery({ currency, walletAddress, safes: deployedSafes })
 
@@ -108,16 +109,16 @@ function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem) {
     [safeOverviews],
   )
 
-  const chains = useAppSelector(selectChains)
+  const { configs: chains } = useChains()
   const hasReplayableSafe = useMemo(() => {
     return sortedSafes.some((safeItem) => {
       const undeployedSafe = undeployedSafes[safeItem.chainId]?.[safeItem.address]
-      const chain = chains.data.find((chain) => chain.chainId === safeItem.chainId)
+      const chain = chains.find((chain) => chain.chainId === safeItem.chainId)
       const addNetworkFeatureEnabled = hasMultiChainAddNetworkFeature(chain)
       // Replayable if deployed or new counterfactual safe and the chain supports add network
       return (!undeployedSafe || !isPredictedSafeProps(undeployedSafe.props)) && addNetworkFeatureEnabled
     })
-  }, [chains.data, sortedSafes, undeployedSafes])
+  }, [chains, sortedSafes, undeployedSafes])
 
   const isReadOnly = useMemo(() => sortedSafes.every((safe) => safe.isReadOnly), [sortedSafes])
 
@@ -272,22 +273,19 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
             <Box sx={{ pr: 2.5 }} data-testid="group-safe-icon">
               <SafeIcon address={address} owners={sharedSetup?.owners.length} threshold={sharedSetup?.threshold} />
             </Box>
-            <Typography variant="body2" component="div" className={css.safeAddress}>
-              {multiSafeAccountItem.name && (
-                <Typography variant="subtitle2" component="p" sx={{ fontWeight: 'bold' }} className={css.safeName}>
-                  {multiSafeAccountItem.name}
-                </Typography>
-              )}
-              <Typography
-                data-testid="group-address"
-                component="span"
-                sx={{
-                  color: 'var(--color-primary-light)',
-                  fontSize: 'inherit',
-                }}
-              >
-                {shortenAddress(address)}
-              </Typography>
+
+            <Typography variant="body2" component="div" data-testid="group-address" className={css.safeAddress}>
+              <EthHashInfo
+                address={address}
+                name={multiSafeAccountItem.name}
+                addressBookNameSource={isSpaceSafe ? ContactSource.space : ContactSource.local}
+                showName={isSpaceSafe ? !!multiSafeAccountItem.name : true}
+                shortAddress
+                showPrefix={false}
+                showAvatar={false}
+                copyPrefix={false}
+                copyAddress={false}
+              />
             </Typography>
             <MultichainIndicator safes={sortedSafes} />
             <Typography

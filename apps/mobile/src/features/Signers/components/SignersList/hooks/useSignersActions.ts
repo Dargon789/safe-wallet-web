@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Platform } from 'react-native'
 import { useTheme } from 'tamagui'
 
-export const useSignersActions = () => {
+export const useSignersActions = (disableImport: boolean) => {
   const theme = useTheme()
   const color = theme.color?.get()
   const actions = useMemo(
@@ -14,7 +14,7 @@ export const useSignersActions = () => {
           ios: 'pencil',
           android: 'baseline_create_24',
         }),
-        imageColor: Platform.select({ ios: color, android: '#000' }),
+        imageColor: Platform.select({ ios: color, android: color }),
       },
       {
         id: 'copy',
@@ -23,19 +23,19 @@ export const useSignersActions = () => {
           ios: 'doc.on.doc',
           android: 'baseline_content_copy_24',
         }),
-        imageColor: Platform.select({ ios: color, android: '#000' }),
+        imageColor: Platform.select({ ios: color, android: color }),
       },
-      {
+      !disableImport && {
         id: 'import',
         title: 'Import signer',
         image: Platform.select({
           ios: 'square.and.arrow.up.on.square',
           android: 'baseline_arrow_outward_24',
         }),
-        imageColor: Platform.select({ ios: color, android: '#000' }),
+        imageColor: Platform.select({ ios: color, android: color }),
       },
     ],
-    [color],
+    [color, disableImport],
   )
 
   return actions

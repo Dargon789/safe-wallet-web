@@ -37,7 +37,9 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token-user-login: 'github-actions[bot]'
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
       - uses: ./.github/actions/yarn
 
@@ -46,14 +48,12 @@ jobs:
           secrets: ${{ toJSON(secrets) }}
           # if: startsWith(github.ref, 'refs/heads/main')
 
-      #- uses: ./.github/workflows/build-storybook
-
-      - name: Add SRI to scripts
-        run: node ./scripts/integrity-hashes.cjs
-        working-directory: apps/web
+      - uses: ./.github/actions/build-storybook
+        with:
+          secrets: ${{ toJSON(secrets) }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}

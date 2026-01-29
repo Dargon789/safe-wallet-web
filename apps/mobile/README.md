@@ -1,4 +1,4 @@
-# Safe{Wallet} mobile app 📱
+# Safe{Mobile} app 📱
 
 This project is now part of the **@safe-global/safe-wallet** monorepo! The monorepo setup allows centralized management
 of multiple
@@ -38,7 +38,8 @@ file into it and set the correct values for the environment variables.
 For local development you need to place the `google-services.json` and `GoogleService-Info.plist` files in the root of
 the mobile app.
 
-If you use EAS to manage your environement variables you can issue the 
+If you use EAS to manage your environement variables you can issue the
+
 ```bash
 eas env:pull
 ```

@@ -1,14 +1,14 @@
+import type { TransactionListItem } from '@safe-global/store/gateway/types'
+import { LabelValue, TransactionListItemType, ConflictType } from '@safe-global/store/gateway/types'
+import type {
+  ConflictHeaderQueuedItem,
+  DateLabel,
+  LabelQueuedItem,
+  Transaction,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import * as txEvents from '@/services/tx/txEvents'
 import { pendingTxBuilder } from '@/tests/builders/pendingTx'
 import { createListenerMiddleware } from '@reduxjs/toolkit'
-import type {
-  ConflictHeader,
-  DateLabel,
-  Label,
-  TransactionListItem,
-  TransactionSummary,
-} from '@safe-global/safe-gateway-typescript-sdk'
-import { LabelValue, TransactionListItemType } from '@safe-global/safe-gateway-typescript-sdk'
 import type { RootState } from '..'
 import type { PendingTxsState } from '../pendingTxsSlice'
 import { PendingStatus } from '../pendingTxsSlice'
@@ -29,9 +29,10 @@ describe('txHistorySlice', () => {
     })
 
     it('should dispatch SUCCESS event if tx is pending', () => {
+      const pendingTx = pendingTxBuilder().with({ nonce: 1, status: PendingStatus.INDEXING }).build()
       const state = {
         pendingTxs: {
-          '0x123': pendingTxBuilder().with({ nonce: 1, status: PendingStatus.INDEXING }).build(),
+          '0x123': pendingTx,
         } as PendingTxsState,
       } as RootState
 
@@ -42,6 +43,7 @@ describe('txHistorySlice', () => {
 
       const transaction = {
         type: TransactionListItemType.TRANSACTION,
+        conflictType: ConflictType.NONE,
         transaction: {
           id: '0x123',
           executionInfo: {
@@ -51,11 +53,12 @@ describe('txHistorySlice', () => {
           txInfo: {
             type: 'TRANSFER',
           },
-        } as unknown as TransactionSummary,
+        } as unknown as Transaction,
       } as TransactionListItem
 
       const action = txHistorySlice.actions.set({
         loading: false,
+        loaded: true,
         data: {
           results: [transaction],
         },
@@ -66,7 +69,10 @@ describe('txHistorySlice', () => {
       expect(txDispatchSpy).toHaveBeenCalledWith(txEvents.TxEvent.SUCCESS, {
         nonce: 1,
         txId: '0x123',
-        groupKey: expect.anything(),
+        chainId: pendingTx.chainId,
+        safeAddress: pendingTx.safeAddress,
+        groupKey: pendingTx.groupKey,
+        txHash: undefined,
       })
     })
 
@@ -84,6 +90,7 @@ describe('txHistorySlice', () => {
 
       const action = txHistorySlice.actions.set({
         loading: false,
+        loaded: true,
         data: undefined, // Cleared
       })
 
@@ -109,19 +116,21 @@ describe('txHistorySlice', () => {
         timestamp: 0,
       }
 
-      const label: Label = {
+      const label: LabelQueuedItem = {
         label: LabelValue.Queued,
         type: TransactionListItemType.LABEL,
       }
 
-      const conflictHeader: ConflictHeader = {
+      const conflictHeader: ConflictHeaderQueuedItem = {
         nonce: 0,
         type: TransactionListItemType.CONFLICT_HEADER,
       }
 
       const action = txHistorySlice.actions.set({
         loading: false,
+        loaded: true,
         data: {
+          // @ts-expect-error - dateLabel, label, conflictHeader are not sometihng that CGW returns for history txs
           results: [dateLabel, label, conflictHeader],
         },
       })
@@ -145,6 +154,7 @@ describe('txHistorySlice', () => {
 
       const transaction = {
         type: TransactionListItemType.TRANSACTION,
+        conflictType: ConflictType.NONE,
         transaction: {
           id: '0x456',
           executionInfo: {
@@ -155,11 +165,12 @@ describe('txHistorySlice', () => {
             type: 'Custom',
             methodName: 'createProxyWithNonce',
           },
-        } as unknown as TransactionSummary,
+        } as unknown as Transaction,
       } as TransactionListItem
 
       const action = txHistorySlice.actions.set({
         loading: false,
+        loaded: true,
         data: {
           results: [transaction],
         },
@@ -191,6 +202,7 @@ describe('txHistorySlice', () => {
 
       const transaction = {
         type: TransactionListItemType.TRANSACTION,
+        conflictType: ConflictType.NONE,
         transaction: {
           id: '0x456',
           executionInfo: {
@@ -201,11 +213,12 @@ describe('txHistorySlice', () => {
             type: 'Custom',
             methodName: 'createProxyWithNonce',
           },
-        } as unknown as TransactionSummary,
+        } as unknown as Transaction,
       } as TransactionListItem
 
       const action = txHistorySlice.actions.set({
         loading: false,
+        loaded: true,
         data: {
           results: [transaction],
         },
@@ -217,11 +230,10 @@ describe('txHistorySlice', () => {
       expect(listenerApi.dispatch).toHaveBeenNthCalledWith(1, {
         payload: [
           {
-            id: `${state.safeInfo.data!.chainId}:${state.safeInfo.data!.address.value}`,
-            type: 'OwnedSafes',
+            type: 'owners',
           },
         ],
-        type: 'gatewayApi/invalidateTags',
+        type: 'api/invalidateTags',
       })
       expect(listenerApi.dispatch).toHaveBeenNthCalledWith(2, {
         payload: expect.anything(),

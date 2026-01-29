@@ -1,10 +1,11 @@
 import { Box, Chip, Typography, useMediaQuery, useTheme } from '@mui/material'
 import VisibilityIcon from '@mui/icons-material/Visibility'
-import { LoopIcon } from '@/features/counterfactual/CounterfactualStatusButton'
+import { LoopIcon } from '@/features/counterfactual/components'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import css from './styles.module.css'
 import QueueActions from '../QueueActions'
-import type { ChainInfo, SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { UrlObject } from 'url'
 import Link from 'next/link'
 import Track from '@/components/common/Track'
@@ -64,7 +65,7 @@ export const AccountInfoChips = ({
   isVisible: boolean
   undeployedSafe: boolean
   safeOverview: SafeOverview | null
-  chain: ChainInfo | undefined
+  chain: Chain | undefined
   href: UrlObject | string
   onLinkClick: (() => void) | undefined
   trackingLabel: string

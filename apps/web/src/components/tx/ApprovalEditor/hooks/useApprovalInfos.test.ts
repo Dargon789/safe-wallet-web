@@ -4,16 +4,18 @@ import { Interface, zeroPadValue } from 'ethers'
 import { type ApprovalInfo, useApprovalInfos } from '@/components/tx/ApprovalEditor/hooks/useApprovalInfos'
 import { waitFor } from '@testing-library/react'
 import { createMockSafeTransaction } from '@/tests/transactions'
-import { OperationType } from '@safe-global/safe-core-sdk-types'
+import { OperationType } from '@safe-global/types-kit'
 import { ERC20__factory, Multi_send__factory } from '@safe-global/utils/types/contracts'
 import * as balances from '@/hooks/useBalances'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { TokenType } from '@safe-global/store/gateway/types'
 import * as getTokenInfo from '@/utils/tokens'
 import { faker } from '@faker-js/faker'
 import { PSEUDO_APPROVAL_VALUES } from '../utils/approvals'
 import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { UNLIMITED_PERMIT2_AMOUNT } from '@safe-global/utils/utils/tokens'
+import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { type Erc20Token } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const ERC20_INTERFACE = ERC20__factory.createInterface()
 
@@ -236,6 +238,105 @@ describe('useApprovalInfos', () => {
     })
   })
 
+  it('returns an ApprovalInfo for Permit (EIP 2612) message', async () => {
+    const tokenAddress = faker.finance.ethereumAddress()
+    const mockBalanceItem = {
+      balance: '40000',
+      fiatBalance: '1',
+      fiatConversion: '1',
+      tokenInfo: {
+        address: tokenAddress,
+        decimals: 2,
+        logoUri: '',
+        name: 'USDC',
+        symbol: 'USDC',
+        type: TokenType.ERC20,
+      },
+    } as const
+    const spenderAddress = faker.finance.ethereumAddress()
+    const mockMessage: TypedData = {
+      types: {
+        EIP712Domain: [
+          {
+            name: 'name',
+            type: 'string',
+          },
+          {
+            name: 'chainId',
+            type: 'uint256',
+          },
+          {
+            name: 'verifyingContract',
+            type: 'address',
+          },
+        ],
+        Permit: [
+          {
+            name: 'owner',
+            type: 'address',
+          },
+          {
+            name: 'spender',
+            type: 'address',
+          },
+          {
+            name: 'value',
+            type: 'uint256',
+          },
+          {
+            name: 'nonce',
+            type: 'uint256',
+          },
+          {
+            name: 'deadline',
+            type: 'uint256',
+          },
+        ],
+      },
+      domain: {
+        name: 'USDC',
+        chainId: 137,
+        verifyingContract: tokenAddress,
+      },
+      message: {
+        owner: faker.finance.ethereumAddress(),
+        spender: spenderAddress,
+        value: BigInt(2000),
+        nonce: BigInt(0),
+        deadline: BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'),
+      },
+      primaryType: 'Permit',
+    } as const
+
+    jest.spyOn(balances, 'default').mockReturnValue({
+      balances: { fiatTotal: '0', items: [mockBalanceItem] },
+      error: undefined,
+      loading: false,
+      loaded: true,
+    })
+
+    const { result } = renderHook(() => useApprovalInfos({ safeMessage: mockMessage }))
+
+    const mockApproval: ApprovalInfo = {
+      amount: BigInt(2000),
+      amountFormatted: '20',
+      spender: spenderAddress,
+      tokenAddress: tokenAddress.toLowerCase(),
+      tokenInfo: expect.objectContaining({
+        address: tokenAddress,
+        decimals: 2,
+        symbol: 'USDC',
+        type: TokenType.ERC20,
+      }),
+      method: 'Permit',
+      transactionIndex: 0,
+    }
+
+    await waitFor(() => {
+      expect(result.current).toEqual([[mockApproval], undefined, false])
+    })
+  })
+
   it('returns an ApprovalInfo for Permit2 PermitSingle message', async () => {
     const spenderAddress = faker.finance.ethereumAddress()
     const mockMessage: TypedData = {
@@ -431,7 +532,7 @@ describe('useApprovalInfos', () => {
   })
 
   it('returns an ApprovalInfo with token infos if the token exists in balances', async () => {
-    const mockBalanceItem = {
+    const mockBalanceItem: Balance = {
       balance: '40',
       fiatBalance: '40',
       fiatConversion: '1',
@@ -445,9 +546,12 @@ describe('useApprovalInfos', () => {
       },
     }
 
-    jest
-      .spyOn(balances, 'default')
-      .mockReturnValue({ balances: { fiatTotal: '0', items: [mockBalanceItem] }, error: undefined, loading: false })
+    jest.spyOn(balances, 'default').mockReturnValue({
+      balances: { fiatTotal: '0', items: [mockBalanceItem] },
+      error: undefined,
+      loading: false,
+      loaded: true,
+    })
     const testInterface = new Interface(['function approve(address, uint256)'])
 
     const mockSafeTx = createMockSafeTransaction({
@@ -474,7 +578,7 @@ describe('useApprovalInfos', () => {
   })
 
   it('fetches token info for an approval if its missing', async () => {
-    const mockTokenInfo = {
+    const mockTokenInfo: Omit<Erc20Token, 'name' | 'logoUri'> = {
       address: '0x0000000000000000000000000000000000000123',
       symbol: 'HT',
       decimals: 18,
@@ -482,7 +586,7 @@ describe('useApprovalInfos', () => {
     }
     const fetchMock = jest
       .spyOn(getTokenInfo, 'getERC20TokenInfoOnChain')
-      .mockReturnValue(Promise.resolve(mockTokenInfo))
+      .mockReturnValue(Promise.resolve([mockTokenInfo]))
     const testInterface = new Interface(['function approve(address, uint256)'])
 
     const mockSafeTx = createMockSafeTransaction({

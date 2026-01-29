@@ -1,12 +1,15 @@
 import { blo } from 'blo'
 import { act } from 'react'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import { fireEvent, render, waitFor } from '@/tests/test-utils'
 import * as useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import * as useChainId from '@/hooks/useChainId'
 import * as store from '@/store'
+import * as useChains from '@/hooks/useChains'
+import * as useDarkMode from '@/hooks/useDarkMode'
 import EthHashInfo from '.'
+import { ContactSource } from '@/hooks/useAllAddressBooks'
 
 const originalClipboard = { ...global.navigator.clipboard }
 
@@ -15,15 +18,28 @@ const MOCK_CHAIN_ID = '4'
 
 jest.mock('@/hooks/useAllAddressBooks')
 jest.mock('@/hooks/useChainId')
+jest.mock('@/hooks/useChains')
+jest.mock('@/hooks/useDarkMode')
 
 describe('EthHashInfo', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
+    jest.spyOn(useDarkMode, 'useDarkMode').mockReturnValue(false)
+
     jest.spyOn(useAllAddressBooks, 'default').mockImplementation(() => ({
       [MOCK_CHAIN_ID]: {
         [MOCK_SAFE_ADDRESS]: 'Address book name',
       },
+    }))
+
+    jest.spyOn(useAllAddressBooks, 'useAddressBookItem').mockImplementation(() => ({
+      name: 'Address book name',
+      chainIds: [MOCK_CHAIN_ID],
+      address: MOCK_SAFE_ADDRESS,
+      createdBy: '0x123',
+      lastUpdatedBy: '0x123',
+      source: ContactSource.local,
     }))
 
     //@ts-ignore
@@ -55,19 +71,13 @@ describe('EthHashInfo', () => {
     it('renders the current chain prefix by default', () => {
       jest.spyOn(useChainId, 'default').mockReturnValue('4')
 
-      jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
-        selector({
-          session: {},
-          settings: {
-            shortName: {
-              copy: true,
-            },
-          },
-          chains: {
-            data: [{ chainId: '4', shortName: 'rin' }],
-          },
-        } as store.RootState),
-      )
+      jest.spyOn(useChains, 'useChain').mockReturnValue({ chainId: '4', shortName: 'rin' } as Chain)
+
+      jest.spyOn(store, 'useAppSelector').mockReturnValue({
+        shortName: {
+          copy: true,
+        },
+      })
 
       const { queryByText } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} />)
 
@@ -75,22 +85,13 @@ describe('EthHashInfo', () => {
     })
 
     it('renders the chain prefix associated with the given chainId', () => {
-      jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
-        selector({
-          session: {},
-          settings: {
-            shortName: {
-              copy: true,
-            },
-          },
-          chains: {
-            data: [
-              { chainId: '4', shortName: 'rin' },
-              { chainId: '100', shortName: 'gno' },
-            ],
-          },
-        } as store.RootState),
-      )
+      jest.spyOn(useChains, 'useChain').mockReturnValue({ chainId: '100', shortName: 'gno' } as Chain)
+
+      jest.spyOn(store, 'useAppSelector').mockReturnValue({
+        shortName: {
+          copy: true,
+        },
+      })
 
       const { queryByText } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} chainId="100" />)
 
@@ -112,19 +113,13 @@ describe('EthHashInfo', () => {
     it("doesn't prefix non-addresses", () => {
       jest.spyOn(useChainId, 'default').mockReturnValue('4')
 
-      jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
-        selector({
-          session: {},
-          settings: {
-            shortName: {
-              copy: true,
-            },
-          },
-          chains: {
-            data: [{ chainId: '4', shortName: 'rin' }],
-          },
-        } as store.RootState),
-      )
+      jest.spyOn(useChains, 'useChain').mockReturnValue({ chainId: '4', shortName: 'rin' } as Chain)
+
+      jest.spyOn(store, 'useAppSelector').mockReturnValue({
+        shortName: {
+          copy: true,
+        },
+      })
 
       const result1 = render(
         <EthHashInfo address="0xe26920604f9a02c5a877d449faa71b7504f0c2508dcc7c0384078a024b8e592f" />,
@@ -146,6 +141,7 @@ describe('EthHashInfo', () => {
 
   describe('name', () => {
     it('renders a name by default', () => {
+      jest.spyOn(useAllAddressBooks, 'useAddressBookItem').mockReturnValue(undefined)
       const { queryByText } = render(<EthHashInfo address="0x1234" name="Test name" />)
 
       expect(queryByText('Test name')).toBeInTheDocument()
@@ -239,19 +235,13 @@ describe('EthHashInfo', () => {
     it("doesn't copy the prefix with non-addresses", async () => {
       jest.spyOn(useChainId, 'default').mockReturnValue('4')
 
-      jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
-        selector({
-          session: {},
-          settings: {
-            shortName: {
-              copy: true,
-            },
-          },
-          chains: {
-            data: [{ chainId: '4', shortName: 'rin' }],
-          },
-        } as store.RootState),
-      )
+      jest.spyOn(useChains, 'useChain').mockReturnValue({ chainId: '4', shortName: 'rin' } as Chain)
+
+      jest.spyOn(store, 'useAppSelector').mockReturnValue({
+        shortName: {
+          copy: true,
+        },
+      })
 
       const { container } = render(
         <EthHashInfo address="0xe26920604f9a02c5a877d449faa71b7504f0c2508dcc7c0384078a024b8e592f" showCopyButton />,
@@ -271,19 +261,13 @@ describe('EthHashInfo', () => {
     it('copies the default prefixed address', async () => {
       jest.spyOn(useChainId, 'default').mockReturnValue('4')
 
-      jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
-        selector({
-          session: {},
-          settings: {
-            shortName: {
-              copy: true,
-            },
-          },
-          chains: {
-            data: [{ chainId: '4', shortName: 'rin' }],
-          },
-        } as store.RootState),
-      )
+      jest.spyOn(useChains, 'useChain').mockReturnValue({ chainId: '4', shortName: 'rin' } as Chain)
+
+      jest.spyOn(store, 'useAppSelector').mockReturnValue({
+        shortName: {
+          copy: true,
+        },
+      })
 
       const { container } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} showCopyButton />)
 
@@ -299,19 +283,13 @@ describe('EthHashInfo', () => {
     it('copies the prefix even if it is hidden', async () => {
       jest.spyOn(useChainId, 'default').mockReturnValue('4')
 
-      jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
-        selector({
-          session: {},
-          settings: {
-            shortName: {
-              copy: true,
-            },
-          },
-          chains: {
-            data: [{ chainId: '4', shortName: 'rin' }],
-          },
-        } as store.RootState),
-      )
+      jest.spyOn(useChains, 'useChain').mockReturnValue({ chainId: '4', shortName: 'rin' } as Chain)
+
+      jest.spyOn(store, 'useAppSelector').mockReturnValue({
+        shortName: {
+          copy: true,
+        },
+      })
 
       const { container, queryByText } = render(
         <EthHashInfo address={MOCK_SAFE_ADDRESS} showCopyButton showPrefix={false} />,
@@ -329,22 +307,13 @@ describe('EthHashInfo', () => {
     })
 
     it('copies the selected chainId prefix', async () => {
-      jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
-        selector({
-          session: {},
-          settings: {
-            shortName: {
-              copy: true,
-            },
-          },
-          chains: {
-            data: [
-              { chainId: '4', shortName: 'rin' },
-              { chainId: '100', shortName: 'gno' },
-            ],
-          },
-        } as store.RootState),
-      )
+      jest.spyOn(useChains, 'useChain').mockReturnValue({ chainId: '100', shortName: 'gno' } as Chain)
+
+      jest.spyOn(store, 'useAppSelector').mockReturnValue({
+        shortName: {
+          copy: true,
+        },
+      })
 
       const { container } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} showCopyButton chainId="100" />)
 
@@ -358,19 +327,13 @@ describe('EthHashInfo', () => {
     })
 
     it('copies the raw address', async () => {
-      jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
-        selector({
-          session: {},
-          settings: {
-            shortName: {
-              copy: false,
-            },
-          },
-          chains: {
-            data: [] as ChainInfo[],
-          },
-        } as store.RootState),
-      )
+      jest.spyOn(useChains, 'useChain').mockReturnValue(undefined)
+
+      jest.spyOn(store, 'useAppSelector').mockReturnValue({
+        shortName: {
+          copy: false,
+        },
+      })
 
       const { container } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} showCopyButton />)
 
@@ -391,20 +354,12 @@ describe('EthHashInfo', () => {
       expect(container.querySelector('a')).not.toBeInTheDocument()
     })
     it('renders the block explorer link', () => {
-      jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
-        selector({
-          session: {},
-          settings: { shortName: {} },
-          chains: {
-            data: [
-              {
-                chainId: '4',
-                blockExplorerUriTemplate: { address: 'https://rinkeby.etherscan.io/address/{{address}}' },
-              },
-            ],
-          },
-        } as store.RootState),
-      )
+      jest.spyOn(useChains, 'useChain').mockReturnValue({
+        chainId: '4',
+        blockExplorerUriTemplate: { address: 'https://rinkeby.etherscan.io/address/{{address}}' },
+      } as Chain)
+
+      jest.spyOn(store, 'useAppSelector').mockReturnValue({ shortName: {} })
 
       const { container } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} hasExplorer />)
 
@@ -412,6 +367,75 @@ describe('EthHashInfo', () => {
         'href',
         'https://rinkeby.etherscan.io/address/0x0000000000000000000000000000000000005AFE',
       )
+    })
+  })
+
+  describe('Safe Shield icon', () => {
+    it('renders shield icon when showShieldIcon is true and name is not undefined', () => {
+      jest.spyOn(useAllAddressBooks, 'useAddressBookItem').mockReturnValue(undefined)
+
+      const { container, queryByText } = render(
+        <EthHashInfo address={MOCK_SAFE_ADDRESS} showShieldIcon={true} name="My Safe Account" />,
+      )
+
+      expect(queryByText('My Safe Account')).toBeInTheDocument()
+
+      const nameBox = container.querySelector('.ethHashInfo-name')
+      expect(nameBox).toBeInTheDocument()
+
+      if (nameBox) {
+        const styles = window.getComputedStyle(nameBox)
+        // Should have bold font weight (indicates shield styling is applied)
+        expect(styles.fontWeight).toBe('700')
+        // Should have border radius (part of shield styling)
+        expect(styles.borderRadius).toBeTruthy()
+      }
+
+      // Shield icon should be rendered (check for bold styling which indicates shield container)
+      const boxes = Array.from(container.querySelectorAll('*')).filter((el) => {
+        const styles = window.getComputedStyle(el)
+        return styles.fontWeight === '700' || styles.fontWeight === 'bold'
+      })
+
+      expect(boxes.length).toBeGreaterThan(0)
+    })
+
+    it('renders shield icon when showShieldIcon is true and name is undefined', () => {
+      jest.spyOn(useAllAddressBooks, 'useAddressBookItem').mockReturnValue(undefined)
+
+      const { container } = render(
+        <EthHashInfo address={MOCK_SAFE_ADDRESS} showShieldIcon={true} name={undefined} showName={false} />,
+      )
+
+      // Check that the shield icon is rendered even without a name
+      // The HypernativeTooltip wraps the SvgIcon in a span with display: flex
+      // Look for spans with display: flex that contain the mocked icon
+      const tooltipSpans = Array.from(container.querySelectorAll('span')).filter((span) => {
+        const styles = window.getComputedStyle(span)
+        return styles.display === 'flex' && span.querySelector('[class*="MuiSvgIcon"]') !== null
+      })
+
+      // Should have at least one span with flex display containing the shield icon
+      expect(tooltipSpans.length).toBeGreaterThan(0)
+    })
+
+    it('does not render shield icon when showShieldIcon is false and name is undefined', () => {
+      jest.spyOn(useAllAddressBooks, 'useAddressBookItem').mockReturnValue(undefined)
+
+      const { container } = render(
+        <EthHashInfo address={MOCK_SAFE_ADDRESS} showShieldIcon={false} name={undefined} showName={false} />,
+      )
+
+      // When showShieldIcon is false, there should be no shield icon Box container
+      // Check for Box elements with display: flex and alignItems: center (which would contain the shield icon)
+      const shieldBoxes = Array.from(container.querySelectorAll('*')).filter((el) => {
+        const styles = window.getComputedStyle(el)
+        // The shield icon Box has display: flex and alignItems: center
+        return styles.display === 'flex' && styles.alignItems === 'center' && el.children.length > 0
+      })
+
+      // Should not have the shield icon container Box
+      expect(shieldBoxes.length).toBe(0)
     })
   })
 })

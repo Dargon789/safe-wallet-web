@@ -6,7 +6,7 @@ import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Identicon } from '@/src/components/Identicon'
 import QRCodeStyled from 'react-native-qrcode-styled'
-import { StyleSheet } from 'react-native'
+import { Platform, StyleSheet } from 'react-native'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 import React, { useCallback } from 'react'
 import { ToastViewport } from '@tamagui/toast'
@@ -24,7 +24,6 @@ type ShareViewProps = {
 export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
   const copyAndDispatchToast = useCopyAndDispatchToast()
   const contact = useAppSelector(selectContactByAddress(activeSafe.address))
-
   const safeAddress = activeSafe.address
 
   const onPressShare = async () => {
@@ -43,7 +42,7 @@ export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
 
   return (
     <>
-      <YStack flex={1}>
+      <YStack flex={1} paddingBottom={'$4'}>
         <YStack flex={1} justifyContent={'flex-end'} alignItems={'center'} marginBottom={'$6'}>
           <H3 fontWeight={600}>{contact ? contact.name : 'Unnamed safe'}</H3>
         </YStack>
@@ -55,7 +54,6 @@ export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
                   data={safeAddress}
                   style={styles.svg}
                   padding={22}
-                  pieceSize={6}
                   pieceCornerType={'rounded'}
                   pieceBorderRadius={3}
                   isPiecesGlued
@@ -85,20 +83,10 @@ export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
             </View>
           </Container>
           <XStack gap={'$3'} marginTop={'$6'}>
-            <SafeButton
-              size={'$sm'}
-              onPress={onPressShare}
-              icon={<SafeFontIcon name={'export'} size={16} style={{ marginTop: -4 }} />}
-              secondary
-            >
+            <SafeButton size={'$sm'} onPress={onPressShare} icon={<SafeFontIcon name={'export'} size={16} />} secondary>
               Share
             </SafeButton>
-            <SafeButton
-              size={'$sm'}
-              onPress={onPressCopy}
-              icon={<SafeFontIcon name={'copy'} size={16} style={{ marginTop: -4 }} />}
-              secondary
-            >
+            <SafeButton size={'$sm'} onPress={onPressCopy} icon={<SafeFontIcon name={'copy'} size={16} />} secondary>
               Copy
             </SafeButton>
           </XStack>
@@ -113,7 +101,7 @@ export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
           </Text>
         </YStack>
       </YStack>
-      <ToastViewport multipleToasts={false} left={0} right={0} />
+      {Platform.OS === 'ios' && <ToastViewport multipleToasts={false} left={0} right={0} />}
     </>
   )
 }

@@ -11,12 +11,12 @@ import { RecoverAccountFlow } from '@/components/tx-flow/flows'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import madProps from '@/utils/mad-props'
 import { TxModalContext } from '@/components/tx-flow'
-import { HelpCenterArticle, HelperCenterArticleTitles } from '@/config/constants'
 import type { TxModalContextType } from '@/components/tx-flow'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import css from './styles.module.css'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'
 
 type Props =
   | {
@@ -53,7 +53,9 @@ export function InternalRecoveryProposalCard({
     />
   )
   const title = 'Recover this Account'
-  const desc = `The connected wallet was chosen as a trusted Recoverer. You can help the owner${maybePlural(safe.owners)} regain access by resetting the Account setup.`
+  const desc = `The connected wallet was chosen as a trusted Recoverer. You can help the owner${maybePlural(
+    safe.owners,
+  )} regain access by resetting the Account setup.`
 
   const link = (
     <Track {...RECOVERY_EVENTS.LEARN_MORE} label="proposal-card">

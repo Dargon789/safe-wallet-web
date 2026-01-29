@@ -52,16 +52,6 @@ export const MODALS_EVENTS = {
     action: 'Accept transaction risk',
     category: MODALS_CATEGORY,
   },
-  REDEFINE_RESULT: {
-    action: 'Redefine scan result',
-    category: MODALS_CATEGORY,
-    event: EventType.META,
-  },
-  BLOCKAID_RESULT: {
-    action: 'Blockaid scan result',
-    category: MODALS_CATEGORY,
-    event: EventType.META,
-  },
   OPEN_SPEED_UP_MODAL: {
     action: 'Open speed-up modal',
     category: MODALS_CATEGORY,
@@ -110,6 +100,16 @@ export const MODALS_EVENTS = {
     action: 'Remove recipient',
     category: MODALS_CATEGORY,
     event: EventType.CLICK,
+  },
+  CONTINUE_CLICKED: {
+    action: 'Continue to receipt',
+    category: MODALS_CATEGORY,
+    event: EventType.CLICK,
+  },
+  RECEIPT_TIME_SPENT: {
+    action: 'Time spent on receipt',
+    category: MODALS_CATEGORY,
+    event: EventType.META,
   },
 }
 

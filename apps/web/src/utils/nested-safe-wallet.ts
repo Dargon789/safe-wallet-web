@@ -1,6 +1,7 @@
 import { type Eip1193Provider, getAddress, type JsonRpcProvider } from 'ethers'
 import { SafeWalletProvider, type WalletSDK } from '@/services/safe-wallet-provider'
-import { getTransactionDetails, type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { getTransactionDetails } from '@/utils/transactions'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { type NextRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import proposeTx from '@/services/tx/proposeTransaction'
@@ -10,7 +11,7 @@ import { initSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { tryOffChainTxSigning } from '@/services/tx/tx-sender/sdk'
-import type { TransactionResult } from '@safe-global/safe-core-sdk-types'
+import type { TransactionResult } from '@safe-global/types-kit'
 
 export type NestedWallet = {
   address: string
@@ -21,7 +22,7 @@ export type NestedWallet = {
 
 export const getNestedWallet = (
   actualWallet: ConnectedWallet,
-  safeInfo: SafeInfo,
+  safeInfo: SafeState,
   web3ReadOnly: JsonRpcProvider,
   router: NextRouter,
 ): NestedWallet => {

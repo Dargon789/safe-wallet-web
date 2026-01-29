@@ -61,8 +61,11 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env.eas
+
 
 # typescript
 *.tsbuildinfo
 
 # @end expo-cli
+.vercel

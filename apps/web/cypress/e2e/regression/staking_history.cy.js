@@ -2,22 +2,23 @@ import * as constants from '../../support/constants.js'
 import * as create_tx from '../pages/create_tx.pages.js'
 import * as staking from '../pages/staking.page.js'
 import * as staking_data from '../../fixtures/staking_data.json'
+import * as main from '../pages/main.page.js'
 
 const safe = 'eth:0xAD1Cf279D18f34a13c3Bf9b79F4D427D5CD9505B'
 const historyData = staking_data.type.history
 
 describe('Staking history tests', { defaultCommandTimeout: 30000 }, () => {
-  // Unskip when decoding is fixed on staging
+  //Skipped until we find out why it’s flaky on the CGW side.
   it.skip('Verify Claim tx shows amount received', () => {
     cy.visit(constants.transactionUrl + safe + staking.stakingTxs.claim)
+    main.waitForElementByTextInContainer(create_tx.transactionItem, historyData.claim)
     staking.checkTxHeaderData([historyData.ETH_3205184, historyData.claim])
     create_tx.verifyExpandedDetails([historyData.ETH_3205184, historyData.received])
     create_tx.clickOnAdvancedDetails()
     create_tx.verifyAdvancedDetails([historyData.call_batchWithdrawCLFee, historyData.StakingContract])
   })
 
-  // Unskip when decoding is fixed on staging
-  it.skip('Verify Withdraw request shows amount of validators and Validator status', () => {
+  it('Verify Withdraw request shows amount of validators and Validator status', () => {
     cy.visit(constants.transactionUrl + safe + staking.stakingTxs.withdrawal)
     staking.checkTxHeaderData([historyData.withdrawal, historyData.validator_1])
     staking.verifyValidatorCount(1)
@@ -26,8 +27,7 @@ describe('Staking history tests', { defaultCommandTimeout: 30000 }, () => {
     create_tx.verifyAdvancedDetails([historyData.call_requestValidatorsExit, historyData.StakingContract])
   })
 
-  // Unskip when decoding is fixed on staging
-  it.skip('Verify Stake tx show the amount staked and proper fields', () => {
+  it('Verify Stake tx show the amount staked and proper fields', () => {
     cy.visit(constants.transactionUrl + safe + staking.stakingTxs.stake)
     staking.checkTxHeaderData([historyData.ETH32_2, historyData.stake])
     staking.checkDataFields(staking.dataFields.deposit, historyData.ETH_32)

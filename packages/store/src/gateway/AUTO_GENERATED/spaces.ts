@@ -1,11 +1,77 @@
 import { cgwClient as api } from '../cgwClient'
-export const addTagTypes = ['spaces'] as const
+export const addTagTypes = ['accounts', 'spaces'] as const
 const injectedRtkApi = api
   .enhanceEndpoints({
     addTagTypes,
   })
   .injectEndpoints({
     endpoints: (build) => ({
+      addressBooksGetAddressBookV1: build.query<
+        AddressBooksGetAddressBookV1ApiResponse,
+        AddressBooksGetAddressBookV1ApiArg
+      >({
+        query: (queryArg) => ({ url: `/v1/accounts/${queryArg.address}/address-books/${queryArg.chainId}` }),
+        providesTags: ['accounts'],
+      }),
+      addressBooksCreateAddressBookItemV1: build.mutation<
+        AddressBooksCreateAddressBookItemV1ApiResponse,
+        AddressBooksCreateAddressBookItemV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/accounts/${queryArg.address}/address-books/${queryArg.chainId}`,
+          method: 'POST',
+          body: queryArg.createAddressBookItemDto,
+        }),
+        invalidatesTags: ['accounts'],
+      }),
+      addressBooksDeleteAddressBookV1: build.mutation<
+        AddressBooksDeleteAddressBookV1ApiResponse,
+        AddressBooksDeleteAddressBookV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/accounts/${queryArg.address}/address-books/${queryArg.chainId}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['accounts'],
+      }),
+      addressBooksDeleteAddressBookItemV1: build.mutation<
+        AddressBooksDeleteAddressBookItemV1ApiResponse,
+        AddressBooksDeleteAddressBookItemV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/accounts/${queryArg.address}/address-books/${queryArg.chainId}/${queryArg.addressBookItemId}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['accounts'],
+      }),
+      addressBooksGetAddressBookItemsV1: build.query<
+        AddressBooksGetAddressBookItemsV1ApiResponse,
+        AddressBooksGetAddressBookItemsV1ApiArg
+      >({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/address-book` }),
+        providesTags: ['spaces'],
+      }),
+      addressBooksUpsertAddressBookItemsV1: build.mutation<
+        AddressBooksUpsertAddressBookItemsV1ApiResponse,
+        AddressBooksUpsertAddressBookItemsV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book`,
+          method: 'PUT',
+          body: queryArg.upsertAddressBookItemsDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      addressBooksDeleteByAddressV1: build.mutation<
+        AddressBooksDeleteByAddressV1ApiResponse,
+        AddressBooksDeleteByAddressV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/${queryArg.address}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['spaces'],
+      }),
       spacesCreateV1: build.mutation<SpacesCreateV1ApiResponse, SpacesCreateV1ApiArg>({
         query: (queryArg) => ({ url: `/v1/spaces`, method: 'POST', body: queryArg.createSpaceDto }),
         invalidatesTags: ['spaces'],
@@ -74,11 +140,23 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members` }),
         providesTags: ['spaces'],
       }),
+      membersSelfRemoveV1: build.mutation<MembersSelfRemoveV1ApiResponse, MembersSelfRemoveV1ApiArg>({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members`, method: 'DELETE' }),
+        invalidatesTags: ['spaces'],
+      }),
       membersUpdateRoleV1: build.mutation<MembersUpdateRoleV1ApiResponse, MembersUpdateRoleV1ApiArg>({
         query: (queryArg) => ({
           url: `/v1/spaces/${queryArg.spaceId}/members/${queryArg.userId}/role`,
           method: 'PATCH',
           body: queryArg.updateRoleDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      membersUpdateAliasV1: build.mutation<MembersUpdateAliasV1ApiResponse, MembersUpdateAliasV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/members/alias`,
+          method: 'PATCH',
+          body: queryArg.updateMemberAliasDto,
         }),
         invalidatesTags: ['spaces'],
       }),
@@ -90,71 +168,175 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type SpacesCreateV1ApiResponse = /** status 200 Space created */ CreateSpaceResponse
+export type AddressBooksGetAddressBookV1ApiResponse = /** status 200  */ AddressBook
+export type AddressBooksGetAddressBookV1ApiArg = {
+  address: string
+  chainId: string
+}
+export type AddressBooksCreateAddressBookItemV1ApiResponse = /** status 200  */ AddressBookItem
+export type AddressBooksCreateAddressBookItemV1ApiArg = {
+  address: string
+  chainId: string
+  createAddressBookItemDto: CreateAddressBookItemDto
+}
+export type AddressBooksDeleteAddressBookV1ApiResponse = unknown
+export type AddressBooksDeleteAddressBookV1ApiArg = {
+  address: string
+  chainId: string
+}
+export type AddressBooksDeleteAddressBookItemV1ApiResponse = unknown
+export type AddressBooksDeleteAddressBookItemV1ApiArg = {
+  address: string
+  chainId: string
+  addressBookItemId: number
+}
+export type AddressBooksGetAddressBookItemsV1ApiResponse =
+  /** status 200 Address book items retrieved successfully */ SpaceAddressBookDto
+export type AddressBooksGetAddressBookItemsV1ApiArg = {
+  /** Space ID to get address book for */
+  spaceId: number
+}
+export type AddressBooksUpsertAddressBookItemsV1ApiResponse =
+  /** status 200 Address book updated successfully */ SpaceAddressBookDto
+export type AddressBooksUpsertAddressBookItemsV1ApiArg = {
+  /** Space ID to update address book for */
+  spaceId: number
+  /** Address book items to create or update, including addresses and their labels */
+  upsertAddressBookItemsDto: UpsertAddressBookItemsDto
+}
+export type AddressBooksDeleteByAddressV1ApiResponse = unknown
+export type AddressBooksDeleteByAddressV1ApiArg = {
+  /** Space ID containing the address book */
+  spaceId: number
+  /** Address to remove from the address book (0x prefixed hex string) */
+  address: string
+}
+export type SpacesCreateV1ApiResponse = /** status 200 Space created successfully */ CreateSpaceResponse
 export type SpacesCreateV1ApiArg = {
+  /** Space creation data including the name of the space */
   createSpaceDto: CreateSpaceDto
 }
-export type SpacesGetV1ApiResponse = /** status 200 Spaces found */ GetSpaceResponse[]
+export type SpacesGetV1ApiResponse = /** status 200 User spaces retrieved successfully */ GetSpaceResponse[]
 export type SpacesGetV1ApiArg = void
-export type SpacesCreateWithUserV1ApiResponse = /** status 200 Space created */ CreateSpaceResponse
+export type SpacesCreateWithUserV1ApiResponse =
+  /** status 200 Space and user created successfully */ CreateSpaceResponse
 export type SpacesCreateWithUserV1ApiArg = {
+  /** Space creation data including the name of the space */
   createSpaceDto: CreateSpaceDto
 }
-export type SpacesGetOneV1ApiResponse = /** status 200 Space found */ GetSpaceResponse
+export type SpacesGetOneV1ApiResponse = /** status 200 Space information retrieved successfully */ GetSpaceResponse
 export type SpacesGetOneV1ApiArg = {
+  /** Space ID */
   id: number
 }
-export type SpacesUpdateV1ApiResponse = /** status 200 Space updated */ UpdateSpaceResponse
+export type SpacesUpdateV1ApiResponse = /** status 200 Space updated successfully */ UpdateSpaceResponse
 export type SpacesUpdateV1ApiArg = {
+  /** Space ID to update */
   id: number
+  /** Space update data including new name or other properties */
   updateSpaceDto: UpdateSpaceDto
 }
 export type SpacesDeleteV1ApiResponse = unknown
 export type SpacesDeleteV1ApiArg = {
+  /** Space ID to delete */
   id: number
 }
 export type SpaceSafesCreateV1ApiResponse = unknown
 export type SpaceSafesCreateV1ApiArg = {
+  /** Space ID to add Safes to */
   spaceId: number
+  /** List of Safe addresses and their chain information to add to the space */
   createSpaceSafesDto: CreateSpaceSafesDto
 }
-export type SpaceSafesGetV1ApiResponse = /** status 200 Safes fetched successfully */ GetSpaceSafeResponse
+export type SpaceSafesGetV1ApiResponse = /** status 200 Space Safes retrieved successfully */ GetSpaceSafeResponse
 export type SpaceSafesGetV1ApiArg = {
+  /** Space ID to get Safes for */
   spaceId: number
 }
 export type SpaceSafesDeleteV1ApiResponse = unknown
 export type SpaceSafesDeleteV1ApiArg = {
+  /** Space ID to remove Safes from */
   spaceId: number
+  /** List of Safe addresses and their chain information to remove from the space */
   deleteSpaceSafesDto: DeleteSpaceSafesDto
 }
-export type MembersInviteUserV1ApiResponse = /** status 200 Users invited */ Invitation[]
+export type MembersInviteUserV1ApiResponse = /** status 200 Users invited successfully */ Invitation[]
 export type MembersInviteUserV1ApiArg = {
+  /** Space ID to invite users to */
   spaceId: number
+  /** List of wallet addresses to invite to the space */
   inviteUsersDto: InviteUsersDto
 }
 export type MembersAcceptInviteV1ApiResponse = unknown
 export type MembersAcceptInviteV1ApiArg = {
+  /** Space ID to accept invitation for */
   spaceId: number
+  /** Invitation acceptance data including any required confirmation */
   acceptInviteDto: AcceptInviteDto
 }
 export type MembersDeclineInviteV1ApiResponse = unknown
 export type MembersDeclineInviteV1ApiArg = {
+  /** Space ID to decline invitation for */
   spaceId: number
 }
-export type MembersGetUsersV1ApiResponse = /** status 200 Space and members list */ MembersDto
+export type MembersGetUsersV1ApiResponse = /** status 200 Space members retrieved successfully */ MembersDto
 export type MembersGetUsersV1ApiArg = {
+  /** Space ID to get members for */
+  spaceId: number
+}
+export type MembersSelfRemoveV1ApiResponse = unknown
+export type MembersSelfRemoveV1ApiArg = {
   spaceId: number
 }
 export type MembersUpdateRoleV1ApiResponse = unknown
 export type MembersUpdateRoleV1ApiArg = {
+  /** Space ID containing the member */
   spaceId: number
+  /** User ID of the member to update */
   userId: number
+  /** New role information for the member */
   updateRoleDto: UpdateRoleDto
+}
+export type MembersUpdateAliasV1ApiResponse = unknown
+export type MembersUpdateAliasV1ApiArg = {
+  spaceId: number
+  updateMemberAliasDto: UpdateMemberAliasDto
 }
 export type MembersRemoveUserV1ApiResponse = unknown
 export type MembersRemoveUserV1ApiArg = {
+  /** Space ID to remove member from */
   spaceId: number
+  /** User ID of the member to remove */
   userId: number
+}
+export type AddressBookItem = {
+  name: string
+  address: string
+  chainIds: string[]
+}
+export type AddressBook = {
+  id: string
+  accountId: string
+  chainId: string
+  data: AddressBookItem[]
+}
+export type CreateAddressBookItemDto = {
+  name: string
+  address: string
+}
+export type SpaceAddressBookItemDto = {
+  name: string
+  address: string
+  chainIds: string[]
+  createdBy: string
+  lastUpdatedBy: string
+}
+export type SpaceAddressBookDto = {
+  spaceId: string
+  data: SpaceAddressBookItemDto[]
+}
+export type UpsertAddressBookItemsDto = {
+  items: AddressBookItem[]
 }
 export type CreateSpaceResponse = {
   name: string
@@ -237,6 +419,7 @@ export type Member = {
   role: 'ADMIN' | 'MEMBER'
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   name: string
+  alias?: string | null
   invitedBy?: string | null
   createdAt: string
   updatedAt: string
@@ -248,7 +431,20 @@ export type MembersDto = {
 export type UpdateRoleDto = {
   role: 'ADMIN' | 'MEMBER'
 }
+export type UpdateMemberAliasDto = {
+  /** The new alias for the member */
+  alias: string
+}
 export const {
+  useAddressBooksGetAddressBookV1Query,
+  useLazyAddressBooksGetAddressBookV1Query,
+  useAddressBooksCreateAddressBookItemV1Mutation,
+  useAddressBooksDeleteAddressBookV1Mutation,
+  useAddressBooksDeleteAddressBookItemV1Mutation,
+  useAddressBooksGetAddressBookItemsV1Query,
+  useLazyAddressBooksGetAddressBookItemsV1Query,
+  useAddressBooksUpsertAddressBookItemsV1Mutation,
+  useAddressBooksDeleteByAddressV1Mutation,
   useSpacesCreateV1Mutation,
   useSpacesGetV1Query,
   useLazySpacesGetV1Query,
@@ -266,6 +462,8 @@ export const {
   useMembersDeclineInviteV1Mutation,
   useMembersGetUsersV1Query,
   useLazyMembersGetUsersV1Query,
+  useMembersSelfRemoveV1Mutation,
   useMembersUpdateRoleV1Mutation,
+  useMembersUpdateAliasV1Mutation,
   useMembersRemoveUserV1Mutation,
 } = injectedRtkApi

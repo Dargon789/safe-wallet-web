@@ -8,6 +8,7 @@ export const isAndroid = Platform.OS === 'android'
 export const isTestingEnv = process.env.NODE_ENV === 'test'
 export const isStorybookEnv = Constants?.expoConfig?.extra?.storybookEnabled === 'true'
 export const POLLING_INTERVAL = 15_000
+export const POSITIONS_POLLING_INTERVAL = 300_000 // 5 minutes
 
 export const COMING_SOON_MESSAGE = 'This feature is coming soon.'
 export const COMING_SOON_TITLE = 'Coming soon'
@@ -16,6 +17,10 @@ export const GATEWAY_URL_PRODUCTION =
   process.env.EXPO_PUBLIC_GATEWAY_URL_PRODUCTION || 'https://safe-client.safe.global'
 export const GATEWAY_URL_STAGING = process.env.EXPO_PUBLIC_GATEWAY_URL_STAGING || 'https://safe-client.staging.5afe.dev'
 export const GATEWAY_URL = isProduction ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
+
+export const SECURITY_CERTIFICATE_HASH_BASE64 = process.env.EXPO_PUBLIC_SECURITY_SERTIFICATE_HASH_BASE64
+export const SECURITY_WATCHER_MAIL = process.env.EXPO_PUBLIC_SECURITY_WATCHER_MAIL
+export const SECURITY_RASP_ENABLED = process.env.EXPO_PUBLIC_SECURITY_RASP_ENABLED === 'true'
 
 /**
  * The version of the onboarding flow.
@@ -27,3 +32,11 @@ export const SAFE_WEB_URL = 'https://app.safe.global'
 export const SAFE_WEB_TRANSACTIONS_URL = `${SAFE_WEB_URL}/transactions/tx?safe=:safeAddressWithChainPrefix&id=:txId`
 export const SAFE_WEB_FEEDBACK_URL =
   'https://docs.google.com/forms/d/e/1FAIpQLSfJXkNNsZqVtg3w3dwk-YrTNutQ00n3MMfLtH-dN8zSHaJu5Q/viewform?usp=dialog'
+
+export const PRIVACY_POLICY_URL =
+  'https://s3.eu-central-1.amazonaws.com/mobile.app.safe.global/SafeLabsGmbHPrivacyPolicy_v1.0.html'
+export const TERMS_OF_USE_URL =
+  'https://s3.eu-central-1.amazonaws.com/mobile.app.safe.global/MobileTermsAndConditions_v1.0.html'
+
+export const APP_STORE_URL = 'https://apps.apple.com/app/id6748754793'
+export const GOOGLE_PLAY_URL = 'https://play.google.com/store/apps/details?id=global.safe.mobileapp'

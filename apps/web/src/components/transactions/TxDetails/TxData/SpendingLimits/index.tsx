@@ -1,29 +1,30 @@
+import type { CustomTransactionInfo, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
 import React, { useMemo } from 'react'
-import type { Custom, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
-import { Box, Typography } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import TokenIcon from '@/components/common/TokenIcon'
 import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
 import { useCurrentChain } from '@/hooks/useChains'
-import { selectTokens } from '@/store/balancesSlice'
-import { useAppSelector } from '@/store'
+import useBalances from '@/hooks/useBalances'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import type { SpendingLimitMethods } from '@/utils/transaction-guards'
 import { isSetAllowance } from '@/utils/transaction-guards'
-import css from './styles.module.css'
 import chains from '@/config/chains'
+import TxDetailsRow from '@/components/tx/ConfirmTxDetails/TxDetailsRow'
+import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 
 type SpendingLimitsProps = {
-  txData?: TransactionData
-  txInfo: Custom
+  txData?: TransactionData | null
+  txInfo: CustomTransactionInfo
   type: SpendingLimitMethods
 }
 
-export const SpendingLimits = ({ txData, txInfo, type }: SpendingLimitsProps): ReactElement | null => {
+export const SpendingLimits = ({ txData, type }: SpendingLimitsProps): ReactElement | null => {
   const chain = useCurrentChain()
-  const tokens = useAppSelector(selectTokens)
+  const { balances } = useBalances()
+  const tokens = useMemo(() => balances.items.map(({ tokenInfo }) => tokenInfo), [balances.items])
   const isSetAllowanceMethod = useMemo(() => isSetAllowance(type), [type])
 
   const [beneficiary, tokenAddress, amount, resetTimeMin] =
@@ -37,58 +38,51 @@ export const SpendingLimits = ({ txData, txInfo, type }: SpendingLimitsProps): R
     () => tokens.find(({ address }) => sameAddress(address, tokenAddress as string)),
     [tokenAddress, tokens],
   )
-  const txTo = txInfo.to
 
   if (!txData) return null
 
   return (
-    <Box className={css.container}>
+    <Stack spacing={1}>
       <Typography>
         <b>{`${isSetAllowanceMethod ? 'Modify' : 'Delete'} spending limit:`}</b>
       </Typography>
-      <Box className={css.group}>
-        <Typography sx={({ palette }) => ({ color: palette.primary.light })}>Beneficiary</Typography>
+
+      <TxDetailsRow label="Beneficiary" grid>
         <EthHashInfo
-          address={(beneficiary as string) || txTo?.value || '0x'}
-          name={txTo.name}
-          customAvatar={txTo.logoUri}
+          address={(beneficiary as string) || ZERO_ADDRESS}
           shortAddress={false}
           showCopyButton
           hasExplorer
         />
-      </Box>
-      <Box className={css.group}>
-        <Typography sx={({ palette }) => ({ color: palette.primary.light })}>
-          {isSetAllowanceMethod ? (tokenInfo ? 'Amount' : 'Raw Amount (in decimals)') : 'Token'}
-        </Typography>
-        <Box className={css.inline}>
-          {tokenInfo && (
-            <>
-              <TokenIcon logoUri={tokenInfo.logoUri} size={32} tokenSymbol={tokenInfo.symbol} />
-              <Typography>{tokenInfo.symbol}</Typography>
-            </>
-          )}
+      </TxDetailsRow>
 
-          {isSetAllowanceMethod && (
-            <>
-              {tokenInfo ? (
-                <Typography>
-                  {formatVisualAmount(amount as string, tokenInfo.decimals)} {tokenInfo.symbol}
-                </Typography>
-              ) : (
-                <Typography>{amount}</Typography>
-              )}
-            </>
-          )}
-        </Box>
-      </Box>
+      <TxDetailsRow label={isSetAllowanceMethod ? (tokenInfo ? 'Amount' : 'Raw Amount (in decimals)') : 'Token'} grid>
+        {tokenInfo && (
+          <>
+            <TokenIcon logoUri={tokenInfo.logoUri} size={32} tokenSymbol={tokenInfo.symbol} />
+            <Typography>{tokenInfo.symbol}</Typography>
+          </>
+        )}
+
+        {isSetAllowanceMethod && (
+          <>
+            {tokenInfo ? (
+              <Typography>
+                {formatVisualAmount(amount as string, tokenInfo.decimals)} {tokenInfo.symbol}
+              </Typography>
+            ) : (
+              <Typography>{amount}</Typography>
+            )}
+          </>
+        )}
+      </TxDetailsRow>
+
       {isSetAllowanceMethod && (
-        <Box className={css.group}>
-          <Typography sx={({ palette }) => ({ color: palette.primary.light })}>Reset time</Typography>
+        <TxDetailsRow label="Reset time" grid>
           <SpendingLimitLabel label={resetTimeLabel || 'One-time spending limit'} isOneTime={!resetTimeLabel} />
-        </Box>
+        </TxDetailsRow>
       )}
-    </Box>
+    </Stack>
   )
 }
 
@@ -109,5 +103,3 @@ const TEST_RESET_TIME_OPTIONS = [
 export const getResetTimeOptions = (chainId = ''): { label: string; value: string }[] => {
   return chainId === chains.gor || chainId === chains.sep ? TEST_RESET_TIME_OPTIONS : RESET_TIME_OPTIONS
 }
-
-export default SpendingLimits

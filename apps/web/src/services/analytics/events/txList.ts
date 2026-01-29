@@ -4,7 +4,6 @@ const TX_LIST_CATEGORY = 'tx-list'
 
 export enum CopyDeeplinkLabels {
   shareBlock = 'share-block',
-  button = 'button',
 }
 
 export const TX_LIST_EVENTS = {
@@ -25,10 +24,6 @@ export const TX_LIST_EVENTS = {
     action: 'Copy deeplink',
     category: TX_LIST_CATEGORY,
     label: CopyDeeplinkLabels.shareBlock,
-  },
-  OPEN_SHARE_BLOCK: {
-    action: 'Open share block',
-    category: TX_LIST_CATEGORY,
   },
   CONFIRM: {
     action: 'Confirm transaction',
@@ -74,6 +69,16 @@ export const TX_LIST_EVENTS = {
     category: TX_LIST_CATEGORY,
     event: EventType.CLICK,
     // label: 'hide' | 'show',
+  },
+  CSV_EXPORT_CLICKED: {
+    action: 'CSV Export Clicked',
+    category: TX_LIST_CATEGORY,
+    event: EventType.CLICK,
+  },
+  CSV_EXPORT_SUBMITTED: {
+    action: 'CSV Export Submitted',
+    category: TX_LIST_CATEGORY,
+    event: EventType.CLICK,
   },
 }
 

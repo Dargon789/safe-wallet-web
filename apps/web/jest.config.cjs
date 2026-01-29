@@ -1,3 +1,14 @@
+const path = require('path')
+const fs = require('fs')
+
+// Set environment variables before modules are loaded
+if (!process.env.NEXT_PUBLIC_APP_VERSION || !process.env.NEXT_PUBLIC_APP_HOMEPAGE) {
+  const packageJsonPath = path.join(__dirname, 'package.json')
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
+  process.env.NEXT_PUBLIC_APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || packageJson.version
+  process.env.NEXT_PUBLIC_APP_HOMEPAGE = process.env.NEXT_PUBLIC_APP_HOMEPAGE || packageJson.homepage
+}
+
 const nextJest = require('next/jest')
 const createJestConfig = nextJest({
   // Provide the path to your Next.js app to load next.config.js and .env files in your test environment
@@ -11,8 +22,8 @@ const customJestConfig = {
   moduleNameMapper: {
     // Handle module aliases (this will be automatically configured for you soon)
     '^@/(.*)$': '<rootDir>/src/$1',
-    '^react$': '<rootDir>/node_modules/react',
-    '^react-dom$': '<rootDir>/node_modules/react-dom',
+    '^react-dom$': '<rootDir>/../../node_modules/react-dom',
+    '^react-dom/client$': '<rootDir>/../../node_modules/react-dom/client',
     '^.+\\.(svg)$': '<rootDir>/mocks/svg.js',
     '^.+/markdown/terms/terms\\.md$': '<rootDir>/mocks/terms.md.js',
     isows: '<rootDir>/node_modules/isows/_cjs/index.js',
@@ -29,12 +40,14 @@ const customJestConfig = {
     customExportConditions: ['node'],
   },
   coveragePathIgnorePatterns: ['/node_modules/', '/src/tests/', '/src/types/contracts/'],
+  // Exclude storybook snapshot tests from main test run - they have their own CI workflow
+  testPathIgnorePatterns: ['/node_modules/', '/.next/', '\\.stories\\.test\\.tsx$'],
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
 module.exports = async () => ({
   ...(await createJestConfig(customJestConfig)()),
   transformIgnorePatterns: [
-    'node_modules/(?!(uint8arrays|multiformats|@web3-onboard/common|@walletconnect/(.*)/uint8arrays)/)',
+    'node_modules/(?!(uint8arrays|multiformats|@web3-onboard/common|@walletconnect/(.*)/uint8arrays|@storybook|storybook)/)',
   ],
 })

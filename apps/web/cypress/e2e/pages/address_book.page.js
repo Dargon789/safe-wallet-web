@@ -1,6 +1,6 @@
 import * as constants from '../../support/constants.js'
 import * as main from './main.page.js'
-import staticSafes from '../../fixtures/safes/static.json'
+import staticSafes from '../../fixtures/safes/static.js'
 
 export const addressBookRecipient = '[data-testid="address-book-recipient"]'
 const beameriFrameContainer = '#beamerOverlay .iframeCointaner'
@@ -30,7 +30,7 @@ const moreActionIcon = '[data-testid="MoreHorizIcon"]'
 
 export const acceptSelection = 'Save settings'
 export const addressBook = 'Address book'
-const createEntryBtn = 'Create entry'
+const createEntryBtn = 'New entry'
 export const delteEntryModaldeleteBtn = 'Delete'
 const exportBtn = 'Export'
 // const saveBtn = 'Save'

@@ -1,30 +1,24 @@
-import type { DecodedDataResponse, ChainInfo, SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import semverSatisfies from 'semver/functions/satisfies'
 import memoize from 'lodash/memoize'
 import { keccak256, ethers, solidityPacked, getCreate2Address, type Provider } from 'ethers'
+import type { SafeSetup } from '../types'
 
 import {
   type UndeployedSafesState,
   type ReplayedSafeProps,
 } from '@safe-global/utils/features/counterfactual/store/types'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { areOwnersMatching } from '@safe-global/utils/utils/safe-setup-comparison'
 import { Safe_proxy_factory__factory } from '@safe-global/utils/types/contracts'
-import { extractCounterfactualSafeSetup } from '@/features/counterfactual/utils'
+import { extractCounterfactualSafeSetup } from '@/features/counterfactual/services'
 import { encodeSafeSetupCall } from '@/components/new-safe/create/logic'
 import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { type MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
-
-type SafeSetup = {
-  owners: string[]
-  threshold: number
-  chainId: string
-}
-
-export const isChangingSignerSetup = (decodedData: DecodedDataResponse | undefined) => {
-  return decodedData?.method === 'addOwnerWithThreshold' || decodedData?.method === 'removeOwner'
-}
+import { MIN_SAFE_VERSION_FOR_MULTICHAIN } from '../constants'
 
 export const isMultiChainSafeItem = (safe: SafeItem | MultiChainSafeItem): safe is MultiChainSafeItem => {
   if ('safes' in safe && 'address' in safe) {
@@ -32,13 +26,6 @@ export const isMultiChainSafeItem = (safe: SafeItem | MultiChainSafeItem): safe 
   }
   return false
 }
-
-export const isSafeItem = (safe: SafeItem | MultiChainSafeItem): safe is SafeItem => {
-  return !isMultiChainSafeItem(safe)
-}
-
-const areOwnersMatching = (owners1: string[], owners2: string[]) =>
-  owners1.length === owners2.length && owners1.every((owner) => owners2.some((owner2) => sameAddress(owner, owner2)))
 
 export const getSafeSetups = (
   safes: SafeItem[],
@@ -138,16 +125,18 @@ export const predictAddressBasedOnReplayData = async (safeCreationData: Replayed
   )
 }
 
-const canMultichain = (chain: ChainInfo) => {
-  const MIN_SAFE_VERSION = '1.4.1'
-  return hasFeature(chain, FEATURES.COUNTERFACTUAL) && semverSatisfies(LATEST_SAFE_VERSION, `>=${MIN_SAFE_VERSION}`)
+const canMultichain = (chain: Chain) => {
+  return (
+    hasFeature(chain, FEATURES.COUNTERFACTUAL) &&
+    semverSatisfies(LATEST_SAFE_VERSION, `>=${MIN_SAFE_VERSION_FOR_MULTICHAIN}`)
+  )
 }
 
-export const hasMultiChainCreationFeatures = (chain: ChainInfo): boolean => {
+export const hasMultiChainCreationFeatures = (chain: Chain): boolean => {
   return hasFeature(chain, FEATURES.MULTI_CHAIN_SAFE_CREATION) && canMultichain(chain)
 }
 
-export const hasMultiChainAddNetworkFeature = (chain: ChainInfo | undefined): boolean => {
+export const hasMultiChainAddNetworkFeature = (chain: Chain | undefined): boolean => {
   if (!chain) return false
   return hasFeature(chain, FEATURES.MULTI_CHAIN_SAFE_ADD_NETWORK) && canMultichain(chain)
 }

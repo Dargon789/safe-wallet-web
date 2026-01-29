@@ -1,11 +1,17 @@
 import { TokenTransferType } from '@/components/tx-flow/flows/TokenTransfer'
-import { CreateTokenTransfer } from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
+import CreateTokenTransfer, {
+  type CreateTokenTransferProps,
+} from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
 import * as tokenUtils from '@/components/tx-flow/flows/TokenTransfer/utils'
 import * as useHasPermission from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
 import { render } from '@/tests/test-utils'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { TokenType } from '@safe-global/store/gateway/types'
+import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
+import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import * as useRecipientAnalysis from '@/features/safe-shield/hooks/useRecipientAnalysis'
+import * as useBalances from '@/hooks/useBalances'
 
 describe('CreateTokenTransfer', () => {
   const mockParams = {
@@ -20,20 +26,36 @@ describe('CreateTokenTransfer', () => {
   }
 
   const useHasPermissionSpy = jest.spyOn(useHasPermission, 'useHasPermission')
+  const useRecipientAnalysisSpy = jest.spyOn(useRecipientAnalysis, 'useRecipientAnalysis')
 
   beforeEach(() => {
     jest.clearAllMocks()
     useHasPermissionSpy.mockReturnValue(true)
+    useRecipientAnalysisSpy.mockReturnValue([undefined, undefined, false])
   })
 
+  const renderCreateTokenTransfer = (
+    props: CreateTokenTransferProps = {},
+    options: Parameters<typeof render>[1] = undefined,
+  ) => {
+    return render(
+      <SafeShieldProvider>
+        <TxFlowProvider step={0} data={mockParams} prevStep={() => {}} nextStep={jest.fn()}>
+          <CreateTokenTransfer {...props} />
+        </TxFlowProvider>
+      </SafeShieldProvider>,
+      options,
+    )
+  }
+
   it('should display a token amount input', () => {
-    const { getByText } = render(<CreateTokenTransfer params={mockParams} onSubmit={jest.fn()} />)
+    const { getByText } = renderCreateTokenTransfer()
 
     expect(getByText('Amount')).toBeInTheDocument()
   })
 
   it('should display a recipient input', () => {
-    const { getAllByText } = render(<CreateTokenTransfer params={mockParams} onSubmit={jest.fn()} />)
+    const { getAllByText } = renderCreateTokenTransfer()
 
     expect(getAllByText('Recipient address')[0]).toBeInTheDocument()
   })
@@ -45,31 +67,31 @@ describe('CreateTokenTransfer', () => {
 
     const tokenAddress = ZERO_ADDRESS
 
-    const { getByText } = render(<CreateTokenTransfer params={mockParams} onSubmit={jest.fn()} />, {
-      initialReduxState: {
-        balances: {
-          loading: false,
-          data: {
-            fiatTotal: '0',
-            items: [
-              {
-                balance: '10',
-                tokenInfo: {
-                  address: tokenAddress,
-                  decimals: 18,
-                  logoUri: 'someurl',
-                  name: 'Test token',
-                  symbol: 'TST',
-                  type: TokenType.ERC20,
-                },
-                fiatBalance: '10',
-                fiatConversion: '1',
-              },
-            ],
+    jest.spyOn(useBalances, 'default').mockReturnValue({
+      balances: {
+        fiatTotal: '0',
+        items: [
+          {
+            balance: '10',
+            tokenInfo: {
+              address: tokenAddress,
+              decimals: 18,
+              logoUri: 'someurl',
+              name: 'Test token',
+              symbol: 'TST',
+              type: TokenType.ERC20,
+            },
+            fiatBalance: '10',
+            fiatConversion: '1',
           },
-        },
+        ],
       },
+      loaded: true,
+      loading: false,
+      error: undefined,
     })
+
+    const { getByText } = renderCreateTokenTransfer()
 
     expect(getByText('Send as')).toBeInTheDocument()
 
@@ -78,14 +100,14 @@ describe('CreateTokenTransfer', () => {
 
   it('should not display a type selection if user does not have `CreateSpendingLimitTransaction` permission', () => {
     useHasPermissionSpy.mockReturnValueOnce(false)
-    const { queryByText } = render(<CreateTokenTransfer params={mockParams} onSubmit={jest.fn()} txNonce={1} />)
+    const { queryByText } = renderCreateTokenTransfer({ txNonce: 1 })
 
     expect(queryByText('Send as')).not.toBeInTheDocument()
     expect(useHasPermissionSpy).toHaveBeenCalledWith(Permission.CreateSpendingLimitTransaction)
   })
 
   it('should not display a type selection if there is a txNonce', () => {
-    const { queryByText } = render(<CreateTokenTransfer params={mockParams} onSubmit={jest.fn()} txNonce={1} />)
+    const { queryByText } = renderCreateTokenTransfer({ txNonce: 1 })
 
     expect(queryByText('Send as')).not.toBeInTheDocument()
   })

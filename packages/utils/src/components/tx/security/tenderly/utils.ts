@@ -1,32 +1,86 @@
-import type { ChainInfo, SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import type { MetaTransactionData, SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { MetaTransactionData, SafeTransaction } from '@safe-global/types-kit'
 import {
   TENDERLY_ORG_NAME,
   TENDERLY_PROJECT_NAME,
   TENDERLY_SIMULATE_ENDPOINT_URL,
 } from '@safe-global/utils/config/constants'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
-import type {
-  StateObject,
-  TenderlySimulatePayload,
-  TenderlySimulation,
+import {
+  FETCH_STATUS,
+  NestedTxStatus,
+  type StateObject,
+  type TenderlySimulatePayload,
+  type TenderlySimulation,
 } from '@safe-global/utils/components/tx/security/tenderly/types'
 import type { EnvState } from '@safe-global/store/settingsSlice'
-import { toBeHex } from 'ethers'
+import { toBeHex, ZeroAddress } from 'ethers'
+import { UseSimulationReturn } from './useSimulation'
 
-export const getSimulationLink = (simulationId: string): string => {
-  return `https://dashboard.tenderly.co/public/${TENDERLY_ORG_NAME}/${TENDERLY_PROJECT_NAME}/simulator/${simulationId}`
+const TENDERLY_DASHBOARD_URL = 'https://dashboard.tenderly.co'
+
+const getTenderlyProjectFromUrl = (tenderlyUrl?: string): { org: string; project: string } | undefined => {
+  if (!tenderlyUrl) {
+    return
+  }
+
+  try {
+    const { pathname } = new URL(tenderlyUrl)
+    const segments = pathname.split('/').filter(Boolean)
+
+    if (!segments.length) {
+      return
+    }
+
+    const accountIndex = segments.findIndex((segment) => segment === 'account')
+
+    if (accountIndex !== -1) {
+      const org = segments[accountIndex + 1]
+      const projectIndex = segments.indexOf('project', accountIndex)
+      const project = projectIndex !== -1 ? segments[projectIndex + 1] : undefined
+
+      if (org && project) {
+        return { org, project }
+      }
+    }
+
+    const projectIndex = segments.findIndex((segment) => segment === 'project')
+
+    if (projectIndex !== -1) {
+      const org = segments[projectIndex + 1]
+      const project = segments[projectIndex + 2]
+
+      if (org && project) {
+        return { org, project }
+      }
+    }
+  } catch (error) {
+    // Ignore URL parsing errors and fall back to defaults
+  }
+}
+
+export const getSimulationLink = (simulationId: string, customTenderly?: EnvState['tenderly']): string => {
+  const parsedTenderly = getTenderlyProjectFromUrl(customTenderly?.url)
+
+  if (parsedTenderly) {
+    const { org, project } = parsedTenderly
+    const baseUrl = customTenderly?.accessToken ? TENDERLY_DASHBOARD_URL : `${TENDERLY_DASHBOARD_URL}/public`
+
+    return `${baseUrl}/${org}/${project}/simulator/${simulationId}`
+  }
+
+  return `${TENDERLY_DASHBOARD_URL}/public/${TENDERLY_ORG_NAME}/${TENDERLY_PROJECT_NAME}/simulator/${simulationId}`
 }
 
 export type SingleTransactionSimulationParams = {
-  safe: SafeInfo
+  safe: SafeState
   executionOwner: string
   transactions: SafeTransaction
   gasLimit?: number
 }
 export type MultiSendTransactionSimulationParams = {
-  safe: SafeInfo
+  safe: SafeState
   executionOwner: string
   transactions: MetaTransactionData[]
   gasLimit?: number
@@ -42,6 +96,21 @@ export const isTxSimulationEnabled = (chain?: Pick<Chain, 'features'>): boolean 
 
   return isSimulationEnvSet && hasFeature(chain, FEATURES.TX_SIMULATION)
 }
+
+export const isSimulationError = (status: SimulationStatus, nestedTx: NestedTxStatus, isNested: boolean) => {
+  const mainIsSuccess = status.isSuccess && !status.isError
+  const nestedIsSuccess = isNested ? nestedTx.status.isSuccess && !nestedTx.status.isError : true
+  const isSimulationSuccess = mainIsSuccess && nestedIsSuccess
+
+  const mainIsFinished = status.isFinished
+  const nestedIsFinished = isNested ? nestedTx.status.isFinished : true
+  const isSimulationFinished = mainIsFinished && nestedIsFinished
+
+  const isLoading = status.isLoading || (isNested && nestedTx.status.isLoading)
+
+  return isSimulationFinished && !isSimulationSuccess && !isLoading
+}
+
 export const getSimulation = async (
   tx: TenderlySimulatePayload,
   customTenderly: EnvState['tenderly'] | undefined,
@@ -101,7 +170,7 @@ const isOverwriteThreshold = (params: SimulationTxParams) => {
     return false
   }
   const tx = params.transactions
-  const hasOwnerSig = tx.signatures.has(params.executionOwner)
+  const hasOwnerSig = tx.signatures.has(params.executionOwner) || tx.signatures.has(params.executionOwner.toLowerCase())
   const effectiveSigs = tx.signatures.size + (hasOwnerSig ? 0 : 1)
   return params.safe.threshold > effectiveSigs
 }
@@ -115,18 +184,27 @@ const getNonceOverwrite = (params: SimulationTxParams): number | undefined => {
     return txNonce
   }
 }
+const getGuardOverwrite = (params: SimulationTxParams): string | undefined => {
+  const hasGuard = params.safe.guard?.value !== undefined && params.safe.guard.value !== ZeroAddress
+  if (hasGuard) {
+    return ZeroAddress
+  }
+}
 /* We need to overwrite the threshold stored in smart contract storage to 1
   to do a proper simulation that takes transaction guards into account.
   The threshold is stored in storage slot 4 and uses full 32 bytes slot.
   Safe storage layout can be found here:
-  https://github.com/gnosis/safe-contracts/blob/main/contracts/libraries/GnosisSafeStorage.sol */
+  https://github.com/gnosis/safe-contracts/blob/main/contracts/libraries/SafeStorage.sol */
 export const THRESHOLD_STORAGE_POSITION = toBeHex('0x4', 32)
 export const THRESHOLD_OVERWRITE = toBeHex('0x1', 32)
 export const NONCE_STORAGE_POSITION = toBeHex('0x5', 32)
+/** keccak256("guard_manager.guard.address" */
+export const GUARD_STORAGE_POSITION = '0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8'
+
 export const getStateOverwrites = (params: SimulationTxParams) => {
   const nonceOverwrite = getNonceOverwrite(params)
   const isThresholdOverwrite = isOverwriteThreshold(params)
-
+  const guardOverwrite = getGuardOverwrite(params)
   const storageOverwrites: Record<string, string> = {} as Record<string, string>
 
   if (isThresholdOverwrite) {
@@ -135,6 +213,47 @@ export const getStateOverwrites = (params: SimulationTxParams) => {
   if (nonceOverwrite !== undefined) {
     storageOverwrites[NONCE_STORAGE_POSITION] = toBeHex('0x' + BigInt(nonceOverwrite).toString(16), 32)
   }
+  if (guardOverwrite !== undefined) {
+    storageOverwrites[GUARD_STORAGE_POSITION] = toBeHex(guardOverwrite, 32)
+  }
 
   return storageOverwrites
+}
+
+export const getCallTraceErrors = (simulation?: TenderlySimulation) => {
+  if (!simulation || !simulation.simulation.status) {
+    return []
+  }
+
+  return simulation.transaction.call_trace.filter((call) => call.error)
+}
+
+export type SimulationStatus = {
+  isLoading: boolean
+  isFinished: boolean
+  isSuccess: boolean
+  isCallTraceError: boolean
+  isError: boolean
+}
+
+export const getSimulationStatus = (simulationResult: UseSimulationReturn): SimulationStatus => {
+  const isLoading = simulationResult._simulationRequestStatus === FETCH_STATUS.LOADING
+
+  const isFinished =
+    simulationResult._simulationRequestStatus === FETCH_STATUS.SUCCESS ||
+    simulationResult._simulationRequestStatus === FETCH_STATUS.ERROR
+
+  const isSuccess = simulationResult.simulationData?.simulation.status || false
+
+  // Safe can emit failure event even though Tenderly simulation succeeds
+  const isCallTraceError = isSuccess && getCallTraceErrors(simulationResult.simulationData).length > 0
+  const isError = simulationResult._simulationRequestStatus === FETCH_STATUS.ERROR
+
+  return {
+    isLoading,
+    isFinished,
+    isSuccess,
+    isCallTraceError,
+    isError,
+  }
 }

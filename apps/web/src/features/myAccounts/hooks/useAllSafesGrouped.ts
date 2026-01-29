@@ -1,3 +1,4 @@
+import type { AllOwnedSafes } from '@safe-global/store/gateway/types'
 import groupBy from 'lodash/groupBy'
 import useAllSafes, { type SafeItem, type SafeItems } from './useAllSafes'
 import { useMemo } from 'react'
@@ -6,8 +7,7 @@ import { type AddressBookState, selectAllAddressBooks } from '@/store/addressBoo
 import useWallet from '@/hooks/wallets/useWallet'
 import useAllOwnedSafes from '@/features/myAccounts/hooks/useAllOwnedSafes'
 import { useAppSelector } from '@/store'
-import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
-import type { AllOwnedSafes } from '@safe-global/safe-gateway-typescript-sdk'
+import { isMultiChainSafeItem } from '@/features/multichain'
 
 export type MultiChainSafeItem = {
   address: string
@@ -33,7 +33,7 @@ export const _buildMultiChainSafeItem = (address: string, safes: SafeItems): Mul
 }
 
 export function _buildSafeItems(
-  safes: Record<string, string[]>,
+  safes: Record<string, string[] | null>,
   allSafeNames: AddressBookState,
   allOwned?: AllOwnedSafes,
 ): SafeItem[] {
@@ -42,7 +42,7 @@ export function _buildSafeItems(
   for (const chainId in safes) {
     const addresses = safes[chainId]
 
-    addresses.forEach((address) => {
+    addresses?.forEach((address) => {
       const isReadOnly = !!allOwned && !(allOwned[chainId] || []).includes(address)
       const name = allSafeNames[chainId]?.[address]
 

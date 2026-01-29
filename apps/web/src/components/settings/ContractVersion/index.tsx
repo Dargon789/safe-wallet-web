@@ -1,6 +1,6 @@
+import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { useContext, useMemo } from 'react'
 import { SvgIcon, Typography, Alert, AlertTitle, Skeleton, Button } from '@mui/material'
-import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { MasterCopy } from '@/hooks/useMasterCopies'
 import { MasterCopyDeployer, useMasterCopies } from '@/hooks/useMasterCopies'
@@ -12,7 +12,7 @@ import { UpdateSafeFlow } from '@/components/tx-flow/flows'
 import ExternalLink from '@/components/common/ExternalLink'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useCurrentChain } from '@/hooks/useChains'
-import { UnsupportedMastercopyWarning } from '@/features/multichain/components/UnsupportedMastercopyWarning/UnsupportedMasterCopyWarning'
+import { UnsupportedMastercopyWarning } from '@/features/multichain'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 export const ContractVersion = () => {
@@ -30,7 +30,7 @@ export const ContractVersion = () => {
   const showUpdateDialog = safeMasterCopy?.deployer === MasterCopyDeployer.GNOSIS && needsUpdate
   const isLatestVersion = safe.version && !showUpdateDialog
 
-  const latestSafeVersion = getLatestSafeVersion(currentChain, true)
+  const latestSafeVersion = getLatestSafeVersion(currentChain)
 
   return (
     <>

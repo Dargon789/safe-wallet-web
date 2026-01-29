@@ -14,7 +14,7 @@ import EditIcon from '@/public/images/common/edit.svg'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import { useAppSelector } from '@/store'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
-import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
+import { isMultiChainSafeItem } from '@/features/multichain'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
@@ -60,7 +60,7 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
   return (
     <>
       <IconButton edge="end" size="small" onClick={handleOpenContextMenu}>
-        <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
+        <MoreVertIcon sx={{ color: 'border.main' }} />
       </IconButton>
       <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>
         <MenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)}>

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback } from 'react'
 import { useColorScheme } from 'react-native'
 import { updateSettings } from '@/src/store/settingsSlice'
 import { selectSettings } from '@/src/store/settingsSlice'
@@ -7,7 +7,11 @@ import { ThemePreference } from '@/src/types/theme'
 
 export const useTheme = () => {
   const dispatch = useAppDispatch()
-  const colorScheme = useColorScheme()
+
+  // The logical OR is intentional to ensure colorSchemeOS is never `null`.
+  // This makes it easier to use in the rest of the codebase without having to check for null.
+  const colorSchemeOS = useColorScheme() || undefined
+
   const themePreference = useAppSelector(
     (state) => selectSettings(state, 'themePreference') ?? 'auto',
   ) as ThemePreference
@@ -19,9 +23,12 @@ export const useTheme = () => {
     [dispatch],
   )
 
-  const currentTheme = useMemo(() => {
-    return themePreference === 'auto' ? colorScheme : themePreference
-  }, [themePreference, colorScheme])
+  const colorScheme = themePreference === 'auto' ? colorSchemeOS : themePreference
 
-  return { themePreference, setThemePreference, currentTheme }
+  return {
+    themePreference,
+    setThemePreference,
+    colorScheme,
+    isDark: colorScheme === 'dark',
+  }
 }

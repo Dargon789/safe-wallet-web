@@ -1,5 +1,5 @@
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
+import type { SafeVersion } from '@safe-global/types-kit'
 import { getSafeSingletonDeployment } from '@safe-global/safe-deployments'
 import semverSatisfies from 'semver/functions/satisfies'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
@@ -27,9 +27,10 @@ export enum FEATURES {
   NATIVE_SWAPS = 'NATIVE_SWAPS',
   NATIVE_SWAPS_USE_COW_STAGING_SERVER = 'NATIVE_SWAPS_USE_COW_STAGING_SERVER',
   NATIVE_SWAPS_FEE_ENABLED = 'NATIVE_SWAPS_FEE_ENABLED',
+  NATIVE_SWAPS_COW = 'NATIVE_SWAPS_COW',
   ZODIAC_ROLES = 'ZODIAC_ROLES',
   STAKING = 'STAKING',
-  STAKING_BANNER = 'STAKING_BANNER',
+  STAKING_PROMO = 'STAKING_PROMO',
   MULTI_CHAIN_SAFE_CREATION = 'MULTI_CHAIN_SAFE_CREATION',
   MULTI_CHAIN_SAFE_ADD_NETWORK = 'MULTI_CHAIN_SAFE_ADD_NETWORK',
   PROPOSERS = 'PROPOSERS',
@@ -40,7 +41,22 @@ export enum FEATURES {
   NESTED_SAFES = 'NESTED_SAFES',
   MASS_PAYOUTS = 'MASS_PAYOUTS',
   SPACES = 'SPACES',
+  EARN = 'EARN',
+  EARN_PROMO = 'EARN_PROMO',
+  MIXPANEL = 'MIXPANEL',
+  POSITIONS = 'POSITIONS',
+  PORTFOLIO_ENDPOINT = 'PORTFOLIO_ENDPOINT',
+  NATIVE_COW_SWAP_FEE_V2 = 'NATIVE_COW_SWAP_FEE_V2',
+  CSV_TX_EXPORT = 'CSV_TX_EXPORT',
+  SAFE_LABS_TERMS_DISABLED = 'SAFE_LABS_TERMS_DISABLED',
+  NO_FEE_NOVEMBER = 'NO_FEE_NOVEMBER',
+  HYPERNATIVE = 'HYPERNATIVE',
+  HYPERNATIVE_RELAX_GUARD_CHECK = 'HYPERNATIVE_RELAX_GUARD_CHECK',
+  HYPERNATIVE_QUEUE_SCAN = 'HYPERNATIVE_QUEUE_SCAN',
+  EURCV_BOOST = 'EURCV_BOOST',
 }
+
+const MIN_SAFE_VERSION = '1.3.0'
 
 export const hasFeature = (chain: Pick<Chain, 'features'>, feature: FEATURES): boolean => {
   return (chain.features as string[]).includes(feature)
@@ -58,11 +74,8 @@ export const getBlockExplorerLink = (
 const FALLBACK_SAFE_VERSION = '1.3.0' as const
 export const getLatestSafeVersion = (
   chain: Pick<Chain, 'recommendedMasterCopyVersion' | 'chainId'> | undefined,
-  isUpgrade = false,
 ): SafeVersion => {
-  const latestSafeVersion = isUpgrade
-    ? chain?.recommendedMasterCopyVersion || LATEST_SAFE_VERSION // for upgrades, use the recommended version
-    : LATEST_SAFE_VERSION // for Safe creation, always use the latest version
+  const latestSafeVersion = chain?.recommendedMasterCopyVersion || LATEST_SAFE_VERSION
 
   // Without version filter it will always return the LATEST_SAFE_VERSION constant to avoid automatically updating to the newest version if the deployments change
   const latestDeploymentVersion = (getSafeSingletonDeployment({ network: chain?.chainId, released: true })?.version ??
@@ -74,4 +87,8 @@ export const getLatestSafeVersion = (
   } else {
     return latestSafeVersion as SafeVersion
   }
+}
+
+export const isNonCriticalUpdate = (version?: string | null) => {
+  return version && semverSatisfies(version, `>= ${MIN_SAFE_VERSION}`)
 }

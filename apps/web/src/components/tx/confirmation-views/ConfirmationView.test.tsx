@@ -1,13 +1,9 @@
+import { DetailedExecutionInfoType, SettingsInfoType, TransactionInfoType } from '@safe-global/store/gateway/types'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
 import ConfirmationView from './index'
 import { render } from '@/tests/test-utils'
 import { createMockTransactionDetails } from '@/tests/transactions'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import {
-  DetailedExecutionInfoType,
-  SettingsInfoType,
-  TransactionInfoType,
-} from '@safe-global/safe-gateway-typescript-sdk'
 
 const txDetails = createMockTransactionDetails({
   txInfo: {
@@ -97,6 +93,10 @@ const txDetails = createMockTransactionDetails({
       value: '0xDa5e9FA404881Ff36DDa97b41Da402dF6430EE6b',
       name: '',
     },
+    proposedByDelegate: {
+      value: '0xDa5e9FA404881Ff36DDa97b41Da402dF6430EE6b',
+      name: '',
+    },
   },
 })
 const safeTx = safeTxBuilder().build()
@@ -111,9 +111,7 @@ const safeTxWithNativeData = {
 }
 xdescribe('ConfirmationView', () => {
   it('should display a confirmation screen for a SETTINGS_CHANGE transaction', () => {
-    const { container } = render(
-      <ConfirmationView safeTx={safeTxWithNativeData} txDetails={txDetails} txId={txDetails.txId} isApproval />,
-    )
+    const { container } = render(<ConfirmationView safeTx={safeTxWithNativeData} txDetails={txDetails} isApproval />)
 
     expect(container).toMatchSnapshot()
   })
@@ -122,12 +120,7 @@ xdescribe('ConfirmationView', () => {
     const CustomTxDetails = { ...txDetails, txInfo: { ...txDetails.txInfo, type: TransactionInfoType.CUSTOM } }
 
     const { container } = render(
-      <ConfirmationView
-        safeTx={safeTxWithNativeData}
-        txDetails={CustomTxDetails as TransactionDetails}
-        txId={txDetails.txId}
-        isApproval
-      />,
+      <ConfirmationView safeTx={safeTxWithNativeData} txDetails={CustomTxDetails as TransactionDetails} isApproval />,
     )
 
     expect(container).toMatchSnapshot()

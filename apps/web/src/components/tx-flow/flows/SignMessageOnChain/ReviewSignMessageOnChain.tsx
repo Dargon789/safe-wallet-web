@@ -6,7 +6,7 @@ import { Box } from '@mui/system'
 import { Typography, SvgIcon } from '@mui/material'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import { type EIP712TypedData, Methods, type RequestId } from '@safe-global/safe-apps-sdk'
-import { OperationType } from '@safe-global/safe-core-sdk-types'
+import { OperationType } from '@safe-global/types-kit'
 
 import SendFromBlock from '@/components/tx/SendFromBlock'
 import { InfoDetails } from '@/components/transactions/InfoDetails'
@@ -18,24 +18,23 @@ import { getDecodedMessage } from '@/components/safe-apps/utils'
 import { createTx } from '@/services/tx/tx-sender'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useHighlightHiddenTab from '@/hooks/useHighlightHiddenTab'
-import { type SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 import ApprovalEditor from '@/components/tx/ApprovalEditor'
 import { ErrorBoundary } from '@sentry/react'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
-import ReviewTransaction from '@/components/tx/ReviewTransaction'
+import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 
 export type SignMessageOnChainProps = {
   app?: SafeAppData
   requestId: RequestId
   message: string | EIP712TypedData
   method: Methods.signMessage | Methods.signTypedMessage
-  onSubmit: () => void
-}
+} & ReviewTransactionProps
 
-const ReviewSignMessageOnChain = ({ message, method, onSubmit }: SignMessageOnChainProps): ReactElement => {
+const ReviewSignMessageOnChain = ({ message, method, children, ...props }: SignMessageOnChainProps): ReactElement => {
   const { safe } = useSafeInfo()
   const { safeTx, setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   useHighlightHiddenTab()
@@ -52,7 +51,7 @@ const ReviewSignMessageOnChain = ({ message, method, onSubmit }: SignMessageOnCh
 
   useEffect(() => {
     if (!readOnlySignMessageLibContract) return
-    readOnlySignMessageLibContract.getAddress().then(setSignMessageAddress)
+    setSignMessageAddress(readOnlySignMessageLibContract.getAddress())
   }, [readOnlySignMessageLibContract])
 
   const [decodedMessage, readableMessage] = useMemo(() => {
@@ -68,10 +67,12 @@ const ReviewSignMessageOnChain = ({ message, method, onSubmit }: SignMessageOnCh
   useEffect(() => {
     let txData
 
-    if (!readOnlySignMessageLibContract) return
+    if (!readOnlySignMessageLibContract || !signMessageAddress) return
 
     if (isTextMessage) {
-      txData = readOnlySignMessageLibContract.encode('signMessage', [hashMessage(getDecodedMessage(message))])
+      txData = readOnlySignMessageLibContract.encode('signMessage', [
+        hashMessage(getDecodedMessage(message)) as `0x${string}`,
+      ])
     } else if (isTypedMessage) {
       const typesCopy = { ...message.types }
 
@@ -104,7 +105,7 @@ const ReviewSignMessageOnChain = ({ message, method, onSubmit }: SignMessageOnCh
   ])
 
   return (
-    <ReviewTransaction onSubmit={onSubmit}>
+    <ReviewTransaction {...props}>
       <SendFromBlock />
 
       <InfoDetails title="Interact with SignMessageLib">
@@ -138,6 +139,8 @@ const ReviewSignMessageOnChain = ({ message, method, onSubmit }: SignMessageOnCh
           Signing a message with your Safe Account requires a transaction on the blockchain
         </Typography>
       </Box>
+
+      {children}
     </ReviewTransaction>
   )
 }

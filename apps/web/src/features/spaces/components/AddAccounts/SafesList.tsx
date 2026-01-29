@@ -1,7 +1,7 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { ChainIcon } from '@/components/common/SafeIcon'
-import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
+import { isMultiChainSafeItem } from '@/features/multichain'
 import { MultichainIndicator } from '@/features/myAccounts/components/AccountItems/MultiAccountItem'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import {
@@ -68,7 +68,16 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
 
   return (
     <List
-      sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1, maxHeight: 400, minHeight: 400, overflow: 'auto' }}
+      sx={{
+        px: 2,
+        pb: 2,
+        pt: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1,
+        height: 400,
+        overflow: 'auto',
+      }}
     >
       {safes.map((safe, index) => {
         if (isMultiChainSafeItem(safe)) {
@@ -94,7 +103,7 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
           }
 
           return (
-            <Accordion key={index} disableGutters sx={{ flexShrink: '0' }}>
+            <Accordion key={index} className={css.accordion} disableGutters sx={{ flexShrink: '0' }}>
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 sx={{
@@ -110,9 +119,9 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
                   sx={{ mr: 2 }}
                   disabled={alreadyAdded}
                 />
-                <Box className={css.safeRow}>
+                <Box className={css.safeRow} pr={4}>
                   <EthHashInfo address={safe.address} copyAddress={false} showPrefix={false} />
-                  <Box sx={{ justifySelf: 'flex-start' }}>
+                  <Box sx={{ justifySelf: 'flex-start', pl: 2 }}>
                     <MultichainIndicator safes={safe.safes} />
                   </Box>
                 </Box>

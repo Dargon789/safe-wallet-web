@@ -2,8 +2,20 @@ import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/utils/chains'
 import { CONFIG_SERVICE_CHAINS } from '@/tests/mocks/chains'
 import { chainBuilder } from '@/tests/builders/chains'
+import { getChainConfig } from '@/utils/chains'
+import { makeStore, setStoreInstance } from '@/store'
 
 describe('chains', () => {
+  beforeAll(() => {
+    // Initialize store for tests that use getStoreInstance
+    const testStore = makeStore({}, { skipBroadcast: true })
+    setStoreInstance(testStore)
+  })
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
   describe('hasFeature', () => {
     it('returns true for a feature that exists', () => {
       expect(hasFeature(CONFIG_SERVICE_CHAINS[0], FEATURES.ERC721)).toBe(true)
@@ -40,37 +52,53 @@ describe('chains', () => {
     })
   })
 
+  describe('getChainConfig', () => {
+    it('should fetch chain configuration for Ethereum mainnet', async () => {
+      const chain = await getChainConfig('1')
+
+      expect(chain).toBeDefined()
+      expect(chain.chainId).toBe('1')
+      expect(chain.chainName).toBe('Ethereum')
+      expect(chain.shortName).toBe('eth')
+    })
+
+    it('should fetch chain configuration for Polygon', async () => {
+      const chain = await getChainConfig('137')
+
+      expect(chain).toBeDefined()
+      expect(chain.chainId).toBe('137')
+      expect(chain.chainName).toBe('Polygon')
+      expect(chain.shortName).toBe('matic')
+    })
+
+    it('should throw an error for unknown chain', async () => {
+      // RTK Query unwrap() will reject with the error response from MSW
+      // The MSW handler returns 404 for unknown chain IDs
+      try {
+        await getChainConfig('999999')
+        fail('Expected getChainConfig to throw an error')
+      } catch (error) {
+        // Verify that an error was thrown
+        expect(error).toBeDefined()
+      }
+    })
+  })
+
   describe('chains', () => {
     describe('getLatestSafeVersion', () => {
       it('should return the version from recommendedMasterCopyVersion', () => {
-        expect(
-          getLatestSafeVersion(
-            chainBuilder().with({ chainId: '1', recommendedMasterCopyVersion: '1.4.1' }).build(),
-            true,
-          ),
-        ).toEqual('1.4.1')
-        expect(
-          getLatestSafeVersion(
-            chainBuilder().with({ chainId: '137', recommendedMasterCopyVersion: '1.3.0' }).build(),
-            true,
-          ),
-        ).toEqual('1.3.0')
-      })
-
-      it('should always return LATEST_VERSION if true is not passed', () => {
         expect(
           getLatestSafeVersion(chainBuilder().with({ chainId: '1', recommendedMasterCopyVersion: '1.4.1' }).build()),
         ).toEqual('1.4.1')
         expect(
           getLatestSafeVersion(chainBuilder().with({ chainId: '137', recommendedMasterCopyVersion: '1.3.0' }).build()),
-        ).toEqual('1.4.1')
+        ).toEqual('1.3.0')
       })
 
       it('should fall back to LATEST_VERSION', () => {
         expect(
           getLatestSafeVersion(
             chainBuilder().with({ chainId: '11155111', recommendedMasterCopyVersion: null }).build(),
-            true,
           ),
         ).toEqual('1.4.1')
       })

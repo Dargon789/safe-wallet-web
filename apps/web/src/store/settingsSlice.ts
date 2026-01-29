@@ -20,6 +20,8 @@ export type SettingsState = {
 
   tokenList: TOKEN_LISTS
 
+  hideDust?: boolean
+
   hideSuspiciousTransactions?: boolean
 
   shortName: {
@@ -44,11 +46,17 @@ export const initialState: SettingsState = {
 
   hiddenTokens: {},
 
+  hideDust: true,
+
   hideSuspiciousTransactions: true,
 
+  // The `shortName` object contains settings related to short name interactions.
+  // The `copy` setting determines if the short name can be copied, while the `qr` setting
+  // determines if a QR code for the short name is displayed. Both are disabled by default
+  // for consistency and to avoid unintended behavior.
   shortName: {
-    copy: true,
-    qr: true,
+    copy: false,
+    qr: false,
   },
   theme: {},
   env: {
@@ -91,6 +99,9 @@ export const settingsSlice = createSlice({
     setTokenList: (state, { payload }: PayloadAction<SettingsState['tokenList']>) => {
       state.tokenList = payload
     },
+    setHideDust: (state, { payload }: PayloadAction<SettingsState['hideDust']>) => {
+      state.hideDust = payload
+    },
     hideSuspiciousTransactions: (state, { payload }: PayloadAction<boolean>) => {
       state.hideSuspiciousTransactions = payload
     },
@@ -126,6 +137,7 @@ export const {
   setDarkMode,
   setHiddenTokensForChain,
   setTokenList,
+  setHideDust,
   hideSuspiciousTransactions,
   setRpc,
   setTenderly,
@@ -161,3 +173,4 @@ export const isEnvInitialState = createSelector([selectSettings, (_, chainId) =>
 
 export const selectOnChainSigning = createSelector(selectSettings, (settings) => settings.signing.onChainSigning)
 export const selectBlindSigning = createSelector(selectSettings, (settings) => settings.signing.blindSigning)
+export const selectHideDust = createSelector(selectSettings, (settings) => settings.hideDust ?? true)
