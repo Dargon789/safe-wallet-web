@@ -9,6 +9,7 @@ import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import { readFile } from 'fs/promises'
 import { fileURLToPath } from 'url'
 import { execSync } from 'child_process'
+import { SriManifestWebpackPlugin } from './plugins/sri-manifest-webpack-plugin.mjs'
 
 let withRspack = null
 if (process.env.USE_RSPACK === '1') {
@@ -80,6 +81,8 @@ const nextConfig = {
 
   env: {
     NEXT_PUBLIC_COMMIT_HASH: commitHash,
+    NEXT_PUBLIC_APP_VERSION: pkg.version,
+    NEXT_PUBLIC_APP_HOMEPAGE: pkg.homepage,
   },
 
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
@@ -148,6 +151,11 @@ const nextConfig = {
         },
       }
       config.optimization.minimize = false
+    }
+
+    // Add SRI manifest plugin (production only, skip for Cypress tests)
+    if (!dev && process.env.NODE_ENV !== 'cypress') {
+      config.plugins.push(new SriManifestWebpackPlugin())
     }
 
     return config
