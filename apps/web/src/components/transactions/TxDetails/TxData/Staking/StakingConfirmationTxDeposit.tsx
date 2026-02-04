@@ -4,8 +4,8 @@ import FieldsGrid from '@/components/tx/FieldsGrid'
 import ConfirmationOrderHeader from '@/components/tx/ConfirmationOrder/ConfirmationOrderHeader'
 import { formatDurationFromMilliseconds, formatVisualAmount, maybePlural } from '@safe-global/utils/utils/formatters'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
-import StakingStatus from '@/features/stake/components/StakingStatus'
-import { InfoTooltip } from '@/features/stake/components/InfoTooltip'
+import StakingStatus from './StakingStatus'
+import { InfoTooltip } from '@/components/common/InfoTooltip'
 import { BRAND_NAME } from '@/config/constants'
 
 type StakingOrderConfirmationViewProps = {
