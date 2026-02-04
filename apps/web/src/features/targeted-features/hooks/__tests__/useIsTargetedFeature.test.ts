@@ -1,10 +1,10 @@
 import { faker } from '@faker-js/faker'
 
-import * as useOutreachSafeHook from '@/features/targetedFeatures/hooks/useIsOutreachSafe'
+import * as useOutreachSafeHook from '../useIsOutreachSafe'
 import * as useChainsHook from '@/hooks/useChains'
 import * as useLocalStorageHook from '@/services/local-storage/useLocalStorage'
 import { renderHook, waitFor } from '@/tests/test-utils'
-import { type TargetedFeatures, useIsTargetedFeature } from '../useIsTargetedFeature'
+import { useIsTargetedFeature, type TargetedFeatures } from '@/features/targeted-features'
 
 jest.mock('../../constants', () => ({
   TARGETED_FEATURES: [
