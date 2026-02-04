@@ -1,5 +1,5 @@
-import * as allSafes from '@/features/myAccounts/hooks/useAllSafes'
-import { _getMultiChainAccounts, useAllSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import * as allSafes from '../useAllSafes'
+import { _getMultiChainAccounts, useAllSafesGrouped } from '../useAllSafesGrouped'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
 import { renderHook } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'

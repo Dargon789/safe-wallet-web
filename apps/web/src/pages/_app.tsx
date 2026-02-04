@@ -73,7 +73,7 @@ const TargetedOutreachPopupLoader = () => {
 }
 import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
-import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
+import { useVisitedSafes } from '@/features/myAccounts'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
 import { GATEWAY_URL } from '@/config/gateway'
 import { captureException, initObservability } from '@/services/observability'

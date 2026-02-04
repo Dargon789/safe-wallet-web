@@ -5,9 +5,8 @@ import { useMemo } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type AddressBookState, selectAllAddressBooks } from '@/store/addressBookSlice'
 import useWallet from '@/hooks/wallets/useWallet'
-import useAllOwnedSafes from '@/features/myAccounts/hooks/useAllOwnedSafes'
+import useAllOwnedSafes from './useAllOwnedSafes'
 import { useAppSelector } from '@/store'
-import { isMultiChainSafeItem } from '@/features/multichain'
 
 export type MultiChainSafeItem = {
   address: string
@@ -23,6 +22,16 @@ export type AllSafeItemsGrouped = {
 }
 
 export type AllSafeItems = Array<SafeItem | MultiChainSafeItem>
+
+/**
+ * Type guard to check if a safe item is a multi-chain safe
+ */
+export const isMultiChainSafeItem = (safe: SafeItem | MultiChainSafeItem): safe is MultiChainSafeItem => {
+  if ('safes' in safe && 'address' in safe) {
+    return true
+  }
+  return false
+}
 
 export const _buildMultiChainSafeItem = (address: string, safes: SafeItems): MultiChainSafeItem => {
   const isPinned = safes.some((safe) => safe.isPinned)

@@ -1,5 +1,5 @@
-import * as allOwnedSafes from '@/features/myAccounts/hooks/useAllOwnedSafes'
-import useAllSafes, { _buildSafeItem, _prepareAddresses } from '@/features/myAccounts/hooks/useAllSafes'
+import * as allOwnedSafes from '../useAllOwnedSafes'
+import useAllSafes, { _buildSafeItem, _prepareAddresses } from '../useAllSafes'
 import * as useChains from '@/hooks/useChains'
 import * as useWallet from '@/hooks/wallets/useWallet'
 import { renderHook } from '@/tests/test-utils'

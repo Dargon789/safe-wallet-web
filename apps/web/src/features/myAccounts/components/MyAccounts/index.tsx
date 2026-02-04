@@ -1,15 +1,15 @@
-import AccountListFilters from 'src/features/myAccounts/components/AccountListFilters'
-import AccountsHeader from '@/features/myAccounts/components/AccountsHeader'
-import AccountsList from '@/features/myAccounts/components/AccountsList'
+import AccountListFilters from '../AccountListFilters'
+import AccountsHeader from '../AccountsHeader'
+import AccountsList from '../AccountsList'
 import { useState } from 'react'
 import { Box, Divider, Paper } from '@mui/material'
 import madProps from '@/utils/mad-props'
-import css from '@/features/myAccounts/styles.module.css'
+import css from '../../styles.module.css'
 import useWallet from '@/hooks/wallets/useWallet'
-import { type AllSafeItemsGrouped, useAllSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import { type AllSafeItemsGrouped, useAllSafesGrouped } from '@/hooks/safes'
 import classNames from 'classnames'
-import useTrackSafesCount from '@/features/myAccounts/hooks/useTrackedSafesCount'
-import { DataWidget } from '@/features/myAccounts/components/DataWidget'
+import useTrackSafesCount from '../../hooks/useTrackedSafesCount'
+import { DataWidget } from '../DataWidget'
 
 type MyAccountsProps = {
   safes: AllSafeItemsGrouped
