@@ -18,6 +18,7 @@ import HnPendingBanner from './components/HnPendingBanner'
 import { HnQueueAssessmentBanner } from './components/HnQueueAssessmentBanner'
 import { HnActivatedBannerForSettings } from './components/HnActivatedSettingsBanner'
 import HnSecurityReportBtn from './components/HnSecurityReportBtn/HnSecurityReportBtn'
+import HnSecuritySection from './components/HnSecuritySection'
 import { HnLoginCard } from './components/HnLoginCard'
 import HypernativeLogo from './components/HypernativeLogo'
 import { HypernativeTooltip } from './components/HypernativeTooltip'
@@ -40,6 +41,7 @@ const feature: HypernativeContract = {
   // Settings Components
   HnActivatedSettingsBanner: HnActivatedBannerForSettings,
   HnSecurityReportBtn,
+  HnSecuritySection,
   HnLoginCard,
 
   // UI Components
