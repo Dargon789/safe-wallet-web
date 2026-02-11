@@ -195,11 +195,13 @@ function PopoverBody({
 function ManageModeFooter({
   isFirstTimeCuration,
   selectedCount,
+  hasChanges,
   onSave,
   onCancel,
 }: {
   isFirstTimeCuration: boolean
   selectedCount: number
+  hasChanges: boolean
   onSave: () => void
   onCancel: () => void
 }): ReactElement {
@@ -221,7 +223,7 @@ function ManageModeFooter({
       <Button
         variant="contained"
         onClick={onSave}
-        disabled={selectedCount === 0}
+        disabled={isFirstTimeCuration ? selectedCount === 0 : !hasChanges}
         data-testid="save-manage-nested-safes"
       >
         {isFirstTimeCuration ? 'Confirm selection' : 'Save'}
@@ -258,6 +260,7 @@ export function NestedSafesPopover({
     saveChanges,
     cancel,
     selectedCount,
+    hasChanges,
     isFlagged,
     getSimilarAddresses,
     pendingConfirmation,
@@ -303,6 +306,7 @@ export function NestedSafesPopover({
         paper: {
           sx: {
             width: isManageMode ? 'min(750px, calc(100vw - 32px))' : 'min(420px, calc(100vw - 32px))',
+            height: 'calc(100vh - 100px)',
             maxHeight: 'calc(100vh - 100px)',
             display: 'flex',
             flexDirection: 'column',
@@ -372,6 +376,7 @@ export function NestedSafesPopover({
         <ManageModeFooter
           isFirstTimeCuration={isFirstTimeCuration}
           selectedCount={selectedCount}
+          hasChanges={hasChanges}
           onSave={handleSave}
           onCancel={handleCancel}
         />
