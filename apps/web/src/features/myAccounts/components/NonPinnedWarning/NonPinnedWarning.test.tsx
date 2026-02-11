@@ -1,4 +1,4 @@
-import { screen, fireEvent } from '@testing-library/react'
+import { screen, fireEvent, waitFor } from '@testing-library/react'
 import { render } from '@/tests/test-utils'
 import NonPinnedWarning from './index'
 
@@ -6,6 +6,7 @@ describe('NonPinnedWarning', () => {
   const defaultProps = {
     safeAddress: '0x1234567890123456789012345678901234567890',
     safeName: undefined,
+    chainId: '1',
     hasSimilarAddress: false,
     similarAddresses: [],
     isConfirmDialogOpen: false,
@@ -23,8 +24,8 @@ describe('NonPinnedWarning', () => {
     render(<NonPinnedWarning {...defaultProps} />)
 
     expect(screen.getByTestId('non-pinned-warning')).toBeInTheDocument()
-    expect(screen.getByText('Untrusted Safe')).toBeInTheDocument()
-    expect(screen.getByText(/not yet included in your trusted list/i)).toBeInTheDocument()
+    expect(screen.getByText('Not in your trusted list')).toBeInTheDocument()
+    expect(screen.getByText(/haven.t marked it as trusted yet/i)).toBeInTheDocument()
   })
 
   it('should call onOpenConfirmDialog when add button is clicked', () => {
@@ -46,7 +47,7 @@ describe('NonPinnedWarning', () => {
   it('should show same message for all users', () => {
     render(<NonPinnedWarning {...defaultProps} />)
 
-    expect(screen.getByText(/not yet included in your trusted list/i)).toBeInTheDocument()
+    expect(screen.getByText(/haven.t marked it as trusted yet/i)).toBeInTheDocument()
   })
 
   it('should show confirmation dialog when isConfirmDialogOpen is true', () => {
@@ -73,12 +74,15 @@ describe('NonPinnedWarning', () => {
     expect(screen.getByText('Similar Safe in your account')).toBeInTheDocument()
   })
 
-  it('should call onConfirmAdd when confirm button is clicked in dialog', () => {
+  it('should call onConfirmAdd when confirm button is clicked in dialog', async () => {
     render(<NonPinnedWarning {...defaultProps} isConfirmDialogOpen={true} />)
 
-    fireEvent.click(screen.getByTestId('confirm-add-trusted-safe-button'))
+    const confirmButton = screen.getByTestId('confirm-add-trusted-safe-button')
+    fireEvent.submit(confirmButton)
 
-    expect(defaultProps.onConfirmAdd).toHaveBeenCalled()
+    await waitFor(() => {
+      expect(defaultProps.onConfirmAdd).toHaveBeenCalled()
+    })
   })
 
   it('should call onCloseConfirmDialog when cancel button is clicked in dialog', () => {

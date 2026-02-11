@@ -8,12 +8,13 @@ import type { SimilarAddressInfo } from '../../hooks/useNonPinnedSafeWarning.typ
 interface NonPinnedWarningProps {
   safeAddress: string
   safeName?: string
+  chainId: string
   hasSimilarAddress: boolean
   similarAddresses: SimilarAddressInfo[]
   isConfirmDialogOpen: boolean
   onOpenConfirmDialog: () => void
   onCloseConfirmDialog: () => void
-  onConfirmAdd: () => void
+  onConfirmAdd: (name: string) => void
   onDismiss: () => void
 }
 
@@ -24,6 +25,7 @@ interface NonPinnedWarningProps {
 const NonPinnedWarning = ({
   safeAddress,
   safeName,
+  chainId,
   hasSimilarAddress,
   similarAddresses,
   isConfirmDialogOpen,
@@ -45,9 +47,10 @@ const NonPinnedWarning = ({
         }
         sx={{ mb: 2 }}
       >
-        <AlertTitle>Untrusted Safe</AlertTitle>
+        <AlertTitle sx={{ fontWeight: 700 }}>Not in your trusted list</AlertTitle>
         <Typography variant="body2" sx={{ mb: 1 }}>
-          You are a signer of this Safe, but it is not yet included in your trusted list.
+          You’re a signer of this Safe, but you haven’t marked it as trusted yet. Malicious actors may have added you
+          without your knowledge. Trusting a Safe helps you recognize it and reduces the risk of impersonation.
         </Typography>
         <Box>
           <Button
@@ -57,7 +60,7 @@ const NonPinnedWarning = ({
             onClick={onOpenConfirmDialog}
             data-testid="add-to-pinned-list-button"
           >
-            Add trusted Safe
+            Trust this Safe
           </Button>
         </Box>
       </Alert>
@@ -66,6 +69,7 @@ const NonPinnedWarning = ({
         open={isConfirmDialogOpen}
         safeAddress={safeAddress}
         safeName={safeName}
+        chainId={chainId}
         hasSimilarAddress={hasSimilarAddress}
         similarAddresses={similarAddresses}
         onConfirm={onConfirmAdd}
