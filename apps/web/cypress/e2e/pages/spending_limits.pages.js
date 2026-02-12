@@ -4,7 +4,6 @@ import * as addressBook from '../pages/address_book.page'
 import { invalidAddressFormatErrorMsg } from '../pages/load_safe.pages'
 import * as ls from '../../support/localstorage_data.js'
 import { tokenSelector } from './create_tx.pages'
-import 'cypress-file-upload'
 
 export const spendingLimitsSection = '[data-testid="spending-limit-section"]'
 export const newSpendingLimitBtn = '[data-testid="new-spending-limit"]'
@@ -48,7 +47,7 @@ export const timePeriodOptions = {
   oneHr: '1 hour',
 }
 
-const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input').should('be.enabled')
+const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input').first()
 const automationOwner = ls.addressBookData.sepoliaAddress2[11155111]['0xC16Db0251654C0a72E91B190d81eAD367d2C6fED']
 
 export const actionNames = {
@@ -185,7 +184,7 @@ export function enterSpendingLimitAmount(amount) {
 }
 
 export function enterBeneficiaryAddress(address) {
-  getBeneficiaryInput().clear({ force: true }).type(address, { force: true })
+  getBeneficiaryInput().clear().type(address)
 }
 
 export function checkBeneficiaryInputValue(value) {
