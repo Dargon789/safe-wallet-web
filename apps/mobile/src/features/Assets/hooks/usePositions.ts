@@ -9,8 +9,8 @@ import { selectCurrency } from '@/src/store/settingsSlice'
 import { useHasFeature } from '@/src/hooks/useHasFeature'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { usePositionsGetPositionsV1Query, type Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
-import { usePortfolioGetPortfolioV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import { transformAppBalancesToProtocols, getPositionsEndpointConfig } from '@safe-global/utils/features/positions'
+import useMobileTotalBalances from '@/src/hooks/useTotalBalances'
 
 interface UsePositionsResult {
   data: Protocol[] | undefined
@@ -32,6 +32,7 @@ export const usePositions = (): UsePositionsResult => {
     isPortfolioEndpointEnabled,
   )
 
+  // Positions endpoint (fallback when portfolio endpoint is not available)
   const {
     data: positionsData,
     error: positionsError,
@@ -51,46 +52,35 @@ export const usePositions = (): UsePositionsResult => {
     },
   )
 
+  // Read positions from the total balances hook (portfolio data) when available.
+  // This shares the same RTK Query cache as the balance display, avoiding duplicate requests.
   const {
-    data: portfolioData,
-    error: portfolioError,
-    isLoading: portfolioLoading,
-    isFetching: portfolioFetching,
-    refetch: portfolioRefetch,
-  } = usePortfolioGetPortfolioV1Query(
-    !activeSafe || !shouldUsePortfolioEndpoint
-      ? skipToken
-      : {
-          address: activeSafe.address,
-          chainIds: activeSafe.chainId,
-          fiatCode: currency,
-        },
-    {
-      pollingInterval: POSITIONS_POLLING_INTERVAL,
-    },
-  )
+    data: balancesData,
+    error: balancesError,
+    loading: balancesLoading,
+    isFetching: balancesFetching,
+    refetch: balancesRefetch,
+  } = useMobileTotalBalances()
 
   return useMemo(
     () => ({
-      data: shouldUsePortfolioEndpoint
-        ? transformAppBalancesToProtocols(portfolioData?.positionBalances)
-        : positionsData,
-      error: shouldUsePortfolioEndpoint ? portfolioError : positionsError,
-      isLoading: shouldUsePortfolioEndpoint ? portfolioLoading : positionsLoading,
-      isFetching: shouldUsePortfolioEndpoint ? portfolioFetching : positionsFetching,
-      refetch: shouldUsePortfolioEndpoint ? portfolioRefetch : positionsRefetch,
+      data: shouldUsePortfolioEndpoint ? transformAppBalancesToProtocols(balancesData?.positions) : positionsData,
+      error: shouldUsePortfolioEndpoint ? balancesError : positionsError,
+      isLoading: shouldUsePortfolioEndpoint ? balancesLoading : positionsLoading,
+      isFetching: shouldUsePortfolioEndpoint ? balancesFetching : positionsFetching,
+      refetch: shouldUsePortfolioEndpoint ? balancesRefetch : positionsRefetch,
     }),
     [
       shouldUsePortfolioEndpoint,
-      portfolioData?.positionBalances,
+      balancesData?.positions,
+      balancesError,
+      balancesLoading,
+      balancesFetching,
+      balancesRefetch,
       positionsData,
-      portfolioError,
       positionsError,
-      portfolioLoading,
       positionsLoading,
-      portfolioFetching,
       positionsFetching,
-      portfolioRefetch,
       positionsRefetch,
     ],
   )

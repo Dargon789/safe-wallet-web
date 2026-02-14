@@ -2,7 +2,7 @@ import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '.'
 import { Address } from '@/src/types/address'
 import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
+import { additionalSafesRtkApi, additionalSafesRtkApiV2 } from '@safe-global/store/gateway/safes'
 
 export type SafesSliceItem = Record<string, SafeOverview>
 export type SafesSlice = Record<Address, SafesSliceItem>
@@ -31,27 +31,32 @@ const safesSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addMatcher(additionalSafesRtkApi.endpoints.safesGetOverviewForMany.matchFulfilled, (state, action) => {
-      const data = action.payload
+    const handleOverviewFulfilled = (state: SafesSlice, data: SafeOverview[]) => {
       if (!data?.length) {
         return
       }
 
-      // Process each safe in the response individually
       for (const safeOverview of data) {
         const address = safeOverview.address.value as Address
 
         if (!state[address]) {
-          continue // Skip if safe doesn't exist in state
+          continue
         }
 
         const current = state[address] || {}
-        // Update the specific chain for this safe
         state[address] = {
           ...current,
           [safeOverview.chainId]: safeOverview,
         }
       }
+    }
+
+    builder.addMatcher(additionalSafesRtkApi.endpoints.safesGetOverviewForMany.matchFulfilled, (state, action) => {
+      handleOverviewFulfilled(state, action.payload)
+    })
+
+    builder.addMatcher(additionalSafesRtkApiV2.endpoints.safesGetOverviewForManyV2.matchFulfilled, (state, action) => {
+      handleOverviewFulfilled(state, action.payload)
     })
   },
 })

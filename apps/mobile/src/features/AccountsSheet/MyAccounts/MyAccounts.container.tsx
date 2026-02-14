@@ -38,12 +38,18 @@ export function MyAccountsContainer({ item, isDragging, drag, onClose }: MyAccou
     onClose()
   }
 
+  const fiatTotal = chainsIds
+    .reduce((acc, id) => {
+      return acc + parseFloat(item.info[id].fiatTotal)
+    }, 0)
+    .toString()
+
   return (
     <AccountItem
       drag={drag}
       account={{
         ...item.info[chainsIds[0]],
-        fiatTotal: chainsIds.reduce((acc, id) => acc + parseFloat(item.info[id].fiatTotal), 0).toString(),
+        fiatTotal,
       }}
       isDragging={isDragging}
       chains={filteredChains}
