@@ -1,5 +1,6 @@
 import { getChainsByIds, selectChainById } from '@/src/store/chains'
 import { Balance } from './Balance'
+import { makeSafeId } from '@/src/utils/formatters'
 import { RootState } from '@/src/store'
 import { selectSafeChains } from '@/src/store/safesSlice'
 import { useAppSelector } from '@/src/store/hooks'
@@ -7,15 +8,29 @@ import React, { useCallback } from 'react'
 import { useSelector } from 'react-redux'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
-import useMobileTotalBalances from '@/src/hooks/useTotalBalances'
+import { selectCurrency } from '@/src/store/settingsSlice'
+import { POLLING_INTERVAL } from '@/src/config/constants'
+import { useSafeOverviewsQuery } from '@/src/hooks/services/useSafeOverviewsQuery'
 
 export function BalanceContainer() {
   const activeSafe = useDefinedActiveSafe()
   const chainsIds = useAppSelector((state: RootState) => selectSafeChains(state, activeSafe.address))
   const activeSafeChains = useAppSelector((state: RootState) => getChainsByIds(state, chainsIds))
   const copy = useCopyAndDispatchToast()
-  const { data, loading } = useMobileTotalBalances()
+  const currency = useAppSelector(selectCurrency)
+  const { data, isLoading } = useSafeOverviewsQuery(
+    {
+      safes: [makeSafeId(activeSafe.chainId, activeSafe.address)],
+      currency,
+      trusted: true,
+      excludeSpam: true,
+    },
+    {
+      pollingInterval: POLLING_INTERVAL,
+    },
+  )
   const activeChain = useSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
+  const balance = data?.find((chain) => chain.chainId === activeSafe.chainId)
 
   const onPressAddressCopy = useCallback(() => {
     copy(activeSafe.address)
@@ -25,10 +40,10 @@ export function BalanceContainer() {
     <Balance
       chainName={activeChain?.chainName}
       chains={activeSafeChains}
-      isLoading={loading}
+      isLoading={isLoading}
       activeChainId={activeSafe.chainId}
       safeAddress={activeSafe.address}
-      balanceAmount={data?.fiatTotal || ''}
+      balanceAmount={balance?.fiatTotal || ''}
       onPressAddressCopy={onPressAddressCopy}
     />
   )
