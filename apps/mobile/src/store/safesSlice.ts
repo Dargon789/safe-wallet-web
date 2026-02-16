@@ -2,7 +2,7 @@ import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '.'
 import { Address } from '@/src/types/address'
 import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { additionalSafesRtkApi, additionalSafesRtkApiV2 } from '@safe-global/store/gateway/safes'
+import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
 
 export type SafesSliceItem = Record<string, SafeOverview>
 export type SafesSlice = Record<Address, SafesSliceItem>
@@ -52,10 +52,6 @@ const safesSlice = createSlice({
     }
 
     builder.addMatcher(additionalSafesRtkApi.endpoints.safesGetOverviewForMany.matchFulfilled, (state, action) => {
-      handleOverviewFulfilled(state, action.payload)
-    })
-
-    builder.addMatcher(additionalSafesRtkApiV2.endpoints.safesGetOverviewForManyV2.matchFulfilled, (state, action) => {
       handleOverviewFulfilled(state, action.payload)
     })
   },
