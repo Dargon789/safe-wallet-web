@@ -51,41 +51,56 @@ describe('portfolioBalances helpers', () => {
       expect(transformPortfolioToBalances(undefined)).toBeUndefined()
     })
 
-    it('should transform portfolio data correctly', () => {
-      const portfolio: Portfolio = {
-        totalBalanceFiat: '3000',
-        totalTokenBalanceFiat: '2000',
-        totalPositionsBalanceFiat: '1000',
-        tokenBalances: [
-          {
-            tokenInfo: {
-              address: '0x1',
-              decimals: 18,
-              logoUri: 'https://example.com/logo.png',
-              name: 'Token',
-              symbol: 'TKN',
-              type: 'ERC20' as const,
-              chainId: '1',
-              trusted: true,
-            },
-            balance: '1000',
-            balanceFiat: '2000',
-            price: '2',
-            priceChangePercentage1d: '0.05',
+    const portfolio: Portfolio = {
+      totalBalanceFiat: '3000',
+      totalTokenBalanceFiat: '2000',
+      totalPositionsBalanceFiat: '1000',
+      tokenBalances: [
+        {
+          tokenInfo: {
+            address: '0x1',
+            decimals: 18,
+            logoUri: 'https://example.com/logo.png',
+            name: 'Token',
+            symbol: 'TKN',
+            type: 'ERC20' as const,
+            chainId: '1',
+            trusted: true,
           },
-        ],
-        positionBalances: [],
-      }
+          balance: '1000',
+          balanceFiat: '2000',
+          price: '2',
+          priceChangePercentage1d: '0.05',
+        },
+      ],
+      positionBalances: [],
+    }
 
+    it('should transform fiat totals correctly', () => {
       const result = transformPortfolioToBalances(portfolio)
 
       expect(result?.fiatTotal).toBe('3000')
       expect(result?.tokensFiatTotal).toBe('2000')
       expect(result?.positionsFiatTotal).toBe('1000')
-      expect(result?.positions).toEqual([])
+    })
+
+    it('should transform token items correctly', () => {
+      const result = transformPortfolioToBalances(portfolio)
+
       expect(result?.items).toHaveLength(1)
       expect(result?.items[0]?.fiatBalance).toBe('2000')
       expect(result?.items[0]?.fiatConversion).toBe('2')
+    })
+
+    it('should transform positions correctly', () => {
+      const result = transformPortfolioToBalances(portfolio)
+
+      expect(result?.positions).toEqual([])
+    })
+
+    it('should handle price change data', () => {
+      const result = transformPortfolioToBalances(portfolio)
+
       expect(result?.items[0]?.fiatBalance24hChange).toBe('0.05')
     })
 

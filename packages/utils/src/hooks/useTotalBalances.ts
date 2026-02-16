@@ -33,8 +33,114 @@ export interface TotalBalancesResult {
   refetch: () => void
 }
 
+interface TxServiceState {
+  balances: Balances | undefined
+  error: unknown
+  loading: boolean
+}
+
+interface CounterfactualState {
+  data: Balances | undefined
+  error: Error | undefined
+  loading: boolean
+}
+
+interface SharedResultFields {
+  isFetching: boolean
+  refetch: () => void
+}
+
+const toError = (error: unknown): Error | undefined => {
+  return error ? new Error(String(error)) : undefined
+}
+
+/**
+ * Builds a result from tx-service data or counterfactual data.
+ * Used when portfolio is not available, not enabled, or needs fallback.
+ */
+const buildTxServiceResult = (
+  txService: TxServiceState,
+  counterfactual: CounterfactualState,
+  isCounterfactual: boolean,
+  shared: SharedResultFields,
+): TotalBalancesResult => {
+  if (isCounterfactual && counterfactual.data) {
+    return {
+      data: createPortfolioBalances(counterfactual.data),
+      error: counterfactual.error,
+      loading: counterfactual.loading,
+      ...shared,
+    }
+  }
+
+  if (txService.balances) {
+    return {
+      data: createPortfolioBalances(txService.balances),
+      error: toError(txService.error),
+      loading: txService.loading,
+      ...shared,
+    }
+  }
+
+  return { data: undefined, error: toError(txService.error), loading: true, ...shared }
+}
+
+/**
+ * Builds a result from portfolio data in "Default Tokens" mode.
+ */
+const buildPortfolioResult = (
+  portfolioBalances: PortfolioBalances | undefined,
+  portfolioError: unknown,
+  portfolioLoading: boolean,
+  shared: SharedResultFields,
+): TotalBalancesResult => {
+  const error = toError(portfolioError)
+  const isInitialLoading = !portfolioBalances && !error
+
+  return {
+    data: portfolioBalances,
+    error,
+    loading: portfolioLoading || isInitialLoading,
+    ...shared,
+  }
+}
+
+/**
+ * Builds a merged result combining portfolio positions with tx-service token list ("All Tokens" mode).
+ */
+const buildMergedResult = (
+  portfolioBalances: PortfolioBalances | undefined,
+  portfolioLoading: boolean,
+  portfolioError: unknown,
+  txService: TxServiceState,
+  shared: SharedResultFields,
+): TotalBalancesResult => {
+  if (portfolioLoading || txService.loading) {
+    return { data: undefined, error: undefined, loading: true, ...shared }
+  }
+
+  const mergedError = portfolioError || txService.error
+  if (mergedError) {
+    return { data: undefined, error: new Error(String(mergedError)), loading: false, ...shared }
+  }
+
+  if (!portfolioBalances || !txService.balances) {
+    return { data: undefined, error: undefined, loading: true, ...shared }
+  }
+
+  const mergedBalances: PortfolioBalances = {
+    items: txService.balances.items,
+    fiatTotal: portfolioBalances.fiatTotal,
+    tokensFiatTotal: calculateTokensFiatTotal(txService.balances.items),
+    positionsFiatTotal: portfolioBalances.positionsFiatTotal,
+    positions: portfolioBalances.positions,
+    isAllTokensMode: true,
+  }
+
+  return { data: mergedBalances, error: undefined, loading: false, isFetching: false, refetch: shared.refetch }
+}
+
 const useTotalBalances = (params: UseTotalBalancesParams): TotalBalancesResult => {
-  const normalizedCurrency = params.currency.toUpperCase()
   const isReady = params.safeAddress && params.trusted !== undefined
 
   // 1. Portfolio query (when feature enabled)
@@ -48,7 +154,7 @@ const useTotalBalances = (params: UseTotalBalancesParams): TotalBalancesResult =
     {
       address: params.safeAddress,
       chainIds: params.chainId,
-      fiatCode: normalizedCurrency,
+      fiatCode: params.currency,
       trusted: params.trusted,
     },
     {
@@ -76,7 +182,7 @@ const useTotalBalances = (params: UseTotalBalancesParams): TotalBalancesResult =
     {
       chainId: params.chainId,
       safeAddress: params.safeAddress,
-      fiatCode: normalizedCurrency,
+      fiatCode: params.currency,
       trusted: params.trusted,
     },
     {
@@ -110,74 +216,22 @@ const useTotalBalances = (params: UseTotalBalancesParams): TotalBalancesResult =
       return { data: undefined, error: undefined, loading: false, isFetching: false, refetch }
     }
 
-    // Shared fallback: returns tx service or counterfactual balances
-    const getTxServiceFallback = (): TotalBalancesResult => {
-      if (isCounterfactual && cfData) {
-        return { data: createPortfolioBalances(cfData), error: cfError, loading: cfLoading, isFetching, refetch }
-      }
+    const shared: SharedResultFields = { isFetching, refetch }
+    const txService: TxServiceState = { balances: txServiceBalances, error: txServiceError, loading: txServiceLoading }
+    const counterfactual: CounterfactualState = { data: cfData, error: cfError, loading: cfLoading }
 
-      if (txServiceBalances) {
-        const error = txServiceError ? new Error(String(txServiceError)) : undefined
-        return {
-          data: createPortfolioBalances(txServiceBalances),
-          error,
-          loading: txServiceLoading,
-          isFetching,
-          refetch,
-        }
-      }
-
-      const error = txServiceError ? new Error(String(txServiceError)) : undefined
-      return { data: undefined, error, loading: true, isFetching, refetch }
-    }
-
-    // No portfolio feature → tx service only
-    if (!params.hasPortfolioFeature) {
-      return getTxServiceFallback()
-    }
-
-    // Portfolio feature enabled, but needs fallback
-    if (needsPortfolioFallback && !params.isAllTokensSelected) {
-      return getTxServiceFallback()
+    // No portfolio feature or portfolio needs fallback → tx service only
+    if (!params.hasPortfolioFeature || (needsPortfolioFallback && !params.isAllTokensSelected)) {
+      return buildTxServiceResult(txService, counterfactual, isCounterfactual, shared)
     }
 
     // Portfolio + default tokens mode
     if (!params.isAllTokensSelected) {
-      const error = portfolioError ? new Error(String(portfolioError)) : undefined
-      const isInitialLoading = !memoizedPortfolioBalances && !error
-      return {
-        data: memoizedPortfolioBalances,
-        error,
-        loading: portfolioLoading || isInitialLoading,
-        isFetching,
-        refetch,
-      }
+      return buildPortfolioResult(memoizedPortfolioBalances, portfolioError, portfolioLoading, shared)
     }
 
     // Portfolio + "All Tokens" merged mode
-    if (portfolioLoading || txServiceLoading) {
-      return { data: undefined, error: undefined, loading: true, isFetching, refetch }
-    }
-
-    const mergedError = portfolioError || txServiceError
-    if (mergedError) {
-      return { data: undefined, error: new Error(String(mergedError)), loading: false, isFetching, refetch }
-    }
-
-    if (!memoizedPortfolioBalances || !txServiceBalances) {
-      return { data: undefined, error: undefined, loading: true, isFetching, refetch }
-    }
-
-    const mergedBalances: PortfolioBalances = {
-      items: txServiceBalances.items,
-      fiatTotal: memoizedPortfolioBalances.fiatTotal,
-      tokensFiatTotal: calculateTokensFiatTotal(txServiceBalances.items),
-      positionsFiatTotal: memoizedPortfolioBalances.positionsFiatTotal,
-      positions: memoizedPortfolioBalances.positions,
-      isAllTokensMode: true,
-    }
-
-    return { data: mergedBalances, error: undefined, loading: false, isFetching: false, refetch }
+    return buildMergedResult(memoizedPortfolioBalances, portfolioLoading, portfolioError, txService, shared)
   }, [
     params.skip,
     params.hasPortfolioFeature,

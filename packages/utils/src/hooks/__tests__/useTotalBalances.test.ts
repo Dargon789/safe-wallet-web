@@ -90,6 +90,19 @@ const mockQueryResult = (overrides: Partial<MockQueryResult> = {}): MockQueryRes
 })
 
 describe('useTotalBalances', () => {
+  const setupAndRender = (
+    params: Partial<UseTotalBalancesParams>,
+    mocks: { txService?: Partial<MockQueryResult>; portfolio?: Partial<MockQueryResult> } = {},
+  ) => {
+    if (mocks.txService) {
+      jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue(mockQueryResult(mocks.txService))
+    }
+    if (mocks.portfolio) {
+      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue(mockQueryResult(mocks.portfolio))
+    }
+    return renderHook(() => useTotalBalances({ ...defaultParams, ...params }))
+  }
+
   beforeEach(() => {
     jest.clearAllMocks()
 
@@ -99,13 +112,7 @@ describe('useTotalBalances', () => {
 
   describe('no portfolio feature', () => {
     it('should return tx service balances', () => {
-      const mockBalances = createMockTxServiceBalances()
-
-      jest
-        .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
-        .mockReturnValue(mockQueryResult({ currentData: mockBalances }))
-
-      const { result } = renderHook(() => useTotalBalances(defaultParams))
+      const { result } = setupAndRender({}, { txService: { currentData: createMockTxServiceBalances() } })
 
       expect(result.current.data?.fiatTotal).toBe('1000')
       expect(result.current.data?.tokensFiatTotal).toBe('1000')
@@ -161,13 +168,7 @@ describe('useTotalBalances', () => {
     }
 
     it('should return portfolio balances in default tokens mode', () => {
-      const mockPortfolio = createMockPortfolio()
-
-      jest
-        .spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query')
-        .mockReturnValue(mockQueryResult({ currentData: mockPortfolio }))
-
-      const { result } = renderHook(() => useTotalBalances(portfolioParams))
+      const { result } = setupAndRender(portfolioParams, { portfolio: { currentData: createMockPortfolio() } })
 
       expect(result.current.data?.fiatTotal).toBe('2000')
       expect(result.current.data?.tokensFiatTotal).toBe('1500')
@@ -195,35 +196,20 @@ describe('useTotalBalances', () => {
     })
 
     it('should fallback to tx service when portfolio returns empty', () => {
-      const mockEmptyPortfolio = createMockEmptyPortfolio()
-      const mockBalances = createMockTxServiceBalances()
-
-      jest
-        .spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query')
-        .mockReturnValue(mockQueryResult({ currentData: mockEmptyPortfolio }))
-
-      jest
-        .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
-        .mockReturnValue(mockQueryResult({ currentData: mockBalances }))
-
-      const { result } = renderHook(() => useTotalBalances(portfolioParams))
+      const { result } = setupAndRender(portfolioParams, {
+        portfolio: { currentData: createMockEmptyPortfolio() },
+        txService: { currentData: createMockTxServiceBalances() },
+      })
 
       expect(result.current.data?.fiatTotal).toBe('1000')
       expect(result.current.data?.tokensFiatTotal).toBe('1000')
     })
 
     it('should fallback to tx service when portfolio errors', () => {
-      const mockBalances = createMockTxServiceBalances()
-
-      jest
-        .spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query')
-        .mockReturnValue(mockQueryResult({ error: new Error('Portfolio error') }))
-
-      jest
-        .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
-        .mockReturnValue(mockQueryResult({ currentData: mockBalances }))
-
-      const { result } = renderHook(() => useTotalBalances(portfolioParams))
+      const { result } = setupAndRender(portfolioParams, {
+        portfolio: { error: new Error('Portfolio error') },
+        txService: { currentData: createMockTxServiceBalances() },
+      })
 
       expect(result.current.data?.fiatTotal).toBe('1000')
     })
@@ -340,12 +326,12 @@ describe('useTotalBalances', () => {
       expect(balancesSpy).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ skip: true }))
     })
 
-    it('should normalize currency to uppercase', () => {
+    it('should pass currency through as-is for consistent cache keys', () => {
       const portfolioSpy = jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query')
 
       renderHook(() => useTotalBalances({ ...defaultParams, hasPortfolioFeature: true, currency: 'usd' }))
 
-      expect(portfolioSpy).toHaveBeenCalledWith(expect.objectContaining({ fiatCode: 'USD' }), expect.anything())
+      expect(portfolioSpy).toHaveBeenCalledWith(expect.objectContaining({ fiatCode: 'usd' }), expect.anything())
     })
   })
 
