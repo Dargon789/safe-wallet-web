@@ -24,7 +24,7 @@ import {
   MultiTokenTransferFields,
   TokenTransferType,
   MultiTransfersFields,
-} from '.'
+} from './types'
 import TxCard from '../../common/TxCard'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
@@ -42,9 +42,12 @@ import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
-import NoFeeNovemberTransactionCard from '@/features/no-fee-november/components/NoFeeNovemberTransactionCard'
-import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
-import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
+import {
+  NoFeeCampaignFeature,
+  useNoFeeCampaignEligibility,
+  useIsNoFeeCampaignEnabled,
+} from '@/features/no-fee-campaign'
+import { useLoadFeature } from '@/features/__core__'
 import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
 import uniq from 'lodash/uniq'
 
@@ -81,7 +84,8 @@ export type CreateTokenTransferProps = {
   txNonce?: number
 }
 
-export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElement => {
+const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElement => {
+  const { NoFeeCampaignTransactionCard } = useLoadFeature(NoFeeCampaignFeature)
   const disableSpendingLimit = txNonce !== undefined
   const [csvAirdropModalOpen, setCsvAirdropModalOpen] = useState<boolean>(false)
   const [maxRecipientsInfo, setMaxRecipientsInfo] = useState<boolean>(false)
@@ -92,8 +96,8 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
   const [safeApps] = useRemoteSafeApps({ name: SafeAppsName.CSV })
   const isMassPayoutsEnabled = useHasFeature(FEATURES.MASS_PAYOUTS)
   const { onNext, data } = useContext(TxFlowContext) as TxFlowContextType<MultiTokenTransferParams>
-  const { isEligible } = useNoFeeNovemberEligibility()
-  const isNoFeeNovemberEnabled = useIsNoFeeNovemberFeatureEnabled()
+  const { isEligible } = useNoFeeCampaignEligibility()
+  const isNoFeeCampaignEnabled = useIsNoFeeCampaignEnabled()
 
   useEffect(() => {
     if (txNonce !== undefined) {
@@ -113,7 +117,9 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
         data?.recipients.map(({ tokenAddress, ...rest }) => ({
           ...rest,
           [TokenTransferFields.tokenAddress]:
-            canCreateSpendingLimitTx && !canCreateStandardTx ? balancesItems[0]?.tokenInfo.address : tokenAddress,
+            canCreateSpendingLimitTx && !canCreateStandardTx
+              ? tokenAddress || balancesItems[0]?.tokenInfo.address
+              : tokenAddress,
         })) || [],
     },
     mode: 'onChange',
@@ -219,7 +225,7 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
                   >{`${recipientFields.length}/${MAX_RECIPIENTS}`}</Typography>
                 </Stack>
 
-                {isEligible && isNoFeeNovemberEnabled && <NoFeeNovemberTransactionCard />}
+                {isEligible && isNoFeeCampaignEnabled && <NoFeeCampaignTransactionCard />}
 
                 {hasInsufficientFunds && (
                   <Alert data-testid="insufficient-balance-error" severity="error">

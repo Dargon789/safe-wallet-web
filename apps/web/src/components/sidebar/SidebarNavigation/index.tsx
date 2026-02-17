@@ -40,7 +40,7 @@ const customSidebarEvents: { [key: string]: { event: any; label: string } } = {
   [AppRoutes.earn]: { event: EARN_EVENTS.OPEN_EARN_PAGE, label: EARN_LABELS.sidebar },
 }
 
-const Navigation = (): ReactElement => {
+const Navigation = (): ReactElement | null => {
   const chain = useCurrentChain()
   const router = useRouter()
   const { safe } = useSafeInfo()
@@ -63,6 +63,10 @@ const Navigation = (): ReactElement => {
       ? visibleNavItems
       : visibleNavItems.filter((item) => !UNDEPLOYED_SAFE_BLOCKED_ROUTES.includes(item.href))
   }, [safe.deployed, visibleNavItems])
+
+  if (!router.isReady) {
+    return null
+  }
 
   const getBadge = (item: NavItem) => {
     // Indicate whether the current Safe needs an upgrade
@@ -114,7 +118,7 @@ const Navigation = (): ReactElement => {
           ItemTag = queueSize ? <SidebarListItemCounter count={queueSize} /> : null
         }
 
-        const isSettingsItem = item.href === AppRoutes.settings.setup
+        const shouldPlaceDivider = item.href === AppRoutes.apps.index || item.href === AppRoutes.stake
 
         return (
           <Tooltip
@@ -152,7 +156,7 @@ const Navigation = (): ReactElement => {
                 </SidebarListItemButton>
               </ListItemButton>
 
-              {isSettingsItem && <Divider sx={{ mt: 1, mb: 0.5 }} />}
+              {shouldPlaceDivider && <Divider sx={{ mt: 1, mb: 0.5, borderColor: 'background.main' }} />}
             </div>
           </Tooltip>
         )

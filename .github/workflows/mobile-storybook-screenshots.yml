@@ -109,6 +109,16 @@ jobs:
           STORYBOOK_WEB: 'true'
           STORYBOOK_DISABLE_TELEMETRY: '1'
 
+      - name: Extract branch name
+        if: steps.changed-stories.outputs.has_changes == 'true'
+        id: branch
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
+        run: |
+          NORMALIZED=$(echo "$BRANCH_NAME" | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')
+          echo "normalized=$NORMALIZED" >> $GITHUB_OUTPUT
+          echo "Normalized branch: $NORMALIZED"
+
       - name: Generate story URLs
         if: steps.changed-stories.outputs.has_changes == 'true' && steps.build-storybook.outputs.build_failed != 'true'
         id: story-urls
@@ -134,41 +144,15 @@ jobs:
 
       - name: Upload screenshots to branch
         if: steps.changed-stories.outputs.has_changes == 'true' && steps.build-storybook.outputs.build_failed != 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global credential.helper '!f() { echo "username=x-access-token"; echo "password=$GH_TOKEN"; }; f'
-
-          SCREENSHOT_DIR="mobile-storybook-screenshots/${{ github.event.pull_request.number }}"
-
-          cd /tmp
-          rm -rf screenshots-storage
-
-          if git clone --depth 1 --branch mobile-storybook-screenshots-storage https://github.com/${{ github.repository }}.git screenshots-storage; then
-            echo "Cloned existing storage branch"
-            cd screenshots-storage
-          else
-            echo "Storage branch doesn't exist, creating it"
-            git clone --depth 1 https://github.com/${{ github.repository }}.git screenshots-storage
-            cd screenshots-storage
-            git checkout --orphan mobile-storybook-screenshots-storage
-            git rm -rf . 2>/dev/null || true
-            echo "# Mobile Storybook Screenshots Storage" > README.md
-            git add README.md
-            git commit -m "Initialize mobile-storybook-screenshots-storage branch"
-          fi
-
-          mkdir -p "$SCREENSHOT_DIR"
-          cp $GITHUB_WORKSPACE/mobile-screenshots/*.png "$SCREENSHOT_DIR/" 2>/dev/null || true
-
-          git add "$SCREENSHOT_DIR"
-          if git commit -m "Add mobile screenshots for PR #${{ github.event.pull_request.number }}"; then
-            git push origin mobile-storybook-screenshots-storage
-          else
-            echo "No changes to commit"
-          fi
+        uses: ./.github/actions/upload-to-storage-branch
+        with:
+          storage_branch: ${{ steps.branch.outputs.normalized }}-screenshots
+          source_dir: mobile-screenshots
+          target_dir: mobile-storybook-screenshots/${{ github.event.pull_request.number }}
+          file_pattern: '*.png'
+          commit_message: 'Add mobile screenshots for PR #${{ github.event.pull_request.number }}'
+          readme_title: 'Mobile Storybook Screenshots Storage'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Post PR comment with screenshots
         if: steps.changed-stories.outputs.has_changes == 'true' && steps.build-storybook.outputs.build_failed != 'true'
@@ -194,37 +178,59 @@ jobs:
 
             const prNumber = ${{ github.event.pull_request.number }};
             const repo = context.repo;
-            const baseUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/mobile-storybook-screenshots-storage/mobile-storybook-screenshots/${prNumber}`;
+            const screenshotBranch = `${{ steps.branch.outputs.normalized }}-screenshots`;
+            const baseUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/${screenshotBranch}/mobile-storybook-screenshots/${prNumber}`;
 
-            let body = '## 📱 Mobile Storybook Screenshots\n\n';
-            body += `Found ${screenshots.length} screenshot(s) for changed mobile components in this PR.\n\n`;
-
+            // Group screenshots by component and story, pairing light and dark modes
             const components = {};
             for (const file of screenshots) {
-              // Use greedy matching for component name to handle names with hyphens
-              const match = file.match(/^(.+)--(.+?)\.png$/);
+              // Match format: componentName--storyName--mode.png
+              const match = file.match(/^(.+)--(.+?)--(light|dark)\.png$/);
               if (match) {
-                const [, componentName, storyName] = match;
+                const [, componentName, storyName, mode] = match;
                 if (!components[componentName]) {
-                  components[componentName] = [];
+                  components[componentName] = {};
                 }
-                components[componentName].push({ storyName, file });
+                if (!components[componentName][storyName]) {
+                  components[componentName][storyName] = {};
+                }
+                components[componentName][storyName][mode] = file;
               }
             }
 
-            const useCollapsible = screenshots.length >= 10;
+            // Count total story pairs
+            let totalStories = 0;
+            for (const stories of Object.values(components)) {
+              totalStories += Object.keys(stories).length;
+            }
+
+            let body = '## 📱 Mobile Storybook Screenshots\n\n';
+            body += `Found ${totalStories} story pair(s) for changed mobile components in this PR.\n\n`;
+
+            const useCollapsible = totalStories >= 5;
 
             for (const [componentName, stories] of Object.entries(components)) {
               body += `### ${componentName}\n\n`;
-              for (const { storyName, file } of stories) {
-                const imageUrl = `${baseUrl}/${file}`;
+
+              for (const [storyName, modes] of Object.entries(stories)) {
+                const lightUrl = modes.light ? `${baseUrl}/${modes.light}` : '';
+                const darkUrl = modes.dark ? `${baseUrl}/${modes.dark}` : '';
+
                 if (useCollapsible) {
                   body += `<details>\n<summary>${storyName}</summary>\n\n`;
-                  body += `![${storyName}](${imageUrl})\n\n`;
+                }
+
+                body += `**${storyName}**\n\n`;
+                body += '| Light Mode | Dark Mode |\n';
+                body += '|------------|----------|\n';
+
+                const lightImg = lightUrl ? `<img src="${lightUrl}" alt="${storyName} - Light" width="100%">` : 'N/A';
+                const darkImg = darkUrl ? `<img src="${darkUrl}" alt="${storyName} - Dark" width="100%">` : 'N/A';
+
+                body += `| ${lightImg} | ${darkImg} |\n\n`;
+
+                if (useCollapsible) {
                   body += `</details>\n\n`;
-                } else {
-                  body += `**${storyName}**\n\n`;
-                  body += `![${storyName}](${imageUrl})\n\n`;
                 }
               }
             }
