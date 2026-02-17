@@ -143,8 +143,13 @@ export class WindowMessageHandler extends BaseWalletTransport {
     }
 
     if (init) {
-      // init message transmission to global target -- for 'init' payloads only
-      this.parentWindow.postMessage(message, '*')
+      // init message transmission with restricted target origin
+      const targetOrigin = this.appOrigin && this.appOrigin.length > 4 ? this.appOrigin : this.initTargetOrigin
+      if (targetOrigin && targetOrigin.length > 4) {
+        this.parentWindow.postMessage(message, targetOrigin)
+      } else {
+        logger.error('unable to post init message as target origin is not set')
+      }
     } else {
       // open message transmission
       if (this.appOrigin && this.appOrigin.length > 4) {
