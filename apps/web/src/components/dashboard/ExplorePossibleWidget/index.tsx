@@ -14,7 +14,6 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { EURCV_ASSET_ID } from '@/config/eurcv'
-import { EURCV_APY } from '@/features/earn/constants'
 import css from './styles.module.css'
 
 export type ExplorePossibleApp = {
@@ -29,9 +28,9 @@ export type ExplorePossibleApp = {
 const EXPLORE_POSSIBLE_CONFIG = [
   {
     id: 'earn',
-    title: 'Earn',
-    subtitle: 'on stablecoins',
-    badge: `${EURCV_APY}%`,
+    title: '',
+    badge: '',
+    subtitle: 'Earn boosted APY on stablecoins',
     iconUrl: {
       light: '/images/explore-possible/earn-large.svg',
       dark: '/images/explore-possible/earn-large-dark.svg',
@@ -118,7 +117,7 @@ const ExplorePossibleWidget = () => {
         subtitle: 'subtitle' in config ? config.subtitle : undefined,
         badge: 'badge' in config ? config.badge : undefined,
         iconUrl: isDarkMode ? config.iconUrl.dark : config.iconUrl.light,
-        link: config.getLink(router.query.safe, txBuilderApp?.link),
+        link: config.getLink(router.query.safe, txBuilderApp.link),
       })),
     [router.query.safe, txBuilderApp, isDarkMode, isSwapEnabled, isEurcvBoostEnabled],
   )
