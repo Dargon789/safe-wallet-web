@@ -21,6 +21,7 @@ apps/mobile/resources/
 # Web
 apps/web/.next
 apps/web/.swc
+apps/web/out
 apps/web/public
 apps/web/src/markdown/privacy/privacy.md
 apps/web/src/markdown/terms/terms.md
@@ -31,3 +32,5 @@ packages/utils/src/types/contracts/**/*
 # Expo plugins
 expo-plugins/notification-service-ios/dist
 
+# Spec templates (contain placeholders that aren't valid syntax)
+specs/**/contracts/*.template.*

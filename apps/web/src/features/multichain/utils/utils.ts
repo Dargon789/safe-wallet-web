@@ -1,4 +1,3 @@
-import type { DataDecoded } from '@safe-global/store/gateway/AUTO_GENERATED/data-decoded'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import semverSatisfies from 'semver/functions/satisfies'
@@ -13,28 +12,15 @@ import {
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { areOwnersMatching } from '@safe-global/utils/utils/safe-setup-comparison'
 import { Safe_proxy_factory__factory } from '@safe-global/utils/types/contracts'
-import { extractCounterfactualSafeSetup } from '@/features/counterfactual/utils'
+import { extractCounterfactualSafeSetup } from '@/features/counterfactual/services'
 import { encodeSafeSetupCall } from '@/components/new-safe/create/logic'
-import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import { type MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import { type SafeItem } from '@/hooks/safes'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { MIN_SAFE_VERSION_FOR_MULTICHAIN } from '../constants'
 
-export const isChangingSignerSetup = (decodedData: DataDecoded | undefined) => {
-  return decodedData?.method === 'addOwnerWithThreshold' || decodedData?.method === 'removeOwner'
-}
-
-export const isMultiChainSafeItem = (safe: SafeItem | MultiChainSafeItem): safe is MultiChainSafeItem => {
-  if ('safes' in safe && 'address' in safe) {
-    return true
-  }
-  return false
-}
-
-export const isSafeItem = (safe: SafeItem | MultiChainSafeItem): safe is SafeItem => {
-  return !isMultiChainSafeItem(safe)
-}
+// Re-export from shared hooks for backward compatibility
+export { isMultiChainSafeItem } from '@/hooks/safes'
 
 export const getSafeSetups = (
   safes: SafeItem[],

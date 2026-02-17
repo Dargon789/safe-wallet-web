@@ -21,6 +21,14 @@ yarn workspace @safe-global/web test
 git add .
 git commit -m "feat: your change description"
 
+# Semantic commit prefixes:
+# - feat: new features
+# - fix: bug fixes
+# - chore: CI/CD, build, config changes (NEVER use feat/fix for CI)
+# - tests: changes in unit or e2e tests (NEVER use feat/fix for tests)
+# - refactor: code refactoring
+# - docs: documentation
+
 # Push to your branch
 git push -u origin feature/your-feature-name
 
@@ -40,6 +48,9 @@ Use `@AGENTS.md` in your prompts to include the full guidelines, which cover:
 - Common pitfalls and debugging tips
 
 ## Active Technologies
+
+- TypeScript 5.x (Next.js 14.x) + Storybook 10.x, MSW 2.x, Chromatic, @storybook/nextjs, shadcn/ui (001-shadcn-storybook-migration)
+- N/A (tooling/documentation feature) (001-shadcn-storybook-migration)
 
 - TypeScript 5.x (Next.js 14.x) + Next.js (dynamic imports), ESLint (import restrictions), Redux Toolkit (state management) (001-feature-architecture)
 - N/A (architecture pattern, no new data storage) (001-feature-architecture)
