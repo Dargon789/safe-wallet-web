@@ -33,6 +33,8 @@ export const waitForTx = async (
         txDispatch(TxEvent.FAILED, {
           nonce,
           txId,
+          chainId,
+          safeAddress,
           error: new Error(`Transaction not found. It might have been replaced or cancelled in the connected wallet.`),
         })
       })
@@ -41,6 +43,8 @@ export const waitForTx = async (
         txDispatch(TxEvent.REVERTED, {
           nonce,
           txId,
+          chainId,
+          safeAddress,
           error: new Error('Transaction reverted by EVM.'),
         })
       })
@@ -49,6 +53,7 @@ export const waitForTx = async (
         txDispatch(TxEvent.PROCESSED, {
           nonce,
           txId,
+          chainId,
           safeAddress,
           txHash,
         })
@@ -63,6 +68,8 @@ export const waitForTx = async (
       txDispatch(TxEvent.FAILED, {
         nonce,
         txId,
+        chainId,
+        safeAddress,
         error: asError(error),
       })
     })
@@ -96,11 +103,8 @@ export const waitForTx = async (
 }
 
 export enum TaskState {
-  CheckPending = 'CheckPending',
-  ExecPending = 'ExecPending',
   ExecSuccess = 'ExecSuccess',
   ExecReverted = 'ExecReverted',
-  WaitingForConfirmation = 'WaitingForConfirmation',
   Blacklisted = 'Blacklisted',
   Cancelled = 'Cancelled',
   NotFound = 'NotFound',
@@ -150,6 +154,7 @@ const WAIT_FOR_RELAY_TIMEOUT = 3 * 60_000 // 3 minutes
 export const waitForRelayedTx = (
   taskId: string,
   txIds: string[],
+  chainId: string,
   safeAddress: string,
   nonce: number,
   groupKey?: string,
@@ -172,6 +177,7 @@ export const waitForRelayedTx = (
             nonce,
             txId,
             groupKey,
+            chainId,
             safeAddress,
           }),
         )
@@ -181,6 +187,8 @@ export const waitForRelayedTx = (
           txDispatch(TxEvent.REVERTED, {
             nonce,
             txId,
+            chainId,
+            safeAddress,
             error: new Error(`Relayed transaction reverted by EVM.`),
             groupKey,
           }),
@@ -191,6 +199,8 @@ export const waitForRelayedTx = (
           txDispatch(TxEvent.FAILED, {
             nonce,
             txId,
+            chainId,
+            safeAddress,
             error: new Error(`Relayed transaction was blacklisted by relay provider.`),
             groupKey,
           }),
@@ -201,6 +211,8 @@ export const waitForRelayedTx = (
           txDispatch(TxEvent.FAILED, {
             nonce,
             txId,
+            chainId,
+            safeAddress,
             error: new Error(`Relayed transaction was cancelled by relay provider.`),
             groupKey,
           }),
@@ -211,6 +223,8 @@ export const waitForRelayedTx = (
           txDispatch(TxEvent.FAILED, {
             nonce,
             txId,
+            chainId,
+            safeAddress,
             error: new Error(`Relayed transaction was not found.`),
             groupKey,
           }),
@@ -230,6 +244,8 @@ export const waitForRelayedTx = (
       txDispatch(TxEvent.FAILED, {
         nonce,
         txId,
+        chainId,
+        safeAddress,
         error: new Error(
           `Transaction not relayed in ${
             WAIT_FOR_RELAY_TIMEOUT / 60_000

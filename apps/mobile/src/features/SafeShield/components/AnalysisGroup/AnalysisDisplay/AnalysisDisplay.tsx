@@ -11,6 +11,7 @@ import { useTheme } from '@/src/theme/hooks/useTheme'
 import { AnalysisIssuesDisplay } from './components/AnalysisIssuesDisplay'
 import { AddressChanges } from './components/AddressChanges'
 import { ShowAllAddress } from './components/ShowAllAddress'
+import { AnalysisDetailsDropdown } from './components/AnalysisDetailsDropdown'
 
 interface AnalysisDisplayProps {
   result: AnalysisResult
@@ -49,9 +50,10 @@ export function AnalysisDisplay({ result, description, severity }: AnalysisDispl
 
   // Double-check in case if issues are undefined:
   const hasIssues = 'issues' in result && !!(result as MaliciousOrModerateThreatAnalysisResult).issues
+  const hasError = Boolean(result.error)
 
   return (
-    <View backgroundColor="$backgroundPaper" borderRadius="$1" overflow="hidden">
+    <View backgroundColor="$backgroundSheet" borderRadius="$1" overflow="hidden">
       <View
         style={{
           borderLeftWidth: 4,
@@ -62,9 +64,31 @@ export function AnalysisDisplay({ result, description, severity }: AnalysisDispl
         <Stack gap="$3">
           {renderDescription()}
 
+          {hasError && (
+            <AnalysisDetailsDropdown
+              showLabel="Show details"
+              hideLabel="Hide details"
+              contentWrapper={(children) => (
+                <View
+                  marginTop="$1"
+                  paddingHorizontal="$2"
+                  paddingVertical="$1"
+                  backgroundColor="$backgroundPaper"
+                  borderRadius="$1"
+                >
+                  {children}
+                </View>
+              )}
+            >
+              <Text fontSize="$2" lineHeight={14} color="$colorLight" flexWrap="wrap">
+                {result.error}
+              </Text>
+            </AnalysisDetailsDropdown>
+          )}
+
           {isAddressChange(result) && <AddressChanges result={result} />}
 
-          <AnalysisIssuesDisplay result={result} />
+          <AnalysisIssuesDisplay result={result} severity={severity} />
 
           {/* Only show ShowAllAddress dropdown if there are no issues (to avoid duplication) */}
           {!hasIssues && result.addresses?.length ? (

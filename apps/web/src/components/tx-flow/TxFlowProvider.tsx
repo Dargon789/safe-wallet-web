@@ -26,9 +26,10 @@ import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store
 import { trackTxEvents } from '@/components/tx/shared/tracking'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useChainId from '@/hooks/useChainId'
-import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
+import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import useTxDetails from '@/hooks/useTxDetails'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 
 export type TxFlowContextType<T extends unknown = any> = {
   step: number
@@ -161,7 +162,7 @@ const TxFlowProvider = <T extends unknown>({
   const { safe } = useSafeInfo()
   const isProposer = useIsWalletProposer()
   const chainId = useChainId()
-  const { safeTx, txOrigin, isMassPayout } = useContext(SafeTxContext)
+  const { safeTx, txOrigin } = useContext(SafeTxContext)
   const isCorrectNonce = useValidateNonce(safeTx)
   const { transactionExecution } = useAppSelector(selectSettings)
   const [shouldExecute, setShouldExecute] = useState<boolean>(transactionExecution)
@@ -173,6 +174,8 @@ const TxFlowProvider = <T extends unknown>({
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const [txDetails, , txDetailsLoading] = useTxDetails(txId)
+  const { needsRiskConfirmation, isRiskConfirmed } = useSafeShield()
+  const isUntrustedSafeBlocked = needsRiskConfirmation && !isRiskConfirmed
 
   const isCreation = !txId
   const isNewExecutableTx = useImmediatelyExecutable() && isCreation
@@ -202,6 +205,8 @@ const TxFlowProvider = <T extends unknown>({
   const trackTxEvent = useCallback(
     async (txId: string, isExecuted = false, isRoleExecution = false, isProposerCreation = false) => {
       const { data: details } = await trigger({ chainId, id: txId })
+      // Compute isMassPayout from data (recipients.length > 1)
+      const isMassPayout = (data as any)?.recipients?.length > 1
       // Track tx event
       trackTxEvents(
         details,
@@ -215,7 +220,7 @@ const TxFlowProvider = <T extends unknown>({
         safe.threshold,
       )
     },
-    [chainId, isCreation, trigger, signer?.isSafe, txOrigin, isMassPayout, safe.threshold],
+    [chainId, isCreation, trigger, signer?.isSafe, txOrigin, data, safe.threshold],
   )
 
   const value = {
@@ -244,7 +249,7 @@ const TxFlowProvider = <T extends unknown>({
     isSubmitLoading,
     setIsSubmitLoading,
 
-    isSubmitDisabled: isSubmitDisabled || isSubmitLoading,
+    isSubmitDisabled: isSubmitDisabled || isSubmitLoading || isUntrustedSafeBlocked,
     setIsSubmitDisabled,
 
     submitError,

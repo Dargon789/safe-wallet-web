@@ -13,31 +13,31 @@ import CurrencySelect from '@/components/balances/CurrencySelect'
 import ManageTokensButton from '@/components/balances/ManageTokensButton'
 import StakingBanner from '@/components/dashboard/StakingBanner'
 import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
-import NoFeeNovemberBanner from '@/features/no-fee-november/components/NoFeeNovemberBanner'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import { Box } from '@mui/material'
+import { Box, Stack } from '@mui/material'
 import { BRAND_NAME } from '@/config/constants'
+import { NoFeeCampaignFeature, useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign'
+import { PortfolioFeature } from '@/features/portfolio'
+import { useLoadFeature } from '@/features/__core__'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
-import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
-import PortfolioRefreshHint from '@/features/portfolio/components/PortfolioRefreshHint'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+
 const Balances: NextPage = () => {
+  const { NoFeeCampaignBanner } = useLoadFeature(NoFeeCampaignFeature)
   const { balances, error } = useVisibleBalances()
   const [showHiddenAssets, setShowHiddenAssets] = useState(false)
   const toggleShowHiddenAssets = () => setShowHiddenAssets((prev) => !prev)
   const manageTokensButtonRef = useRef<ManageTokensButtonHandle>(null)
   const isStakingBannerVisible = useIsStakingBannerVisible()
-  const isNoFeeNovemberEnabled = useIsNoFeeNovemberFeatureEnabled()
-  const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
-  const [hideNoFeeNovemberBanner, setHideNoFeeNovemberBanner] = useLocalStorage<boolean>(
-    'hideNoFeeNovemberAssetsPageBanner',
+  const isNoFeeCampaignEnabled = useIsNoFeeCampaignEnabled()
+  const [hideNoFeeCampaignBanner, setHideNoFeeCampaignBanner] = useLocalStorage<boolean>(
+    'hideNoFeeCampaignAssetsPageBanner',
   )
+  const portfolio = useLoadFeature(PortfolioFeature)
 
   const tokensFiatTotal = balances.tokensFiatTotal ? Number(balances.tokensFiatTotal) : undefined
 
-  const handleNoFeeNovemberDismiss = () => {
-    setHideNoFeeNovemberBanner(true)
+  const handleNoFeeCampaignDismiss = () => {
+    setHideNoFeeCampaignBanner(true)
   }
 
   return (
@@ -46,10 +46,7 @@ const Balances: NextPage = () => {
         <title>{`${BRAND_NAME} – Assets`}</title>
       </Head>
 
-      <AssetsHeader>
-        <ManageTokensButton ref={manageTokensButtonRef} onHideTokens={toggleShowHiddenAssets} />
-        <CurrencySelect />
-      </AssetsHeader>
+      <AssetsHeader />
 
       <main>
         {isStakingBannerVisible && (
@@ -62,18 +59,28 @@ const Balances: NextPage = () => {
           <PagePlaceholder img={<NoAssetsIcon />} text="There was an error loading your assets" />
         ) : (
           <>
-            {isNoFeeNovemberEnabled && !hideNoFeeNovemberBanner && (
+            {isNoFeeCampaignEnabled && !hideNoFeeCampaignBanner && (
               <Box mb={2}>
-                <NoFeeNovemberBanner onDismiss={handleNoFeeNovemberDismiss} />
+                <NoFeeCampaignBanner onDismiss={handleNoFeeCampaignDismiss} />
               </Box>
             )}
 
             <Box mb={2}>
-              <TotalAssetValue
-                fiatTotal={tokensFiatTotal}
-                isAllTokensMode={balances.isAllTokensMode}
-                action={isPortfolioEndpointEnabled ? <PortfolioRefreshHint entryPoint="Assets" /> : undefined}
-              />
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <TotalAssetValue
+                  fiatTotal={tokensFiatTotal}
+                  title="Total assets value"
+                  tooltipTitle="Total from this list only. Portfolio total includes positions and may use other token data."
+                />
+
+                <Stack direction="column" alignItems="flex-end" gap={0.5}>
+                  <portfolio.PortfolioRefreshHint entryPoint="Assets" />
+                  <Stack direction="row" gap={1} alignItems="center">
+                    <ManageTokensButton ref={manageTokensButtonRef} onHideTokens={toggleShowHiddenAssets} />
+                    <CurrencySelect />
+                  </Stack>
+                </Stack>
+              </Stack>
             </Box>
 
             <AssetsTable
