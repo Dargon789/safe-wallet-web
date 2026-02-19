@@ -5,7 +5,7 @@ import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/saf
 import type { Chain as ChainInfo } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { selectCurrency } from '../../settingsSlice'
-import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
+import { type SafeItem } from '@/hooks/safes'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { makeSafeTag } from '.'
 import { additionalSafesRtkApi, additionalSafesRtkApiV2 } from '@safe-global/store/gateway/safes'
@@ -61,7 +61,6 @@ class SafeOverviewFetcher {
         currency,
         walletAddress,
         trusted: false,
-        excludeSpam: true,
       })
       const queryAction: SafesV2QueryActionResult = dispatchV2(queryThunk)
 
@@ -137,7 +136,8 @@ class SafeOverviewFetcher {
     } else {
       v1Items.forEach((item) => {
         const overview = v1Result.value.find(
-          (entry) => sameAddress(entry.address.value, item.safeAddress) && entry.chainId === item.chainId,
+          (entry) =>
+            entry != null && sameAddress(entry.address?.value, item.safeAddress) && entry.chainId === item.chainId,
         )
         item.callback({ data: overview })
       })
@@ -149,7 +149,8 @@ class SafeOverviewFetcher {
     } else {
       v2Items.forEach((item) => {
         const overview = v2Result.value.find(
-          (entry) => sameAddress(entry.address.value, item.safeAddress) && entry.chainId === item.chainId,
+          (entry) =>
+            entry != null && sameAddress(entry.address?.value, item.safeAddress) && entry.chainId === item.chainId,
         )
         item.callback({ data: overview })
       })

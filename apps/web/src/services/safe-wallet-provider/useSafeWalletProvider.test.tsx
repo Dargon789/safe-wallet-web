@@ -2,7 +2,7 @@ import { Provider } from 'react-redux'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import * as router from 'next/router'
 
-import * as web3 from '@/hooks/wallets/web3'
+import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import * as notifications from './notifications'
 import { act, renderHook, getAppName } from '@/tests/test-utils'
 import { TxModalContext } from '@/components/tx-flow'
@@ -16,8 +16,7 @@ import { Interface } from 'ethers'
 import { getCreateCallDeployment } from '@safe-global/safe-deployments'
 import * as chainHooks from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
-import useAllSafes from '@/features/myAccounts/hooks/useAllSafes'
-import { useGetHref } from '@/features/myAccounts/hooks/useGetHref'
+import { useAllSafes, useGetHref } from '@/hooks/safes'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const createMockStore = <T,>(initialValue: T) => {
@@ -49,6 +48,11 @@ jest.mock('@/features/__core__', () => ({
     wcChainSwitchStore: mockWcChainSwitchStore,
     walletConnectInstance: mockWalletConnectInstance,
   })),
+  createFeatureHandle: jest.fn((name: string) => ({
+    name,
+    useIsEnabled: () => true,
+    load: jest.fn(),
+  })),
 }))
 
 // Mock the feature handle export (not used directly, but imported)
@@ -66,12 +70,9 @@ const updateSessionsMock = mockWalletConnectInstance.updateSessions as jest.Mock
 
 updateSessionsMock.mockResolvedValue(undefined)
 
-jest.mock('@/features/myAccounts/hooks/useAllSafes', () => ({
+jest.mock('@/hooks/safes', () => ({
   __esModule: true,
-  default: jest.fn(),
-}))
-
-jest.mock('@/features/myAccounts/hooks/useGetHref', () => ({
+  useAllSafes: jest.fn(),
   useGetHref: jest.fn(),
 }))
 
@@ -740,9 +741,12 @@ describe('useSafeWalletProvider', () => {
     it('should proxy RPC calls', async () => {
       const mockSend = jest.fn(() => Promise.resolve({ result: '0x' }))
 
-      jest.spyOn(web3 as any, 'useWeb3ReadOnly').mockImplementation(() => ({
-        send: mockSend,
-      }))
+      jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockImplementation(
+        () =>
+          ({
+            send: mockSend,
+          }) as any,
+      )
 
       const { result } = renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'))
 

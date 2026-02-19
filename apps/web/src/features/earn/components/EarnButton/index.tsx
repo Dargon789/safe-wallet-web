@@ -1,7 +1,7 @@
 import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
-import useSpendingLimit from '@/hooks/useSpendingLimit'
+import { useSpendingLimit } from '@/features/spending-limits'
 import { Button, IconButton, Tooltip, SvgIcon } from '@mui/material'
 
 import { useRouter } from 'next/router'
@@ -62,7 +62,7 @@ const EarnButton = (props: EarnButtonProps): ReactElement => {
               aria-label="Earn"
               variant={compact ? 'text' : 'contained'}
               color={compact ? 'info' : 'background.paper'}
-              size={compact ? 'small' : 'compact'}
+              size="small"
               disableElevation
               startIcon={<EarnIcon />}
               onClick={onEarnClick}

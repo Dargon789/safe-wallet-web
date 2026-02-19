@@ -26,8 +26,7 @@ import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlin
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
 import css from './styles.module.css'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import { HnDashboardBannerWithNoBalanceCheck } from '@/features/hypernative/components/HnDashboardBanner'
-import { BannerType, useBannerVisibility } from '@/features/hypernative/hooks'
+import { BannerType, useBannerVisibility, HnDashboardBannerWithNoBalanceCheck } from '@/features/hypernative'
 
 const calculateProgress = (items: boolean[]) => {
   const totalNumberOfItems = items.length
@@ -155,13 +154,7 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
             }}
           >
             <Track {...OVERVIEW_EVENTS.ADD_FUNDS}>
-              <Button
-                data-testid="add-funds-btn"
-                onClick={toggleDialog}
-                variant="contained"
-                size="small"
-                sx={{ minHeight: '40px' }}
-              >
+              <Button data-testid="add-funds-btn" onClick={toggleDialog} variant="contained" size="medium">
                 Add funds
               </Button>
             </Track>
@@ -293,8 +286,8 @@ const FirstTransactionWidget = ({
                   data-testid="create-tx-btn"
                   onClick={() => setOpen(true)}
                   variant="outlined"
-                  size="small"
-                  sx={{ mt: 2, minHeight: '40px' }}
+                  size="medium"
+                  sx={{ mt: 2 }}
                   disabled={!isOk}
                 >
                   Create transaction
