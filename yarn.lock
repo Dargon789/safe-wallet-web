@@ -13071,7 +13071,7 @@ __metadata:
     moti: "npm:^0.29.0"
     prettier: "npm:^3.6.2"
     react: "npm:19.1.0"
-    react-dom: "npm:19.1.0"
+    react-dom: "npm:19.2.4"
     react-hook-form: "npm:^7.54.2"
     react-native: "npm:0.81.4"
     react-native-ble-plx: "patch:react-native-ble-plx@npm%3A3.5.0#~/.yarn/patches/react-native-ble-plx+3.5.0.patch"
@@ -13346,7 +13346,7 @@ __metadata:
     "@testing-library/user-event": "npm:^14.5.2"
     "@types/node": "npm:^22.10.7"
     "@types/react": "npm:^19.0.8"
-    "@types/react-dom": "npm:^19.0.3"
+    "@types/react-dom": "npm:^19.2.3"
     "@types/styled-components": "npm:^5.1.34"
     "@typescript-eslint/eslint-plugin": "npm:^8.31.1"
     "@typescript-eslint/parser": "npm:^8.31.1"
@@ -13364,7 +13364,7 @@ __metadata:
     msw: "npm:^2.7.3"
     prettier: "npm:^3.6.2"
     react: "npm:19.1.0"
-    react-dom: "npm:19.1.0"
+    react-dom: "npm:19.2.4"
     react-hook-form: "npm:^7.54.2"
     react-is: "npm:^19.1.0"
     react-media: "npm:^1.10.0"
@@ -13487,7 +13487,7 @@ __metadata:
     "@types/node": "npm:25.0.3"
     "@types/qrcode": "npm:^1.5.5"
     "@types/react": "npm:^19.0.0"
-    "@types/react-dom": "npm:^19.0.0"
+    "@types/react-dom": "npm:^19.2.3"
     "@types/semver": "npm:^7.3.10"
     "@typescript-eslint/eslint-plugin": "npm:^7.6.0"
     "@typescript-eslint/parser": "npm:^8.18.1"
@@ -13536,7 +13536,7 @@ __metadata:
     prettier: "npm:^3.6.2"
     qrcode.react: "npm:^3.1.0"
     react: "npm:19.1.0"
-    react-dom: "npm:19.1.0"
+    react-dom: "npm:19.2.4"
     react-dropzone: "npm:^14.2.3"
     react-hook-form: "npm:7.41.1"
     react-papaparse: "npm:^4.0.2"
@@ -17969,16 +17969,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^19.0.0":
-  version: 19.0.2
-  resolution: "@types/react-dom@npm:19.0.2"
-  peerDependencies:
-    "@types/react": ^19.0.0
-  checksum: 10/d2ae81ec0b8eee7a4bf31918796fdaa34e8db68f69682163bc212d759de76783e6ffcc02c02722dcf508429067148841e6da81414cc730ca2a28c9c2b350c880
-  languageName: node
-  linkType: hard
-
-"@types/react-dom@npm:^19.0.3":
+"@types/react-dom@npm:^19.2.3":
   version: 19.2.3
   resolution: "@types/react-dom@npm:19.2.3"
   peerDependencies:
@@ -36749,14 +36740,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:19.1.0":
-  version: 19.1.0
-  resolution: "react-dom@npm:19.1.0"
+"react-dom@npm:19.2.4":
+  version: 19.2.4
+  resolution: "react-dom@npm:19.2.4"
   dependencies:
-    scheduler: "npm:^0.26.0"
+    scheduler: "npm:^0.27.0"
   peerDependencies:
-    react: ^19.1.0
-  checksum: 10/c5b58605862c7b0bb044416b01c73647bb8e89717fb5d7a2c279b11815fb7b49b619fe685c404e59f55eb52c66831236cc565c25ee1c2d042739f4a2cc538aa2
+    react: ^19.2.4
+  checksum: 10/ec17721a8cb131bc33480a9f738bc5bbfe4bd11b11cf69f3f473605346578a329ad26ceef6ef0761ea67a4b455803407dd7ed4ba3d8a5abd2cee8c32d221e498
   languageName: node
   linkType: hard
 
