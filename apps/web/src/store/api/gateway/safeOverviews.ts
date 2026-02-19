@@ -44,7 +44,6 @@ class SafeOverviewFetcher {
       currency,
       walletAddress,
       trusted: false,
-      excludeSpam: true,
     })
     const queryAction = dispatch(queryThunk)
 

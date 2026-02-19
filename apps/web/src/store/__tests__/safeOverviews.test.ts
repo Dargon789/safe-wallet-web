@@ -139,7 +139,6 @@ describe('safeOverviews', () => {
         safes: [`1:${fakeSafeAddress}`],
         currency: 'usd',
         trusted: false,
-        excludeSpam: true,
         walletAddress: undefined,
       })
     })
@@ -308,7 +307,6 @@ describe('safeOverviews', () => {
         safes: request.safes.map((safe) => `1:${safe.address}`),
         currency: 'usd',
         trusted: false,
-        excludeSpam: true,
         walletAddress: undefined,
       })
     })
