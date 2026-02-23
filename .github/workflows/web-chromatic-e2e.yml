@@ -30,7 +30,13 @@ jobs:
 
       - uses: ./.github/actions/cypress
         with:
-          secrets: ${{ toJSON(secrets) }}
+          # Pass only the specific secrets required by the cypress action instead of all secrets.
+          # Example (uncomment and adjust as needed):
+          # secrets: ${{ toJSON({
+          #   GITHUB_TOKEN: secrets.GITHUB_TOKEN,
+          #   CHROMATIC_PROJECT_TOKEN_SMOKE_TESTS: secrets.CHROMATIC_PROJECT_TOKEN_SMOKE_TESTS
+          # }) }}
+          secrets: ${{ toJSON(fromJSON('{}')) }}
           spec: 'cypress/e2e/visual/**/*.cy.js'
           group: 'Chromatic E2E'
           tag: 'chromatic-e2e'
