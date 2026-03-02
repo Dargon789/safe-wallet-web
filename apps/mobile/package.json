@@ -107,7 +107,7 @@
     "lodash": "^4.17.23",
     "moti": "^0.29.0",
     "react": "19.1.0",
-    "react-dom": "19.1.0",
+    "react-dom": "19.2.4",
     "react-hook-form": "^7.54.2",
     "react-native": "0.81.4",
     "react-native-ble-plx": "patch:react-native-ble-plx@npm%3A3.5.0#~/.yarn/patches/react-native-ble-plx+3.5.0.patch",
