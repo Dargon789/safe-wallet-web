@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { Appearance } from 'react-native'
 import { ThemeProvider } from '@react-navigation/native'
 import { TamaguiProvider } from '@tamagui/core'
 
@@ -14,7 +15,15 @@ interface SafeThemeProviderProps {
 }
 
 export const SafeThemeProvider = ({ children }: SafeThemeProviderProps) => {
-  const { colorScheme, isDark } = useTheme()
+  const { colorScheme, isDark, themePreference } = useTheme()
+
+  // Sync native iOS appearance so native components (RefreshControl, context
+  // menus, etc.) match the app theme. In auto mode, pass 'unspecified' to
+  // follow the OS. Fixed by .yarn/patches/react-native-npm-0.83.4-* which
+  // resolves the actual OS scheme instead of storing 'unspecified' as-is.
+  useEffect(() => {
+    Appearance.setColorScheme(themePreference === 'auto' ? 'unspecified' : themePreference)
+  }, [themePreference])
 
   const themeProvider = isStorybookEnv ? (
     <View
@@ -29,8 +38,8 @@ export const SafeThemeProvider = ({ children }: SafeThemeProviderProps) => {
 
   return (
     <FontProvider>
-      <TamaguiProvider config={config} defaultTheme={colorScheme ?? 'light'}>
-        <View testID={`theme-${colorScheme ?? 'light'}`} style={{ flex: 1 }}>
+      <TamaguiProvider config={config} defaultTheme={colorScheme}>
+        <View testID={`theme-${colorScheme}`} style={{ flex: 1 }}>
           {themeProvider}
         </View>
       </TamaguiProvider>

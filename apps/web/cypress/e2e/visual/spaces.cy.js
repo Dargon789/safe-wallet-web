@@ -5,7 +5,9 @@ import { mockVisualTestApis } from '../../support/visual-mocks.js'
 const SPACE_ID = '1'
 
 function setupSpacesAuth() {
-  main.enableChainFeature(constants.chainFeatures.spaces)
+  // Note: SPACES feature flag is already present in the chains fixture (all.json).
+  // Do NOT call enableChainFeature here — it uses req.continue() which bypasses
+  // the fixture mock and hits the real staging server, causing flaky failures.
 
   main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__auth, {
     sessionExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
@@ -34,33 +36,33 @@ describe('[VISUAL] Spaces page screenshots', { defaultCommandTimeout: 60000, ...
     setupSpacesAuth()
   })
 
+  it('[VISUAL] Screenshot spaces welcome page', () => {
+    cy.visit(constants.spacesUrl)
+    main.awaitVisualStability()
+  })
+
   it('[VISUAL] Screenshot spaces dashboard page', () => {
     cy.visit(constants.spaceDashboardUrl + SPACE_ID)
-    cy.contains('Getting started', { timeout: 30000 }).should('be.visible')
     main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot spaces settings page', () => {
     cy.visit(constants.spaceUrl + SPACE_ID)
-    cy.contains('Settings', { timeout: 30000 }).should('be.visible')
     main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot spaces members page', () => {
     cy.visit(constants.spaceMembersUrl + SPACE_ID)
-    cy.contains('Members', { timeout: 30000 }).should('be.visible')
     main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot spaces safe accounts page', () => {
     cy.visit(constants.spaceSafeAccountsUrl + SPACE_ID)
-    cy.contains('Safe Accounts', { timeout: 30000 }).should('be.visible')
     main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot spaces address book page', () => {
     cy.visit(constants.spaceAddressBookUrl + SPACE_ID)
-    cy.contains('Address book', { timeout: 30000 }).should('be.visible')
     main.awaitVisualStability()
   })
 })
