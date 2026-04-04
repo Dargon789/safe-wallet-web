@@ -15,7 +15,7 @@ export default defineConfig({
       include: '**/*.svg',
     }),
   ],
-  base: '/',
+  base: '/tx-builder/',
   build: {
     outDir: 'build',
     sourcemap: true,

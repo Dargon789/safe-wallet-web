@@ -1,7 +1,7 @@
 {
   "name": "@safe-global/mobile",
   "main": "index.js",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "doctor": {
     "reactNativeDirectoryCheck": {
       "enabled": true
@@ -50,7 +50,7 @@
     "@gorhom/bottom-sheet": "^5.2.6",
     "@hookform/resolvers": "^4.1.3",
     "@ledgerhq/context-module": "^1.7.0",
-    "@ledgerhq/device-management-kit": "^0.9.0",
+    "@ledgerhq/device-management-kit": "^0.12.0",
     "@ledgerhq/device-signer-kit-ethereum": "^1.7.0",
     "@ledgerhq/device-transport-kit-react-native-ble": "^1.1.0",
     "@notifee/react-native": "^9.1.8",
@@ -179,7 +179,7 @@
     "jest-expo": "~54.0.12",
     "prettier": "^3.6.2",
     "redux-devtools-expo-dev-plugin": "^2.0.0",
-    "storybook": "^10.2.7",
+    "storybook": "^10.2.9",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.31.1",
