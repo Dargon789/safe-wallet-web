@@ -28,11 +28,7 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
   const copyAndDispatchToast = useCopyAndDispatchToast()
   const theme = useTheme()
   const color = theme.color.get()
-  // hardcoded to the iOS red
-  // when we set danger to a button, it automatically sets a color that the OS selects
-  // titleColor only works on android and not on iOS
-  // that's why I'm hardcoding the iOS value of the danger text here
-  const colorError = 'rgb(255,66,69)'
+  const colorError = theme.error?.get() || '#FF5F72'
 
   if (!safeAddress) {
     return null
@@ -71,11 +67,11 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
             backgroundColor={'$backgroundSkeleton'}
             alignItems={'center'}
             justifyContent={'center'}
-            borderRadius={200}
-            height={40}
-            width={40}
+            borderRadius={16}
+            height={32}
+            width={32}
           >
-            <SafeFontIcon name={'settings'} size={24} color={'$color'} />
+            <SafeFontIcon name={'settings'} size={20} color={'$color'} />
           </View>
         </Pressable>
 
@@ -184,7 +180,6 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
             {
               id: 'remove',
               title: 'Remove account',
-              titleColor: colorError,
               attributes: {
                 destructive: true,
               },
@@ -201,11 +196,11 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
               backgroundColor={'$backgroundSkeleton'}
               alignItems={'center'}
               justifyContent={'center'}
-              borderRadius={200}
-              height={40}
-              width={40}
+              borderRadius={16}
+              height={32}
+              width={32}
             >
-              <SafeFontIcon name={'options-horizontal'} size={24} color={'$color'} />
+              <SafeFontIcon name={'options-horizontal'} size={20} color={'$color'} />
             </View>
           </Pressable>
         </FloatingMenu>
