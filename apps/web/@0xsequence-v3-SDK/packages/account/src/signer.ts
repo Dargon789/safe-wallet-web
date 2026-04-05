@@ -80,7 +80,7 @@ export class AccountSigner implements ethers.AbstractSigner<ethers.Provider> {
   /**
    * Signs a message.
    * 
-   * This method will sign the message using the account associated with this signer
+   * and the specified chain ID. The implementation will handle EIP-191 prefixing before signing.
    * and the specified chain ID. The message is already being prefixed with the EIP-191 prefix.
    * 
    * @param message - The message to sign. Can be a string or BytesLike.
