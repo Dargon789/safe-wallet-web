@@ -1,7 +1,7 @@
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import type { Dispatch, SetStateAction } from 'react'
-import type { ReactElement } from 'react'
+import { type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import type { Url } from 'next/dist/shared/lib/router/router'
 import { Box, IconButton, Paper } from '@mui/material'
@@ -10,8 +10,8 @@ import classnames from 'classnames'
 import css from './styles.module.css'
 import ConnectWallet from '@/components/common/ConnectWallet'
 import NetworkSelector from '@/components/common/NetworkSelector'
-import SafeTokenWidget from '@/components/common/SafeTokenWidget'
 import NotificationCenter from '@/components/notification-center/NotificationCenter'
+import SafenetStakingWidget from '@/components/common/SafenetStakingWidget'
 import { AppRoutes } from '@/config/routes'
 import SafeLabsLogo from '@/public/images/logo-safe-labs.svg'
 import SafeLogoMobile from '@/public/images/logo-no-text.svg'
@@ -22,8 +22,8 @@ import { BatchingFeature } from '@/features/batching'
 import { WalletConnectFeature } from '@/features/walletconnect'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
-import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
+import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { BRAND_LOGO, BRAND_NAME } from '@/config/constants'
 
 type HeaderProps = {
@@ -31,12 +31,8 @@ type HeaderProps = {
   onBatchToggle?: Dispatch<SetStateAction<boolean>>
 }
 
-export function getLogoLink(router: ReturnType<typeof useRouter>): Url {
-  return router.pathname === AppRoutes.home || !router.query.safe
-    ? router.pathname === AppRoutes.welcome.accounts
-      ? AppRoutes.welcome.index
-      : AppRoutes.welcome.accounts
-    : { pathname: AppRoutes.home, query: { safe: router.query.safe } }
+export function getLogoLink(): Url {
+  return AppRoutes.welcome.accounts
 }
 
 const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
@@ -49,8 +45,7 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
   const { WalletConnectWidget } = useLoadFeature(WalletConnectFeature)
   const isOfficialHost = useIsOfficialHost()
 
-  // If on the home page, the logo should link to the Accounts or Welcome page, otherwise to the home page
-  const logoHref = getLogoLink(router)
+  const logoHref = getLogoLink()
 
   const handleMenuToggle = () => {
     if (onMenuToggle) {
@@ -92,7 +87,7 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
 
       {showSafeToken && (
         <div className={classnames(css.element, css.hideMobile)}>
-          <SafeTokenWidget />
+          <SafenetStakingWidget />
         </div>
       )}
 
