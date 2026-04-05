@@ -2,7 +2,7 @@
 name: Tech debt task
 about: Internal tech debt task – only for the Safe team!
 title: ''
-labels: ''
+labels: 'task, tech debt'
 assignees: ''
 
 ---
