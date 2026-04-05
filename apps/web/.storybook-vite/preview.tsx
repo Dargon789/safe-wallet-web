@@ -8,6 +8,7 @@ import createEmotionCache from '../src/utils/createEmotionCache'
 import { initialize, mswLoader } from 'msw-storybook-addon'
 
 import '../src/styles/globals.css'
+import { ShadcnProvider } from '../.storybook/shadcn'
 
 // Create emotion cache once for Storybook (same as real app)
 // This ensures MUI styles are injected first, allowing CSS modules to override them
@@ -44,6 +45,8 @@ const ThemeSyncDecorator = (
     </div>
   )
 }
+
+const isShadcnStory = (title: string | undefined) => title?.startsWith('UI/')
 
 /** Safe{Wallet} viewport presets for responsive testing */
 const SAFE_VIEWPORTS = {
@@ -117,6 +120,7 @@ const preview: Preview = {
           ],
           'Components',
           'Features',
+          'UI',
         ],
       },
     },
@@ -143,11 +147,20 @@ const preview: Preview = {
   loaders: [mswLoader],
 
   decorators: [
-    // Custom MUI theme decorator with emotion cache (same as real app)
-    // This ensures CSS modules can override MUI styles
+    // UI/ stories get ShadcnProvider only (no MUI). All other stories get MUI only.
+    // Stories that need shadcn opt in via `shadcn: true` on withMockProvider/createMockStory.
     (Story, context) => {
       const themeMode = (context.globals?.theme as 'light' | 'dark') || 'light'
-      const theme = themeMode === 'dark' ? createSafeTheme('dark') : createSafeTheme('light')
+
+      if (isShadcnStory(context.title)) {
+        return (
+          <ShadcnProvider dark={themeMode === 'dark'}>
+            <Story />
+          </ShadcnProvider>
+        )
+      }
+
+      const theme = createSafeTheme(themeMode)
 
       return (
         <CacheProvider value={emotionCache}>

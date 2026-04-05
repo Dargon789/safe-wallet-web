@@ -32,6 +32,42 @@ yarn workspace @safe-global/web storybook
 
 The monorepo uses **Yarn 4 workspaces** to manage dependencies and enables sharing code between web and mobile applications.
 
+### Key Entry Points
+
+Stable architectural landmarks for fast orientation:
+
+| Area           | Path                                         | Purpose                                              |
+| -------------- | -------------------------------------------- | ---------------------------------------------------- |
+| Web app entry  | `apps/web/src/pages/_app.tsx`                | Next.js app bootstrap, providers, `InitApp`          |
+| Redux store    | `apps/web/src/store/index.ts`                | `makeStore()`, middleware, RTK Query APIs            |
+| RTK Query APIs | `apps/web/src/store/api/gateway/`            | CGW API endpoints (balances, transactions, etc.)     |
+| Feature system | `apps/web/src/features/__core__/`            | `createFeatureHandle`, `useLoadFeature`, proxy stubs |
+| Page layout    | `apps/web/src/components/common/PageLayout/` | Main app layout, sidebar, header                     |
+| Safe info hook | `apps/web/src/hooks/useSafeInfo.ts`          | Current Safe address, owners, threshold              |
+| Chain config   | `packages/store/src/gateway/chains/`         | RTK Query chains endpoint with retry logic           |
+| Theme package  | `packages/theme/src/`                        | Palettes, spacing, typography tokens                 |
+| Mobile entry   | `apps/mobile/src/app/_layout.tsx`            | Expo Router root layout                              |
+
+### AST-Based Code Search
+
+If `ast-grep` (aka `sg`) is installed, prefer it over text-based grep for structural code searches. It understands TypeScript/TSX syntax so it won't match inside comments or strings.
+
+```bash
+# Find all components using useAppSelector
+sg -p 'useAppSelector($$$)' --lang tsx apps/web/src/
+
+# Find all createSlice calls
+sg -p 'createSlice({ name: $NAME, $$$})' --lang ts apps/web/src/
+
+# Find all default exports of a function component
+sg -p 'export default function $NAME($$$) { $$$}' --lang tsx apps/web/src/
+
+# Find useMemo with specific dependency
+sg -p 'useMemo(() => $$$, [$$$, chainId, $$$])' --lang tsx apps/web/src/
+```
+
+Install: `brew install ast-grep` or `npm install -g @ast-grep/cli`
+
 ## Unified Theme System
 
 The project uses `@safe-global/theme` package as a single source of truth for all design tokens (colors, spacing, typography, radius) across web and mobile.
@@ -201,7 +237,28 @@ export default {
 
 See `apps/web/docs/feature-architecture.md` for the complete guide including proxy-based stubs and meta properties (`$isDisabled`, `$isReady`, `$error`).
 
+## Testing Requirements
+
+Every code change must include tests. See [`apps/web/docs/TESTING.md`](apps/web/docs/TESTING.md) for conventions, templates, and mock patterns.
+
 ## Workflow
+
+### Fast Feedback Loop
+
+The repo provides automated verification:
+
+1. **Automatic**: A Claude Code `Stop` hook runs `verify:changed` once at the end of each agent turn. It early-exits (no-op) when no `.ts/.tsx/.js/.jsx` files have been modified. When it does run, type-check runs on the full project (TSC requires this), while lint, prettier, and tests are scoped to changed files only. The workspace (web/mobile) is auto-detected from the changed file paths. Set `SKIP_VERIFY=1` to disable. Fix any errors before moving on.
+
+2. **Manual**: Run `yarn verify:changed:web` anytime to check your work. Run `yarn verify:web` for a full check before committing.
+
+3. **Test scaffolding**: Run `yarn test:scaffold <file>` to generate a test skeleton with the correct imports, mocks, and structure. See the Test Decision Matrix in the Testing Guidelines section for which files need tests.
+
+**Rules for agents:**
+
+- Fix all `verify:changed` errors before proceeding to the next task
+- If `verify:changed` reports a missing test, write one before committing
+- Do NOT run type-check, lint, prettier, and test separately — use `verify`
+- Do NOT commit without a clean `verify:changed` pass
 
 1. **Install dependencies**: `yarn install` (from the repository root).
    - Uses Yarn 4 (managed via `corepack`)
@@ -253,6 +310,50 @@ See `apps/web/docs/feature-architecture.md` for the complete guide including pro
 
 7. **Pull requests**: fill out the PR template and ensure all checks pass.
 
+8. **PR poem**: Include a short technical poem at the very top of each PR description that acts as a concise summary of what the PR actually changes. The poem should prioritize clarity over artistry — a reader should understand the gist of the PR from the poem alone. Use a randomly chosen short form (e.g., haiku, limerick, free verse, tanka) and keep it to 2–4 lines. Wrap in a blockquote:
+
+   ```markdown
+   > Strip Sentry SDK and config,
+   > no more error tracking calls,
+   > bundle shrinks, tests pass clean.
+   ```
+
+9. **PR description**: Always use the GitHub PR template (`.github/PULL_REQUEST_TEMPLATE.md`). Fill out all sections — "What it solves", "How this PR fixes it", "How to test it", and the checklist.
+
+10. **PR visual summary (required)**: Every PR must include a visual in the `## Visual summary` section. This is mandatory, not optional.
+
+    - **Architecture/logic changes** → Mermaid diagram (flowchart, sequence, or class diagram) showing what changed
+    - **UI changes** → Screenshot of the result (use Chrome DevTools MCP if the app is running, or describe how to capture manually)
+    - **Both** if the PR includes UI + logic changes
+
+    Mermaid diagrams are rendered natively by GitHub. Example:
+
+    ````markdown
+    ```mermaid
+    flowchart LR
+      A[useSafeInfo hook] --> B[New validation logic]
+      B --> C{Is owner?}
+      C -->|Yes| D[Show actions]
+      C -->|No| E[Show read-only]
+    ```
+    ````
+
+    For refactors, use a before/after diagram:
+
+    ````markdown
+    ```mermaid
+    flowchart TB
+      subgraph Before
+        A1[Component A] --> B1[Inline logic]
+        A1 --> C1[Inline logic]
+      end
+      subgraph After
+        A2[Component A] --> H[useSharedHook]
+        H --> B2[Extracted service]
+      end
+    ```
+    ````
+
 **Environment Variables** – Web apps use `NEXT_PUBLIC_*` prefix, mobile apps use `EXPO_PUBLIC_*` prefix for environment variables. In shared packages, check for both prefixes.
 
 ## Testing Guidelines
@@ -302,6 +403,25 @@ Coverage report: `apps/web/cypress/COVERAGE.md`
 - Run `yarn workspace @safe-global/web test:coverage` to generate coverage reports
 - Coverage reports help identify untested code paths
 
+### Test Decision Matrix
+
+| What you changed             | Required tests                 | Test type                                      | Example                                                            |
+| ---------------------------- | ------------------------------ | ---------------------------------------------- | ------------------------------------------------------------------ |
+| New hook (`use*.ts`)         | Unit test with `renderHook`    | `hooks/__tests__/useX.test.ts`                 | Mock dependencies, test return values and state changes            |
+| New utility/service (`*.ts`) | Unit test                      | `utils.test.ts` colocated                      | Pure function tests, edge cases, error paths                       |
+| New component with logic     | Unit test + Storybook story    | `Component.test.tsx` + `Component.stories.tsx` | Render with providers, test interactions, story for visual states  |
+| New component (layout only)  | Storybook story only           | `Component.stories.tsx`                        | No unit test needed — story covers visual correctness              |
+| Redux slice                  | State transition test          | `mySlice.test.ts`                              | Test reducers by dispatching actions and asserting resulting state |
+| RTK Query endpoint           | MSW integration test           | `api.test.ts`                                  | Use MSW to mock API, test cache behavior                           |
+| Bug fix (any file)           | Regression test                | Add to existing test file                      | Write a test that fails without the fix, passes with it            |
+| Feature (new feature dir)    | All of the above as applicable | Per-file rules above                           | Plus: add feature flag test showing disabled state                 |
+
+### What NOT to test
+
+- Type-only files, barrel re-exports, constants
+- Auto-generated files (`AUTO_GENERATED/`, contract types)
+- Storybook stories themselves (covered by snapshot workflow)
+
 ## Mobile Development (Expo + Tamagui)
 
 - **UI Components** – Use Tamagui components for styling and theming. Import from `tamagui` not React Native directly when possible.
@@ -341,7 +461,6 @@ import { MyComponent } from './MyComponent'
 const meta = {
   title: 'Components/MyComponent',
   component: MyComponent,
-  tags: ['autodocs'],
 } satisfies Meta<typeof MyComponent>
 
 export default meta
@@ -399,7 +518,6 @@ const meta = {
     ...defaultSetup.parameters, // Includes MSW handlers and Next.js router mock
   },
   decorators: [defaultSetup.decorator], // Provides Redux, Wallet, SDK, TxModal contexts
-  tags: ['autodocs'],
 } satisfies Meta<typeof Dashboard>
 
 export default meta
@@ -454,7 +572,6 @@ import {
 - Place story files next to the component they document
 - Use descriptive story names (Default, WithError, Loading, etc.)
 - Include all important component states and variations
-- Use the `autodocs` tag for automatic documentation generation
 - Story files are located throughout `apps/web/src/` alongside components
 - **For pages/widgets**: Use `createMockStory` to avoid duplicating mock setup code
 - **For simple components**: Use basic story format without mocking utilities

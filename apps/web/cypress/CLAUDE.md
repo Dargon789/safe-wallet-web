@@ -9,7 +9,7 @@ cypress/
 ├── e2e/
 │   ├── pages/          # Page Object Model (*.pages.js, main.page.js)
 │   ├── smoke/          # Functional smoke tests (CI on every PR)
-│   ├── visual/         # Visual regression tests (Chromatic E2E, manual trigger only)
+│   ├── visual/         # Visual regression tests (Argos E2E)
 │   ├── regression/     # Feature tests
 │   ├── happypath/      # User journey tests
 │   └── safe-apps/      # Safe Apps tests
@@ -27,9 +27,9 @@ cypress/
 | Regression | `e2e/regression/` | On-demand                | `Verify that ...`         |
 | Happy path | `e2e/happypath/`  | On-demand                | `Verify that ...`         |
 
-## Visual regression tests (Chromatic E2E)
+## Visual regression tests (Argos E2E)
 
-All visual tests in `e2e/visual/`. Chromatic captures light + dark mode automatically (dark via `afterEach` hook in `support/e2e.js`).
+All visual tests in `e2e/visual/`. Argos captures screenshots via `afterEach` hook in `support/e2e.js`.
 
 ### Structure
 
@@ -69,7 +69,7 @@ Use `wallet.connectSigner(signer)` in `beforeEach`, not in individual `it` block
 
 ### API mocking for visual tests
 
-All visual tests call `mockVisualTestApis()` in `beforeEach()` to intercept CGW API endpoints with deterministic fixture data. This prevents flaky Chromatic diffs caused by changing token prices, balances, and fiat values.
+All visual tests call `mockVisualTestApis()` in `beforeEach()` to intercept CGW API endpoints with deterministic fixture data. This prevents flaky visual diffs caused by changing token prices, balances, and fiat values.
 
 - Fixtures are shared with Storybook MSW via symlink: `fixtures/msw → config/test/msw/fixtures`
 - Uses the `safe-token-holder` scenario for balances/portfolio/positions
@@ -77,11 +77,62 @@ All visual tests call `mockVisualTestApis()` in `beforeEach()` to intercept CGW 
 - Tests that need specific data (e.g., `tx_queue.cy.js` with pending transactions) call their own `cy.intercept()` AFTER `mockVisualTestApis()` to override (Cypress last-registered-wins)
 - Safe info, chain config, and nonces are NOT mocked (stable for static test safes)
 
+## Test Body Structure
+
+Each test must follow a clear **actions → assertions** pattern. The test body is split into three phases:
+
+1. **Preconditions** (optional) — verify the page is in the expected state before acting (e.g. widget loaded, sidebar visible)
+2. **Actions** — user interactions: clicks, navigation, typing. Use `click*` / `open*` / `expand*` / `type*` functions from page objects
+3. **Assertions** — verify the outcome. Use `verify*` functions from page objects. Group all assertions at the end
+
+### Rules
+
+- **Never write raw Cypress commands in test files.** Every `cy.get(selector)`, `cy.url().should(...)`, or `cy.contains(label).click()` must be wrapped in a page object function.
+- **Action functions** (click, open, expand, type, navigate) must not contain assertions about outcomes. They perform one user action.
+- **Verify functions** must not perform actions. They only assert state (element visible, URL correct, text matches).
+- **Reuse existing page object functions.** Before creating a new function, search all `*.page*.js` files for similar logic. If it exists, import and reuse.
+- **Create general functions** when the same action/assertion pattern repeats across tests. Pass element selectors and expected values as parameters rather than creating one function per element.
+
+### Example
+
+```js
+// ✅ Good: actions then assertions, all via page object functions
+it('Verify that clicking an account row opens the Safe dashboard', () => {
+  space.verifySpaceDashboardWidgetVisible('Accounts')
+
+  space.clickAccountItemByIndex(0)
+
+  space.verifySafeDashboardUrlSafeQuery('sep:0x1234...')
+  space.verifySafeNameInSafeLevelNavigation('My Safe')
+})
+
+// ❌ Bad: inline selectors, mixed actions and assertions
+it('Verify that clicking an account row opens the Safe dashboard', () => {
+  cy.get('[data-testid="space-dashboard-accounts-widget"]').should('be.visible')
+  cy.get('[data-testid="space-dashboard-accounts-row-0"]').click()
+  cy.url().should('include', '/home')
+  cy.get('[data-testid="safe-selector-trigger-name"]').should('contain.text', 'My Safe')
+})
+```
+
+### Function Naming Convention
+
+| Prefix    | Purpose                         | Example                            |
+| --------- | ------------------------------- | ---------------------------------- |
+| `click*`  | Click an element                | `clickAccountItemByIndex(index)`   |
+| `open*`   | Open a dropdown/modal/panel     | `openSpaceSelector()`              |
+| `expand*` | Expand a collapsible section    | `expandAccountRow(index)`          |
+| `type*`   | Type into an input              | `typeSpaceName(name)`              |
+| `visit*`  | Navigate to a URL               | `visitSpaceDashboard(id)`          |
+| `verify*` | Assert state (visibility, URL…) | `verifySpaceSidebarItemsVisible()` |
+
 ## Selectors
 
 ALL selectors in `e2e/pages/*.pages.js`. Never use raw selectors in `.cy.js` files.
 
-Preference: `data-testid` > semantic HTML/ARIA > `cy.contains()` > never class names.
+Preference: `data-testid` > semantic HTML/ARIA > `cy.contains()` > never class names. Reuse existing test IDs; add new ones only when the element has none.
+
+For links and external CTAs: use `data-testid` (or `actionTestId` on ActionCard) in the component and select by that in the page object. Do **not** use `cy.contains('a', ...)`, `.should('have.attr', 'href', ...)`, or `.and('have.attr', 'target', '_blank')`; add a testid only if missing, then assert visibility or behavior.
 
 ## Data setup
 

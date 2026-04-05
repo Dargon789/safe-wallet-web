@@ -8,6 +8,10 @@ export const getDefaultScreenOptions = (goBack: () => void) => {
   return {
     headerBackButtonDisplayMode: 'minimal' as const,
     headerShadowVisible: false,
+    headerLeftContainerStyle: { paddingLeft: 16 },
+    headerRightContainerStyle: { paddingRight: 16 },
+    headerTitleAlign: 'center' as const,
+    headerRight: () => <View width={40} />,
     headerLeft: (props: NativeStackHeaderLeftProps) => {
       return <HeaderLeft props={props} goBack={goBack} />
     },
@@ -26,7 +30,7 @@ export const HeaderLeft = ({
   return (
     <HeaderBackButton
       {...props}
-      style={{ marginLeft: -8 }}
+      style={{ marginLeft: 0 }}
       testID={'go-back'}
       onPress={goBack}
       backImage={() => {
@@ -35,11 +39,11 @@ export const HeaderLeft = ({
             backgroundColor={'$backgroundSkeleton'}
             alignItems={'center'}
             justifyContent={'center'}
-            borderRadius={16}
-            height={32}
-            width={32}
+            borderRadius={200}
+            height={40}
+            width={40}
           >
-            <SafeFontIcon name={icon} size={16} color={'$color'} />
+            <SafeFontIcon name={icon} size={24} color={'$color'} />
           </View>
         )
       }}

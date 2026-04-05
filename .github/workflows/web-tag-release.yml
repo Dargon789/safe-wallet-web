@@ -13,13 +13,19 @@ permissions: {}
 
 jobs:
   tag:
-    if: github.event.pull_request.merged == true
+    # Allow merged PRs (normal flow) and auto-closed release branch PRs (direct push to main)
+    if: >-
+      github.event.pull_request.merged == true ||
+      (github.event.action == 'closed' &&
+       startsWith(github.event.pull_request.head.ref, 'release') &&
+       github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       actions: write
       contents: write
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
+      version_number: ${{ steps.version.outputs.version_number }}
       changelog: ${{ steps.extract_changelog.outputs.changelog }}
 
     steps:
@@ -29,11 +35,23 @@ jobs:
           ref: main
           fetch-depth: 0
 
+      - name: Verify PR commits are in main
+        if: github.event.pull_request.merged != true
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if git merge-base --is-ancestor "$PR_HEAD_SHA" HEAD; then
+            echo "PR head commit is in main - proceeding"
+          else
+            echo "::error::PR head commit is NOT in main - aborting"
+            exit 1
+          fi
+
       - name: Extract version
         id: version
         run: |
           NEW_VERSION=$(node -p 'require("./apps/web/package.json").version')
-          echo "version=v$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "version=web-v$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "version_number=$NEW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Create a git tag
@@ -94,7 +112,7 @@ jobs:
             ${{ needs.tag.outputs.changelog }}
 
             [🔗 IPFS release](
-            https://github.com/5afe/safe-wallet-ipfs/releases/tag/${{ needs.tag.outputs.version }})
+            https://github.com/5afe/safe-wallet-ipfs/releases/tag/v${{ needs.tag.outputs.version_number }})
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -114,7 +132,7 @@ jobs:
         working-directory: apps/web
 
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest@v4
         with:
           subject-path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}.tar.gz
 

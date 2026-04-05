@@ -2,9 +2,9 @@
 
 > **Maintenance:** This file is manually maintained. Update it when adding, removing, or changing visual test files in `e2e/visual/`. Cross-reference with `.storybook/COVERAGE.md` for component-level gaps.
 
-**64 tests** across **33 test files** — each test captures **light + dark mode** (128 Chromatic snapshots total)
+**65 tests** across **33 test files** — each test captures an Argos screenshot automatically.
 
-Dark mode is applied automatically via a global `afterEach` hook in `cypress/support/e2e.js` that toggles `data-theme="dark"` and takes a second Chromatic snapshot.
+Screenshots are captured via a global `afterEach` hook in `cypress/support/e2e.js`.
 
 ## Covered pages
 
@@ -47,6 +47,7 @@ Dark mode is applied automatically via a global `afterEach` hook in `cypress/sup
 | `/imprint`                        | legal_pages.cy.js            | 1     | No               | No      |
 | `/cookie`                         | legal_pages.cy.js            | 1     | No               | No      |
 | `/safe-labs-terms`                | legal_pages.cy.js            | 1     | No               | No      |
+| `/welcome/spaces`                 | spaces.cy.js                 | 1     | Yes (auth + API) | No      |
 | `/spaces` (dashboard)             | spaces.cy.js                 | 1     | Yes (auth + API) | No      |
 | `/spaces/settings`                | spaces.cy.js                 | 1     | Yes (auth + API) | No      |
 | `/spaces/members`                 | spaces.cy.js                 | 1     | Yes (auth + API) | No      |

@@ -1,9 +1,9 @@
 import { LS_NAMESPACE } from '../../src/config/constants'
 import safes from '../fixtures/safes/static.js'
 
-// Visual regression (Chromatic) test settings
+// Visual regression (Argos) test settings
 export const VISUAL_VIEWPORT = { viewportWidth: 1920, viewportHeight: 1080 }
-export const VISUAL_SETTLE_TIME = 7000 // ms to let UI animations settle before Chromatic captures the screenshot
+export const VISUAL_SETTLE_TIME = 7000 // ms to let UI animations settle before Argos captures the screenshot
 
 export const RECIPIENT_ADDRESS = '0x6a5602335a878ADDCa4BF63a050E34946B56B5bC'
 export const GOERLI_SAFE_APPS_SAFE = 'gor:0x168ca275d1103cb0a30980813140053c7566932F'
@@ -51,7 +51,7 @@ export const prodbaseUrl = 'https://app.safe.global'
 export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
 export const bridgeWidget = 'https://iframe.jumper.exchange/bridge'
 export const safeTestAppurl = 'https://safe-apps-test-app.pages.dev'
-export const TX_Builder_url = 'https://safe-apps.dev.5afe.dev/tx-builder'
+export const TX_Builder_url = 'https://tx-builder.staging.5afe.dev'
 export const drainAccount_url = 'https://safe-apps.dev.5afe.dev/drain-safe'
 export const testAppUrl = 'https://safe-test-app.com'
 export const swapUrl = '/swap?safe='
@@ -124,8 +124,8 @@ export const ownedSafesEndpoint = '**/v2/owners/**/safes*'
 export const queuedEndpoint = '**/queued*'
 export const messagesEndpoint = 'v1/chains/**/safes/**/messages*'
 export const collectiblesEndpoint = '**/collectibles*'
-export const chainsEndpoint = '**/v1/chains'
-export const chainConfigEndpoint = '**/v1/chains/*'
+export const chainsEndpoint = '**/v2/chains'
+export const chainConfigEndpoint = '**/v2/chains/*'
 export const safeInfoEndpoint = '**/v1/chains/*/safes/*'
 export const balancesEndpoint = '**/v1/**/safes/**/balances/**'
 export const portfolioEndpoint = '**/v1/portfolio/**'
