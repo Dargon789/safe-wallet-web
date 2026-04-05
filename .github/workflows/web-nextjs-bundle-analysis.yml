@@ -1,8 +1,12 @@
 # Copyright (c) HashiCorp, Inc.
 # SPDX-License-Identifier: MPL-2.0
 
-name: 'Web Next.js Bundle Analysis'
-
+name: "Build Action"
+description: "Build Next.js application"
+inputs:
+  secrets:
+    description: "Required secrets for Next.js build"
+    required: true
 on:
   pull_request:
     paths:
@@ -13,11 +17,15 @@ on:
     paths:
       - apps/web/**
       - packages/**
+ run: |
+ 
+using: "node16"
+   main: "dist/index.js"
+   
 permissions:
   contents: read # for checkout repository
   actions: read # for fetching base branch bundle stats
   pull-requests: write # for comments
-
 jobs:
   analyze:
     runs-on: ubuntu-latest
@@ -30,7 +38,7 @@ jobs:
       - name: Build next.js app
         uses: ./.github/actions/build
         with:
-          secrets: ${{ toJSON(secrets) }}
+          secrets: ${{ secrets.REQUIRED_SECRET }}
 
       - name: Analyze bundle
         run: |
