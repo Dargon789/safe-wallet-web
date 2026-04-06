@@ -1,7 +1,10 @@
 ---
 name: Bug report
 about: Create an issue to fix a bug
-type: 'bug'
+title: ''
+labels: ''
+assignees: ''
+
 ---
 
 <!--

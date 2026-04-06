@@ -5,7 +5,8 @@ import madProps from '@/utils/mad-props'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ErrorMessage from '../ErrorMessage'
 import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
-import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
+import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/shared/ConfirmationTitle'
+import { ErrorBoundary } from '@sentry/react'
 import ApprovalEditor from '../ApprovalEditor'
 import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
@@ -38,7 +39,8 @@ export const ReviewTransactionContent = ({
   txDetails?: TransactionDetails
   txPreview?: TransactionPreview
 }): ReactElement => {
-  const { isBatch, isCreation, isRejection, isSubmitLoading, isSubmitDisabled, onlyExecute } = useContext(TxFlowContext)
+  const { willExecute, isBatch, isCreation, isProposing, isRejection, isSubmitLoading, isSubmitDisabled, onlyExecute } =
+    useContext(TxFlowContext)
   const { needsRiskConfirmation, isRiskConfirmed } = safeShield
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
@@ -63,9 +65,9 @@ export const ReviewTransactionContent = ({
           withDecodedData={withDecodedData}
         >
           {!isRejection && (
-            <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
+            <ErrorBoundary fallback={<div>Error parsing data</div>}>
               {isApproval && <ApprovalEditor safeTransaction={safeTx} />}
-            </ObservabilityErrorBoundary>
+            </ErrorBoundary>
           )}
         </ConfirmationView>
 
@@ -73,6 +75,16 @@ export const ReviewTransactionContent = ({
 
         <Divider sx={{ mt: 2, mx: -3 }} />
 
+        <ConfirmationTitle
+          variant={
+            isProposing
+              ? ConfirmationTitleTypes.propose
+              : willExecute
+                ? ConfirmationTitleTypes.execute
+                : ConfirmationTitleTypes.sign
+          }
+          isCreation={isCreation}
+        />
         {safeTxError && (
           <ErrorMessage error={safeTxError}>
             This transaction will most likely fail. To save gas costs, avoid confirming the transaction.
@@ -83,7 +95,7 @@ export const ReviewTransactionContent = ({
         <NetworkWarning />
         <UnknownContractError txData={txDetails?.txData ?? txPreview?.txData} />
 
-        <TxCardActions sx={{ marginTop: '0 !important' }}>
+        <TxCardActions>
           {/* Continue button */}
           <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!isSubmitDisabled}>
             {(isOk) => {
