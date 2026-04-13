@@ -3,6 +3,15 @@ import { useContext, useState } from 'react'
 import type { ReactElement } from 'react'
 
 import css from './styles.module.css'
+import {
+  getIsFirstTimeCuration,
+  getIsManageMode,
+  getPopoverWidth,
+  getSelectedCountLabel,
+  getSafesToShow,
+  getUncuratedCount,
+  getUncuratedCountLabel,
+} from './utils'
 import AddIcon from '@/public/images/common/add.svg'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
 import { ModalDialogTitle } from '@/components/common/ModalDialog'
@@ -36,7 +45,7 @@ function PopoverHeaderAction({
   if (isManageMode) {
     return (
       <Typography variant="body2" color="text.secondary">
-        {selectedCount} {selectedCount === 1 ? 'safe' : 'safes'} selected
+        {getSelectedCountLabel(selectedCount)}
       </Typography>
     )
   }
@@ -81,7 +90,7 @@ function NormalModeActions({
             onClick={onManageClick}
             data-testid="more-nested-safes-indicator"
           >
-            +{uncuratedCount} more nested {uncuratedCount === 1 ? 'safe' : 'safes'} found
+            {getUncuratedCountLabel(uncuratedCount)}
           </Typography>
         </Track>
       )}
@@ -241,6 +250,7 @@ export function NestedSafesPopover({
   hasCompletedCuration,
   isLoading = false,
   hideCreationButton = false,
+  centered = false,
 }: {
   anchorEl: HTMLElement | null
   onClose: () => void
@@ -250,6 +260,7 @@ export function NestedSafesPopover({
   hasCompletedCuration: boolean
   isLoading?: boolean
   hideCreationButton?: boolean
+  centered?: boolean
 }): ReactElement {
   const { setTxFlow } = useContext(TxModalContext)
   const [userRequestedManage, setUserRequestedManage] = useState(false)
@@ -269,9 +280,9 @@ export function NestedSafesPopover({
     groupedSafes,
   } = useManageNestedSafes(allSafesWithStatus)
 
-  const isFirstTimeCuration = !hasCompletedCuration && rawNestedSafes.length > 0
+  const isFirstTimeCuration = getIsFirstTimeCuration(hasCompletedCuration, rawNestedSafes)
   const showIntroScreen = isFirstTimeCuration && showIntro
-  const isManageMode = userRequestedManage || (isFirstTimeCuration && !showIntro)
+  const isManageMode = getIsManageMode(userRequestedManage, isFirstTimeCuration, showIntro)
 
   const onAdd = () => {
     setTxFlow(<CreateNestedSafeFlow />)
@@ -291,21 +302,25 @@ export function NestedSafesPopover({
     onClose()
   }
 
-  const safesToShow = isManageMode ? allSafesWithStatus : visibleSafes
-  const uncuratedCount = rawNestedSafes.length - visibleSafes.length
+  const safesToShow = getSafesToShow(isManageMode, allSafesWithStatus, visibleSafes)
+  const uncuratedCount = getUncuratedCount(rawNestedSafes, visibleSafes)
   const canClose = !isManageMode
 
   return (
     <Popover
       open={!!anchorEl}
-      anchorEl={anchorEl}
+      anchorEl={centered ? undefined : anchorEl}
+      anchorReference={centered ? 'anchorPosition' : 'anchorEl'}
+      anchorPosition={centered ? { top: window.innerHeight / 2, left: window.innerWidth / 2 } : undefined}
       onClose={canClose ? onClose : undefined}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-      transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+      transformOrigin={
+        centered ? { vertical: 'center', horizontal: 'center' } : { vertical: 'top', horizontal: 'left' }
+      }
       slotProps={{
         paper: {
           sx: {
-            width: isManageMode ? 'min(750px, calc(100vw - 32px))' : 'min(420px, calc(100vw - 32px))',
+            width: getPopoverWidth(isManageMode),
             height: 'calc(100vh - 100px)',
             maxHeight: 'calc(100vh - 100px)',
             display: 'flex',

@@ -55,12 +55,58 @@ export enum FEATURES {
   HYPERNATIVE_QUEUE_SCAN = 'HYPERNATIVE_QUEUE_SCAN',
   EURCV_BOOST = 'EURCV_BOOST',
   MY_ACCOUNTS = 'MY_ACCOUNTS',
+  SEND_FLOW = 'SEND_FLOW',
+  BATCHING = 'BATCHING',
+  HIDE_NATIVE_TOKEN = 'HIDE_NATIVE_TOKEN',
+  TEMPO_GAS_TOKEN = 'TEMPO_GAS_TOKEN',
+  SUPPORT_CHAT = 'SUPPORT_CHAT',
+  GTF = 'GTF',
+  SAFE_STAKING = 'SAFE_STAKING',
 }
 
 const MIN_SAFE_VERSION = '1.3.0'
 
 export const hasFeature = (chain: Pick<Chain, 'features'>, feature: FEATURES): boolean => {
   return (chain.features as string[]).includes(feature)
+}
+
+export type NativeTokenDisplay = {
+  showNativeInBalances: boolean
+  showGasFeeEstimation: boolean
+  showWalletBalance: boolean
+  showInsufficientFundsWarning: boolean
+  showFeeInConfirmationText: boolean
+  showUndeployedNativeValue: boolean
+  showStablecoinFeeInfo: boolean
+}
+
+export const NATIVE_TOKEN_DISPLAY_DEFAULT: NativeTokenDisplay = {
+  showNativeInBalances: true,
+  showGasFeeEstimation: true,
+  showWalletBalance: true,
+  showInsufficientFundsWarning: true,
+  showFeeInConfirmationText: true,
+  showUndeployedNativeValue: true,
+  showStablecoinFeeInfo: false,
+}
+
+const HIDE_NATIVE: NativeTokenDisplay = {
+  showNativeInBalances: false,
+  showGasFeeEstimation: false,
+  showWalletBalance: false,
+  showInsufficientFundsWarning: false,
+  showFeeInConfirmationText: false,
+  showUndeployedNativeValue: false,
+  showStablecoinFeeInfo: true,
+}
+
+/**
+ * Derives granular display capabilities from the HIDE_NATIVE_TOKEN chain feature.
+ * Use with components that already have a chain object.
+ * For React hooks, use useNativeTokenDisplay from apps/web/src/hooks/.
+ */
+export const getNativeTokenDisplay = (chain: Pick<Chain, 'features'>): NativeTokenDisplay => {
+  return hasFeature(chain, FEATURES.HIDE_NATIVE_TOKEN) ? HIDE_NATIVE : NATIVE_TOKEN_DISPLAY_DEFAULT
 }
 
 export const getBlockExplorerLink = (
@@ -71,23 +117,23 @@ export const getBlockExplorerLink = (
     return getExplorerLink(address, chain.blockExplorerUriTemplate)
   }
 }
-/** This version is used if a network does not have the LATEST_SAFE_VERSION deployed yet */
-const FALLBACK_SAFE_VERSION = '1.3.0' as const
 export const getLatestSafeVersion = (
   chain: Pick<Chain, 'recommendedMasterCopyVersion' | 'chainId'> | undefined,
 ): SafeVersion => {
-  const latestSafeVersion = chain?.recommendedMasterCopyVersion || LATEST_SAFE_VERSION
+  const recommendedVersion = chain?.recommendedMasterCopyVersion || LATEST_SAFE_VERSION
 
-  // Without version filter it will always return the LATEST_SAFE_VERSION constant to avoid automatically updating to the newest version if the deployments change
-  const latestDeploymentVersion = (getSafeSingletonDeployment({ network: chain?.chainId, released: true })?.version ??
-    FALLBACK_SAFE_VERSION) as SafeVersion
+  // For chains registered in safe-deployments, cap at the latest deployed version
+  // to avoid using a version that isn't actually deployed on-chain yet.
+  const deployedVersion = getSafeSingletonDeployment({ network: chain?.chainId, released: true })?.version
 
-  // The version needs to be smaller or equal to the
-  if (semverSatisfies(latestDeploymentVersion, `<=${latestSafeVersion}`)) {
-    return latestDeploymentVersion
-  } else {
-    return latestSafeVersion as SafeVersion
+  if (deployedVersion) {
+    return (
+      semverSatisfies(deployedVersion, `<=${recommendedVersion}`) ? deployedVersion : recommendedVersion
+    ) as SafeVersion
   }
+
+  // For chains not in safe-deployments, trust the CGW's recommended version directly
+  return recommendedVersion as SafeVersion
 }
 
 export const isNonCriticalUpdate = (version?: string | null) => {

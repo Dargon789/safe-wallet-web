@@ -35,7 +35,7 @@ jobs:
           token: ${{ secrets.RELEASE_BOT_TOKEN }}
 
       - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v6
+        uses: crazy-max/ghaction-import-gpg@v7
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
@@ -47,10 +47,13 @@ jobs:
 
       - name: Determine base branch
         id: base
+        env:
+          INPUT_BASE_BRANCH: ${{ inputs.base_branch }}
+          INPUT_RELEASE_TYPE: ${{ inputs.release_type }}
         run: |
-          if [ -n "${{ inputs.base_branch }}" ]; then
-            BASE="${{ inputs.base_branch }}"
-          elif [ "${{ inputs.release_type }}" = "hotfix" ]; then
+          if [ -n "$INPUT_BASE_BRANCH" ]; then
+            BASE="$INPUT_BASE_BRANCH"
+          elif [ "$INPUT_RELEASE_TYPE" = "hotfix" ]; then
             BASE="main"
           else
             BASE="dev"
@@ -60,15 +63,18 @@ jobs:
 
       - name: Determine version
         id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_RELEASE_TYPE: ${{ inputs.release_type }}
         run: |
-          if [ -n "${{ inputs.version }}" ]; then
+          if [ -n "$INPUT_VERSION" ]; then
             # Validate provided version format
-            if ! [[ "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            if ! [[ "$INPUT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
               echo "❌ Invalid version format. Expected: X.Y.Z where X, Y, Z are numbers (e.g., 1.74.0)"
-              echo "Received: '${{ inputs.version }}'"
+              echo "Received: '$INPUT_VERSION'"
               exit 1
             fi
-            VERSION="${{ inputs.version }}"
+            VERSION="$INPUT_VERSION"
             echo "✅ Using provided version: $VERSION"
           else
             # Auto-increment version based on release type
@@ -92,7 +98,7 @@ jobs:
               exit 1
             fi
 
-            if [ "${{ inputs.release_type }}" = "hotfix" ]; then
+            if [ "$INPUT_RELEASE_TYPE" = "hotfix" ]; then
               # Hotfix: increment patch version (last number)
               PATCH=$((PATCH + 1))
               echo "🔧 Hotfix: incrementing patch version"
@@ -111,8 +117,8 @@ jobs:
 
       - name: Check if version already exists
         run: |
-          if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
-            echo "❌ Version v${{ steps.version.outputs.version }} already exists!"
+          if git rev-parse "web-v${{ steps.version.outputs.version }}" >/dev/null 2>&1 || git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "❌ Version ${{ steps.version.outputs.version }} already exists (checked both web-v and legacy v prefix)!"
             exit 1
           fi
           echo "✅ Version is new"
@@ -181,6 +187,7 @@ jobs:
         id: create_pr
         env:
           GH_TOKEN: ${{ secrets.RELEASE_BOT_TOKEN }}
+          INPUT_RELEASE_TYPE: ${{ inputs.release_type }}
         run: |
           cd apps/web
 
@@ -189,7 +196,7 @@ jobs:
 
           # Create PR body
           PR_BODY=$(cat <<EOF
-          ## 🚀 Release v${{ steps.version.outputs.version }}
+          ## 🚀 Release web-v${{ steps.version.outputs.version }}
 
           $CHANGELOG
 
@@ -222,7 +229,7 @@ jobs:
 
           ---
 
-          **Release Type:** ${{ inputs.release_type }}
+          **Release Type:** ${INPUT_RELEASE_TYPE}
           **Base Branch:** ${{ steps.base.outputs.branch }}
 
           🤖 *This PR was created automatically by the [Start Web Release workflow](https://github.com/${{ github.repository }}/actions/workflows/web-release-start.yml)*
@@ -233,7 +240,7 @@ jobs:
           PR_URL=$(gh pr create \
             --base main \
             --head release \
-            --title "Release v${{ steps.version.outputs.version }}" \
+            --title "Release web-v${{ steps.version.outputs.version }}" \
             --body "$PR_BODY" \
             --label "release" \
             | tail -n 1)
@@ -244,9 +251,11 @@ jobs:
       - name: Notify on Slack
         if: vars.SLACK_WEBHOOK_URL
         continue-on-error: true
+        env:
+          INPUT_RELEASE_TYPE: ${{ inputs.release_type }}
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          RELEASE_TYPE="${{ inputs.release_type }}"
+          RELEASE_TYPE="$INPUT_RELEASE_TYPE"
           BASE_BRANCH="${{ steps.base.outputs.branch }}"
           PR_URL="${{ steps.create_pr.outputs.pr_url }}"
 
@@ -256,13 +265,13 @@ jobs:
             --arg base "$BASE_BRANCH" \
             --arg pr_url "$PR_URL" \
             '{
-              text: ("🚀 *Release v" + $version + " Started*"),
+              text: ("🚀 *Release web-v" + $version + " Started*"),
               blocks: [
                 {
                   type: "section",
                   text: {
                     type: "mrkdwn",
-                    text: ("*Release v" + $version + " has been initiated* ✅\n\n*Type:* " + $release_type + "\n*Base:* " + $base + "\n*PR:* " + $pr_url + "\n\n_QA team: Please review and test_ 🧪")
+                    text: ("*Release web-v" + $version + " has been initiated* ✅\n\n*Type:* " + $release_type + "\n*Base:* " + $base + "\n*PR:* " + $pr_url + "\n\n_QA team: Please review and test_ 🧪")
                   }
                 }
               ]
@@ -271,11 +280,13 @@ jobs:
               -d @-
 
       - name: Summary
+        env:
+          INPUT_RELEASE_TYPE: ${{ inputs.release_type }}
         run: |
           echo "### 🎉 Release Started Successfully!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Type:** ${{ inputs.release_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** web-v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Type:** $INPUT_RELEASE_TYPE" >> $GITHUB_STEP_SUMMARY
           echo "**Base Branch:** ${{ steps.base.outputs.branch }}" >> $GITHUB_STEP_SUMMARY
           echo "**PR:** ${{ steps.create_pr.outputs.pr_url }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

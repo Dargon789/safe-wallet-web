@@ -1,11 +1,14 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
+import { visualSpacesApiMockSpace } from '../../fixtures/spaces/visualSpacesApiMock.js'
 import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
 const SPACE_ID = '1'
 
 function setupSpacesAuth() {
-  main.enableChainFeature(constants.chainFeatures.spaces)
+  // Note: SPACES feature flag is already present in the chains fixture (all.json).
+  // Do NOT call enableChainFeature here — it uses req.continue() which bypasses
+  // the fixture mock and hits the real staging server, causing flaky failures.
 
   main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__auth, {
     sessionExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
@@ -15,11 +18,9 @@ function setupSpacesAuth() {
   cy.fixture('spaces/user.json').then((mockUser) => {
     cy.intercept('GET', constants.usersEndpoint, mockUser).as('getUser')
   })
-  cy.fixture('spaces/space.json').then((mockSpace) => {
-    cy.intercept('GET', constants.spacesSafesEndpoint, { safes: {} }).as('getSpaceSafes')
-    cy.intercept('GET', constants.spacesGetOneEndpoint, mockSpace).as('getSpace')
-    cy.intercept('GET', `${constants.stagingCGWUrlv1}/spaces`, [mockSpace]).as('getSpaces')
-  })
+  cy.intercept('GET', constants.spacesSafesEndpoint, { safes: {} }).as('getSpaceSafes')
+  cy.intercept('GET', constants.spacesGetOneEndpoint, visualSpacesApiMockSpace).as('getSpace')
+  cy.intercept('GET', `${constants.stagingCGWUrlv1}/spaces`, [visualSpacesApiMockSpace]).as('getSpaces')
   cy.fixture('spaces/members.json').then((mockMembers) => {
     cy.intercept('GET', constants.spacesMembersEndpoint, mockMembers).as('getSpaceMembers')
   })
@@ -32,6 +33,11 @@ describe('[VISUAL] Spaces page screenshots', { defaultCommandTimeout: 60000, ...
   beforeEach(() => {
     mockVisualTestApis()
     setupSpacesAuth()
+  })
+
+  it('[VISUAL] Screenshot spaces welcome page', () => {
+    cy.visit(constants.spacesUrl)
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot spaces dashboard page', () => {
