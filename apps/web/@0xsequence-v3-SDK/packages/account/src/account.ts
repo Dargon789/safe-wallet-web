@@ -1048,7 +1048,7 @@ export class Account {
 
     const predecorated = skipPreDecorate ? txs : await this.predecorateTransactions(txs, status, chainId)
     const hasTxs = commons.transaction.fromTransactionish(this.address, predecorated).length > 0
-    const signed = hasTxs ? await this.signTransactions(predecorated, chainId, undefined, options) : undefined
+    const signed = hasTxs ? await this.signTransactions(predecorated, chainId, status, options) : undefined
 
     const childBundles = await this.orchestrator.predecorateSignedTransactions({ chainId })
 
@@ -1058,7 +1058,7 @@ export class Account {
     }
     bundles.push(...childBundles.filter(b => b.transactions.length > 0))
 
-    return this.sendSignedTransactions(bundles, chainId, quote, undefined, callback, options?.projectAccessKey)
+    return this.sendSignedTransactions(bundles, chainId, quote, status, callback, options?.projectAccessKey)
   }
 
   async signTypedData(
