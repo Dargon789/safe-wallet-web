@@ -54,7 +54,7 @@ export function useWalletConnect() {
             },
           })
         } else {
-          disconnect()
+          await disconnect()
           router.push({
             pathname: '/import-signers/connect-signer-error',
             params: { address: checksumAddress, walletIcon: walletInfo.icon ?? '' },
