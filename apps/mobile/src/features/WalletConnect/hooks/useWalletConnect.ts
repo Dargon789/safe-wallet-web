@@ -66,7 +66,7 @@ export function useWalletConnect() {
         }
 
         Logger.error('Error validating signer ownership:', error)
-        disconnect()
+        await disconnect()
         router.push({
           pathname: '/import-signers/connect-signer-error',
           params: { address: checksumAddress, walletIcon: walletInfo.icon ?? '' },
