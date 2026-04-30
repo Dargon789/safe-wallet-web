@@ -15,6 +15,10 @@ export interface SettingsState {
   themePreference: ThemePreference
   currency: string
   tokenList: TOKEN_LISTS
+  hideDust: boolean
+  preferFiatInput: boolean
+  dataCollectionConsented: boolean
+  screenProtectionDisabled: boolean
   env: EnvState
 }
 
@@ -23,6 +27,10 @@ const initialState: SettingsState = {
   themePreference: 'auto' as ThemePreference,
   currency: 'usd',
   tokenList: TOKEN_LISTS.TRUSTED,
+  hideDust: true,
+  preferFiatInput: true,
+  dataCollectionConsented: false,
+  screenProtectionDisabled: false,
   env: {
     rpc: {},
     tenderly: {
@@ -47,6 +55,18 @@ const settingsSlice = createSlice({
     },
     setTokenList: (state, { payload }: PayloadAction<SettingsState['tokenList']>) => {
       state.tokenList = payload
+    },
+    setHideDust: (state, { payload }: PayloadAction<boolean>) => {
+      state.hideDust = payload
+    },
+    setPreferFiatInput: (state, { payload }: PayloadAction<boolean>) => {
+      state.preferFiatInput = payload
+    },
+    setDataCollectionConsented: (state, { payload }: PayloadAction<boolean>) => {
+      state.dataCollectionConsented = payload
+    },
+    setScreenProtectionDisabled: (state, { payload }: PayloadAction<boolean>) => {
+      state.screenProtectionDisabled = payload
     },
     setRpc: (state, { payload }: PayloadAction<{ chainId: string; rpc: string }>) => {
       const { chainId, rpc } = payload
@@ -77,11 +97,33 @@ export const selectTokenList = createSelector(
   (settings) => settings.tokenList || initialState.tokenList,
 )
 
+export const selectHideDust = createSelector(selectSettingsState, (settings) => settings.hideDust ?? true)
+
+export const selectPreferFiatInput = createSelector(selectSettingsState, (settings) => settings.preferFiatInput ?? true)
+export const selectDataCollectionConsented = createSelector(
+  selectSettingsState,
+  (settings) => settings.dataCollectionConsented ?? false,
+)
+
 export const selectRpc = createSelector(selectSettingsState, (settings) => {
   return settings?.env?.rpc
 })
 
 export const selectTenderly = createSelector(selectSettingsState, (settings) => settings?.env?.tenderly)
 
-export const { updateSettings, resetSettings, setCurrency, setTokenList } = settingsSlice.actions
+export const selectScreenProtectionDisabled = createSelector(
+  selectSettingsState,
+  (settings) => settings.screenProtectionDisabled ?? false,
+)
+
+export const {
+  updateSettings,
+  resetSettings,
+  setCurrency,
+  setTokenList,
+  setHideDust,
+  setPreferFiatInput,
+  setDataCollectionConsented,
+  setScreenProtectionDisabled,
+} = settingsSlice.actions
 export default settingsSlice.reducer

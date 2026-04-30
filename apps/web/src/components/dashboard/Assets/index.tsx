@@ -2,7 +2,8 @@ import { useMemo } from 'react'
 import { Box, Skeleton, Typography, Paper, Stack, Divider } from '@mui/material'
 import useBalances from '@/hooks/useBalances'
 import TokenAmount from '@/components/common/TokenAmount'
-import SwapButton from '@/features/swap/components/SwapButton'
+import { SwapFeature, useIsSwapFeatureEnabled } from '@/features/swap'
+import { useLoadFeature } from '@/features/__core__'
 import { AppRoutes } from '@/config/routes'
 import { WidgetCard } from '../styled'
 import css from './styles.module.css'
@@ -10,19 +11,16 @@ import { useRouter } from 'next/router'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { useVisibleAssets } from '@/components/balances/AssetsTable/useHideAssets'
 import SendButton from '@/components/balances/AssetsTable/SendButton'
-import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 import { FiatBalance } from '@/components/balances/AssetsTable/FiatBalance'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { FiatChange } from '@/components/balances/AssetsTable/FiatChange'
-import { isEligibleEarnToken } from '@/features/earn/utils'
-import EarnButton from '@/features/earn/components/EarnButton'
+import { isEligibleEarnToken, useIsEarnPromoEnabled, EarnButton } from '@/features/earn'
 import { EARN_LABELS } from '@/services/analytics/events/earn'
-import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEnabled'
-import useIsStakingPromoEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
+import { useIsStakingBannerEnabled as useIsStakingPromoEnabled } from '@/features/stake'
 import useChainId from '@/hooks/useChainId'
 import TokenIcon from '@/components/common/TokenIcon'
 import { TokenType } from '@safe-global/store/gateway/types'
-import StakeButton from '@/features/stake/components/StakeButton'
+import { StakeFeature } from '@/features/stake'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import NoAssetsIcon from '@/public/images/common/no-assets.svg'
 
@@ -30,7 +28,9 @@ const MAX_ASSETS = 4
 
 const NoAssets = () => (
   <Paper elevation={0} sx={{ p: 5, textAlign: 'center' }}>
-    <NoAssetsIcon />
+    <Box display="flex" justifyContent="center">
+      <NoAssetsIcon />
+    </Box>
 
     <Typography mb={0.5} mt={3}>
       No assets yet
@@ -46,6 +46,13 @@ const AssetsSkeleton = () => (
   </WidgetCard>
 )
 
+const ASSET_BUTTON_SIZE = 28
+const ASSET_BUTTON_GAP = 8
+const VALUE_CONTAINER_GAP = 16
+
+const getAssetButtonsWidth = (buttonCount: number) =>
+  buttonCount * ASSET_BUTTON_SIZE + (buttonCount - 1) * ASSET_BUTTON_GAP
+
 const AssetRow = ({
   item,
   chainId,
@@ -59,6 +66,16 @@ const AssetRow = ({
   showEarn?: boolean
   showStake?: boolean
 }) => {
+  const stake = useLoadFeature(StakeFeature)
+  const { SwapButton } = useLoadFeature(SwapFeature)
+
+  const assetButtonCount =
+    1 + // SendButton always
+    (showSwap ? 1 : 0) +
+    (showEarn && isEligibleEarnToken(chainId, item.tokenInfo.address) ? 1 : 0) +
+    (showStake && item.tokenInfo.type === TokenType.NATIVE_TOKEN ? 1 : 0)
+  const assetButtonsOffset = VALUE_CONTAINER_GAP + getAssetButtonsWidth(assetButtonCount)
+
   return (
     <Box className={css.container} key={item.tokenInfo.address}>
       <Stack direction="row" gap={1.5} alignItems="center">
@@ -71,7 +88,7 @@ const AssetRow = ({
         </Box>
       </Stack>
 
-      <Box className={css.valueContainer}>
+      <Box className={css.valueContainer} style={{ ['--asset-buttons-offset' as string]: `${assetButtonsOffset}px` }}>
         <Box className={css.valueContent}>
           <FiatBalance balanceItem={item} />
           <FiatChange balanceItem={item} inline />
@@ -89,7 +106,7 @@ const AssetRow = ({
           )}
 
           {showStake && item.tokenInfo.type === TokenType.NATIVE_TOKEN && (
-            <StakeButton tokenInfo={item.tokenInfo} trackingLabel={STAKE_LABELS.asset} onlyIcon />
+            <stake.StakeButton tokenInfo={item.tokenInfo} trackingLabel={STAKE_LABELS.asset} onlyIcon />
           )}
         </Box>
       </Box>

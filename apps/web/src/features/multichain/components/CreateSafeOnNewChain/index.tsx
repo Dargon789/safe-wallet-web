@@ -9,8 +9,8 @@ import { showNotification } from '@/store/notificationsSlice'
 import { Box, Button, CircularProgress, DialogActions, DialogContent, Stack, Typography } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useSafeCreationData } from '../../hooks/useSafeCreationData'
-import { replayCounterfactualSafeDeployment } from '@/features/counterfactual/utils'
-
+import { CounterfactualFeature } from '@/features/counterfactual'
+import { useLoadFeature } from '@/features/__core__'
 import useChains from '@/hooks/useChains'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
@@ -21,7 +21,7 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { useRouter } from 'next/router'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
 import { MULTICHAIN_HELP_ARTICLE } from '@/config/constants'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
@@ -44,14 +44,21 @@ const ReplaySafeDialog = ({
       chainId: chain?.chainId || '',
     },
   })
-  const { handleSubmit, formState } = formMethods
+  const { handleSubmit, formState, reset } = formMethods
   const router = useRouter()
   const addressBook = useAddressBook()
 
   const customRpc = useAppSelector(selectRpc)
   const dispatch = useAppDispatch()
+  const { replayCounterfactualSafeDeployment } = useLoadFeature(CounterfactualFeature)
   const [creationError, setCreationError] = useState<Error>()
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (chain?.chainId) {
+      reset({ chainId: chain.chainId })
+    }
+  }, [chain?.chainId, reset])
 
   // Load some data
   const [safeCreationData, safeCreationDataError, safeCreationDataLoading] = safeCreationResult
@@ -89,7 +96,7 @@ const ReplaySafeDialog = ({
       trackEvent({ ...OVERVIEW_EVENTS.SUBMIT_ADD_NEW_NETWORK, label: selectedChain.chainId })
 
       // 2. Replay Safe creation and add it to the counterfactual Safes
-      replayCounterfactualSafeDeployment(
+      replayCounterfactualSafeDeployment?.(
         selectedChain.chainId,
         safeAddress,
         safeCreationData,
@@ -251,12 +258,14 @@ const ReplaySafeDialog = ({
 export const CreateSafeOnNewChain = ({
   safeAddress,
   deployedChainIds,
+  defaultChainId,
   ...props
 }: Omit<
   ReplaySafeDialogProps,
   'safeCreationResult' | 'replayableChains' | 'chain' | 'isUnsupportedSafeCreationVersion'
 > & {
   deployedChainIds: string[]
+  defaultChainId?: string
 }) => {
   const { configs } = useChains()
   const deployedChains = useMemo(
@@ -275,12 +284,18 @@ export const CreateSafeOnNewChain = ({
     [allCompatibleChains, deployedChainIds],
   )
 
+  const preselectedChain = useMemo(
+    () => (defaultChainId ? replayableChains?.find((c) => c.chainId === defaultChainId) : undefined),
+    [defaultChainId, replayableChains],
+  )
+
   return (
     <ReplaySafeDialog
       safeCreationResult={safeCreationResult}
       replayableChains={replayableChains}
       safeAddress={safeAddress}
       isUnsupportedSafeCreationVersion={isUnsupportedSafeCreationVersion}
+      chain={preselectedChain}
       {...props}
     />
   )

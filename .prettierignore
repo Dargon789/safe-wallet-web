@@ -9,6 +9,9 @@
 .env
 .env.*
 
+# Turborepo cache
+**/.turbo/
+
 # Mobile
 apps/mobile/android
 apps/mobile/ios
@@ -20,14 +23,22 @@ apps/mobile/resources/
 
 # Web
 apps/web/.next
+apps/web/cypress/downloads
 apps/web/.swc
+apps/web/out
 apps/web/public
 apps/web/src/markdown/privacy/privacy.md
 apps/web/src/markdown/terms/terms.md
+apps/web/src/config/__generated__/
 
 # Utils package
 packages/utils/src/types/contracts/**/*
 
+# Store package (auto-generated from CGW API)
+packages/store/scripts/api-schema/schema.json
+
 # Expo plugins
 expo-plugins/notification-service-ios/dist
 
+# Spec templates (contain placeholders that aren't valid syntax)
+specs/**/contracts/*.template.*

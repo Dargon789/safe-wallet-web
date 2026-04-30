@@ -29,6 +29,9 @@ import type { ReactElement } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import type { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 
+import * as useIsPinnedSafeHook from '@/hooks/useIsPinnedSafe'
+import * as useTrustSafeHook from '@/features/myAccounts/hooks/useTrustSafe'
+
 const renderWithSafeShield = (ui: ReactElement) => {
   return render(<SafeShieldProvider>{ui}</SafeShieldProvider>)
 }
@@ -113,6 +116,10 @@ describe('SignMessage', () => {
     jest.spyOn(useIsWrongChainHook, 'default').mockImplementation(() => false)
 
     jest.spyOn(sdk, 'useSafeSDK').mockReturnValue({} as unknown as Safe)
+
+    // Mock hooks for Safe Shield untrusted Safe check
+    jest.spyOn(useIsPinnedSafeHook, 'default').mockImplementation(() => true)
+    jest.spyOn(useTrustSafeHook, 'useTrustSafe').mockImplementation(() => ({ trustSafe: jest.fn() }))
   })
 
   describe('EIP-191 messages', () => {
@@ -718,6 +725,8 @@ describe('SignMessage', () => {
         setSafeTx: jest.fn(),
         safeMessage: undefined,
         setSafeMessage: mockSetSafeMessage,
+        safeMessageHash: undefined,
+        setSafeMessageHash: jest.fn(),
         safeTxError: undefined,
         setSafeTxError: jest.fn(),
         nonce: undefined,
@@ -759,7 +768,7 @@ describe('SignMessage', () => {
       expect(capturedSafeMessage).toEqual(EXAMPLE_EIP712_MESSAGE)
     })
 
-    it('does not set plain text messages in SafeTxContext (not EIP-712)', async () => {
+    it('clears SafeTxContext for plain text messages (not EIP-712)', async () => {
       const { getByText } = render(
         <SafeTxContext.Provider value={mockSafeTxContext}>
           <SafeShieldProvider>
@@ -772,7 +781,7 @@ describe('SignMessage', () => {
         expect(getByText('Hello world!')).toBeInTheDocument()
       })
 
-      expect(mockSetSafeMessage).not.toHaveBeenCalled()
+      expect(mockSetSafeMessage).toHaveBeenCalledWith(undefined)
     })
 
     it('disables Sign button when risk confirmation is needed but not confirmed', async () => {
@@ -786,6 +795,8 @@ describe('SignMessage', () => {
         recipient: undefined,
         contract: undefined,
         threat: undefined,
+        safeAnalysis: null,
+        addToTrustedList: jest.fn(),
       })
 
       const { getByText } = renderWithSafeShield(
@@ -808,6 +819,8 @@ describe('SignMessage', () => {
         recipient: undefined,
         contract: undefined,
         threat: undefined,
+        safeAnalysis: null,
+        addToTrustedList: jest.fn(),
       })
 
       const { getByText } = renderWithSafeShield(
@@ -830,6 +843,8 @@ describe('SignMessage', () => {
         recipient: undefined,
         contract: undefined,
         threat: undefined,
+        safeAnalysis: null,
+        addToTrustedList: jest.fn(),
       })
 
       const { getByTestId, getByText } = renderWithSafeShield(

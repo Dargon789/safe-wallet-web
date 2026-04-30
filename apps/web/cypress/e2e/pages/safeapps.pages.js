@@ -5,9 +5,9 @@ const searchAppInput = 'input[id="search-by-name"]'
 const appUrlInput = 'input[name="appUrl"]'
 const closePreviewWindowBtn = 'button[aria-label*="Close"][aria-label*="preview"]'
 export const contractMethodIndex = '[name="contractMethodIndex"]'
-export const saveToLibraryBtn = 'button[title="Save to Library"]'
-export const downloadBatchBtn = 'button[title="Download batch"]'
-export const deleteBatchBtn = 'button[title="Delete Batch"]'
+export const saveToLibraryBtn = 'button[aria-label="Save to Library"]'
+export const downloadBatchBtn = 'button[aria-label="Download batch"]'
+export const deleteBatchBtn = 'button[aria-label="Delete Batch"]'
 const appModal = '[data-testid="app-info-modal"]'
 export const safeAppsList = '[data-testid="apps-list"]'
 const openSafeAppBtn = '[data-testid="open-safe-app-btn"]'
@@ -365,8 +365,4 @@ export function uncheckAllPermissions(element) {
 
 export function checkAllPermissions(element) {
   cy.wrap(element).findByText(allowAllPermissions).click()
-}
-
-export function verifyPinnedApp(name) {
-  cy.get(`[aria-label="${name}"]`)
 }

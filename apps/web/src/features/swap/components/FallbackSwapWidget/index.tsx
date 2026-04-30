@@ -8,9 +8,9 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import type { SafeAppDataWithPermissions } from '@/components/safe-apps/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
-export const SWAP_WIDGET_URL = 'https://iframe.jumper.exchange/swap'
+import { SWAP_WIDGET_URL } from '../../constants'
 
-export function FallbackSwapWidget({ fromToken }: { fromToken?: string }): ReactElement | null {
+function FallbackSwapWidget({ fromToken }: { fromToken?: string }): ReactElement | null {
   const isDarkMode = useDarkMode()
   const chain = useCurrentChain()
 

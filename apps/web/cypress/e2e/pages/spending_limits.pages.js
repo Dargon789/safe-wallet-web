@@ -4,7 +4,6 @@ import * as addressBook from '../pages/address_book.page'
 import { invalidAddressFormatErrorMsg } from '../pages/load_safe.pages'
 import * as ls from '../../support/localstorage_data.js'
 import { tokenSelector } from './create_tx.pages'
-import 'cypress-file-upload'
 
 export const spendingLimitsSection = '[data-testid="spending-limit-section"]'
 export const newSpendingLimitBtn = '[data-testid="new-spending-limit"]'
@@ -35,6 +34,7 @@ const slimitReplacementWarning = '[data-testid="limit-replacement-warning"]'
 const addressItem = '[data-testid="address-item"]'
 const allActionsSection = '[data-testid="all-actions"]'
 const actionItem = '[data-testid="action-item"]'
+const actionAccordion = '[data-testid="action-accordion"]'
 const decodedTxSummary = '[data-testid="decoded-tx-summary"]'
 
 const actionSectionItem = () => {
@@ -48,10 +48,11 @@ export const timePeriodOptions = {
   oneHr: '1 hour',
 }
 
-const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input').should('be.enabled')
+const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input').first()
 const automationOwner = ls.addressBookData.sepoliaAddress2[11155111]['0xC16Db0251654C0a72E91B190d81eAD367d2C6fED']
 
 export const actionNames = {
+  enableModule: 'enableModule',
   resetAllowance: 'resetAllowance',
   setAllowance: 'setAllowance',
 }
@@ -175,9 +176,14 @@ export function verifyDefaultTimeIsSet() {
   cy.get(timePeriodSection).scrollIntoView().find('div').contains(timePeriodOptions.oneTime).should('be.visible')
 }
 
+export function visitSpendingLimitsPage(safe) {
+  cy.visit(constants.setupUrl + safe)
+  cy.get(spendingLimitsSection).should('be.visible')
+}
+
 export function clickOnNewSpendingLimitBtn() {
   cy.get(newSpendingLimitBtn).click()
-  cy.get(modalTitle).should('have.text', newTransactionStr)
+  cy.contains(modalTitle, newTransactionStr).should('be.visible')
 }
 
 export function enterSpendingLimitAmount(amount) {
@@ -185,7 +191,7 @@ export function enterSpendingLimitAmount(amount) {
 }
 
 export function enterBeneficiaryAddress(address) {
-  getBeneficiaryInput().clear({ force: true }).type(address, { force: true })
+  getBeneficiaryInput().clear().type(address)
 }
 
 export function checkBeneficiaryInputValue(value) {
@@ -235,4 +241,9 @@ export function verifyDecodedTxSummary(names) {
       cy.contains(item)
     })
   })
+}
+
+export function verifyEnableModuleAddress(moduleAddress) {
+  cy.get(actionItem).first().click()
+  cy.get(actionAccordion).first().contains(moduleAddress).should('be.visible')
 }

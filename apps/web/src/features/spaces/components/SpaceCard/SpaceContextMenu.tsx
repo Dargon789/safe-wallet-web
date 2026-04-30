@@ -10,8 +10,8 @@ import DeleteIcon from '@/public/images/common/delete.svg'
 import EditIcon from '@/public/images/common/edit.svg'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import css from './styles.module.css'
-import DeleteSpaceDialog from '@/features/spaces/components/SpaceSettings/DeleteSpaceDialog'
-import UpdateSpaceDialog from '@/features/spaces/components/SpaceSettings/UpdateSpaceDialog'
+import DeleteSpaceDialog from '../SpaceSettings/DeleteSpaceDialog'
+import UpdateSpaceDialog from '../SpaceSettings/UpdateSpaceDialog'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 
@@ -48,7 +48,7 @@ const SpaceContextMenu = ({ space }: { space: GetSpaceResponse }) => {
 
   return (
     <>
-      <IconButton className={css.spaceActions} size="small" onClick={handleOpenContextMenu}>
+      <IconButton className={css.spaceActions} size="small" onClick={handleOpenContextMenu} data-testid="MoreVertIcon">
         <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
       </IconButton>
       <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>

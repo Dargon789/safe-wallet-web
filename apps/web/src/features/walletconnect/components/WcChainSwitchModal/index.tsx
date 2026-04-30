@@ -2,8 +2,9 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { Avatar, Box, Button, Stack, Typography } from '@mui/material'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AppInfo } from '@/services/safe-wallet-provider'
-import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import SingleAccountItem from '@/features/myAccounts/components/AccountItems/SingleAccountItem'
+import { useLoadFeature } from '@/features/__core__'
+import { type SafeItem } from '@/hooks/safes'
+import { MyAccountsFeature, useSafeItemData } from '@/features/myAccounts'
 
 type WcChainSwitchModalProps = {
   appInfo: AppInfo
@@ -11,6 +12,24 @@ type WcChainSwitchModalProps = {
   safes: SafeItem[]
   onSelectSafe: (safe: SafeItem) => Promise<void>
   onCancel: () => void
+}
+
+function WcSafeItem({ safeItem, onSelect }: { safeItem: SafeItem; onSelect: () => void }) {
+  const { AccountItemButton, AccountItemIcon, AccountItemInfo, AccountItemBalance } = useLoadFeature(MyAccountsFeature)
+  const { name, safeOverview, threshold, owners, undeployedSafe, elementRef } = useSafeItemData(safeItem)
+
+  return (
+    <AccountItemButton onClick={onSelect} elementRef={elementRef}>
+      <AccountItemIcon
+        address={safeItem.address}
+        chainId={safeItem.chainId}
+        threshold={threshold}
+        owners={owners.length}
+      />
+      <AccountItemInfo address={safeItem.address} chainId={safeItem.chainId} name={name} />
+      <AccountItemBalance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
+    </AccountItemButton>
+  )
 }
 
 const WcChainSwitchModal = ({ appInfo, chain, safes, onSelectSafe, onCancel }: WcChainSwitchModalProps) => {
@@ -41,12 +60,7 @@ const WcChainSwitchModal = ({ appInfo, chain, safes, onSelectSafe, onCancel }: W
       {hasSafes ? (
         <Box sx={{ maxHeight: 440, overflowY: 'auto' }}>
           {safes.map((safe) => (
-            <SingleAccountItem
-              key={`${safe.chainId}-${safe.address}`}
-              safeItem={safe}
-              onSelectSafe={() => onSelectSafe(safe)}
-              showActions={false}
-            />
+            <WcSafeItem key={`${safe.chainId}-${safe.address}`} safeItem={safe} onSelect={() => onSelectSafe(safe)} />
           ))}
         </Box>
       ) : (

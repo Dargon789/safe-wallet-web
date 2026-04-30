@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { type WalletState, type OnboardAPI } from '@web3-onboard/core'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { Eip1193Provider } from 'ethers'
-import { getAddress } from 'ethers'
+import { getAddress } from 'viem'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { logError, Errors } from '@/services/exceptions'
@@ -27,6 +27,10 @@ export type ConnectedWallet = {
 }
 
 const { getStore, setStore, useStore } = new ExternalStore<OnboardAPI>()
+
+const { setStore: setWalletReady, useStore: useIsWalletReady } = new ExternalStore<boolean>()
+
+export { useIsWalletReady }
 
 export const initOnboard = async (
   chainConfigs: Chain[],
@@ -152,7 +156,7 @@ const connectLastWallet = async (onboard: OnboardAPI) => {
     const isUnlocked = await isWalletUnlocked(lastWalletLabel)
 
     if (isUnlocked === true || isUnlocked === undefined) {
-      connectWallet(onboard, {
+      await connectWallet(onboard, {
         autoSelect: { label: lastWalletLabel, disableModals: isUnlocked || false },
       })
     }
@@ -187,9 +191,11 @@ export const useInitOnboard = () => {
       onboard.state.actions.setWalletModules(supportedWallets)
     }
 
-    enableWallets().then(() => {
-      // Reconnect last wallet
-      connectLastWallet(onboard)
+    enableWallets().then(async () => {
+      // Reconnect last wallet and mark wallet provider as ready
+      await connectLastWallet(onboard)
+
+      setWalletReady(true)
     })
   }, [chain, onboard])
 
@@ -200,6 +206,7 @@ export const useInitOnboard = () => {
 
     const walletSubscription = onboard.state.select('wallets').subscribe((wallets) => {
       const newWallet = getConnectedWallet(wallets)
+
       if (newWallet) {
         if (newWallet.label !== lastConnectedWallet) {
           lastConnectedWallet = newWallet.label

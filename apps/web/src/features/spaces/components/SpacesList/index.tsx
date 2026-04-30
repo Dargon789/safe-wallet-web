@@ -1,78 +1,67 @@
-import AccountsNavigation from '@/features/myAccounts/components/AccountsNavigation'
+import { useLoadFeature } from '@/features/__core__'
+import { MyAccountsFeature } from '@/features/myAccounts'
 import SpaceCard from 'src/features/spaces/components/SpaceCard'
-import SpaceCreationModal from '@/features/spaces/components/SpaceCreationModal'
-import SignInButton from '@/features/spaces/components/SignInButton'
+import SignInOptions from '../SignInOptions'
 import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { Box, Button, Card, Grid2, Link, Typography } from '@mui/material'
+import { Box, Card, Grid2, Link, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
 import { type GetSpaceResponse, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import SpaceListInvite from '../InviteBanner'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import css from './styles.module.css'
-import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
-import useWallet from '@/hooks/wallets/useWallet'
+import { MemberStatus } from '@/features/spaces'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import SpaceInfoModal from '../SpaceInfoModal'
 import { filterSpacesByStatus } from '@/features/spaces/utils'
+import { AppRoutes } from '@/config/routes'
+import NextLink from 'next/link'
+import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
+import AddIcon from '@/public/images/common/add.svg'
 
 const AddSpaceButton = () => {
-  const [openCreationModal, setOpenCreationModal] = useState<boolean>(false)
-
   return (
-    <>
-      <Button
-        data-testid="create-space-button"
-        disableElevation
-        variant="contained"
-        size="small"
-        onClick={() => setOpenCreationModal(true)}
-        sx={{ height: '36px' }}
-      >
-        <Box mt="1px">Create space</Box>
-      </Button>
-      {openCreationModal && <SpaceCreationModal onClose={() => setOpenCreationModal(false)} />}
-    </>
+    <Button
+      data-testid="create-space-button"
+      variant="default"
+      size="lg"
+      className="h-full rounded-lg px-6 text-base"
+      render={<NextLink href={AppRoutes.welcome.createSpace} />}
+    >
+      <AddIcon className="size-5 fill-primary-foreground" />
+      Create space
+    </Button>
   )
 }
 
-const SignedOutState = () => {
-  const wallet = useWallet()
-  const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
-
+const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
   return (
-    <>
-      <Card sx={{ p: 5, textAlign: 'center' }}>
-        <SpacesIcon />
+    <Card sx={{ p: 5, textAlign: 'center' }}>
+      <Typography variant="h3" fontWeight={600} mb={3}>
+        Sign in
+      </Typography>
 
-        <Box mb={3}>
-          <Typography color="text.secondary" mb={1}>
-            To view your space or create one,{' '}
-            {!!wallet ? 'sign in with your connected wallet.' : 'connect your wallet.'}
-            <br />
-          </Typography>
-          <Link onClick={() => setIsInfoOpen(true)} href="#">
-            What are spaces?
-          </Link>
-        </Box>
+      <Typography color="text.secondary" mb={3}>
+        Sign in to view or create a Space.
+      </Typography>
 
-        <SignInButton />
-      </Card>
-      {isInfoOpen && <SpaceInfoModal onClose={() => setIsInfoOpen(false)} showButtons={false} />}
-    </>
+      <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+    </Card>
   )
 }
 
 const NoSpacesState = () => {
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
-  const [openCreationModal, setOpenCreationModal] = useState<boolean>(false)
 
   return (
     <>
       <Card sx={{ p: 5, textAlign: 'center', width: 1 }}>
-        <SpacesIcon />
+        <Box display="flex" justifyContent="center">
+          <SpacesIcon />
+        </Box>
 
         <Box mb={3}>
           <Typography color="text.secondary" mb={1}>
@@ -83,25 +72,40 @@ const NoSpacesState = () => {
             What are spaces?
           </Link>
         </Box>
-        <Track {...SPACE_EVENTS.CREATE_SPACE_MODAL} label={SPACE_LABELS.space_list_page}>
-          <AddSpaceButton />
-        </Track>
+        <div className="h-12">
+          <Track {...SPACE_EVENTS.CREATE_SPACE_MODAL} label={SPACE_LABELS.space_list_page}>
+            <AddSpaceButton />
+          </Track>
+        </div>
       </Card>
-      {isInfoOpen && (
-        <SpaceInfoModal onCreateSpace={() => setOpenCreationModal(true)} onClose={() => setIsInfoOpen(false)} />
-      )}
-      {openCreationModal && <SpaceCreationModal onClose={() => setOpenCreationModal(false)} />}
+      {isInfoOpen && <SpaceInfoModal onClose={() => setIsInfoOpen(false)} />}
     </>
   )
 }
 
 const SpacesList = () => {
+  const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
-  const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
-
+  const {
+    currentData: spaces,
+    isFetching: isSpacesLoading,
+    error,
+  } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
   const pendingInvites = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.INVITED)
   const activeSpaces = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.ACTIVE)
+  const inviteAmount = pendingInvites?.length
+
+  const { setHasSignedIn, redirectLoading } = useSignInRedirect({
+    spacesAmount: spaces?.length || 0,
+    inviteAmount: inviteAmount || 0,
+    isSpacesLoading: isSpacesLoading || false,
+    error: error || undefined,
+  })
+
+  const afterSignIn = useCallback(() => {
+    setHasSignedIn(true)
+  }, [setHasSignedIn])
 
   return (
     <Box className={css.container}>
@@ -122,20 +126,22 @@ const SpacesList = () => {
             <SpaceListInvite key={invitingSpace.id} space={invitingSpace} />
           ))}
 
-        {isUserSignedIn ? (
-          <Grid2 container spacing={2} flexWrap="wrap">
+        {isUserSignedIn || (!redirectLoading && pendingInvites.length) ? (
+          <>
             {activeSpaces.length > 0 ? (
-              activeSpaces.map((space) => (
-                <Grid2 size={{ xs: 12, md: 6 }} key={space.name}>
-                  <SpaceCard space={space} />
-                </Grid2>
-              ))
+              <Grid2 container spacing={2} flexWrap="wrap" data-testid="org-list">
+                {activeSpaces.map((space) => (
+                  <Grid2 size={{ xs: 12, md: 6 }} key={space.name}>
+                    <SpaceCard space={space} currentUserId={currentUser?.id} />
+                  </Grid2>
+                ))}
+              </Grid2>
             ) : (
               <NoSpacesState />
             )}
-          </Grid2>
+          </>
         ) : (
-          <SignedOutState />
+          <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
         )}
       </Box>
     </Box>

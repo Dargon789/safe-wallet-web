@@ -3,8 +3,7 @@ import { Box, Card, Stack, Typography } from '@mui/material'
 import Image from 'next/image'
 import css from './styles.module.css'
 import Link from 'next/link'
-import useNoFeeCampaignEligibility from '@/features/no-fee-campaign/hooks/useNoFeeCampaignEligibility'
-import useIsNoFeeCampaignEnabled from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'
+import { useNoFeeCampaignEligibility, useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign'
 import BlockedAddress from '@/components/common/BlockedAddress'
 import { useDarkMode } from '@/hooks/useDarkMode'
 
@@ -71,7 +70,7 @@ const NoFeeCampaignTransactionCard = () => {
               <Typography variant="body2" color="static.light" className={css.description}>
                 USDe holders enjoy gasless transactions on Ethereum Mainnet this January.{' '}
                 <Link
-                  href="https://help.safe.global/en/articles/484423-no-fee-january-campaign"
+                  href="https://help.safe.global/articles/9605526657-no-fee-january-campaign"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ textDecoration: 'underline', fontWeight: 'bold' }}
@@ -117,7 +116,7 @@ const NoFeeCampaignTransactionCard = () => {
               <Typography variant="body2" className={css.description}>
                 USDe holders enjoy gasless transactions on Ethereum Mainnet this January.{' '}
                 <Link
-                  href="https://help.safe.global/en/articles/484423-no-fee-january-campaign"
+                  href="https://help.safe.global/articles/9605526657-no-fee-january-campaign"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ textDecoration: 'underline', fontWeight: 'bold' }}

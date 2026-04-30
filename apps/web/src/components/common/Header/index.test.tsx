@@ -1,26 +1,16 @@
-import Header from '@/components/common/Header/index'
-import * as useChains from '@/hooks/useChains'
+import Header, { getLogoLink } from '@/components/common/Header/index'
 import * as useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import * as useProposers from '@/hooks/useProposers'
 import * as useSafeAddress from '@/hooks/useSafeAddress'
-import * as useSafeTokenEnabled from '@/hooks/useSafeTokenEnabled'
+import * as contracts from '@/features/__core__'
 import { render } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import { screen, fireEvent } from '@testing-library/react'
+import { AppRoutes } from '@/config/routes'
 
-jest.mock(
-  '@/components/common/SafeTokenWidget',
-  () =>
-    function SafeTokenWidget() {
-      return <div>SafeTokenWidget</div>
-    },
-)
-
-jest.mock('@/features/walletconnect', () => ({
-  __esModule: true,
-  default: function WalletConnect() {
-    return <div>WalletConnect</div>
-  },
+jest.mock('@/features/__core__', () => ({
+  ...jest.requireActual('@/features/__core__'),
+  useLoadFeature: jest.fn(),
 }))
 
 jest.mock(
@@ -35,9 +25,34 @@ jest.mock('@/hooks/useIsOfficialHost', () => ({
   useIsOfficialHost: () => true,
 }))
 
+const mockUseLoadFeature = contracts.useLoadFeature as jest.Mock
+
+describe('getLogoLink', () => {
+  it('always redirects to /welcome/accounts', () => {
+    expect(getLogoLink()).toEqual(AppRoutes.welcome.accounts)
+  })
+})
+
 describe('Header', () => {
   beforeEach(() => {
     jest.resetAllMocks()
+    // Default: BatchingFeature enabled, WalletConnect disabled
+    mockUseLoadFeature.mockImplementation((handle: { name: string }) => {
+      if (handle.name === 'batching') {
+        return {
+          $isDisabled: false,
+          $isReady: true,
+          BatchIndicator: ({ onClick }: { onClick?: () => void }) => <button title="Batch" onClick={onClick} />,
+          BatchSidebar: () => null,
+          BatchTxList: () => null,
+        }
+      }
+      return {
+        $isDisabled: true,
+        $isReady: false,
+        WalletConnectWidget: () => null,
+      }
+    })
   })
 
   it('renders the menu button when onMenuToggle is provided', () => {
@@ -58,20 +73,6 @@ describe('Header', () => {
     fireEvent.click(menuButton)
 
     expect(onMenuToggle).toHaveBeenCalled()
-  })
-
-  it('renders the SafeTokenWidget when showSafeToken is true', () => {
-    jest.spyOn(useSafeTokenEnabled, 'useSafeTokenEnabled').mockReturnValue(true)
-
-    render(<Header />)
-    expect(screen.getByText('SafeTokenWidget')).toBeInTheDocument()
-  })
-
-  it('does not render the SafeTokenWidget when showSafeToken is false', () => {
-    jest.spyOn(useSafeTokenEnabled, 'useSafeTokenEnabled').mockReturnValue(false)
-
-    render(<Header />)
-    expect(screen.queryByText('SafeTokenWidget')).not.toBeInTheDocument()
   })
 
   it('displays the safe logo', () => {
@@ -102,16 +103,29 @@ describe('Header', () => {
     expect(screen.queryByTitle('Batch')).not.toBeInTheDocument()
   })
 
-  it('renders the WalletConnect component when enableWc is true', () => {
-    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+  it('renders the WalletConnect component when feature is enabled', () => {
+    mockUseLoadFeature.mockImplementation((handle: { name: string }) => {
+      if (handle.name === 'batching') {
+        return {
+          $isDisabled: false,
+          $isReady: true,
+          BatchIndicator: () => null,
+          BatchSidebar: () => null,
+          BatchTxList: () => null,
+        }
+      }
+      return {
+        name: 'walletconnect',
+        WalletConnectWidget: () => <div>WalletConnect</div>,
+      }
+    })
 
     render(<Header />)
     expect(screen.getByText('WalletConnect')).toBeInTheDocument()
   })
 
-  it('does not render the WalletConnect component when enableWc is false', () => {
-    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
-
+  it('does not render the WalletConnect component when feature is disabled', () => {
+    // useLoadFeature returns stub that renders null when disabled (default in beforeEach)
     render(<Header />)
     expect(screen.queryByText('WalletConnect')).not.toBeInTheDocument()
   })

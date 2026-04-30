@@ -4,13 +4,12 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { Box, Typography, Card, SvgIcon } from '@mui/material'
 import { GradientCircularProgress } from '@/components/common/GradientCircularProgress'
-import { readPkce, clearPkce } from '@/features/hypernative/hooks/useHypernativeOAuth'
-import { HYPERNATIVE_OAUTH_CONFIG, getRedirectUri } from '@/features/hypernative/config/oauth'
+import { readPkce, clearPkce, useAuthToken, HYPERNATIVE_OAUTH_CONFIG, getRedirectUri } from '@/features/hypernative'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import CheckIcon from '@/public/images/common/check.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { useAuthToken } from '@/features/hypernative/hooks'
+import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
 
 /**
  * OAuth callback page for Hypernative authentication
@@ -113,6 +112,9 @@ const HypernativeOAuthCallback: NextPage = () => {
 
         // Step 8: Update UI state
         setStatus('success')
+
+        // Step 8.5: Track successful authentication
+        trackEvent(HYPERNATIVE_EVENTS.HYPERNATIVE_CONNECTED)
 
         // Step 9: Close popup after short delay (allow postMessage to be delivered)
         setTimeout(() => {

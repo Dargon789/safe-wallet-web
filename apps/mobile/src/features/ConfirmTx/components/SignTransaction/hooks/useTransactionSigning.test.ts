@@ -1,4 +1,5 @@
 import { renderHook, waitFor, act } from '@/src/tests/test-utils'
+import { CONFIG_SERVICE_KEY } from '@/src/config/constants'
 import { useTransactionSigning } from './useTransactionSigning'
 import { getPrivateKey } from '@/src/hooks/useSign/useSign'
 import { signTx } from '@/src/services/tx/tx-sender/sign'
@@ -19,6 +20,9 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
 }))
 jest.mock('@/src/utils/logger')
 jest.mock('@/src/services/ledger/ledger-safe-signing.service')
+jest.mock('@/src/features/WalletConnect/context/WalletConnectContext', () => ({
+  useWalletConnectContext: jest.fn(() => ({ sign: jest.fn(), hasProvider: false })),
+}))
 
 const mockGetPrivateKey = getPrivateKey as jest.MockedFunction<typeof getPrivateKey>
 const mockSignTx = signTx as jest.MockedFunction<typeof signTx>
@@ -105,7 +109,7 @@ const createMockState = (overrides?: Partial<RootState>): Partial<RootState> => 
     // Mock the cgwClient API slice state structure
     api: {
       queries: {
-        'getChainsConfig(undefined)': {
+        [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: {
           status: 'fulfilled' as const,
           data: {
             results: [mockChain],

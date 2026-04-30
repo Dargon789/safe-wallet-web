@@ -9,8 +9,7 @@ import InitialsAvatar from '../InitialsAvatar'
 import css from './styles.module.css'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-import SpaceCreationModal from '../SpaceCreationModal'
-import { useCurrentSpaceId } from 'src/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '@/features/spaces'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { SPACE_LABELS } from '@/services/analytics/events/spaces'
@@ -20,7 +19,6 @@ import { getNonDeclinedSpaces } from '@/features/spaces/utils'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 
 const SpaceSidebarSelector = () => {
-  const [isCreationModalOpen, setIsCreationModalOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const router = useRouter()
   const open = Boolean(anchorEl)
@@ -91,7 +89,7 @@ const SpaceSidebarSelector = () => {
           onClose={handleClose}
           sx={{ '& .MuiPaper-root': { minWidth: '260px !important' } }}
         >
-          <SpaceCard space={selectedSpace} isCompact isLink={false} />
+          <SpaceCard space={selectedSpace} isCompact isLink={false} currentUserId={currentUser?.id} />
 
           <Divider sx={{ mb: 1 }} />
 
@@ -119,8 +117,8 @@ const SpaceSidebarSelector = () => {
           <MenuItem
             onClick={() => {
               handleClose()
-              setIsCreationModalOpen(true)
               trackEvent({ ...SPACE_EVENTS.CREATE_SPACE_MODAL, label: SPACE_LABELS.space_selector })
+              router.push(AppRoutes.spaces.createSpace)
             }}
             sx={{ fontWeight: 700 }}
           >
@@ -139,8 +137,6 @@ const SpaceSidebarSelector = () => {
           </MenuItem>
         </Menu>
       </Box>
-
-      {isCreationModalOpen && <SpaceCreationModal onClose={() => setIsCreationModalOpen(false)} />}
     </>
   )
 }

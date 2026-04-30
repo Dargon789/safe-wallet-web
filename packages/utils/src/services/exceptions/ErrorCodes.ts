@@ -15,6 +15,7 @@ enum ErrorCodes {
   _106 = '106: Failed to get connected wallet',
   _107 = '107: Error connecting to the wallet',
   _108 = '108: Error disconnecting the wallet',
+  _109 = '109: Error signing out',
 
   _200 = '200: Tenderly simulation failed',
   _201 = '201: Blockaid scan failed',
@@ -71,12 +72,14 @@ enum ErrorCodes {
   _817 = '817: Error sending a transaction through nested Safe provider',
   _818 = '818: Error validating transaction data',
   _819 = '819: Error adding a transaction to the batch',
+  _820 = '820: Error signing or submitting delegation',
 
   _900 = '900: Error loading Safe App',
   _901 = '901: Error processing Safe Apps SDK request',
   _902 = '902: Error loading Safe Apps list',
   _903 = '903: Error loading Safe App manifest',
   _905 = '905: Third party cookies are disabled',
+  _906 = '906: Error loading feature',
 }
 
 export default ErrorCodes

@@ -38,42 +38,15 @@ import { OperationType } from '@safe-global/types-kit'
 import uniqBy from 'lodash/uniqBy'
 import { Errors, logError } from '@/services/exceptions'
 import { type BaseTransaction } from '@safe-global/safe-apps-sdk'
-import { isEmptyHexData } from '@/utils/hex'
 import { isMultiSendCalldata } from './transaction-calldata'
-import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
+import { decodeMultiSendData } from '@safe-global/protocol-kit'
 import { getOriginPath } from './url'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { getStoreInstance } from '@/store'
 
-/**
- * Fetch transaction details from the gateway using RTK Query.
- * This function can be used in non-React contexts (e.g., async functions, services).
- * It dispatches the query and waits for the result.
- *
- * @param chainId - The chain ID where the transaction exists
- * @param txId - The transaction ID (safe transaction hash or multisig transaction ID)
- * @returns The transaction details
- * @throws Error if the store is not initialized or if the request fails
- */
-export const getTransactionDetails = async (chainId: string, txId: string): Promise<TransactionDetails> => {
-  const store = getStoreInstance()
-
-  const result = await store
-    .dispatch(
-      cgwApi.endpoints.transactionsGetTransactionByIdV1.initiate(
-        {
-          chainId,
-          id: txId,
-        },
-        {
-          forceRefetch: true,
-        },
-      ),
-    )
-    .unwrap()
-
-  return result
-}
+// Re-exported from tx-details.ts to avoid pulling heavy deps into the bundle
+import { getTransactionDetails } from '@/utils/tx-details'
+export { getTransactionDetails }
 
 /**
  * Delete a transaction from the gateway using RTK Query.
@@ -559,10 +532,6 @@ export const decodeSafeTxToBaseTransactions = (safeTx: SafeTransaction): BaseTra
     })
   }
   return txs
-}
-
-export const isRejectionTx = (tx?: SafeTransaction) => {
-  return !!tx && !!tx.data.data && isEmptyHexData(tx.data.data) && tx.data.value === '0'
 }
 
 export const isTrustedTx = (tx: Transaction) => {

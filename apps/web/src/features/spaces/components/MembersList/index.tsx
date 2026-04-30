@@ -1,5 +1,5 @@
 import { Box, Chip, IconButton, Stack, SvgIcon, Tooltip } from '@mui/material'
-import { type Member } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import EditIcon from '@/public/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EnhancedTable from '@/components/common/EnhancedTable'
@@ -7,12 +7,10 @@ import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import MemberName from './MemberName'
 import RemoveMemberDialog from './RemoveMemberDialog'
 import { useState } from 'react'
-import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
-import EditMemberDialog from '@/features/spaces/components/MembersList/EditMemberDialog'
-import { isAdmin as checkIsAdmin, isActiveAdmin, MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
+import { useIsAdmin, isAdmin as checkIsAdmin, isActiveAdmin, MemberStatus, useAdminCount } from '@/features/spaces'
+import EditMemberDialog from './EditMemberDialog'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import { useAdminCount } from '@/features/spaces/hooks/useIsLastActiveAdmin'
 
 const headCells = [
   {
@@ -33,7 +31,7 @@ const headCells = [
   },
 ]
 
-const EditButton = ({ member, disabled }: { member: Member; disabled: boolean }) => {
+const EditButton = ({ member, disabled }: { member: MemberDto; disabled: boolean }) => {
   const [open, setOpen] = useState(false)
 
   return (
@@ -55,7 +53,7 @@ export const RemoveMemberButton = ({
   disabled,
   isInvite,
 }: {
-  member: Member
+  member: MemberDto
   disabled: boolean
   isInvite: boolean
 }) => {
@@ -90,7 +88,7 @@ export const RemoveMemberButton = ({
   )
 }
 
-const MembersList = ({ members }: { members: Member[] }) => {
+const MembersList = ({ members }: { members: MemberDto[] }) => {
   const isAdmin = useIsAdmin()
   const adminCount = useAdminCount(members)
 

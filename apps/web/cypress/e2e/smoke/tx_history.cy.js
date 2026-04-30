@@ -20,10 +20,8 @@ describe('[SMOKE] Tx history tests', () => {
   })
 
   beforeEach(() => {
+    cy.intercept('GET', constants.transactionHistoryEndpoint, { fixture: 'history/history_tx_1.json' }).as('getHistory')
     cy.visit(constants.transactionsHistoryUrl + staticSafes.SEP_STATIC_SAFE_23)
-    cy.fixture('history/history_tx_1.json').then((mockData) => {
-      cy.intercept('GET', constants.transactionHistoryEndpoint, mockData).as('getHistory')
-    })
     cy.wait('@getHistory')
   })
 
@@ -40,12 +38,7 @@ describe('[SMOKE] Tx history tests', () => {
   // mock
   it('[SMOKE] Verify exapanded details for token receipt', () => {
     createTx.clickOnTransactionItemByName(typeReceive.summaryTitle, typeReceive.summaryTxInfo)
-    createTx.verifyExpandedDetails([
-      typeReceive.title,
-      typeReceive.receivedFrom,
-      typeReceive.senderAddress,
-      typeReceive.transactionHash,
-    ])
+    createTx.verifyExpandedDetails([typeReceive.title, typeReceive.receivedFrom, typeReceive.senderAddress])
   })
 
   // mock

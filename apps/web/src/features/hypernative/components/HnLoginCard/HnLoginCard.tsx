@@ -1,10 +1,13 @@
 import { Alert, Stack, SvgIcon, Typography } from '@mui/material'
 import type { ReactElement } from 'react'
-import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import { useHypernativeOAuth } from '../../hooks/useHypernativeOAuth'
 import ExternalLink from '@/components/common/ExternalLink'
 import AlertIcon from '@/public/images/common/alert.svg'
 import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
+import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 
 export const HnLoginCard = (): ReactElement | null => {
   const isSafeOwner = useIsSafeOwner()
@@ -13,6 +16,9 @@ export const HnLoginCard = (): ReactElement | null => {
   const handleLogin = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
     e.stopPropagation()
+    trackEvent(HYPERNATIVE_EVENTS.HYPERNATIVE_LOGIN_CLICKED, {
+      [MixpanelEventParams.SOURCE]: HYPERNATIVE_SOURCE.Queue,
+    })
     initiateLogin()
   }
 
@@ -60,5 +66,3 @@ export const HnLoginCard = (): ReactElement | null => {
     </Stack>
   )
 }
-
-export default HnLoginCard

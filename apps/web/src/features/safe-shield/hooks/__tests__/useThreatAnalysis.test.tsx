@@ -3,11 +3,12 @@ import { useThreatAnalysis } from '../useThreatAnalysis'
 import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
-import type { HypernativeEligibility } from '@/features/hypernative/hooks/useIsHypernativeEligible'
+import type { HypernativeEligibility } from '@/features/hypernative'
 
 jest.mock('@safe-global/utils/features/safe-shield/hooks', () => ({
   useThreatAnalysis: jest.fn(),
   useThreatAnalysisHypernative: jest.fn(),
+  useThreatAnalysisHypernativeMessage: jest.fn(),
 }))
 
 jest.mock('../../components/useNestedTransaction', () => ({
@@ -35,6 +36,7 @@ jest.mock('@/components/tx-flow/SafeTxProvider', () => ({
     _currentValue: {
       safeTx: undefined,
       safeMessage: undefined,
+      safeMessageHash: undefined,
       txOrigin: undefined,
     },
   },
@@ -49,9 +51,11 @@ const buildEligibility = (overrides: Partial<HypernativeEligibility> = {}): Hype
 })
 
 const mockUseIsHypernativeEligible = jest.fn(() => buildEligibility())
+const mockUseIsHypernativeFeatureEnabled = jest.fn(() => true)
 
-jest.mock('@/features/hypernative/hooks/useIsHypernativeEligible', () => ({
+jest.mock('@/features/hypernative', () => ({
   useIsHypernativeEligible: () => mockUseIsHypernativeEligible(),
+  useIsHypernativeFeatureEnabled: () => mockUseIsHypernativeFeatureEnabled(),
 }))
 
 jest.mock('../useNestedThreatAnalysis', () => ({
@@ -62,6 +66,9 @@ const mockUseThreatAnalysisUtils = jest.requireMock('@safe-global/utils/features
 const mockUseThreatAnalysisHypernative = jest.requireMock(
   '@safe-global/utils/features/safe-shield/hooks',
 ).useThreatAnalysisHypernative
+const mockUseThreatAnalysisHypernativeMessage = jest.requireMock(
+  '@safe-global/utils/features/safe-shield/hooks',
+).useThreatAnalysisHypernativeMessage
 const mockUseNestedTransaction = jest.requireMock('../../components/useNestedTransaction').useNestedTransaction
 const mockUseNestedThreatAnalysis = jest.requireMock('../useNestedThreatAnalysis').useNestedThreatAnalysis
 
@@ -117,6 +124,7 @@ describe('useThreatAnalysis - Nested Transaction Detection', () => {
     jest.clearAllMocks()
     mockUseIsHypernativeEligible.mockReturnValue(buildEligibility({ isHypernativeEligible: false }))
     mockUseThreatAnalysisHypernative.mockReturnValue([undefined, undefined, false])
+    mockUseThreatAnalysisHypernativeMessage.mockReturnValue([undefined, undefined, false])
     mockUseNestedThreatAnalysis.mockReturnValue([undefined, undefined, false])
   })
 
@@ -338,6 +346,7 @@ describe('useThreatAnalysis - Hypernative Guard', () => {
     jest.clearAllMocks()
     mockUseIsHypernativeEligible.mockReturnValue(buildEligibility({ isHypernativeEligible: false }))
     mockUseThreatAnalysisHypernative.mockReturnValue([undefined, undefined, false])
+    mockUseThreatAnalysisHypernativeMessage.mockReturnValue([undefined, undefined, false])
     mockUseNestedThreatAnalysis.mockReturnValue([undefined, undefined, false])
     mockUseNestedTransaction.mockReturnValue({
       nestedSafeInfo: undefined,

@@ -1,6 +1,6 @@
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { Errors, logError } from '@/services/exceptions'
 import { getModuleTransactionId } from '@/services/transactions'
 import { backOff } from 'exponential-backoff'
@@ -21,7 +21,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { useHasFeature } from '@/hooks/useChains'
 import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import { Multi_send__factory } from '@safe-global/utils/types/contracts'
-import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
+import { decodeMultiSendData } from '@safe-global/protocol-kit'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const ROLES_V2_SUPPORTED_CHAINS = Object.keys(chains)

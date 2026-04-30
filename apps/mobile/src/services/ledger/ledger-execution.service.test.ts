@@ -53,20 +53,26 @@ jest.mock('@/src/hooks/coreSDK/safeCoreSDK', () => ({
   getSafeSDK: () => mockGetSafeSDK(),
 }))
 
-jest.mock('@safe-global/protocol-kit/dist/src/utils', () => ({
+jest.mock('@safe-global/protocol-kit', () => ({
   generatePreValidatedSignature: (owner: string) => ({ signer: owner, data: '0xPreValidated' }),
 }))
 
-jest.mock('ethers', () => ({
-  Transaction: {
-    from: jest.fn().mockImplementation((data) => ({
-      ...data,
-      unsignedSerialized: '0x1234',
-      serialized: '0x5678',
-      signature: null,
-    })),
-  },
-}))
+jest.mock('ethers', () => {
+  const actual = jest.requireActual('ethers')
+
+  return {
+    ...actual,
+    Transaction: {
+      ...actual.Transaction,
+      from: jest.fn().mockImplementation((data) => ({
+        ...data,
+        unsignedSerialized: '0x1234',
+        serialized: '0x5678',
+        signature: null,
+      })),
+    },
+  }
+})
 
 jest.mock('@/src/utils/logger', () => ({
   __esModule: true,

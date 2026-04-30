@@ -3,13 +3,13 @@ import { useEstimateSafeCreationGas } from '@/components/new-safe/create/useEsti
 import * as chainIdModule from '@/hooks/useChainId'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import * as wallet from '@/hooks/wallets/useWallet'
-import * as web3 from '@/hooks/wallets/web3'
+import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import * as safeContracts from '@/services/contracts/safeContracts'
 import * as store from '@/store'
 import { renderHook } from '@/tests/test-utils'
-import type { SafeProxyFactoryContractImplementationType } from '@safe-global/protocol-kit/dist/src/types/contracts'
+import type { SafeProxyFactoryContractImplementationType } from '@safe-global/protocol-kit'
 import { JsonRpcProvider } from 'ethers'
-import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { waitFor } from '@testing-library/react'
 import { type EIP1193Provider } from '@web3-onboard/core'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
@@ -39,7 +39,7 @@ describe('useEstimateSafeCreationGas', () => {
     jest.resetAllMocks()
 
     jest.spyOn(store, 'useAppSelector').mockReturnValue({})
-    jest.spyOn(chainIdModule, 'useChainId').mockReturnValue('4')
+    jest.spyOn(chainIdModule, 'default').mockReturnValue('4')
     jest.spyOn(useChains, 'default').mockImplementation(() => ({
       configs: [mockChain],
       error: undefined,
@@ -62,7 +62,7 @@ describe('useEstimateSafeCreationGas', () => {
 
   it('should estimate gas', async () => {
     const mockProvider = new JsonRpcProvider()
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider)
+    jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValue(mockProvider)
     jest.spyOn(sender, 'estimateSafeCreationGas').mockReturnValue(Promise.resolve(BigInt('123')))
     jest.spyOn(wallet, 'default').mockReturnValue({
       label: 'MetaMask',
@@ -90,7 +90,7 @@ describe('useEstimateSafeCreationGas', () => {
   })
 
   it('should not estimate gas if there is no provider', async () => {
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(undefined)
+    jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValue(undefined)
     const { result } = renderHook(() => useEstimateSafeCreationGas(mockProps))
 
     await waitFor(() => {

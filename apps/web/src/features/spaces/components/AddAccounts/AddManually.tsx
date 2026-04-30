@@ -2,7 +2,7 @@ import AddressInput from '@/components/common/AddressInput'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import ModalDialog from '@/components/common/ModalDialog'
 import networkSelectorCss from '@/components/common/NetworkSelector/styles.module.css'
-import chains from '@/config/chains'
+import chains from '@safe-global/utils/config/chains'
 import css from './styles.module.css'
 import useChains from '@/hooks/useChains'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -82,7 +82,7 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
 
   return (
     <>
-      <Button data-testid="add-manually-button" size="compact" onClick={() => setAddManuallyOpen(true)}>
+      <Button data-testid="add-manually-button" size="medium" onClick={() => setAddManuallyOpen(true)}>
         + Add manually
       </Button>
       <ModalDialog

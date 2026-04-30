@@ -1,13 +1,13 @@
-import useIsOnlySpendingLimitBeneficiary from '@/hooks/useIsOnlySpendingLimitBeneficiary'
-import useSpendingLimit from '@/hooks/useSpendingLimit'
+import { useIsOnlySpendingLimitBeneficiary, useSpendingLimit, selectSpendingLimits } from '@/features/spending-limits'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
-import { selectSpendingLimits } from '@/store/spendingLimitsSlice'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { useTrustedTokenBalances } from '@/hooks/loadables/useTrustedTokenBalances'
 import useHiddenTokens from '@/hooks/useHiddenTokens'
 import { useMemo } from 'react'
+import { useNativeTokenDisplay } from '@/hooks/useNativeTokenDisplay'
+import { TokenType } from '@safe-global/store/gateway/types'
 
 export const useTokenAmount = (selectedToken: Balances['items'][0] | undefined) => {
   const spendingLimit = useSpendingLimit(selectedToken?.tokenInfo)
@@ -27,13 +27,18 @@ export const useVisibleTokens = () => {
   const spendingLimits = useAppSelector(selectSpendingLimits)
   const wallet = useWallet()
   const hiddenTokens = useHiddenTokens()
+  const { showNativeInBalances } = useNativeTokenDisplay()
 
   return useMemo(() => {
     if (!balances) {
       return []
     }
 
-    const items = filterHiddenTokens(balances.items, hiddenTokens)
+    let items = filterHiddenTokens(balances.items, hiddenTokens)
+
+    if (!showNativeInBalances) {
+      items = items.filter((item) => item.tokenInfo.type !== TokenType.NATIVE_TOKEN)
+    }
 
     if (isOnlySpendingLimitBeneficiary) {
       return items.filter(({ tokenInfo }) => {
@@ -44,5 +49,5 @@ export const useVisibleTokens = () => {
     }
 
     return items
-  }, [balances, hiddenTokens, isOnlySpendingLimitBeneficiary, spendingLimits, wallet?.address])
+  }, [balances, hiddenTokens, showNativeInBalances, isOnlySpendingLimitBeneficiary, spendingLimits, wallet?.address])
 }

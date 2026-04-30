@@ -4,6 +4,7 @@ import { router } from 'expo-router'
 
 import { Text, View } from 'tamagui'
 import { AppSettings } from './AppSettings'
+import { type SettingsSection } from './AppSettings.types'
 import { useTheme } from '@/src/theme/hooks/useTheme'
 import { SafeFontIcon as Icon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { FloatingMenu } from '../FloatingMenu'
@@ -54,7 +55,7 @@ export const AppSettingsContainer = () => {
     )
   }
 
-  const settingsSections = [
+  const settingsSections: SettingsSection[] = [
     {
       sectionName: 'Preferences',
       items: [
@@ -77,7 +78,6 @@ export const AppSettingsContainer = () => {
           type: 'floating-menu',
           rightNode: (
             <FloatingMenu
-              themeVariant={themePreference}
               onPressAction={({ nativeEvent }) => {
                 const mode = nativeEvent.event as 'auto' | 'dark' | 'light'
                 setThemePreference(mode)
@@ -123,13 +123,6 @@ export const AppSettingsContainer = () => {
             />
           ),
           disabled: false,
-        },
-        {
-          label: 'Change passcode',
-          leftIcon: 'lock',
-          onPress: () => console.log('change passcode'),
-          disabled: true,
-          tag: 'Coming soon',
         },
       ],
     },
@@ -196,7 +189,7 @@ export const AppSettingsContainer = () => {
         {
           label: 'Help center',
           leftIcon: 'question',
-          onPress: () => Linking.openURL('https://help.safe.global/en/'),
+          onPress: () => Linking.openURL('https://help.safe.global'),
           disabled: false,
           type: 'external-link',
         },

@@ -3,15 +3,26 @@ import { render } from '@/tests/test-utils'
 import { useRouter } from 'next/router'
 import HypernativeOAuthCallback from '../../pages/hypernative/oauth-callback'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
+import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
+// Mock @/features/__core__ to prevent circular dependency issues
+jest.mock('@/features/__core__', () => ({
+  createFeatureHandle: jest.fn((name) => ({ name, __type: 'FeatureHandle' })),
+  useLoadFeature: jest.fn(() => ({
+    $isReady: true,
+    $isLoading: false,
+    $isDisabled: false,
+  })),
+}))
+
 // Mock PKCE utilities
-jest.mock('@/features/hypernative/hooks/useHypernativeOAuth', () => {
-  const actual = jest.requireActual('@/features/hypernative/hooks/useHypernativeOAuth')
+jest.mock('@/features/hypernative', () => {
+  const actual = jest.requireActual('@/features/hypernative')
   return {
     ...actual,
     readPkce: jest.fn(),
@@ -33,7 +44,12 @@ jest.mock('@/features/hypernative/config/oauth', () => {
   }
 })
 
-import { readPkce, clearPkce } from '@/features/hypernative/hooks/useHypernativeOAuth'
+jest.mock('@/services/analytics', () => ({
+  trackEvent: jest.fn(),
+  HYPERNATIVE_EVENTS: jest.requireActual('@/services/analytics').HYPERNATIVE_EVENTS,
+}))
+
+import { readPkce, clearPkce } from '@/features/hypernative'
 import { getRedirectUri } from '@/features/hypernative/config/oauth'
 
 describe('HypernativeOAuthCallback', () => {
@@ -185,6 +201,9 @@ describe('HypernativeOAuthCallback', () => {
 
     // Verify getRedirectUri was called
     expect(mockGetRedirectUri).toHaveBeenCalled()
+
+    // Verify analytics event was tracked
+    expect(trackEvent).toHaveBeenCalledWith(HYPERNATIVE_EVENTS.HYPERNATIVE_CONNECTED)
   })
 
   it('should handle missing authorization code', async () => {
@@ -339,6 +358,9 @@ describe('HypernativeOAuthCallback', () => {
       },
       { timeout: 3000 },
     )
+
+    // Verify analytics event was NOT tracked on failure
+    expect(trackEvent).not.toHaveBeenCalled()
 
     // Check that URL history was cleaned
     expect(mockReplaceState).toHaveBeenCalled()

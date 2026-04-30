@@ -1,5 +1,5 @@
 import useAddressBook from '@/hooks/useAddressBook'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { lookupAddress } from '@/services/ens'
 import { useEffect, useMemo } from 'react'
 import useAsync from '@safe-global/utils/hooks/useAsync'
@@ -21,11 +21,13 @@ export const useAddressResolver = (address?: string) => {
 
   const [ens, _, isResolving] = useAsync<string | undefined>(() => {
     if (!shouldResolve) return
+    // Wait for debounce to settle so we never resolve a stale address
+    if (debouncedValue !== address) return
     if (chainId && debouncedValue && cache[chainId]?.[debouncedValue]) {
       return Promise.resolve(cache[chainId][debouncedValue])
     }
     return lookupAddress(ethersProvider, debouncedValue)
-  }, [chainId, ethersProvider, debouncedValue, shouldResolve])
+  }, [chainId, ethersProvider, debouncedValue, shouldResolve, address])
 
   const resolving = (shouldResolve && isResolving) || false
 
@@ -37,12 +39,15 @@ export const useAddressResolver = (address?: string) => {
     }
   }, [chainId, debouncedValue, ens])
 
+  // Clear stale ENS while debounce catches up to the new address
+  const isStale = debouncedValue !== address
+
   return useMemo(
     () => ({
-      ens,
+      ens: isStale ? undefined : ens,
       name: addressBookName,
       resolving,
     }),
-    [ens, addressBookName, resolving],
+    [ens, addressBookName, resolving, isStale],
   )
 }

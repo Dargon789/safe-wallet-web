@@ -38,7 +38,7 @@ export const AppSettings = ({ sections }: AppSettingsProps) => {
           Settings
         </LargeHeaderTitle>
         <YStack flex={1} paddingHorizontal="$3">
-          <YStack space="$4">
+          <YStack gap="$4">
             {memoizedSections.map((section, sectionIndex) => (
               <View
                 key={`section-${sectionIndex}`}
@@ -50,31 +50,29 @@ export const AppSettings = ({ sections }: AppSettingsProps) => {
                 {section.sectionName && <Text color="$colorSecondary">{section.sectionName}</Text>}
                 <View backgroundColor={'$background'} borderRadius={'$3'}>
                   {section.items.map((item, itemIndex) => {
-                    if (item.type === 'floating-menu') {
-                      return (
-                        <SafeListItem
-                          key={`item-${sectionIndex}-${itemIndex}`}
-                          label={item.label}
-                          leftNode={<Icon name={item.leftIcon as IconName} color={'$colorSecondary'} />}
-                          rightNode={item.rightNode ?? <Icon name={'chevron-right'} />}
-                          tag={item.tag}
-                        />
-                      )
+                    const key = `item-${sectionIndex}-${itemIndex}`
+                    const listItem = (
+                      <SafeListItem
+                        label={item.label}
+                        leftNode={<Icon name={item.leftIcon as IconName} color={'$colorSecondary'} />}
+                        rightNode={item.rightNode ?? <Icon name={'chevron-right'} />}
+                        tag={item.tag}
+                      />
+                    )
+
+                    const onPress = 'onPress' in item ? item.onPress : undefined
+                    if (!onPress) {
+                      return <View key={key}>{listItem}</View>
                     }
 
                     return (
                       <Pressable
-                        key={`item-${sectionIndex}-${itemIndex}`}
+                        key={key}
                         style={({ pressed }) => [{ opacity: pressed || item.disabled ? 0.5 : 1.0 }]}
-                        onPress={item.onPress}
+                        onPress={onPress}
                         disabled={item.disabled}
                       >
-                        <SafeListItem
-                          label={item.label}
-                          leftNode={<Icon name={item.leftIcon as IconName} color={'$colorSecondary'} />}
-                          rightNode={item.rightNode ?? <Icon name={'chevron-right'} />}
-                          tag={item.tag}
-                        />
+                        {listItem}
                       </Pressable>
                     )
                   })}

@@ -8,8 +8,8 @@ import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import BlockIcon from '@/public/images/common/block2.svg'
 import LockIcon from '@/public/images/common/lock-small.svg'
 import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
-import { useAssessmentUrl } from '@/features/hypernative/hooks/useAssessmentUrl'
-import { useHnAssessmentSeverity } from '@/features/hypernative/hooks/useHnAssessmentSeverity'
+import { useAssessmentUrl } from '../../hooks/useAssessmentUrl'
+import { useHnAssessmentSeverity } from '../../hooks/useHnAssessmentSeverity'
 
 interface HnQueueAssessmentProps {
   safeTxHash: string
@@ -43,11 +43,11 @@ export const HnQueueAssessment = ({
   assessment,
   isAuthenticated,
 }: HnQueueAssessmentProps): ReactElement | null => {
-  const [assessmentData, error, isLoading] = assessment || [undefined, undefined, false]
   const severity = useHnAssessmentSeverity(assessment)
   const assessmentUrl = useAssessmentUrl(safeTxHash)
 
-  // Scan unavailable state (not logged in)
+  // Scan unavailable state (not logged in) - check before assessment
+  // since unauthenticated users won't have assessments fetched
   if (!isAuthenticated) {
     return (
       <Tooltip
@@ -59,7 +59,7 @@ export const HnQueueAssessment = ({
         arrow
         placement="top"
       >
-        <Stack direction="row" alignItems="center" gap={0.5}>
+        <Stack direction="row" alignItems="center" maxWidth="fit-content" gap={0.5}>
           <SvgIcon inheritViewBox component={LockIcon} sx={{ width: '16px', height: '16px', color: 'text.disabled' }} />
           <Typography variant="caption" color="text.disabled">
             {getSeverityMessage(Severity.ERROR)}
@@ -68,6 +68,12 @@ export const HnQueueAssessment = ({
       </Tooltip>
     )
   }
+
+  if (!assessment) {
+    return null
+  }
+
+  const [assessmentData, error, isLoading] = assessment
 
   // Loading state
   if (isLoading) {
@@ -110,6 +116,7 @@ export const HnQueueAssessment = ({
         href={assessmentUrl}
         color="text.secondary"
         display="flex"
+        maxWidth="fit-content"
         sx={{
           textDecoration: 'none',
           '&:not(:hover)': { '.external-link-icon': { display: 'none' } },

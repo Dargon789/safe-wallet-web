@@ -27,13 +27,12 @@ export const connectedWalletExecMethod = '[data-testid="connected-wallet-executi
 export const relayExecMethod = '[data-testid="relay-execution-method"]'
 export const connectedWalletMethod = '[data-testid="connected-wallet-execution-method"]'
 export const payNowExecMethod = '[data-testid="pay-now-execution-method"]'
-export const addToBatchBtn = '[data-track="batching: Add to batch"]'
+export const addToBatchBtn = '[data-testid="combo-submit-batching"]'
 export const executeTxBtn = '[data-testid="execute-tx-btn"]'
 const accordionDetails = '[data-testid="accordion-details"]'
 export const copyIcon = '[data-testid="copy-btn-icon"]'
 export const explorerBtn = '[data-testid="explorer-btn"]'
 const transactionSideList = '[data-testid="transaction-actions-list"]'
-const confirmationVisibilityBtn = '[data-testid="confirmation-visibility-btn"]'
 const expandAllBtn = '[data-testid="expande-all-btn"]'
 const collapseAllBtn = '[data-testid="collapse-all-btn"]'
 export const txRowTitle = '[data-testid="tx-row-title"]'
@@ -107,16 +106,14 @@ export const hashesText = 'Hashes'
 const TransactionSummary = 'Send '
 const transactionsPerHrStr = 'free transactions left today'
 const maxAmountBtnStr = 'Max'
-const nextBtnStr = 'Next'
 const nativeTokenTransferStr = 'ETH'
-const yesStr = 'Yes, '
 const estimatedFeeStr = 'Estimated fee'
+// Re-export for backward compatibility
 export const executeStr = 'Execute'
 const editBtnStr = 'Edit'
 const executionParamsStr = 'Execution parameters'
 const noLaterStr = 'No, later'
 const confirmBtnStr = 'Confirm'
-const executeBtnStr = 'Execute'
 const expandAllBtnStr = 'Expand all'
 const collapseAllBtnStr = 'Collapse all'
 export const messageNestedStr = `"nestedString": "Test message 3 off-chain"`
@@ -384,9 +381,7 @@ export function fillFilterForm({ address, startDate, endDate, amount, token, non
     if (value !== undefined) {
       const { selector, findInput } = inputMap[key]
       const element = findInput ? cy.get(selector).find('input') : cy.get(selector)
-      element.then(($el) => {
-        cy.wrap($el).invoke('removeAttr', 'readonly').clear().type(value, { force: true })
-      })
+      element.invoke('removeAttr', 'readonly').clear().type(value, { force: true })
     }
   })
 }
@@ -587,7 +582,6 @@ export function collapseAllActions(data) {
 
 export function verifyActionListExists(data) {
   main.checkTextsExistWithinElement(transactionSideList, data)
-  main.verifyElementsIsVisible([confirmationVisibilityBtn])
 }
 
 export function verifySpamIconIsDisplayed(name, token) {
@@ -666,13 +660,13 @@ export function verifySummaryByName(name, token, data, alt, altToken) {
 
     const $element = $elements.first()
 
-    // Verify data text content
+    // Verify data text content (use cy.wrap for retryability, e.g. async status like "Expired")
     if (Array.isArray(data)) {
       data.forEach((text) => {
-        expect($element.text()).to.include(text)
+        cy.wrap($element).should('contain.text', text)
       })
     } else if (data) {
-      expect($element.text()).to.include(data)
+      cy.wrap($element).should('contain.text', data)
     }
 
     // Verify transaction type icon (alt parameter)
@@ -777,6 +771,11 @@ export function clickOnTokenselectorAndSelectSepoliaEth() {
   cy.get('ul[role="listbox"]').contains(constants.tokenNames.sepoliaEther).click()
 }
 
+export function clickOnTokenselectorAndSelectToken(tokenName) {
+  cy.get(tokenSelector).click()
+  cy.get('ul[role="listbox"]').contains(tokenName).click()
+}
+
 export function setMaxAmount() {
   cy.contains(maxAmountBtnStr).click()
 }
@@ -806,7 +805,7 @@ export function setSendValue_(index, value) {
 }
 
 export function clickOnNextBtn() {
-  cy.contains(nextBtnStr).click()
+  cy.contains(main.nextBtnStr).click()
 }
 
 export function verifySubmitBtnIsEnabled() {
@@ -838,10 +837,6 @@ export function hasNonce() {
 
 export function verifyNonceInputValue(value) {
   cy.get(nonceInput).should('have.value', value)
-}
-
-export function clickOnYesOption() {
-  cy.contains(yesStr).should('exist').click()
 }
 
 export function displayAdvancedDetails() {

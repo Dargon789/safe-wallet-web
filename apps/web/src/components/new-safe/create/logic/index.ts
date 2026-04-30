@@ -1,5 +1,5 @@
 import type { SafeVersion, TransactionOptions } from '@safe-global/types-kit'
-import { type TransactionResponse, type Eip1193Provider, type Provider } from 'ethers'
+import { type TransactionResponse, type Eip1193Provider, type Provider, type BrowserProvider } from 'ethers'
 import semverSatisfies from 'semver/functions/satisfies'
 import { type SafeState, cgwApi as safesApi } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { cgwApi as relayApi } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
@@ -13,7 +13,7 @@ import Safe, { predictSafeAddress, SafeProvider } from '@safe-global/protocol-ki
 import type { PredictedSafeProps } from '@safe-global/protocol-kit'
 
 import { backOff } from 'exponential-backoff'
-import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import {
   getCompatibilityFallbackHandlerDeployment,
   getCompatibilityFallbackHandlerDeployments,
@@ -25,11 +25,8 @@ import {
 } from '@safe-global/safe-deployments'
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
 import type { ReplayedSafeProps, UndeployedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
-import { activateReplayedSafe, isPredictedSafeProps } from '@/features/counterfactual/utils'
-import {
-  getSafeContractDeployment,
-  getCanonicalOrFirstAddress,
-} from '@safe-global/utils/services/contracts/deployments'
+import { isPredictedSafeProps } from '@/features/counterfactual/services'
+import { getSafeContractDeployment, getChainAgnosticAddress } from '@safe-global/utils/services/contracts/deployments'
 import {
   Safe__factory,
   Safe_proxy_factory__factory,
@@ -39,6 +36,14 @@ import { createWeb3 } from '@/hooks/wallets/web3'
 import { hasMultiChainCreationFeatures } from '@/features/multichain'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
+// Type for the lazy-loaded activateReplayedSafe function
+export type ActivateReplayedSafeFn = (
+  chain: Chain,
+  props: ReplayedSafeProps,
+  provider: BrowserProvider,
+  options: TransactionOptions,
+) => Promise<TransactionResponse>
+
 export type SafeCreationProps = {
   owners: string[]
   threshold: number
@@ -47,6 +52,8 @@ export type SafeCreationProps = {
 
 /**
  * Create a Safe creation transaction via Core SDK and submits it to the wallet
+ *
+ * @param activateReplayedSafe - Optional function for activating replayed safes (lazy-loaded from counterfactual feature)
  */
 export const createNewSafe = async (
   provider: Eip1193Provider,
@@ -55,6 +62,7 @@ export const createNewSafe = async (
   options: TransactionOptions,
   callback: (txHash: string) => void,
   isL1SafeSingleton?: boolean,
+  activateReplayedSafe?: ActivateReplayedSafeFn,
 ): Promise<void> => {
   let txResponse: TransactionResponse
   if (isPredictedSafeProps(undeployedSafeProps)) {
@@ -73,6 +81,9 @@ export const createNewSafe = async (
       ...options,
     })
   } else {
+    if (!activateReplayedSafe) {
+      throw new Error('activateReplayedSafe function is required for replayed safes')
+    }
     txResponse = await activateReplayedSafe(chain, undeployedSafeProps, createWeb3(provider), options)
   }
   callback(txResponse.hash)
@@ -244,27 +255,27 @@ export const createNewUndeployedSafeWithoutSalt = (
   },
   chain: Chain,
 ): UndeployedSafeWithoutSalt => {
-  // Create universal deployment Data across chains:
-  const fallbackHandlerDeployments = getCompatibilityFallbackHandlerDeployments({
-    version: safeVersion,
-    network: chain.chainId,
-  })
-  const fallbackHandlerAddress = getCanonicalOrFirstAddress(fallbackHandlerDeployments, chain.chainId)
-  const safeL2Deployments = getSafeL2SingletonDeployments({ version: safeVersion, network: chain.chainId })
-  const safeL2Address = getCanonicalOrFirstAddress(safeL2Deployments, chain.chainId)
+  // Resolve contract addresses (per-chain for registered chains, chain-agnostic fallback for new chains)
+  const deploymentType = chain.zk ? 'zksync' : 'canonical'
 
-  const safeL1Deployments = getSafeSingletonDeployments({ version: safeVersion, network: chain.chainId })
-  const safeL1Address = getCanonicalOrFirstAddress(safeL1Deployments, chain.chainId)
+  const fallbackHandlerDeployments = getCompatibilityFallbackHandlerDeployments({ version: safeVersion })
+  const fallbackHandlerAddress = getChainAgnosticAddress(fallbackHandlerDeployments, chain.chainId, deploymentType)
 
-  const safeFactoryDeployments = getProxyFactoryDeployments({ version: safeVersion, network: chain.chainId })
-  const safeFactoryAddress = getCanonicalOrFirstAddress(safeFactoryDeployments, chain.chainId)
+  const safeL2Deployments = getSafeL2SingletonDeployments({ version: safeVersion })
+  const safeL2Address = getChainAgnosticAddress(safeL2Deployments, chain.chainId, deploymentType)
+
+  const safeL1Deployments = getSafeSingletonDeployments({ version: safeVersion })
+  const safeL1Address = getChainAgnosticAddress(safeL1Deployments, chain.chainId, deploymentType)
+
+  const safeFactoryDeployments = getProxyFactoryDeployments({ version: safeVersion })
+  const safeFactoryAddress = getChainAgnosticAddress(safeFactoryDeployments, chain.chainId, deploymentType)
 
   if (!safeL2Address || !safeL1Address || !safeFactoryAddress || !fallbackHandlerAddress) {
     throw new Error('No Safe deployment found')
   }
 
-  const safeToL2SetupDeployments = getSafeToL2SetupDeployments({ version: '1.4.1', network: chain.chainId })
-  const safeToL2SetupAddress = getCanonicalOrFirstAddress(safeToL2SetupDeployments, chain.chainId)
+  const safeToL2SetupDeployments = getSafeToL2SetupDeployments({ version: '1.4.1' })
+  const safeToL2SetupAddress = getChainAgnosticAddress(safeToL2SetupDeployments, chain.chainId, deploymentType)
   const safeToL2SetupInterface = Safe_to_l2_setup__factory.createInterface()
 
   // Only do migration if the chain supports multiChain deployments and has a SafeToL2Setup deployment

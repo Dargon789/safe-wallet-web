@@ -2,10 +2,10 @@ import { Provider } from 'react-redux'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import * as router from 'next/router'
 
-import * as web3 from '@/hooks/wallets/web3'
+import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import * as notifications from './notifications'
 import { act, renderHook, getAppName } from '@/tests/test-utils'
-import { TxModalContext } from '@/components/tx-flow'
+import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import useSafeWalletProvider, { useTxFlowApi } from './useSafeWalletProvider'
 import { RpcErrorCode, SafeWalletProvider } from '.'
 import type { RootState } from '@/store'
@@ -15,10 +15,9 @@ import { faker } from '@faker-js/faker'
 import { Interface } from 'ethers'
 import { getCreateCallDeployment } from '@safe-global/safe-deployments'
 import * as chainHooks from '@/hooks/useChains'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { chainBuilder } from '@/tests/builders/chains'
-import useAllSafes from '@/features/myAccounts/hooks/useAllSafes'
-import { useGetHref } from '@/features/myAccounts/hooks/useGetHref'
-import { wcPopupStore, wcChainSwitchStore, walletConnectInstance } from '@/features/walletconnect'
+import { useAllSafes, useGetHref } from '@/hooks/safes'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const createMockStore = <T,>(initialValue: T) => {
@@ -36,39 +35,54 @@ const createMockStore = <T,>(initialValue: T) => {
 }
 
 const mockWcPopupStore = createMockStore<boolean>(false)
-const mockWcChainSwitchStore = createMockStore<unknown>(undefined)
+
+const mockWcChainSwitchStore = createMockStore<
+  | {
+      appInfo: unknown
+      chain: { chainId: string }
+      safes: unknown[]
+      onSelectSafe: (safe: unknown) => Promise<void>
+      onCancel: () => void
+    }
+  | undefined
+>(undefined)
 const mockWalletConnectInstance = {
   init: jest.fn(),
   updateSessions: jest.fn().mockResolvedValue(undefined),
 }
 
-jest.mock('@/features/walletconnect', () => {
-  return {
-    __esModule: true,
-    get wcPopupStore() {
-      return mockWcPopupStore
-    },
-    get wcChainSwitchStore() {
-      return mockWcChainSwitchStore
-    },
-    get walletConnectInstance() {
-      return mockWalletConnectInstance
-    },
-  }
-})
-
-const updateSessionsMock = walletConnectInstance.updateSessions as jest.MockedFunction<
-  (typeof walletConnectInstance)['updateSessions']
->
-
-updateSessionsMock.mockResolvedValue()
-
-jest.mock('@/features/myAccounts/hooks/useAllSafes', () => ({
-  __esModule: true,
-  default: jest.fn(),
+// Mock useLoadFeature to return the WalletConnect feature (flat structure)
+jest.mock('@/features/__core__', () => ({
+  useLoadFeature: jest.fn(() => ({
+    wcPopupStore: mockWcPopupStore,
+    wcChainSwitchStore: mockWcChainSwitchStore,
+    walletConnectInstance: mockWalletConnectInstance,
+  })),
+  createFeatureHandle: jest.fn((name: string) => ({
+    name,
+    useIsEnabled: () => true,
+    load: jest.fn(),
+  })),
 }))
 
-jest.mock('@/features/myAccounts/hooks/useGetHref', () => ({
+// Mock the feature handle export (not used directly, but imported)
+jest.mock('@/features/walletconnect', () => ({
+  WalletConnectFeature: {
+    name: 'walletconnect',
+    useIsEnabled: () => true,
+    load: jest.fn(),
+  },
+}))
+
+const updateSessionsMock = mockWalletConnectInstance.updateSessions as jest.MockedFunction<
+  typeof mockWalletConnectInstance.updateSessions
+>
+
+updateSessionsMock.mockResolvedValue(undefined)
+
+jest.mock('@/hooks/safes', () => ({
+  __esModule: true,
+  useAllSafes: jest.fn(),
   useGetHref: jest.fn(),
 }))
 
@@ -114,8 +128,8 @@ describe('useSafeWalletProvider', () => {
       query: { safe: `${chain.shortName}:${address}` },
     }))
 
-    wcPopupStore.setStore(false)
-    wcChainSwitchStore.setStore(undefined)
+    mockWcPopupStore._reset(false)
+    mockWcChainSwitchStore._reset(undefined)
   })
 
   describe('useSafeWalletProvider', () => {
@@ -166,7 +180,11 @@ describe('useSafeWalletProvider', () => {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
         wrapper: ({ children }) => (
           <Provider store={makeStore(undefined, { skipBroadcast: true })}>
-            <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -213,7 +231,11 @@ describe('useSafeWalletProvider', () => {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
         wrapper: ({ children }) => (
           <Provider store={testStore}>
-            <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -255,7 +277,11 @@ describe('useSafeWalletProvider', () => {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
         wrapper: ({ children }) => (
           <Provider store={makeStore(undefined, { skipBroadcast: true })}>
-            <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -327,7 +353,11 @@ describe('useSafeWalletProvider', () => {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
         wrapper: ({ children }) => (
           <Provider store={makeStore(undefined, { skipBroadcast: true })}>
-            <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -433,12 +463,16 @@ describe('useSafeWalletProvider', () => {
 
       const store = makeStore({} as Partial<RootState>, { skipBroadcast: true })
 
-      wcPopupStore.setStore(true)
+      mockWcPopupStore.setStore(true)
 
       const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
         wrapper: ({ children }) => (
           <Provider store={store}>
-            <TxModalContext.Provider value={{ setTxFlow: jest.fn() } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: jest.fn(), setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -447,7 +481,7 @@ describe('useSafeWalletProvider', () => {
 
       expect(promise).toBeInstanceOf(Promise)
 
-      const request = wcChainSwitchStore.getStore()
+      const request = mockWcChainSwitchStore.getStore()
       expect(request).toBeDefined()
       expect(request?.safes).toEqual([safeItem])
       expect(request?.chain.chainId).toBe('5')
@@ -461,8 +495,8 @@ describe('useSafeWalletProvider', () => {
       })
 
       await expect(promise).resolves.toBeNull()
-      expect(wcChainSwitchStore.getStore()).toBeUndefined()
-      expect(wcPopupStore.getStore()).toBe(true)
+      expect(mockWcChainSwitchStore.getStore()).toBeUndefined()
+      expect(mockWcPopupStore.getStore()).toBe(true)
       expect(updateSessionsMock).toHaveBeenCalledWith('5', safeItem.address)
       expect(mockPush).toHaveBeenCalledWith({
         pathname: '/',
@@ -495,7 +529,11 @@ describe('useSafeWalletProvider', () => {
       const { result } = renderHook(() => useTxFlowApi('1', currentSafeAddress), {
         wrapper: ({ children }) => (
           <Provider store={store}>
-            <TxModalContext.Provider value={{ setTxFlow: jest.fn() } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: jest.fn(), setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -503,8 +541,8 @@ describe('useSafeWalletProvider', () => {
       const promise = result.current?.switchChain('0x5', appInfo)
 
       expect(promise).toBeInstanceOf(Promise)
-      expect(wcChainSwitchStore.getStore()).toBeUndefined()
-      expect(wcPopupStore.getStore()).toBe(false)
+      expect(mockWcChainSwitchStore.getStore()).toBeUndefined()
+      expect(mockWcPopupStore.getStore()).toBe(false)
 
       await act(async () => {
         await expect(promise).resolves.toBeNull()
@@ -541,7 +579,11 @@ describe('useSafeWalletProvider', () => {
       const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
         wrapper: ({ children }) => (
           <Provider store={store}>
-            <TxModalContext.Provider value={{ setTxFlow: jest.fn() } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: jest.fn(), setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -549,9 +591,9 @@ describe('useSafeWalletProvider', () => {
       const promise = result.current?.switchChain('0x5', appInfo)
 
       expect(promise).toBeInstanceOf(Promise)
-      expect(wcPopupStore.getStore()).toBe(true)
+      expect(mockWcPopupStore.getStore()).toBe(true)
 
-      const request = wcChainSwitchStore.getStore()
+      const request = mockWcChainSwitchStore.getStore()
       expect(request).toBeDefined()
       expect(request?.chain.chainId).toBe('5')
       expect(request?.safes).toEqual([safeItem])
@@ -566,8 +608,8 @@ describe('useSafeWalletProvider', () => {
         code: RpcErrorCode.USER_REJECTED,
         message: 'User rejected chain switch',
       })
-      expect(wcChainSwitchStore.getStore()).toBeUndefined()
-      expect(wcPopupStore.getStore()).toBe(false)
+      expect(mockWcChainSwitchStore.getStore()).toBeUndefined()
+      expect(mockWcPopupStore.getStore()).toBe(false)
       expect(updateSessionsMock).not.toHaveBeenCalled()
       expect(mockPush).not.toHaveBeenCalled()
     })
@@ -597,14 +639,18 @@ describe('useSafeWalletProvider', () => {
       const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
         wrapper: ({ children }) => (
           <Provider store={store}>
-            <TxModalContext.Provider value={{ setTxFlow: jest.fn() } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: jest.fn(), setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
 
       const promise = result.current?.switchChain('0x5', appInfo)
 
-      const request = wcChainSwitchStore.getStore()
+      const request = mockWcChainSwitchStore.getStore()
       expect(request).toBeDefined()
 
       await act(async () => {
@@ -616,14 +662,14 @@ describe('useSafeWalletProvider', () => {
       })
 
       await expect(promise).resolves.toBeNull()
-      expect(wcChainSwitchStore.getStore()).toBeUndefined()
-      expect(wcPopupStore.getStore()).toBe(false)
+      expect(mockWcChainSwitchStore.getStore()).toBeUndefined()
+      expect(mockWcPopupStore.getStore()).toBe(false)
 
       expect(updateSessionsMock).toHaveBeenCalledWith('5', safeItem.address)
 
       request?.onCancel()
 
-      expect(wcChainSwitchStore.getStore()).toBeUndefined()
+      expect(mockWcChainSwitchStore.getStore()).toBeUndefined()
       expect(mockPush).toHaveBeenCalledWith({
         pathname: '/',
         query: { safe: 'gor:0x1234567890000000000000000000000000000000' },
@@ -670,7 +716,7 @@ describe('useSafeWalletProvider', () => {
                 chainName: 'Goerli',
                 zk: false,
                 beaconChainExplorerUriTemplate: {},
-              } as any,
+              } as unknown as Chain,
             ],
             loading: false,
             loaded: true,
@@ -683,7 +729,11 @@ describe('useSafeWalletProvider', () => {
       const { result } = renderHook(() => useTxFlowApi('5', safes[0].address), {
         wrapper: ({ children }) => (
           <Provider store={store}>
-            <TxModalContext.Provider value={{ setTxFlow: jest.fn() } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: jest.fn(), setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -691,7 +741,7 @@ describe('useSafeWalletProvider', () => {
       const firstPromise = result.current?.switchChain('0x5', appInfo)
       expect(firstPromise).toBeInstanceOf(Promise)
 
-      const firstRequest = wcChainSwitchStore.getStore()
+      const firstRequest = mockWcChainSwitchStore.getStore()
       expect(firstRequest?.safes).toEqual(safes)
 
       await act(async () => {
@@ -715,7 +765,7 @@ describe('useSafeWalletProvider', () => {
       const secondPromise = result.current?.switchChain('0x5', appInfo)
       expect(secondPromise).toBeInstanceOf(Promise)
 
-      const secondRequest = wcChainSwitchStore.getStore()
+      const secondRequest = mockWcChainSwitchStore.getStore()
       expect(secondRequest?.safes).toEqual(safes)
 
       await act(async () => {
@@ -737,9 +787,12 @@ describe('useSafeWalletProvider', () => {
     it('should proxy RPC calls', async () => {
       const mockSend = jest.fn(() => Promise.resolve({ result: '0x' }))
 
-      jest.spyOn(web3 as any, 'useWeb3ReadOnly').mockImplementation(() => ({
-        send: mockSend,
-      }))
+      jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockImplementation(
+        () =>
+          ({
+            send: mockSend,
+          }) as unknown as ReturnType<typeof web3ReadOnly.useWeb3ReadOnly>,
+      )
 
       const { result } = renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'))
 

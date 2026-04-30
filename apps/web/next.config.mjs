@@ -9,6 +9,7 @@ import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import { readFile } from 'fs/promises'
 import { fileURLToPath } from 'url'
 import { execSync } from 'child_process'
+import { SriManifestWebpackPlugin } from './plugins/sri-manifest-webpack-plugin.mjs'
 
 let withRspack = null
 if (process.env.USE_RSPACK === '1') {
@@ -69,19 +70,28 @@ const withPWA = withPWAInit({
 const isProd = process.env.NODE_ENV === 'production'
 const enableExperimentalOptimizations = process.env.ENABLE_EXPERIMENTAL_OPTIMIZATIONS === '1'
 
+let appVersion = pkg.version
+
+// Pin volatile values for visual regression builds to avoid Chromatic diffs
+if (process.env.VISUAL_REGRESSION_BUILD === 'true') {
+  commitHash = 'vistest'
+  appVersion = 'istest' // UI prepends 'v' → displays 'vistest'
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export', // static site export
 
-  transpilePackages: ['@safe-global/store'],
+  transpilePackages: ['@safe-global/store', '@safe-global/theme'],
   images: {
     unoptimized: true,
   },
 
   env: {
     NEXT_PUBLIC_COMMIT_HASH: commitHash,
-    NEXT_PUBLIC_APP_VERSION: pkg.version,
+    NEXT_PUBLIC_APP_VERSION: process.env.VISUAL_REGRESSION_BUILD === 'true' ? 'vistest' : pkg.version,
     NEXT_PUBLIC_APP_HOMEPAGE: pkg.homepage,
+    VISUAL_REGRESSION_BUILD: process.env.VISUAL_REGRESSION_BUILD || '',
   },
 
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
@@ -93,14 +103,7 @@ const nextConfig = {
   ...(isProd || enableExperimentalOptimizations
     ? {
         experimental: {
-          optimizePackageImports: [
-            '@mui/material',
-            '@mui/icons-material',
-            'lodash',
-            'date-fns',
-            '@sentry/react',
-            '@gnosis.pm/zodiac',
-          ],
+          optimizePackageImports: ['@mui/material', '@mui/icons-material', 'lodash', 'date-fns', '@gnosis.pm/zodiac'],
         },
       }
     : {}),
@@ -150,6 +153,11 @@ const nextConfig = {
         },
       }
       config.optimization.minimize = false
+    }
+
+    // Add SRI manifest plugin (production only, skip for Cypress tests)
+    if (!dev && process.env.NODE_ENV !== 'cypress') {
+      config.plugins.push(new SriManifestWebpackPlugin())
     }
 
     return config
