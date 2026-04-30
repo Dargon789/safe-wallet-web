@@ -1,4 +1,7 @@
-import WalletLogin from '@/components/welcome/WelcomeLogin/WalletLogin'
+import WalletLogin, {
+  type WalletLoginButtonStyle,
+  type WalletLoginButtonText,
+} from '@/components/welcome/WelcomeLogin/WalletLogin'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { useSiwe } from '@/services/siwe/useSiwe'
@@ -9,14 +12,33 @@ import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useCurrentSpaceId } from '@/features/spaces'
+import useWallet from '@/hooks/wallets/useWallet'
+import { getWalletConnectLabel, type ConnectedWallet } from '@/hooks/wallets/useOnboard'
+import { isSmartContractWallet, isLedger } from '@/utils/wallets'
+
+const getSignInErrorMessage = async (wallet: ConnectedWallet | null): Promise<string> => {
+  if (wallet?.address && (await isSmartContractWallet(wallet.chainId, wallet.address))) {
+    const walletName = getWalletConnectLabel(wallet) || wallet.label
+    return `${walletName} for logging into Workspace is not supported at the moment.`
+  }
+
+  if (wallet && isLedger(wallet)) {
+    return 'Ledger for logging into Workspace is not supported at the moment.'
+  }
+
+  return 'Something went wrong while trying to sign in'
+}
 
 interface SignInButtonProps {
   redirectLoading: boolean
   afterSignIn: () => void
+  buttonStyle?: WalletLoginButtonStyle
+  buttonText?: WalletLoginButtonText
 }
 
-const SignInButton = ({ afterSignIn, redirectLoading = false }: SignInButtonProps) => {
+const SignInButton = ({ afterSignIn, redirectLoading = false, buttonStyle, buttonText }: SignInButtonProps) => {
   const dispatch = useAppDispatch()
+  const wallet = useWallet()
   const { signIn, loading } = useSiwe()
   const spaceId = useCurrentSpaceId()
 
@@ -41,6 +63,8 @@ const SignInButton = ({ afterSignIn, redirectLoading = false }: SignInButtonProp
         afterSignIn()
       }
     } catch (error) {
+      const errorMessage = await getSignInErrorMessage(wallet)
+
       trackEvent(SPACE_EVENTS.SPACES_SIWE_FAILURE, {
         [MixpanelEventParams.FAILURE_REASON]: error instanceof Error ? error.message : String(error),
       })
@@ -48,7 +72,7 @@ const SignInButton = ({ afterSignIn, redirectLoading = false }: SignInButtonProp
 
       dispatch(
         showNotification({
-          message: `Something went wrong while trying to sign in`,
+          message: errorMessage,
           variant: 'error',
           groupKey: 'sign-in-failed',
         }),
@@ -61,7 +85,8 @@ const SignInButton = ({ afterSignIn, redirectLoading = false }: SignInButtonProp
       onLogin={handleLogin}
       onContinue={handleSignIn}
       isLoading={loading || redirectLoading}
-      buttonText="Sign in with"
+      buttonText={buttonText}
+      buttonStyle={buttonStyle}
     />
   )
 }
