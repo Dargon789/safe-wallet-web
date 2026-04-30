@@ -12,12 +12,15 @@ const injectedRtkApi = api
       }),
       authGetNonceV1: build.query<AuthGetNonceV1ApiResponse, AuthGetNonceV1ApiArg>({
         query: () => ({ url: `/v1/auth/nonce` }),
+        providesTags: ['auth'],
       }),
       authVerifyV1: build.mutation<AuthVerifyV1ApiResponse, AuthVerifyV1ApiArg>({
         query: (queryArg) => ({ url: `/v1/auth/verify`, method: 'POST', body: queryArg.siweDto }),
+        invalidatesTags: ['auth'],
       }),
       authLogoutV1: build.mutation<AuthLogoutV1ApiResponse, AuthLogoutV1ApiArg>({
         query: () => ({ url: `/v1/auth/logout`, method: 'POST' }),
+        invalidatesTags: ['auth'],
       }),
       authLogoutWithRedirectV1: build.mutation<AuthLogoutWithRedirectV1ApiResponse, AuthLogoutWithRedirectV1ApiArg>({
         query: (queryArg) => ({ url: `/v1/auth/logout/redirect`, method: 'POST', body: queryArg.logoutDto }),
