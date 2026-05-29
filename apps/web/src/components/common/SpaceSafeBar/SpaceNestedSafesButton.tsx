@@ -3,7 +3,7 @@ import type { ReactElement } from 'react'
 import { GitMerge } from 'lucide-react'
 
 import { NestedSafesPopover } from '@/components/sidebar/NestedSafesPopover'
-import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
+import { useOwnersGetSafesByOwnerV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useNestedSafesVisibility } from '@/hooks/useNestedSafesVisibility'
@@ -12,19 +12,22 @@ import Track from '@/components/common/Track'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
+import { cn } from '@/utils/cn'
 
 function SpaceNestedSafesButton(): ReactElement | null {
   const { safe } = useSafeInfo()
   const { chainId } = safe
   const safeAddress = safe.address.value
   const isEnabled = useHasFeature(FEATURES.NESTED_SAFES)
+  const isDisabled = useIsSafeBarControlDisabled()
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
 
-  const { currentData: ownedSafes } = useOwnersGetAllSafesByOwnerV2Query(
-    { ownerAddress: safeAddress },
+  const { currentData: ownedSafes } = useOwnersGetSafesByOwnerV1Query(
+    { chainId, ownerAddress: safeAddress },
     { skip: !isEnabled || !safeAddress },
   )
-  const rawNestedSafes = ownedSafes?.[chainId] ?? []
+  const rawNestedSafes = ownedSafes?.safes ?? []
   const { visibleSafes, allSafesWithStatus, hasCompletedCuration, isLoading, startFiltering, hasStarted } =
     useNestedSafesVisibility(rawNestedSafes, chainId)
 
@@ -50,10 +53,14 @@ function SpaceNestedSafesButton(): ReactElement | null {
           <TooltipTrigger
             render={
               <button
-                onClick={onClick}
-                className="relative flex items-center border-0 rounded-lg bg-transparent px-2 m-1 cursor-pointer hover:bg-muted/30 transition-colors"
+                onClick={isDisabled ? undefined : onClick}
+                disabled={isDisabled}
+                className={cn(
+                  'relative flex items-center border-0 rounded-lg bg-transparent px-2 m-1 transition-colors',
+                  isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-muted/30',
+                )}
                 aria-label="Nested Safes"
-                data-testid="space-nested-safes-button"
+                data-testid="nested-safes-button"
               />
             }
           >
@@ -63,7 +70,7 @@ function SpaceNestedSafesButton(): ReactElement | null {
               mixpanelParams={{ [MixpanelEventParams.SAFE_SELECTOR_DROPDOWN]: 'Nested Safes' }}
             >
               <div className="relative flex items-center">
-                <GitMerge className="size-5" />
+                <GitMerge className="size-5 text-muted-foreground" />
                 {displayCount > 0 && (
                   <span className="absolute left-[13px] -top-[5px] flex size-[14px] items-center justify-center rounded-full bg-[rgba(18,255,128,0.1)] text-[10px] font-medium leading-none text-secondary-foreground">
                     {displayCount}
@@ -72,7 +79,7 @@ function SpaceNestedSafesButton(): ReactElement | null {
               </div>
             </Track>
           </TooltipTrigger>
-          <TooltipContent>Nested Safes</TooltipContent>
+          <TooltipContent>{isDisabled ? 'Nested Safes are not allowed in this screen' : 'Nested Safes'}</TooltipContent>
         </Tooltip>
       </div>
 

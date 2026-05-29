@@ -1,4 +1,4 @@
-import chains from './chains'
+import chains from '@safe-global/utils/config/chains'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 
 type Environment = 'development' | 'production' | 'test' | 'cypress'
@@ -6,7 +6,12 @@ type Environment = 'development' | 'production' | 'test' | 'cypress'
 export const APP_ENV = process.env.NODE_ENV as Environment
 export const IS_PRODUCTION = process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true'
 export const IS_DEV = APP_ENV === 'development'
-export const IS_TEST_E2E = APP_ENV === 'cypress'
+// NOTE: `next build` rewrites process.env.NODE_ENV to 'production' in client
+// bundles, so the APP_ENV check below only works during `next dev`. For
+// production-built Cypress runs (where the workflow serves the static export)
+// we also honour an explicit NEXT_PUBLIC_IS_TEST_E2E flag, which survives the
+// build because of its NEXT_PUBLIC_ prefix.
+export const IS_TEST_E2E = APP_ENV === 'cypress' || process.env.NEXT_PUBLIC_IS_TEST_E2E === 'true'
 export const COMMIT_HASH = process.env.NEXT_PUBLIC_COMMIT_HASH || ''
 
 // default chain ID's as provided to the environment
@@ -92,7 +97,7 @@ export const DEVELOPER_PORTAL_URL =
 export const SAFE_APPS_THIRD_PARTY_COOKIES_CHECK_URL = 'https://third-party-cookies-check.gnosis-safe.com'
 export const SAFE_APPS_DEMO_SAFE_MAINNET = 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7'
 export const SAFE_APPS_SDK_DOCS_URL =
-  'https://help.safe.global/en/articles/145503-how-to-create-a-safe-app-with-safe-apps-sdk-and-list-it'
+  'https://help.safe.global/articles/6872363437-How-to-create-a-Safe-App-with-Safe-Apps-SDK-and-list-it'
 
 // Google Analytics
 export const PROD_GA_TRACKING_ID = process.env.NEXT_PUBLIC_PROD_GA_TRACKING_ID || ''

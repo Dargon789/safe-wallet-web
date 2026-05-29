@@ -20,7 +20,7 @@ const spaceSaveBtn = '[data-testid="space-save-button"]'
 const spaceDeleteBtn = '[data-testid="space-delete-button"]'
 const spaceConfirmDeleteBtn = '[data-testid="space-confirm-delete-button"]'
 const spaceCard = '[data-testid="space-card"]'
-const spaceVertMenuIcon = '[data-testid="MoreVertIcon"]'
+const spaceCardContextMenuBtn = '[data-testid="space-card-context-menu-button"]'
 const contectMenuRemoveBtn = '[data-testid="remove-button"]'
 
 // -- Dashboard widgets --
@@ -51,7 +51,7 @@ const chainIndicatorNetworkLogoImg = '[data-testid="chain-indicator-network-logo
 
 // -- Safe-level navigation panel --
 const spaceChainSelector = '[data-testid="space-chain-selector"]'
-const safeSelectorTriggerIdenticon = '[data-testid="safe-selector-trigger-identicon"]'
+const safeSelectorTriggerIdenticon = '[data-testid="safe-icon"]'
 const safeSelectorTriggerName = '[data-testid="safe-selector-trigger-name"]'
 const safeSelectorTriggerAddress = '[data-testid="safe-selector-trigger-address"]'
 const safeSelectorBalance = '[data-testid="safe-selector-balance"]'
@@ -59,7 +59,7 @@ const safeSelectorThreshold = '[data-testid="safe-selector-threshold"]'
 const safeLevelNavigation = '[data-testid="safe-level-navigation"]'
 const spaceSafesNavigationBlock = '[data-testid="space-safes-navigation-block"]'
 const spaceChainNavigationButton = '[data-testid="space-chain-navigation-button"]'
-const backToSpaceBtn = '[aria-label="Back to space"]'
+const backToSpaceBtn = '[aria-label="Back to workspace"]'
 const safeLevelNavigationBackToSpaceBtn = `${safeLevelNavigation} ${backToSpaceBtn}`
 
 // -- Space sidebar items --
@@ -105,14 +105,13 @@ const onboardingInviteMembersPath = '/welcome/invite-members'
 // -- Empty dashboard --
 export const gettingStartedLabel = 'Getting started'
 export const addSafeAccountsLabel = 'Add your Safe Accounts'
-export const addAccountBtn = '[data-testid="add-space-account-button"]'
 export const addAccountsModalLabel = 'Add Safe Accounts'
 export const importAddressBookBtn = '[aria-label="Import address book"]'
 export const importAddressBookLabel = 'Import address book'
 export const dashboardAddMemberBtn = '[data-testid="add-member-button"]'
 export const inviteMemberLabel = 'Add member'
 export const learnMoreBtn = '[data-testid="spaces-learn-more-button"]'
-export const exploreSpacesLabel = 'Introducing spaces'
+export const exploreSpacesLabel = 'Introducing workspaces'
 
 // ===========================================
 // Labels & regex patterns
@@ -121,7 +120,6 @@ export const exploreSpacesLabel = 'Introducing spaces'
 const spaceDashboardTotalValueLabelText = 'Total value'
 const viewAllAccountsLabel = 'View all accounts'
 const updateSuccessMsg = 'Updated space name'
-const noSpacesStr = 'No spaces found'
 const formattedSpaceTotalValuePattern = /^\$[\u200a\s]*[\d,]+\.\d{2}$/
 
 export const nonZeroBalanceRegex = /\$[\u200a\s]*[1-9][\d,]*(?:\.\d{2})?/
@@ -130,6 +128,7 @@ export const txDetailsLabel = 'Transaction details'
 export const pendingTxName = 'Send'
 export const pendingTxStatus = 'Needs confirmation'
 export const deleteSpaceConfirmationMsg = (name) => `Deleted space ${name}`
+export const acceptInviteConfirmationMsg = (spaceName) => `Accepted invite to ${spaceName}`
 
 // ===========================================
 // Internal helpers (selectors builders)
@@ -167,7 +166,7 @@ const spaceDashboardWidgetSelectorByTitle = {
 // ===========================================
 
 export function clickOnSignInBtn() {
-  cy.contains('Sign in with').click()
+  cy.get('[data-testid="continue-with-wallet-btn"]').click()
 }
 
 export function waitForSpacesWelcomeReady() {
@@ -178,8 +177,11 @@ export function visitSpaceDashboard(spaceId) {
   cy.visit(constants.spaceDashboardUrl + String(spaceId))
 }
 
-export function clickOnSpaceSelector() {
+export function clickOnSpaceSelector(spaceName) {
   cy.get(spaceSelectorBtn, { timeout: 15000 }).should('be.visible').click()
+  if (spaceName) {
+    cy.get(spaceSelectorMenu).contains(spaceName).click()
+  }
 }
 
 export function disconnectFromSpaceLevel() {
@@ -420,31 +422,30 @@ export function editSpace(newName) {
 export function deleteSpace(name) {
   cy.get(spaceDeleteBtn).click({ force: true })
   cy.get(spaceConfirmDeleteBtn).click()
-  cy.contains(noSpacesStr).should('be.visible')
+  cy.contains(spaceCard, name).should('not.exist')
 }
 
-function deleteAllSpaces() {
-  cy.get('body').then(($body) => {
-    if ($body.find(spaceCard).length > 0) {
-      cy.get(spaceCard)
-        .first()
-        .within(() => {
-          cy.get(spaceVertMenuIcon).click({ force: true })
-        })
-      cy.get(contectMenuRemoveBtn).click({ force: true })
-      cy.get(spaceConfirmDeleteBtn).click()
-      cy.wait(1000)
-      deleteAllSpaces()
-    }
-  })
-}
+const MAX_SPACES = 10
 
 export function ensureReadyToCreateSpace() {
-  cy.get('body').then(($body) => {
-    if ($body.find(spaceCard).length > 0) {
-      deleteAllSpaces()
-    }
-  })
+  // Wait for the page to settle: either the spaces list or the create button must be visible
+  cy.get(`${orgList}, ${createSpaceBtn}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
+
+  // Use the live jQuery collection so the count reflects what's actually in the DOM now
+  cy.get('body')
+    .find(spaceCard)
+    .then(($cards) => {
+      if ($cards.length >= MAX_SPACES) {
+        // At the limit — delete one space to free a slot
+        cy.wrap($cards.first()).within(() => {
+          cy.get(spaceCardContextMenuBtn).click({ force: true })
+        })
+        cy.get(contectMenuRemoveBtn).click({ force: true })
+        cy.get(spaceConfirmDeleteBtn).click()
+        cy.get(spaceCard, { timeout: 10000 }).should('have.length.lessThan', MAX_SPACES)
+      }
+    })
+
   // Wait for either the create button or the create-space form to settle after deletion/redirect
   cy.get(`${createSpaceBtn}, ${orgSpaceInput}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
 }
@@ -503,7 +504,7 @@ function navigateToCreateSpacePage() {
       cy.wait(3000)
       cy.url().then((urlAfterWait) => {
         if (!urlAfterWait.includes(onboardingCreateSpacePath)) {
-          cy.get(createSpaceBtn).should('be.visible').and('be.enabled').click()
+          cy.get(createSpaceBtn).should('be.visible').click()
         }
       })
     }
@@ -513,7 +514,7 @@ function navigateToCreateSpacePage() {
 }
 
 function submitSpaceName(name) {
-  cy.get(orgSpaceInput).should('be.visible').clear().type(name)
+  cy.get(orgSpaceInput).should('be.visible').and('be.enabled').clear().type(name)
   cy.get(createSpaceOnboardingContinueBtn).should('be.enabled').click()
 }
 

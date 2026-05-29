@@ -1,3 +1,4 @@
+import '@/src/features/WalletConnect/shared/compat'
 import '@/src/platform/fetch'
 import '@/src/platform/crypto-shims'
 import '@/src/platform/intl-polyfills'
@@ -37,7 +38,7 @@ import { SigningMonitor } from '@/src/components/SigningMonitor'
 import { ExecutingMonitor } from '@/src/components/ExecutingMonitor'
 import { useDatadogConsent } from '@/src/hooks/useDatadogConsent'
 import { DatadogWrapper } from '@/src/providers/DatadogWrapper'
-import { WalletConnectProvider } from '@/src/features/WalletConnect/context/WalletConnectContext'
+import { AppKitInitializer } from '@/src/features/WalletConnect/Signer/components/AppKitInitializer'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 // Initialize all notification handlers
@@ -145,11 +146,11 @@ function RootLayout() {
       <GestureHandlerRootView>
         <KeyboardProvider>
           <Provider store={store}>
-            <WalletConnectProvider>
-              <DataFetchProvider>
-                <NotificationsProvider>
-                  <PortalProvider shouldAddRootHost>
-                    <PersistGate loading={null} persistor={persistor}>
+            <DataFetchProvider>
+              <NotificationsProvider>
+                <PortalProvider shouldAddRootHost>
+                  <PersistGate loading={null} persistor={persistor}>
+                    <AppKitInitializer>
                       <SafeThemeProvider>
                         <BottomSheetModalProvider>
                           <SafeToastProvider>
@@ -164,11 +165,11 @@ function RootLayout() {
                           </SafeToastProvider>
                         </BottomSheetModalProvider>
                       </SafeThemeProvider>
-                    </PersistGate>
-                  </PortalProvider>
-                </NotificationsProvider>
-              </DataFetchProvider>
-            </WalletConnectProvider>
+                    </AppKitInitializer>
+                  </PersistGate>
+                </PortalProvider>
+              </NotificationsProvider>
+            </DataFetchProvider>
           </Provider>
         </KeyboardProvider>
       </GestureHandlerRootView>
