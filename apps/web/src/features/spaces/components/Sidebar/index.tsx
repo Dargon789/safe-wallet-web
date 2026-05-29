@@ -6,32 +6,47 @@ import { SidebarCommonFooter } from './SidebarCommonFooter'
 import { SidebarProfileSection } from './SidebarProfileSection'
 import type { SpaceSelectorProps } from './types'
 import type { SidebarVariantType } from './variants'
-import css from './styles.module.css'
 
 interface SidebarProps extends SpaceSelectorProps {
   type: SidebarVariantType
+  isLoading?: boolean
+  contained?: boolean
 }
+
+const SIDEBAR_CONTAINER_CLASSNAME = '!p-0 border-r-0 group-data-[side=left]:border-r-0'
+const SIDEBAR_INNER_CLASSNAME = 'rounded-none rounded-tr-[8px] rounded-br-[8px] shadow-none'
 
 export const EnhancedSidebar = ({
   type,
-  spaceName,
   spaceInitial,
   selectedSpace,
   spaces,
+  onSpaceAdded,
+  isLoading = false,
+  contained = false,
 }: SidebarProps): ReactElement => {
   const Variant = getSidebarVariant(type)
   return (
     <Sidebar
       collapsible="icon"
       variant="floating"
-      className="!p-0 border-r-0 group-data-[side=left]:border-r-0 [&_[data-slot=sidebar-inner]]:rounded-none [&_[data-slot=sidebar-inner]]:rounded-tr-[8px] [&_[data-slot=sidebar-inner]]:rounded-br-[8px] [&_[data-slot=sidebar-inner]]:shadow-[0_2px_8px_rgba(23,23,23,0.06)]"
+      contained={contained}
+      containerClassName={SIDEBAR_CONTAINER_CLASSNAME}
+      innerClassName={SIDEBAR_INNER_CLASSNAME}
+      data-testid="sidebar-container"
     >
-      <SidebarHeader className={css.sidebarHeader}>
+      <SidebarHeader>
         <SidebarTopBar />
       </SidebarHeader>
 
-      <Variant spaceName={spaceName} spaceInitial={spaceInitial} selectedSpace={selectedSpace} spaces={spaces} />
-      <SidebarCommonFooter />
+      <Variant
+        spaceInitial={spaceInitial}
+        selectedSpace={selectedSpace}
+        spaces={spaces}
+        onSpaceAdded={onSpaceAdded}
+        isLoading={isLoading}
+      />
+      <SidebarCommonFooter isSafeSidebar={type === 'safe'} />
       <SidebarProfileSection />
     </Sidebar>
   )
