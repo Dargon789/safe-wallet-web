@@ -56,19 +56,26 @@ const getAppLogoUrl = (appUrl: string, { icons = [], iconPath = '' }: AppManifes
 }
 
 const fetchAppManifest = async (appUrl: string, timeout = 5000): Promise<unknown> => {
-  // Define an allowlist of trusted base URLs
-  const trustedBaseUrls = ['https://trusted-domain1.com', 'https://trusted-domain2.com']
+  // Define an allowlist of trusted origins
+  const trustedOrigins = new Set(['https://trusted-domain1.com', 'https://trusted-domain2.com'])
 
-  // Strip URL parameters for fetching the manifest
-  const baseUrl = stripUrlParams(appUrl)
-  const normalizedUrl = trimTrailingSlash(baseUrl)
-
-  // Validate the normalized URL against the allowlist
-  const isTrustedUrl = trustedBaseUrls.some((trustedUrl) => normalizedUrl === trustedUrl || normalizedUrl.startsWith(trustedUrl + '/'))
-  if (!isTrustedUrl) {
-    throw new Error(`Untrusted app URL: ${normalizedUrl}`)
+  let parsedUrl: URL
+  try {
+    parsedUrl = new URL(appUrl)
+  } catch (e) {
+    throw new Error(`Invalid app URL: ${appUrl}`)
   }
 
+  if (parsedUrl.protocol !== 'https:') {
+    throw new Error(`Invalid protocol for app URL: ${parsedUrl.protocol}`)
+  }
+
+  if (!trustedOrigins.has(parsedUrl.origin)) {
+    throw new Error(`Untrusted app URL origin: ${parsedUrl.origin}`)
+  }
+
+  // Strip query/hash while preserving the app path
+  const normalizedUrl = trimTrailingSlash(`${parsedUrl.origin}${parsedUrl.pathname}`)
   const manifestUrl = `${normalizedUrl}/manifest.json`
 
   // A lot of apps are hosted on IPFS and IPFS never times out, so we add our own timeout
