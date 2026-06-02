@@ -15,6 +15,7 @@ enum ErrorCodes {
   _106 = '106: Failed to get connected wallet',
   _107 = '107: Error connecting to the wallet',
   _108 = '108: Error disconnecting the wallet',
+  _109 = '109: Error signing out',
 
   _200 = '200: Tenderly simulation failed',
   _201 = '201: Blockaid scan failed',
@@ -42,6 +43,7 @@ enum ErrorCodes {
   _632 = '632: Error fetching relay task status',
   _633 = '633: Notification (un-)registration failed',
   _640 = '640: Error signing in with Ethereum',
+  _650 = '650: Error syncing counterfactual safes with backend',
 
   _700 = '700: Failed to read from local/session storage',
   _701 = '701: Failed to write to local/session storage',

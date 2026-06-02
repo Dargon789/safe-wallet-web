@@ -3,11 +3,12 @@ import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { FeeParams } from '@/src/hooks/useFeeParams/useFeeParams'
 import { Signer } from '@/src/store/signersSlice'
+import { BIOMETRY_ROTATION_DESCRIPTION, BiometryInvalidationError } from '@/src/services/key-storage'
 
 /**
  * Execution path types for the confirm flow
  */
-export type ExecutionPath = 'ledger' | 'biometrics' | 'standard'
+export type ExecutionPath = 'ledger' | 'walletconnect' | 'biometrics' | 'standard'
 
 /**
  * Determines the execution method based on user selection, relay availability, and signer type
@@ -27,6 +28,11 @@ export const getExecutionMethod = (
   // Ledger signer uses Ledger execution
   if (signer?.type === 'ledger') {
     return ExecutionMethod.WITH_LEDGER
+  }
+
+  // WalletConnect signer uses WC execution
+  if (signer?.type === 'walletconnect') {
+    return ExecutionMethod.WITH_WC
   }
 
   // Default to private key execution
@@ -75,6 +81,11 @@ export const determineExecutionPath = (
     return 'ledger'
   }
 
+  // WalletConnect signer uses standard path (no local key, skip biometrics)
+  if (activeSigner?.type === 'walletconnect') {
+    return 'walletconnect'
+  }
+
   if (!isBiometricsEnabled) {
     return 'biometrics'
   }
@@ -83,11 +94,16 @@ export const determineExecutionPath = (
 }
 
 /**
- * Extracts error message from unknown error
+ * Extracts a user-facing message from an unknown error, mapping biometry
+ * invalidation to the shared re-import copy and falling back to `fallback`
+ * for non-Error throwables.
  */
-export const getErrorMessage = (error: unknown): string => {
+export const getErrorMessage = (error: unknown, fallback = 'Failed to execute transaction'): string => {
+  if (error instanceof BiometryInvalidationError) {
+    return BIOMETRY_ROTATION_DESCRIPTION
+  }
   if (error instanceof Error) {
     return error.message
   }
-  return 'Failed to execute transaction'
+  return fallback
 }

@@ -1,6 +1,5 @@
 import { useState, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
-import { ChevronDown } from 'lucide-react'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import { AccountItem } from '../AccountItem'
 import ChainIndicator from '@/components/common/ChainIndicator'
@@ -10,17 +9,24 @@ import type { Account } from './types'
 
 interface ExpandableAccountItemProps {
   account: Account
+  rowIndex: number
   loading?: boolean
   onItemClick?: (safeAddress: string) => void
 }
 
-const ExpandableAccountItem = ({ account, loading = false, onItemClick }: ExpandableAccountItemProps): ReactElement => {
+const ExpandableAccountItem = ({
+  account,
+  rowIndex,
+  loading = false,
+  onItemClick,
+}: ExpandableAccountItemProps): ReactElement => {
   const router = useRouter()
   const [open, setOpen] = useState(false)
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
       <CollapsibleTrigger
+        data-testid={`space-dashboard-accounts-row-${rowIndex}`}
         className={cn(
           'flex w-full flex-wrap items-center gap-x-4 gap-y-2 rounded-sm py-4 pl-4 pr-6 cursor-pointer transition-colors hover:bg-muted/50',
           account.highlighted && 'bg-background',
@@ -29,14 +35,11 @@ const ExpandableAccountItem = ({ account, loading = false, onItemClick }: Expand
         <AccountItemContent account={account}>
           <div className="flex items-center gap-2">
             <AccountItem.Balance fiatTotal={account.fiatTotal} isLoading={!account.fiatTotal && loading} />
-            <ChevronDown
-              className={cn('size-4 text-muted-foreground transition-transform duration-200', open && 'rotate-180')}
-            />
           </div>
         </AccountItemContent>
       </CollapsibleTrigger>
 
-      <CollapsibleContent>
+      <CollapsibleContent data-testid={`space-dashboard-accounts-expanded-${rowIndex}`}>
         <div className="flex flex-col">
           {account.subAccounts?.map((sub) => (
             <div

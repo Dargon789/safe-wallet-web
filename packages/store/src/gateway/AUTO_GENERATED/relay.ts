@@ -15,18 +15,23 @@ const injectedRtkApi = api
         providesTags: ['relay'],
       }),
       relayGetRelaysRemainingV1: build.query<RelayGetRelaysRemainingV1ApiResponse, RelayGetRelaysRemainingV1ApiArg>({
-        query: (queryArg) => ({ url: `/v1/chains/${queryArg.chainId}/relay/${queryArg.safeAddress}` }),
+        query: (queryArg) => ({
+          url: `/v1/chains/${queryArg.chainId}/relay/${queryArg.safeAddress}`,
+          params: {
+            safeTxHash: queryArg.safeTxHash,
+          },
+        }),
         providesTags: ['relay'],
       }),
     }),
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type RelayRelayV1ApiResponse = /** status 200 Transaction relayed successfully with transaction hash */ Relay
+export type RelayRelayV1ApiResponse = /** status 200 Transaction relayed successfully */ Relay
 export type RelayRelayV1ApiArg = {
   /** Chain ID where the Safe transaction will be executed */
   chainId: string
-  /** Transaction data to relay including Safe address, transaction details, and signatures */
+  /** Transaction data to relay. safeTxHash is required on relay-fee chains and must correspond to the to + data fields. */
   relayDto: RelayDto
 }
 export type RelayGetTaskStatusV1ApiResponse = /** status 200 Task status retrieved successfully */ RelayTaskStatus
@@ -43,6 +48,8 @@ export type RelayGetRelaysRemainingV1ApiArg = {
   chainId: string
   /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
+  /** Safe transaction hash (0x prefixed hex string). Required on relay-fee chains to check per-transaction eligibility with the fee service. Optional on daily-limit and no-fee-campaign chains. */
+  safeTxHash?: string
 }
 export type Relay = {
   taskId: string
@@ -53,6 +60,8 @@ export type RelayDto = {
   data: string
   /** Accepted for backward compatibility and validation; not forwarded to the relay provider (Gelato). */
   gasLimit?: string | null
+  /** Safe transaction hash for relay-fee eligibility check */
+  safeTxHash?: string
 }
 export type RelayTaskStatusReceipt = {
   transactionHash: string

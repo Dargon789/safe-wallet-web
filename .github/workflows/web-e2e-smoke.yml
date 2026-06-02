@@ -31,35 +31,16 @@ jobs:
         containers: [1, 2, 3, 4, 5]
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
         with:
           fetch-depth: 0
-
-      - name: Split specs across containers
-        id: specs
-        shell: bash
-        run: |
-          mapfile -t all_specs < <(ls apps/web/cypress/e2e/smoke/*.cy.js | sort)
-          total=${#all_specs[@]}
-          container=${{ matrix.containers }}
-          num_containers=5
-          selected=()
-          for (( i=0; i<total; i++ )); do
-            if (( (i % num_containers) + 1 == container )); then
-              # Convert absolute path to relative from apps/web/
-              spec="${all_specs[$i]#apps/web/}"
-              selected+=("$spec")
-            fi
-          done
-          echo "specs=$(IFS=,; echo "${selected[*]}")" >> "$GITHUB_OUTPUT"
 
       - uses: ./.github/actions/cypress
         with:
           secrets: ${{ toJSON(secrets) }}
-          spec: ${{ steps.specs.outputs.specs }}
+          spec: cypress/e2e/smoke/*.cy.js
           group: 'Smoke tests'
           tag: 'smoke'
-          record: 'false'
 
   notify:
     if: failure() && github.event_name == 'push'
@@ -68,7 +49,7 @@ jobs:
     permissions: {}
     steps:
       - name: Notify Slack on failure
-        uses: slackapi/slack-github-action@v2.1.1
+        uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_DEV_ALERT }}
           webhook-type: incoming-webhook
