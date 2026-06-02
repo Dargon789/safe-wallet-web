@@ -72,6 +72,15 @@ export type RelayTaskStatus = {
   /** On-chain receipt. Only present when status is 200 (Included) or 500 (Reverted) */
   receipt?: RelayTaskStatusReceipt
 }
+export type RelayTaskStatusReceipt = {
+  transactionHash: string
+}
+export type RelayTaskStatus = {
+  /** Relay task status code: 100=Pending, 110=Submitted, 200=Included, 400=Rejected, 500=Reverted */
+  status: 100 | 110 | 200 | 400 | 500
+  /** On-chain receipt. Only present when status is 200 (Included) or 500 (Reverted) */
+  receipt?: RelayTaskStatusReceipt
+}
 export type RelaysRemaining = {
   remaining: number
   limit: number

@@ -59,6 +59,18 @@ jobs:
             exit 1
           fi
 
+      - name: Verify PR commits are in main
+        if: github.event.pull_request.merged != true
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if git merge-base --is-ancestor "$PR_HEAD_SHA" HEAD; then
+            echo "PR head commit is in main - proceeding"
+          else
+            echo "::error::PR head commit is NOT in main - aborting"
+            exit 1
+          fi
+
       - name: Extract version
         id: version
         run: |
