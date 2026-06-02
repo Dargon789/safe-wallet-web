@@ -2,7 +2,7 @@
 name: Task
 about: Internal implementation task – only for the Safe team!
 title: ''
-labels: 'task'
+labels: ''
 assignees: ''
 
 ---
