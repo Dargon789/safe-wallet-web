@@ -118,6 +118,10 @@ apps/tx-builder/vite.config.d.ts
 todos/*
 /docs/plans/
 /docs/todos/
+/docs/brainstorms/
+/docs/superpowers/
 
 .codemod
 .serena
+# Claude Code worktrees
+.claude/worktrees/

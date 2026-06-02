@@ -21,7 +21,7 @@ describe('Spaces basic flow tests', () => {
 
   it('Verify a user can sign in, create, rename and delete an organisation', () => {
     const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
-    const newSpaceName = 'Renamed Space'
+    const newSpaceName = 'Renamed Space' + Math.random().toString(36).substring(2, 12)
 
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
@@ -52,6 +52,28 @@ describe('Spaces basic flow tests', () => {
     space.addAccountManually(staticSafes.SEP_STATIC_SAFE_35.substring(4), constants.networks.sepolia)
   })
 
+  it('Verify that re-signing in lands on the single space, not on /welcome/create-space', () => {
+    const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
+
+    wallet.connectSigner(admin)
+    space.clickOnSignInBtn()
+    space.ensureReadyToCreateSpace()
+    cy.wait(3000)
+    space.createSpaceViaOnboardingWithSkip(spaceName)
+
+    space.signOutViaSidebarProfile()
+    wallet.connectSigner(admin)
+    space.clickOnSignInBtn()
+
+    // With exactly one space, sign-in should short-circuit straight to the
+    // space dashboard. Crucially we must NOT be bounced into /welcome/create-space
+    // (the regressed re-login behavior).
+    space.verifyOnSingleSpaceDashboard(spaceName)
+
+    space.goToSpaceSettings()
+    space.deleteSpace(spaceName)
+  })
+
   it('Verify a new member can be invited and accept the invite', () => {
     const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
     const memberName = 'Member ' + Math.random().toString(36).substring(2, 12)
@@ -70,8 +92,8 @@ describe('Spaces basic flow tests', () => {
     space.disconnectFromSpaceLevel()
     wallet.connectSigner(user)
     space.clickOnSignInBtn()
-    main.verifyElementByTextExists('Pending invitations')
-    cy.reload() // Required to trigger the invite
+    main.verifyElementByTextExists(`You were invited to join ${spaceName}`)
     space.acceptInvite(newInviteName)
+    main.verifyElementByTextExists(space.acceptInviteConfirmationMsg(spaceName))
   })
 })

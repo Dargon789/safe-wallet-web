@@ -1,9 +1,7 @@
 import { useContext, useEffect, useState, type ReactElement } from 'react'
 import classnames from 'classnames'
-import { AnimatePresence, motion } from 'motion/react'
-
 import Topbar from '@/components/common/Header/Topbar'
-import Header from '@/components/common/Header'
+import SafeLogo from '@/components/common/SafeLogo'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import css from './styles.module.css'
 import SafeLoadingError from '../SafeLoadingError'
@@ -13,27 +11,39 @@ import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { TxModalContext } from '@/components/tx-flow'
 import { useLoadFeature } from '@/features/__core__'
 import { BatchingFeature } from '@/features/batching'
+import { SpacesFeature } from '@/features/spaces'
 import { AppRoutes } from '@/config/routes'
-import HelpMenu from '@/components/common/HelpMenu'
 import Breadcrumbs from '@/components/common/Breadcrumbs'
 import { useParentSafe } from '@/hooks/useParentSafe'
-import SpaceSafeBar from '@/components/common/SpaceSafeBar'
 import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
+import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
+import { useIsTopbarElevated } from '@/hooks/useTopbarElevation'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
+import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
+import { useIsAuthGateBlocking } from '@/hooks/useIsAuthGateBlocking'
+import { useIsSignedIn } from '@/hooks/useIsSignedIn'
+import { isAlwaysPublic } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
+import ClassicViewToast from '@/components/common/ClassicViewToast'
+import ClassicViewWarningBorder from '@/components/common/ClassicViewWarningBorder'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
   AppRoutes.welcome.selectSafes,
   AppRoutes.welcome.inviteMembers,
+  AppRoutes.welcome.survey,
 ]
 
+const STATIC_PAGE_ROUTES = [AppRoutes.terms, AppRoutes.privacy, AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
+
 const NO_HEADER_ROUTES = [
-  AppRoutes.safeLabsTerms,
   AppRoutes.welcome.index,
   AppRoutes.welcome.createSpace,
   AppRoutes.welcome.selectSafes,
   AppRoutes.welcome.inviteMembers,
+  AppRoutes.welcome.survey,
   AppRoutes.spaces.createSpace,
+  ...STATIC_PAGE_ROUTES,
 ]
 
 const PageLayout = ({ pathname, children }: { pathname: string; children: ReactElement }): ReactElement => {
@@ -43,14 +53,25 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const [isBatchOpen, setBatchOpen] = useState<boolean>(false)
   const { txFlow, setFullWidth } = useContext(TxModalContext)
   const { BatchSidebar } = useLoadFeature(BatchingFeature)
-  const isSafeLabsTermsPage = pathname === AppRoutes.safeLabsTerms
-  const hideHeader = NO_HEADER_ROUTES.includes(pathname)
+  const { SelectSafeModal } = useLoadFeature(SpacesFeature)
+  const isStaticPage = STATIC_PAGE_ROUTES.includes(pathname)
+  const isRequireLoginEnabled = useIsRequireLoginEnabled() === true
+  const isSignedIn = useIsSignedIn()
+  // /welcome/spaces renders the sign-in form when signed out, the legacy
+  // workspaces list when signed in. Only the list needs the Topbar.
+  const hideHeader =
+    NO_HEADER_ROUTES.includes(pathname) ||
+    (pathname === AppRoutes.welcome.spaces && (isRequireLoginEnabled || !isSignedIn))
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
   const isSpaceRoute = useIsSpaceRoute()
+  const urlSafeAddress = useSafeAddressFromUrl()
+  const isSettingsWithoutSafe = pathname.startsWith(AppRoutes.settings.index) && !urlSafeAddress
   const parentSafe = useParentSafe()
   const menuToggleHandler = isSidebarRoute ? setSidebarOpen : undefined
 
   useRouterGuard({ useGuard: useFlowActivationGuard })
+  useKeyboardObserver()
+  const isTopbarElevated = useIsTopbarElevated()
 
   // Hide sidebar when transaction flow is open
   const isSidebarVisible = isSidebarOpen && !txFlow
@@ -59,18 +80,42 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
     setFullWidth(!isSidebarVisible)
   }, [isSidebarVisible, setFullWidth])
 
+  // While the require-login gate is keeping the user out of a protected page,
+  // render nothing instead of letting the page's data hooks mount and fire
+  // pending-tx / message toasts before the router guard's redirect resolves.
+  // The login page, onboarding flow and always-public pages stay rendered.
+  const isGateBlocking = useIsAuthGateBlocking()
+  const isGateBlockedRoute =
+    isGateBlocking &&
+    !isAlwaysPublic(pathname) &&
+    pathname !== AppRoutes.welcome.spaces &&
+    !isOnboardingRoute &&
+    !isStaticPage
+  if (isGateBlockedRoute) {
+    return <></>
+  }
+
   return (
     <>
-      {!hideHeader && isSpaceRoute && (
-        <div className={css.topbar}>
-          <Topbar onMenuToggle={menuToggleHandler} />
+      <ClassicViewToast />
+      <ClassicViewWarningBorder />
+
+      {!hideHeader && (
+        <div
+          className={classnames(css.topbar, {
+            [css.topbarCollapsed]: isSpaceRoute && !isSpacesSidebarExpanded,
+            [css.topbarNoSidebar]: !isSidebarVisible || !isSidebarRoute,
+            [css.topbarElevated]: isTopbarElevated,
+          })}
+        >
+          <Topbar onMenuToggle={menuToggleHandler} onBatchToggle={setBatchOpen} />
         </div>
       )}
 
-      {!hideHeader && !isSpaceRoute && (
-        <header className={css.header}>
-          <Header onMenuToggle={menuToggleHandler} onBatchToggle={setBatchOpen} />
-        </header>
+      {isStaticPage && (
+        <div className="px-6 py-4">
+          <SafeLogo />
+        </div>
       )}
 
       {isSidebarRoute ? (
@@ -86,39 +131,25 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
           [css.mainNoSidebar]: !isSidebarVisible || !isSidebarRoute,
           [css.mainAnimated]: isSidebarRoute && isAnimated,
           [css.mainNoHeader]: hideHeader,
-          [css.mainSpace]: isSpaceRoute,
+          [css.mainSpace]: !hideHeader,
+          [css.mainSpaceCompact]: isSettingsWithoutSafe,
           [css.mainSpaceCollapsed]: isSpaceRoute && !isSpacesSidebarExpanded,
         })}
       >
         <div className={css.content}>
           <SafeLoadingError>
             {!hideHeader && parentSafe && <Breadcrumbs />}
-            {!hideHeader && !isSpaceRoute && pathname === AppRoutes.home && <SpaceSafeBar />}
-            {isOnboardingRoute ? (
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={pathname}
-                  className={css.onboardingMotion}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.6, delay: 0.2, ease: 'easeInOut' }}
-                >
-                  {children}
-                </motion.div>
-              </AnimatePresence>
-            ) : (
-              children
-            )}
+
+            {isOnboardingRoute ? <div className={css.onboardingMotion}>{children}</div> : children}
           </SafeLoadingError>
         </div>
 
         <BatchSidebar isOpen={isBatchOpen} onToggle={setBatchOpen} />
 
-        {!isSafeLabsTermsPage && <Footer />}
+        <Footer />
       </div>
 
-      <HelpMenu />
+      <SelectSafeModal />
     </>
   )
 }
