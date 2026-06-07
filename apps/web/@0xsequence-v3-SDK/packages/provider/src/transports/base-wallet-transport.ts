@@ -33,6 +33,10 @@ export abstract class BaseWalletTransport implements WalletTransport {
   protected _initNonce: string
   protected _initCallback?: (error?: string) => void
 
+  // initTargetOrigin can be set by the embedding environment to restrict
+  // the origin used for INIT postMessage calls before appOrigin is known.
+  protected initTargetOrigin?: string
+
   // appOrigin identifies the dapp's origin which opened the app. A transport
   // will auto-detect and set this value if it can. This is determined
   // as the parent app/window which opened the wallet.
