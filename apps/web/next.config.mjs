@@ -82,7 +82,7 @@ if (process.env.VISUAL_REGRESSION_BUILD === 'true') {
 const nextConfig = {
   output: 'export', // static site export
 
-  transpilePackages: ['@safe-global/store'],
+  transpilePackages: ['@safe-global/store', '@safe-global/theme'],
   images: {
     unoptimized: true,
   },
@@ -103,14 +103,7 @@ const nextConfig = {
   ...(isProd || enableExperimentalOptimizations
     ? {
         experimental: {
-          optimizePackageImports: [
-            '@mui/material',
-            '@mui/icons-material',
-            'lodash',
-            'date-fns',
-            '@sentry/react',
-            '@gnosis.pm/zodiac',
-          ],
+          optimizePackageImports: ['@mui/material', '@mui/icons-material', 'lodash', 'date-fns', '@gnosis.pm/zodiac'],
         },
       }
     : {}),

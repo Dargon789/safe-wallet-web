@@ -44,3 +44,39 @@
 .orDivider::before {
   background-color: #dcdee0;
 }
+
+.walletBtnPrimary {
+  color: var(--color-text-contrast);
+  background-color: var(--color-primary-main);
+  min-height: 42px;
+}
+
+.walletBtnPrimary:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.walletBtnSecondary {
+  background-color: var(--color-background-main);
+  color: var(--color-text-primary);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 15px;
+  text-transform: none;
+  min-height: 48px;
+  gap: var(--space-1);
+}
+
+.walletBtnSecondary:hover {
+  background-color: var(--color-border-light);
+}
+
+.walletBtnStatic {
+  color: #fff;
+  background-color: #121312;
+  min-height: 42px;
+}
+
+.walletBtnStatic:hover {
+  background-color: #121312;
+}

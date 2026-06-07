@@ -1,5 +1,5 @@
 import React from 'react'
-import { Stack, Text } from 'tamagui'
+import { View, Text } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Address } from '@/src/types/address'
@@ -7,12 +7,12 @@ import { SelectExecutor } from '@/src/components/SelectExecutor'
 import { EstimatedNetworkFee } from '../EstimatedNetworkFee'
 import { Container } from '@/src/components/Container'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
-import { Skeleton } from 'moti/skeleton'
-import { useTheme } from '@/src/theme/hooks/useTheme'
+import { SafeSkeleton } from '@/src/components/SafeSkeleton'
 import { getSubmitButtonText } from './helpers'
 import { Alert } from '@/src/components/Alert'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Signer } from '@/src/store/signersSlice'
+import { WalletConnectGate } from '@/src/features/WalletConnect/Signer/components/WalletConnectGate'
 
 interface ReviewExecuteFooterProps {
   txId: string
@@ -44,13 +44,15 @@ export function ReviewExecuteFooter({
   onConfirmPress,
 }: ReviewExecuteFooterProps) {
   const insets = useSafeAreaInsets()
-  const { colorScheme } = useTheme()
 
   const isButtonDisabled = !hasSufficientFunds || isExecuting
   const buttonText = isExecuting ? 'Executing...' : getSubmitButtonText(hasSufficientFunds)
 
+  const signerAddress = (activeSigner?.value ?? '') as Address
+  const wcSignerAddress = executionMethod === ExecutionMethod.WITH_WC ? signerAddress : ''
+
   return (
-    <Stack paddingHorizontal="$4" space="$3" paddingBottom={insets.bottom ? insets.bottom : '$4'}>
+    <View paddingHorizontal="$4" gap="$3" paddingBottom={insets.bottom ? insets.bottom : '$4'}>
       <Container
         backgroundColor="transparent"
         gap={'$2'}
@@ -58,7 +60,7 @@ export function ReviewExecuteFooter({
         paddingVertical={'$3'}
         borderColor="$borderLight"
       >
-        <SelectExecutor executionMethod={executionMethod} address={activeSigner?.value as Address} txId={txId} />
+        <SelectExecutor executionMethod={executionMethod} address={signerAddress} txId={txId} />
 
         <EstimatedNetworkFee
           executionMethod={executionMethod}
@@ -79,14 +81,16 @@ export function ReviewExecuteFooter({
       </Container>
 
       {isCheckingFunds ? (
-        <Skeleton.Group show>
-          <Skeleton colorMode={colorScheme} height={44} width="100%" radius={12} />
-        </Skeleton.Group>
+        <SafeSkeleton.Group show>
+          <SafeSkeleton height={44} width="100%" radius={12} />
+        </SafeSkeleton.Group>
       ) : (
-        <SafeButton onPress={onConfirmPress} width="100%" disabled={isButtonDisabled} loading={isExecuting}>
-          {buttonText}
-        </SafeButton>
+        <WalletConnectGate signerAddress={wcSignerAddress}>
+          <SafeButton onPress={onConfirmPress} width="100%" disabled={isButtonDisabled} loading={isExecuting}>
+            {buttonText}
+          </SafeButton>
+        </WalletConnectGate>
       )}
-    </Stack>
+    </View>
   )
 }

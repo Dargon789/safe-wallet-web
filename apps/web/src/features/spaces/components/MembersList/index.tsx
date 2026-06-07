@@ -1,5 +1,5 @@
-import { Box, Chip, IconButton, Stack, SvgIcon, Tooltip } from '@mui/material'
-import { type Member } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { Box, Chip, IconButton, Stack, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import EditIcon from '@/public/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EnhancedTable from '@/components/common/EnhancedTable'
@@ -16,7 +16,12 @@ const headCells = [
   {
     id: 'name',
     label: 'Name',
-    width: '70%',
+    width: '40%',
+  },
+  {
+    id: 'email',
+    label: 'Email',
+    width: '30%',
   },
   {
     id: 'role',
@@ -31,7 +36,7 @@ const headCells = [
   },
 ]
 
-const EditButton = ({ member, disabled }: { member: Member; disabled: boolean }) => {
+const EditButton = ({ member, disabled }: { member: MemberDto; disabled: boolean }) => {
   const [open, setOpen] = useState(false)
 
   return (
@@ -53,7 +58,7 @@ export const RemoveMemberButton = ({
   disabled,
   isInvite,
 }: {
-  member: Member
+  member: MemberDto
   disabled: boolean
   isInvite: boolean
 }) => {
@@ -88,7 +93,7 @@ export const RemoveMemberButton = ({
   )
 }
 
-const MembersList = ({ members }: { members: Member[] }) => {
+const MembersList = ({ members }: { members: MemberDto[] }) => {
   const isAdmin = useIsAdmin()
   const adminCount = useAdminCount(members)
 
@@ -97,6 +102,7 @@ const MembersList = ({ members }: { members: Member[] }) => {
     const isInvite = member.status === MemberStatus.INVITED || member.status === MemberStatus.DECLINED
     const isDeclined = member.status === MemberStatus.DECLINED
     const isDisabled = isAdmin && isLastAdmin && !isInvite
+    const memberEmail = member.user.email
 
     return {
       cells: {
@@ -114,6 +120,10 @@ const MembersList = ({ members }: { members: Member[] }) => {
               )}
             </Stack>
           ),
+        },
+        email: {
+          rawValue: memberEmail,
+          content: memberEmail ? <Typography variant="body2">{memberEmail}</Typography> : null,
         },
         role: {
           rawValue: member.role,

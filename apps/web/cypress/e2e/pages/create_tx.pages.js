@@ -33,7 +33,6 @@ const accordionDetails = '[data-testid="accordion-details"]'
 export const copyIcon = '[data-testid="copy-btn-icon"]'
 export const explorerBtn = '[data-testid="explorer-btn"]'
 const transactionSideList = '[data-testid="transaction-actions-list"]'
-const confirmationVisibilityBtn = '[data-testid="confirmation-visibility-btn"]'
 const expandAllBtn = '[data-testid="expande-all-btn"]'
 const collapseAllBtn = '[data-testid="collapse-all-btn"]'
 export const txRowTitle = '[data-testid="tx-row-title"]'
@@ -76,8 +75,7 @@ export const altImgUsdt = 'iframe[title="USDT"]'
 export const altImgSwaps = 'svg[alt="Swap order"]'
 export const altImgLimitOrder = 'svg[alt="Limit order"]'
 export const altImgTwapOrder = 'svg[alt="Twap Order"]'
-export const txShareBlock = '[data-testid="share-block"]'
-const copyLinkBtn = '[data-testid="copy-link-btn"]'
+export const txShareLinkBtn = '[data-testid="share-tx-link-btn"]'
 export const noteTextField = '[data-testid="tx-note-textfield"]'
 const noteAlert = "[data-testid='tx-note-alert']"
 const recoredTxNote = '[data-testid="tx-note"]'
@@ -289,8 +287,8 @@ export function checkNoteRecordedNoteReadOnly() {
   })
 }
 
-export function clickOnCopyLinkBtn() {
-  cy.get(copyLinkBtn).click()
+export function clickOnShareLinkBtn() {
+  cy.get(txShareLinkBtn).click()
 }
 
 export function verifyCopiedURL() {
@@ -299,15 +297,9 @@ export function verifyCopiedURL() {
   })
 
   cy.url().then((currentUrl) => {
-    clickOnCopyLinkBtn()
+    clickOnShareLinkBtn()
 
     cy.get('@clipboardWrite').should('have.been.calledWith', currentUrl)
-  })
-}
-
-export function checkCopyBtnExistsInShareblock() {
-  cy.get(txShareBlock).within(() => {
-    cy.get(copyLinkBtn).should('exist')
   })
 }
 
@@ -583,7 +575,6 @@ export function collapseAllActions(data) {
 
 export function verifyActionListExists(data) {
   main.checkTextsExistWithinElement(transactionSideList, data)
-  main.verifyElementsIsVisible([confirmationVisibilityBtn])
 }
 
 export function verifySpamIconIsDisplayed(name, token) {
@@ -662,13 +653,13 @@ export function verifySummaryByName(name, token, data, alt, altToken) {
 
     const $element = $elements.first()
 
-    // Verify data text content
+    // Verify data text content (use cy.wrap for retryability, e.g. async status like "Expired")
     if (Array.isArray(data)) {
       data.forEach((text) => {
-        expect($element.text()).to.include(text)
+        cy.wrap($element).should('contain.text', text)
       })
     } else if (data) {
-      expect($element.text()).to.include(data)
+      cy.wrap($element).should('contain.text', data)
     }
 
     // Verify transaction type icon (alt parameter)

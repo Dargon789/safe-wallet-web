@@ -10,9 +10,15 @@ import ExplorePossibleWidget from '@/components/dashboard/ExplorePossibleWidget'
 import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
 import { useHasFeature } from '@/hooks/useChains'
 import css from './styles.module.css'
-import { InconsistentSignerSetupWarning, UnsupportedMastercopyWarning } from '@/features/multichain'
+import {
+  InconsistentSignerSetupWarning,
+  OutdatedMastercopyWarning,
+  UnsupportedMastercopyWarning,
+} from '@/features/multichain'
 import { MyAccountsFeature } from '@/features/myAccounts'
 import { ActionRequiredPanel } from './ActionRequiredPanel'
+import { VulnerableModuleWarning } from './ActionRequiredPanel/VulnerableModuleWarning'
+import { useVulnerableSafe } from '@/features/security'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import NewsDisclaimers from '@/components/dashboard/NewsCarousel/NewsDisclaimers'
 import NewsCarousel, { type BannerItem } from '@/components/dashboard/NewsCarousel'
@@ -49,6 +55,7 @@ const Dashboard = (): ReactElement => {
   const { NonPinnedWarning } = useLoadFeature(MyAccountsFeature)
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
   const supportsRecovery = useIsRecoverySupported()
+  const isVulnerableSafe = useVulnerableSafe()
 
   const { balances, loaded: balancesLoaded } = useVisibleBalances()
   const items = useMemo(() => {
@@ -94,7 +101,7 @@ const Dashboard = (): ReactElement => {
               {!showHnBanner && <AddFundsToGetStarted />}
             </Stack>
           ) : (
-            <Stack minWidth="100%">
+            <Stack minWidth="100%" className={css.hideIfEmpty}>
               <NewsCarousel banners={banners} />
             </Stack>
           )}
@@ -121,9 +128,11 @@ const Dashboard = (): ReactElement => {
         </div>
 
         <div className={css.rightCol}>
-          <ActionRequiredPanel>
+          <ActionRequiredPanel defaultExpanded={isVulnerableSafe}>
+            <VulnerableModuleWarning isVulnerable={isVulnerableSafe} />
             {supportsRecovery && <RecoveryHeader />}
             <InconsistentSignerSetupWarning />
+            <OutdatedMastercopyWarning />
             <UnsupportedMastercopyWarning />
             <NonPinnedWarning />
           </ActionRequiredPanel>

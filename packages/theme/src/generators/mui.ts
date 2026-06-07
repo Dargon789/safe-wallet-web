@@ -260,31 +260,45 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
       MuiAccordionDetails: { styleOverrides: { root: ({ theme }) => ({ padding: theme.spacing(2) }) } },
       MuiCard: {
         styleOverrides: {
-          root: ({ theme }) => ({
-            borderRadius: theme.shape.borderRadius,
+          root: {
+            borderRadius: 24,
             boxSizing: 'border-box',
             border: '2px solid transparent',
             boxShadow: 'none',
-          }),
+          },
         },
       },
-      MuiDialog: { defaultProps: { fullWidth: true } },
+      MuiDialog: {
+        defaultProps: { fullWidth: true },
+        styleOverrides: { paper: ({ theme }) => ({ borderRadius: theme.shape.borderRadius }) },
+      },
       MuiDialogContent: { styleOverrides: { root: ({ theme }) => ({ padding: theme.spacing(3) }) } },
       MuiDivider: { styleOverrides: { root: ({ theme }) => ({ borderColor: theme.palette.border.light }) } },
       MuiPaper: {
         defaultProps: { elevation: 0 },
         styleOverrides: {
           outlined: ({ theme }) => ({ borderWidth: 2, borderColor: theme.palette.border.light }),
-          root: ({ theme }) => ({ borderRadius: theme.shape.borderRadius, backgroundImage: 'none' }),
+          root: { borderRadius: 24, backgroundImage: 'none' },
         },
       },
-      MuiPopover: { defaultProps: { elevation: 2 }, styleOverrides: { paper: { overflow: 'visible' } } },
+      MuiPopover: {
+        defaultProps: { elevation: 2 },
+        styleOverrides: {
+          paper: ({ theme }) => ({ overflow: 'visible', borderRadius: theme.shape.borderRadius }),
+        },
+      },
+      MuiMenu: {
+        styleOverrides: { paper: ({ theme }) => ({ borderRadius: theme.shape.borderRadius }) },
+      },
+      MuiAutocomplete: {
+        styleOverrides: { paper: ({ theme }) => ({ borderRadius: theme.shape.borderRadius }) },
+      },
       MuiIconButton: { styleOverrides: { sizeSmall: { padding: '4px' } } },
       MuiToggleButton: { styleOverrides: { root: { textTransform: 'none' } } },
       MuiChip: {
         styleOverrides: {
           colorSuccess: ({ theme }) => ({ backgroundColor: theme.palette.secondary.light, height: '24px' }),
-          //@ts-ignore this is not detected even though it is declared in web app
+          //@ts-expect-error this is not detected even though it is declared in web app
           sizeTiny: {
             fontSize: '11px',
             height: 'auto',
@@ -312,12 +326,16 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
             '& .MuiAlert-icon': { color: theme.palette.warning.main },
             '&.MuiPaper-root': { backgroundColor: theme.palette.warning.background },
           }),
-          // @ts-ignore - custom color variant
+          // @ts-expect-error - custom color variant
           standardBackground: ({ theme }) => ({
             '& .MuiAlert-icon': { color: theme.palette.text.primary },
             '&.MuiPaper-root': { backgroundColor: theme.palette.background.main },
           }),
-          root: ({ theme }) => ({ color: theme.palette.text.primary, padding: '12px 16px' }),
+          root: ({ theme }) => ({
+            color: theme.palette.text.primary,
+            padding: '12px 16px',
+            borderRadius: theme.shape.borderRadius,
+          }),
         },
       },
       MuiTableHead: {
@@ -452,7 +470,7 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
               boxSizing: 'border-box',
             },
           }),
-          sizeSmall: ({ theme }) => ({
+          sizeSmall: () => ({
             width: 22,
             height: 13,
             padding: 0,

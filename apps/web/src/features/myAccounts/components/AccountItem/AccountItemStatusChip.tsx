@@ -12,12 +12,13 @@ export interface AccountItemStatusChipProps {
 
 const ActivationChip = ({ isActivating }: { isActivating: boolean }) => (
   <Chip
+    data-testid="pending-activation-chip"
     className={css.chip}
     sx={{
       backgroundColor: isActivating ? 'var(--color-info-light)' : 'var(--color-warning-background)',
     }}
     size="small"
-    label={isActivating ? 'Activating account' : 'Not activated'}
+    label={isActivating ? 'Activating' : 'Not activated'}
     icon={
       isActivating ? (
         <LoopIcon fontSize="small" className={css.pendingLoopIcon} sx={{ mr: '-4px', ml: '4px' }} />

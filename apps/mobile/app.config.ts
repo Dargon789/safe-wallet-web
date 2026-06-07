@@ -21,7 +21,7 @@ const config: ExpoConfig = {
   name: name,
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
-  version: '1.0.7',
+  version: '1.0.12',
   extra: {
     storybookEnabled: process.env.STORYBOOK_ENABLED,
     eas: {
@@ -32,7 +32,6 @@ const config: ExpoConfig = {
   icon: './assets/images/icon.png',
   scheme: 'myapp',
   userInterfaceStyle: 'automatic',
-  newArchEnabled: true,
   ios: {
     config: {
       usesNonExemptEncryption: false,
@@ -41,12 +40,31 @@ const config: ExpoConfig = {
       NSFaceIDUsageDescription: 'Enabling Face ID allows you to create/access secure keys.',
       UIBackgroundModes: ['remote-notification'],
       NSBluetoothPeripheralUsageDescription: 'Allow Bluetooth access to connect to Ledger devices.',
-      AppGroup: IS_DEV ? 'group.global.safe.mobileapp.ios.dev' : 'group.global.safe.mobileapp.ios',
+      // Read by react-native-mmkv v4 to place the MMKV store in the App Group container.
+      // Renaming this key to anything else (e.g. v3's `AppGroup`) strands data in the old location on upgrade.
+      AppGroupIdentifier: IS_DEV ? 'group.global.safe.mobileapp.ios.dev' : 'group.global.safe.mobileapp.ios',
       // https://github.com/expo/expo/issues/39739
       UIDesignRequiresCompatibility: true,
       // https://github.com/react-native-share/react-native-share/issues/1669
       NSPhotoLibraryUsageDescription:
         'This permission is required by third party libraries, but not used in the app. If you ever get prompted for it, deny it & contact support.',
+      LSApplicationQueriesSchemes: [
+        'metamask',
+        'rabby',
+        'ledger',
+        'coinbase',
+        'okx',
+        'trust',
+        'tokenpocket',
+        'phantom',
+        'rainbow',
+        'zerion',
+        'frame',
+        'onekey',
+        'bitget',
+        'safepal',
+        'bybit',
+      ],
     },
     supportsTablet: false,
     appleTeamId: appleDevTeamId,
@@ -74,7 +92,6 @@ const config: ExpoConfig = {
       'android.permission.FOREGROUND_SERVICE',
       'android.permission.WAKE_LOCK',
     ],
-    edgeToEdgeEnabled: true,
     allowBackup: false,
   },
   web: {
@@ -83,6 +100,17 @@ const config: ExpoConfig = {
     favicon: './assets/images/favicon.png',
   },
   plugins: [
+    [
+      'expo-datadog',
+      {
+        errorTracking: {
+          iosDsyms: !!process.env.EAS_BUILD,
+          iosSourcemaps: !!process.env.EAS_BUILD,
+          androidSourcemaps: !!process.env.EAS_BUILD,
+          androidProguardMappingFiles: !!process.env.EAS_BUILD,
+        },
+      },
+    ],
     [
       'react-native-ble-plx',
       {
@@ -133,6 +161,7 @@ const config: ExpoConfig = {
           forceStaticLinking: ['RNFBApp'],
         },
         android: {
+          minSdkVersion: 34,
           extraMavenRepos: ['../../../../node_modules/@notifee/react-native/android/libs'],
         },
       },
@@ -148,6 +177,8 @@ const config: ExpoConfig = {
         enableBase64ShareAndroid: true,
       },
     ],
+    '@react-native-community/datetimepicker',
+    'expo-image',
     'expo-task-manager',
     'expo-web-browser',
     [
@@ -171,16 +202,11 @@ const config: ExpoConfig = {
         iosPermissions: ['Bluetooth'],
       },
     ],
+    './queries.js',
   ],
   experiments: {
     typedRoutes: true,
-  },
-  notification: {
-    icon: './assets/images/icon.png',
-    color: '#FFFFFF',
-    androidMode: 'default',
-    androidCollapsedTitle: 'Updates from Safe Wallet',
-    iosDisplayInForeground: true,
+    reactCompiler: true,
   },
 }
 

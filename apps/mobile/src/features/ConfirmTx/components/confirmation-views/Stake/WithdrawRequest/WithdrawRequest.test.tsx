@@ -7,6 +7,7 @@ import {
   Operation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
+import { CONFIG_SERVICE_KEY } from '@/src/config/constants'
 
 const mockWithdrawRequestTxInfo: NativeStakingValidatorsExitTransactionInfo = {
   type: 'NativeStakingValidatorsExit',
@@ -35,6 +36,8 @@ const mockExecutionInfo: MultisigExecutionDetails = {
   baseGas: '0',
   gasPrice: '0',
   gasToken: '0x0000000000000000000000000000000000000000',
+  fee: '0',
+  payment: '0',
   refundReceiver: {
     value: '0x0000000000000000000000000000000000000000',
   },
@@ -73,7 +76,7 @@ describe('StakingWithdrawRequest', () => {
       },
     })
 
-    await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(undefined))
+    await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
   })
 
   it('renders correctly with withdraw request information', () => {

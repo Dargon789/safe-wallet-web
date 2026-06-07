@@ -1,9 +1,9 @@
 import { LS_NAMESPACE } from '../../src/config/constants'
 import safes from '../fixtures/safes/static.js'
 
-// Visual regression (Chromatic) test settings
+// Visual regression (Argos) test settings
 export const VISUAL_VIEWPORT = { viewportWidth: 1920, viewportHeight: 1080 }
-export const VISUAL_SETTLE_TIME = 7000 // ms to let UI animations settle before Chromatic captures the screenshot
+export const VISUAL_SETTLE_TIME = 7000 // ms to let UI animations settle before Argos captures the screenshot
 
 export const RECIPIENT_ADDRESS = '0x6a5602335a878ADDCa4BF63a050E34946B56B5bC'
 export const GOERLI_SAFE_APPS_SAFE = 'gor:0x168ca275d1103cb0a30980813140053c7566932F'
@@ -22,6 +22,9 @@ export const SAFE_APP_ADDRESS_3 = '0xc6b82bA149CFA113f8f48d5E3b1F78e933e16DfD'
 export const DEFAULT_OWNER_ADDRESS = '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED'
 // Below is also used in sidebar tests as a beneficiary
 export const SPENDING_LIMIT_ADDRESS_2 = '0x52835f11E348605E9D791Ec09380a3224526d538'
+// AllowanceModule contract addresses — keyed by contract version, not by network
+export const ALLOWANCE_MODULE_V0_1_0 = '0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134'
+export const ALLOWANCE_MODULE_V0_1_1 = '0xAA46724893dedD72658219405185Fb0Fc91e091C'
 export const SEPOLIA_OWNER_2 = '0x96D4c6fFC338912322813a77655fCC926b9A5aC5'
 export const SEPOLIA_OWNER_2_SHORT = '0x96D4...5aC5'
 export const TEST_SAFE_2 = 'gor:0xE96C43C54B08eC528e9e815fC3D02Ea94A320505'
@@ -48,10 +51,10 @@ export const spaceSafeAccountsUrl = '/spaces/safe-accounts?spaceId='
 export const spaceAddressBookUrl = '/spaces/address-book?spaceId='
 export const userSettingsUrl = '/user-settings'
 export const prodbaseUrl = 'https://app.safe.global'
-export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
+export const swapWidget = 'https://swap.cow.finance/#/11155111/widget/swap/'
 export const bridgeWidget = 'https://iframe.jumper.exchange/bridge'
 export const safeTestAppurl = 'https://safe-apps-test-app.pages.dev'
-export const TX_Builder_url = 'https://safe-apps.dev.5afe.dev/tx-builder'
+export const TX_Builder_url = 'https://tx-builder.staging.5afe.dev'
 export const drainAccount_url = 'https://safe-apps.dev.5afe.dev/drain-safe'
 export const testAppUrl = 'https://safe-test-app.com'
 export const swapUrl = '/swap?safe='
@@ -111,6 +114,7 @@ export const relayPath = '/relay/'
 export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_spam=false'
 
 export const usersEndpoint = '**/v1/users'
+export const counterfactualSafesEndpoint = '**/v1/users/counterfactual-safes'
 export const spacesEndpoint = '**/**/spaces*'
 export const spacesGetOneEndpoint = '**/v1/spaces/*'
 export const spacesMembersEndpoint = '**/v1/spaces/*/members'
@@ -124,8 +128,8 @@ export const ownedSafesEndpoint = '**/v2/owners/**/safes*'
 export const queuedEndpoint = '**/queued*'
 export const messagesEndpoint = 'v1/chains/**/safes/**/messages*'
 export const collectiblesEndpoint = '**/collectibles*'
-export const chainsEndpoint = '**/v1/chains'
-export const chainConfigEndpoint = '**/v1/chains/*'
+export const chainsEndpoint = '**/v2/chains'
+export const chainConfigEndpoint = '**/v2/chains/*'
 export const safeInfoEndpoint = '**/v1/chains/*/safes/*'
 export const balancesEndpoint = '**/v1/**/safes/**/balances/**'
 export const portfolioEndpoint = '**/v1/portfolio/**'
@@ -316,7 +320,7 @@ export const localStorageKeys = {
   SAFE_v2__SafeApps__browserPermissions: 'SAFE_v2__SafeApps__browserPermissions',
   SAFE_v2__SafeApps__infoModal: 'SAFE_v2__SafeApps__infoModal',
   SAFE_v2__undeployedSafes: 'SAFE_v2__undeployedSafes',
-  SAFE_v2__batch: 'SAFE_v2__batch',
+  SAFE_v2__pendingCfDeletes: 'SAFE_v2__pendingCfDeletes',
   SAFE_v2__visitedSafes: 'SAFE_v2__visitedSafes',
   SAFE_v2__auth: 'SAFE_v2__auth',
 }

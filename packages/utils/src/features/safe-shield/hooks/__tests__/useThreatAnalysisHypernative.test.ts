@@ -14,12 +14,13 @@ import { ErrorType, getErrorInfo } from '@safe-global/utils/features/safe-shield
 
 // Mock dependencies
 jest.mock('@safe-global/utils/utils/safeTransaction')
-jest.mock('@safe-global/protocol-kit/dist/src/utils', () => ({
+jest.mock('@safe-global/protocol-kit', () => ({
   calculateSafeTransactionHash: jest.fn(),
 }))
 jest.mock('@safe-global/store/hypernative/hypernativeApi', () => ({
   hypernativeApi: {
     useAssessTransactionMutation: jest.fn(),
+    useAssessMessageMutation: jest.fn(),
   },
 }))
 
@@ -27,9 +28,12 @@ const mockIsSafeTransaction = isSafeTransaction as jest.MockedFunction<typeof is
 const mockUseAssessTransactionMutation = hypernativeApi.useAssessTransactionMutation as jest.MockedFunction<
   typeof hypernativeApi.useAssessTransactionMutation
 >
+const mockUseAssessMessageMutation = hypernativeApi.useAssessMessageMutation as jest.MockedFunction<
+  typeof hypernativeApi.useAssessMessageMutation
+>
 
 // Import the mocked function
-import { calculateSafeTransactionHash } from '@safe-global/protocol-kit/dist/src/utils'
+import { calculateSafeTransactionHash } from '@safe-global/protocol-kit'
 const mockCalculateSafeTransactionHash = calculateSafeTransactionHash as jest.MockedFunction<
   typeof calculateSafeTransactionHash
 >
@@ -113,6 +117,10 @@ describe('useThreatAnalysisHypernative', () => {
     mockCalculateSafeTransactionHash.mockReturnValue(mockSafeTxHash as `0x${string}`)
     mockUseAssessTransactionMutation.mockReturnValue([
       mockTriggerAssessment,
+      { data: undefined, error: undefined, isLoading: false },
+    ] as any)
+    mockUseAssessMessageMutation.mockReturnValue([
+      jest.fn(),
       { data: undefined, error: undefined, isLoading: false },
     ] as any)
   })
@@ -342,7 +350,7 @@ describe('useThreatAnalysisHypernative', () => {
       ]
 
       // Apply changes rapidly (within debounce window)
-      changes.forEach((change, index) => {
+      changes.forEach((change) => {
         rerender({ data: change })
         jest.advanceTimersByTime(100) // Less than 300ms debounce
       })

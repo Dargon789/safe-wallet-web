@@ -1,6 +1,6 @@
 import { Interface } from 'ethers'
 import { getSafeSingletonDeployment } from '@safe-global/safe-deployments'
-import { SENTINEL_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
 import { OperationType } from '@safe-global/types-kit'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getModuleInstance, KnownContracts } from '@gnosis.pm/zodiac'
@@ -18,7 +18,7 @@ export function getRecoveryProposalTransactions({
   newThreshold: number
   newOwners: Array<AddressInfo>
 }): Array<MetaTransactionData> {
-  const safeDeployment = getSafeSingletonDeployment({ network: safe.chainId, version: safe.version ?? undefined })
+  const safeDeployment = getSafeSingletonDeployment({ version: safe.version ?? undefined })
 
   if (!safeDeployment) {
     throw new Error('Safe deployment not found')

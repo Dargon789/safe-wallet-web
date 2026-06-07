@@ -61,6 +61,7 @@ function AccountItemInfo({
           <NamedAddressInfo
             address={address}
             name={name}
+            noContractName
             showName={addressBookNameSource ? !!name : true}
             shortAddress={!fullAddress}
             chainId={chainId}

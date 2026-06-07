@@ -5,7 +5,7 @@ exports[`./NetworkLogosList.stories FourNetworks 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -17,9 +17,11 @@ exports[`./NetworkLogosList.stories FourNetworks 1`] = `
       >
         <img
           alt="Ethereum Logo"
+          data-testid="chain-indicator-network-logo-img"
           height="24"
           loading="lazy"
           src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+          style="min-width: 24px;"
           width="24"
         />
       </span>
@@ -29,9 +31,11 @@ exports[`./NetworkLogosList.stories FourNetworks 1`] = `
       >
         <img
           alt="Polygon Logo"
+          data-testid="chain-indicator-network-logo-img"
           height="24"
           loading="lazy"
           src="https://safe-transaction-assets.staging.5afe.dev/chains/137/chain_logo.png"
+          style="min-width: 24px;"
           width="24"
         />
       </span>
@@ -65,7 +69,7 @@ exports[`./NetworkLogosList.stories ManyNetworksWithHasMore 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -77,9 +81,11 @@ exports[`./NetworkLogosList.stories ManyNetworksWithHasMore 1`] = `
       >
         <img
           alt="Ethereum Logo"
+          data-testid="chain-indicator-network-logo-img"
           height="24"
           loading="lazy"
           src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+          style="min-width: 24px;"
           width="24"
         />
       </span>
@@ -89,9 +95,11 @@ exports[`./NetworkLogosList.stories ManyNetworksWithHasMore 1`] = `
       >
         <img
           alt="Polygon Logo"
+          data-testid="chain-indicator-network-logo-img"
           height="24"
           loading="lazy"
           src="https://safe-transaction-assets.staging.5afe.dev/chains/137/chain_logo.png"
+          style="min-width: 24px;"
           width="24"
         />
       </span>
@@ -131,7 +139,7 @@ exports[`./NetworkLogosList.stories ManyNetworksWithoutHasMore 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -143,9 +151,11 @@ exports[`./NetworkLogosList.stories ManyNetworksWithoutHasMore 1`] = `
       >
         <img
           alt="Ethereum Logo"
+          data-testid="chain-indicator-network-logo-img"
           height="24"
           loading="lazy"
           src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+          style="min-width: 24px;"
           width="24"
         />
       </span>
@@ -155,9 +165,11 @@ exports[`./NetworkLogosList.stories ManyNetworksWithoutHasMore 1`] = `
       >
         <img
           alt="Polygon Logo"
+          data-testid="chain-indicator-network-logo-img"
           height="24"
           loading="lazy"
           src="https://safe-transaction-assets.staging.5afe.dev/chains/137/chain_logo.png"
+          style="min-width: 24px;"
           width="24"
         />
       </span>
@@ -201,7 +213,7 @@ exports[`./NetworkLogosList.stories SingleNetwork 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -213,9 +225,11 @@ exports[`./NetworkLogosList.stories SingleNetwork 1`] = `
       >
         <img
           alt="Ethereum Logo"
+          data-testid="chain-indicator-network-logo-img"
           height="24"
           loading="lazy"
           src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+          style="min-width: 24px;"
           width="24"
         />
       </span>
@@ -229,7 +243,7 @@ exports[`./NetworkLogosList.stories TwoNetworks 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -241,9 +255,11 @@ exports[`./NetworkLogosList.stories TwoNetworks 1`] = `
       >
         <img
           alt="Ethereum Logo"
+          data-testid="chain-indicator-network-logo-img"
           height="24"
           loading="lazy"
           src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+          style="min-width: 24px;"
           width="24"
         />
       </span>
@@ -253,9 +269,11 @@ exports[`./NetworkLogosList.stories TwoNetworks 1`] = `
       >
         <img
           alt="Polygon Logo"
+          data-testid="chain-indicator-network-logo-img"
           height="24"
           loading="lazy"
           src="https://safe-transaction-assets.staging.5afe.dev/chains/137/chain_logo.png"
+          style="min-width: 24px;"
           width="24"
         />
       </span>
