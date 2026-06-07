@@ -1,5 +1,10 @@
-import { useMembersGetUsersV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId } from 'src/features/spaces/hooks/useCurrentSpaceId'
+import {
+  useMembersGetMembershipV1Query,
+  useMembersGetUsersV1Query,
+  type MemberDto,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
+import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
@@ -15,11 +20,18 @@ export enum MemberRole {
   MEMBER = 'MEMBER',
 }
 
+export const isAdmin = (member: MemberDto) => member.role === MemberRole.ADMIN
+
+export const isActiveAdmin = (member: MemberDto) => isAdmin(member) && member.status === MemberStatus.ACTIVE
+
 const useAllMembers = (spaceId?: number) => {
   const currentSpaceId = useCurrentSpaceId()
   const actualSpaceId = spaceId ?? currentSpaceId
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { data: currentData } = useMembersGetUsersV1Query({ spaceId: Number(actualSpaceId) }, { skip: !isUserSignedIn })
+  const { data: currentData } = useMembersGetUsersV1Query(
+    { spaceId: Number(actualSpaceId) },
+    { skip: !isUserSignedIn || !actualSpaceId },
+  )
   return currentData?.members || []
 }
 
@@ -34,15 +46,41 @@ export const useSpaceMembersByStatus = () => {
   return { activeMembers, invitedMembers }
 }
 
-const useCurrentMembership = (spaceId?: number) => {
+export const useCurrentMembership = (spaceId?: number) => {
   const allMembers = useAllMembers(spaceId)
-  const { currentData: user } = useUsersGetWithWalletsV1Query()
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { currentData: user } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   return allMembers.find((member) => member.user.id === user?.id)
+}
+
+export const useCurrentMemberProfile = () => {
+  const spaceId = useCurrentSpaceId()
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+
+  const { data: session, isLoading: isSessionLoading } = useAuthGetMeV1Query(undefined, {
+    skip: !isUserSignedIn,
+  })
+  const { currentData: membership, isLoading: isMembershipLoading } = useMembersGetMembershipV1Query(
+    { spaceId: Number(spaceId) },
+    { skip: !isUserSignedIn || !spaceId },
+  )
+
+  return {
+    membership,
+    signerAddress: session?.authMethod === 'siwe' ? session.signerAddress : undefined,
+    email: session?.authMethod === 'oidc' ? (session.email ?? membership?.user.email ?? undefined) : undefined,
+    isLoading: isSessionLoading || isMembershipLoading,
+  }
+}
+
+export const useIsActiveMember = (spaceId?: number) => {
+  const currentMembership = useCurrentMembership(spaceId)
+  return !!currentMembership && currentMembership.status === MemberStatus.ACTIVE
 }
 
 export const useIsAdmin = (spaceId?: number) => {
   const currentMembership = useCurrentMembership(spaceId)
-  return currentMembership?.role === MemberRole.ADMIN && currentMembership?.status === MemberStatus.ACTIVE
+  return !!currentMembership && isActiveAdmin(currentMembership)
 }
 
 export const useIsInvited = () => {

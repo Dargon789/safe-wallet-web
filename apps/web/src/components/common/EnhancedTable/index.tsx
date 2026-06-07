@@ -15,12 +15,13 @@ import { visuallyHidden } from '@mui/utils'
 import classNames from 'classnames'
 
 import css from './styles.module.css'
-import { Collapse } from '@mui/material'
+import { Collapse, Typography } from '@mui/material'
 
 type EnhancedCell = {
   content: ReactNode
   rawValue: string | number | null
   sticky?: boolean
+  mobileLabel?: string
 }
 
 type EnhancedRow = {
@@ -36,6 +37,7 @@ type EnhancedHeadCell = {
   width?: string
   align?: string
   sticky?: boolean
+  disableSort?: boolean
 }
 
 function descendingComparator(a: string | number, b: string | number) {
@@ -91,17 +93,25 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
             }}
             className={classNames({ sticky: headCell.sticky })}
           >
-            {headCell.label && (
+            {headCell.disableSort ? (
+              <Box component="span" sx={{ fontSize: '14px' }}>
+                {headCell.label}
+              </Box>
+            ) : (
               <>
                 <TableSortLabel
                   active={orderBy === headCell.id}
                   direction={orderBy === headCell.id ? order : 'asc'}
                   onClick={createSortHandler(headCell.id)}
-                  sx={{ mr: [0, '-26px'], textWrap: 'nowrap' }}
+                  sx={{
+                    mr: headCell.id === 'actions' || headCell.disableSort ? 0 : [0, '-26px'],
+                    textWrap: 'nowrap',
+                    fontSize: '14px',
+                  }}
                 >
                   {headCell.label}
                   {orderBy === headCell.id ? (
-                    <Box component="span" sx={visuallyHidden}>
+                    <Box component="span" sx={{ ...visuallyHidden }}>
                       {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
                     </Box>
                   ) : null}
@@ -119,11 +129,13 @@ export type EnhancedTableProps = {
   rows: EnhancedRow[]
   headCells: EnhancedHeadCell[]
   mobileVariant?: boolean
+  compact?: boolean
+  footer?: ReactNode
 }
 
 const pageSizes = [10, 25, 100]
 
-function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
+function EnhancedTable({ rows, headCells, mobileVariant, compact, footer }: EnhancedTableProps) {
   const [order, setOrder] = useState<'asc' | 'desc'>('asc')
   const [orderBy, setOrderBy] = useState<string>('')
   const [page, setPage] = useState<number>(0)
@@ -146,37 +158,60 @@ function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
 
   const orderedRows = orderBy ? rows.slice().sort(getComparator(order, orderBy)) : rows
   const pagedRows = orderedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+  const showPagination = rows.length > pageSizes[0] || rowsPerPage !== pageSizes[1]
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <TableContainer data-testid="table-container" component={Paper} sx={{ width: '100%', mb: 2 }}>
-        <Table aria-labelledby="tableTitle" className={mobileVariant ? css.mobileColumn : undefined}>
+    <Box sx={{ width: '100%', mb: 2 }}>
+      <TableContainer
+        data-testid="table-container"
+        component={Paper}
+        sx={{
+          width: '100%',
+          overflowX: ['auto', 'hidden'],
+          borderBottomLeftRadius: showPagination ? 0 : '24px',
+          borderBottomRightRadius: showPagination ? 0 : '24px',
+        }}
+      >
+        <Table
+          aria-labelledby="tableTitle"
+          className={classNames({ [css.mobileColumn]: mobileVariant, [css.compactTable]: compact })}
+        >
           <EnhancedTableHead headCells={headCells} order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
-          <TableBody>
+          <TableBody className={css.tableBody}>
             {pagedRows.length > 0 ? (
-              pagedRows.map((row, index) => (
-                <TableRow
-                  data-testid="table-row"
-                  tabIndex={-1}
-                  key={row.key ?? index}
-                  selected={row.selected}
-                  className={row.collapsed ? css.collapsedRow : undefined}
-                >
-                  {Object.entries(row.cells).map(([key, cell]) => (
-                    <TableCell
-                      key={key}
-                      className={classNames({
-                        sticky: cell.sticky,
-                        [css.collapsedCell]: row.collapsed,
-                      })}
-                    >
-                      <Collapse key={index} in={!row.collapsed} enter={false}>
-                        {cell.content}
-                      </Collapse>
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              pagedRows.map((row, index) => {
+                const rowKey = row.key ?? index
+
+                return (
+                  <TableRow
+                    data-testid="table-row"
+                    tabIndex={-1}
+                    key={rowKey}
+                    selected={row.selected}
+                    className={row.collapsed ? css.collapsedRow : undefined}
+                  >
+                    {Object.entries(row.cells).map(([key, cell]) => (
+                      <TableCell
+                        key={key}
+                        data-testid={`table-cell-${key}`}
+                        className={classNames({
+                          [css.collapsedCell]: row.collapsed,
+                        })}
+                      >
+                        <Collapse in={!row.collapsed} enter={false}>
+                          {cell.mobileLabel ? (
+                            <Typography variant="body2" color="text.secondary" className={css.mobileLabel}>
+                              {cell.mobileLabel}
+                            </Typography>
+                          ) : null}
+
+                          {cell.content}
+                        </Collapse>
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                )
+              })
             ) : (
               // Prevent no `tbody` rows hydration error
               <TableRow>
@@ -187,17 +222,67 @@ function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
         </Table>
       </TableContainer>
 
-      {(rows.length > pageSizes[0] || rowsPerPage !== pageSizes[1]) && (
-        <TablePagination
-          data-testid="table-pagination"
-          rowsPerPageOptions={pageSizes}
-          component="div"
-          count={rows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
+      {showPagination && (
+        <Box
+          component={Paper}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          {footer && (
+            <Box
+              sx={{
+                px: 2,
+                display: 'flex',
+                alignItems: 'center',
+                height: '52px',
+              }}
+            >
+              {footer}
+            </Box>
+          )}
+          <TablePagination
+            data-testid="table-pagination"
+            rowsPerPageOptions={pageSizes}
+            component="div"
+            count={rows.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            sx={{
+              borderTop: 'none',
+              height: '52px',
+              '& .MuiTablePagination-selectLabel': { color: 'text.secondary', fontSize: '14px' },
+              '& .MuiTablePagination-displayedRows': { color: 'primary.light', fontSize: '14px' },
+              '& .MuiTablePagination-select': { color: 'primary.light', fontSize: '14px' },
+              '& .MuiIconButton-root': { color: 'primary.light' },
+            }}
+          />
+        </Box>
+      )}
+      {!showPagination && footer && (
+        <Box
+          component={Paper}
+          sx={{
+            px: 2,
+            display: 'flex',
+            alignItems: 'center',
+            height: '52px',
+            borderTop: '1px solid',
+            borderColor: 'var(--color-background-main)',
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
+          }}
+        >
+          {footer}
+        </Box>
       )}
     </Box>
   )

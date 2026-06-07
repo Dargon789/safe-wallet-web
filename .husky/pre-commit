@@ -1,1 +1,4 @@
-npx lint-staged
+#!/bin/bash
+set -eu
+
+lint-staged

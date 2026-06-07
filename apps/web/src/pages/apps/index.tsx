@@ -1,12 +1,12 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
+import { Typography } from '@mui/material'
 import { useCallback, useEffect, useMemo } from 'react'
 import debounce from 'lodash/debounce'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
-import SafeAppsSDKLink from '@/components/safe-apps/SafeAppsSDKLink'
 import SafeAppsHeader from '@/components/safe-apps/SafeAppsHeader'
 import SafeAppList from '@/components/safe-apps/SafeAppList'
 import { AppRoutes } from '@/config/routes'
@@ -46,60 +46,64 @@ const SafeApps: NextPage = () => {
     }
   }, [router])
 
-  if (!isSafeAppsEnabled) return <></>
-
   return (
     <>
       <Head>
         <title>{`${BRAND_NAME} – Safe Apps`}</title>
       </Head>
 
-      <SafeAppsSDKLink />
+      {isSafeAppsEnabled === undefined ? null : !isSafeAppsEnabled ? (
+        <Typography textAlign="center" my={3}>
+          Safe Apps are not available on this network.
+        </Typography>
+      ) : (
+        <>
+          <SafeAppsHeader />
 
-      <SafeAppsHeader />
+          <main>
+            {/* Safe Apps Filters */}
+            <SafeAppsFilters
+              onChangeQuery={onChangeQuery}
+              onChangeFilterCategory={setSelectedCategories}
+              onChangeOptimizedWithBatch={setOptimizedWithBatchFilter}
+              selectedCategories={selectedCategories}
+              safeAppsList={remoteSafeApps}
+            />
 
-      <main>
-        {/* Safe Apps Filters */}
-        <SafeAppsFilters
-          onChangeQuery={onChangeQuery}
-          onChangeFilterCategory={setSelectedCategories}
-          onChangeOptimizedWithBatch={setOptimizedWithBatchFilter}
-          selectedCategories={selectedCategories}
-          safeAppsList={remoteSafeApps}
-        />
+            {/* Pinned apps */}
+            {!isFiltered && pinnedSafeApps.length > 0 && (
+              <SafeAppList
+                title="My pinned apps"
+                safeAppsList={pinnedSafeApps}
+                bookmarkedSafeAppsId={pinnedSafeAppIds}
+                eventLabel={SAFE_APPS_LABELS.apps_pinned}
+              />
+            )}
 
-        {/* Pinned apps */}
-        {!isFiltered && pinnedSafeApps.length > 0 && (
-          <SafeAppList
-            title="My pinned apps"
-            safeAppsList={pinnedSafeApps}
-            bookmarkedSafeAppsId={pinnedSafeAppIds}
-            eventLabel={SAFE_APPS_LABELS.apps_pinned}
-          />
-        )}
+            {/* Featured apps */}
+            {!isFiltered && featuredSafeApps.length > 0 && (
+              <SafeAppList
+                title="Featured apps"
+                safeAppsList={featuredSafeApps}
+                bookmarkedSafeAppsId={pinnedSafeAppIds}
+                eventLabel={SAFE_APPS_LABELS.apps_featured}
+              />
+            )}
 
-        {/* Featured apps */}
-        {!isFiltered && featuredSafeApps.length > 0 && (
-          <SafeAppList
-            title="Featured apps"
-            safeAppsList={featuredSafeApps}
-            bookmarkedSafeAppsId={pinnedSafeAppIds}
-            eventLabel={SAFE_APPS_LABELS.apps_featured}
-          />
-        )}
-
-        {/* All apps */}
-        <SafeAppList
-          title="All apps"
-          isFiltered={isFiltered}
-          safeAppsList={isFiltered ? filteredApps : nonPinnedApps}
-          safeAppsListLoading={remoteSafeAppsLoading}
-          bookmarkedSafeAppsId={pinnedSafeAppIds}
-          eventLabel={SAFE_APPS_LABELS.apps_all}
-          query={query}
-          showNativeSwapsCard
-        />
-      </main>
+            {/* All apps */}
+            <SafeAppList
+              title="All apps"
+              isFiltered={isFiltered}
+              safeAppsList={isFiltered ? filteredApps : nonPinnedApps}
+              safeAppsListLoading={remoteSafeAppsLoading}
+              bookmarkedSafeAppsId={pinnedSafeAppIds}
+              eventLabel={SAFE_APPS_LABELS.apps_all}
+              query={query}
+              showNativeSwapsCard
+            />
+          </main>
+        </>
+      )}
     </>
   )
 }

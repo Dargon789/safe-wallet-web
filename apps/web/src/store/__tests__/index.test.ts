@@ -35,6 +35,11 @@ describe('store', () => {
           key2: 'key2',
         },
         arr1: ['arr1', 'arr2'],
+        auth: {
+          isStoreHydrated: true,
+          cfSafeSynced: false,
+          isOidcLoginPending: false,
+        },
       })
     })
 
@@ -100,6 +105,11 @@ describe('store', () => {
           key2: 'key2',
         },
         arr1: ['arr1'],
+        auth: {
+          isStoreHydrated: true,
+          cfSafeSynced: false,
+          isOidcLoginPending: false,
+        },
       })
     })
 
@@ -122,6 +132,11 @@ describe('store', () => {
       expect(mergedState).toStrictEqual({
         str1: 'str1',
         str2: 'str2',
+        auth: {
+          isStoreHydrated: true,
+          cfSafeSynced: false,
+          isOidcLoginPending: false,
+        },
       })
 
       // @ts-expect-error demo state

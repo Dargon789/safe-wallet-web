@@ -1,7 +1,6 @@
-import { skipToken } from '@reduxjs/toolkit/query'
 import { useCallback, useContext, useEffect, useMemo } from 'react'
 import type { PropsWithChildren, ReactElement } from 'react'
-import type { MetaTransactionData, SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { MetaTransactionData, SafeTransaction } from '@safe-global/types-kit'
 
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -9,9 +8,9 @@ import useBalances from '@/hooks/useBalances'
 import { useCurrentChain } from '@/hooks/useChains'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { createNewUndeployedSafeWithoutSalt, encodeSafeCreationTx } from '@/components/new-safe/create/logic'
-import { useGetOwnedSafesQuery } from '@/store/slices'
-import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useOwnersGetSafesByOwnerV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
+import { predictAddressBasedOnReplayData } from '@/features/multichain'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import { SetupNestedSafeFormAssetFields } from '@/components/tx-flow/flows/CreateNestedSafe/SetupNestedSafe'
@@ -32,10 +31,13 @@ export function ReviewNestedSafe({
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const { balances } = useBalances()
   const provider = useWeb3ReadOnly()
-  const { data: nestedSafes } = useGetOwnedSafesQuery(
-    safeLoaded ? { chainId: safe.chainId, ownerAddress: safeAddress } : skipToken,
+  const { currentData: ownedSafes } = useOwnersGetSafesByOwnerV1Query(
+    { chainId: safe.chainId, ownerAddress: safeAddress },
+    { skip: !safeLoaded },
   )
   const version = getLatestSafeVersion(chain)
+
+  const nestedSafes = ownedSafes?.safes
 
   const safeAccountConfig = useMemo(() => {
     if (!chain || !nestedSafes) {

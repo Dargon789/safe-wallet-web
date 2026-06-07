@@ -14,16 +14,17 @@ const newSafeName = 'Added safe 3'
 const addedSafe900 = 'Added safe 900'
 const staticSafe200 = 'Added safe 200'
 
-describe('Sidebar added sidebar tests', () => {
+// These tests live in safe_selector.cy.js - this logic moved from the old sidebar to the selector
+describe.skip('Sidebar added sidebar tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
   beforeEach(() => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
-    cy.wait(2000)
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set2)
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.addedSafes)
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    cy.wait(2000)
   })
 
   it('Verify the safe added are listed in the sidebar', () => {

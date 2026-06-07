@@ -1,40 +1,31 @@
-import {
-  Box,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  SvgIcon,
-  Tooltip,
-  Typography,
-  type SelectChangeEvent,
-} from '@mui/material'
+import { SvgIcon, Tooltip, Typography } from '@mui/material'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
-import EthHashInfo from '@/components/common/EthHashInfo'
 import { useCallback, useContext, useEffect, useMemo } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import TxCard from '@/components/tx-flow/common/TxCard'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import SignatureIcon from '@/public/images/transactions/signature.svg'
 
-import css from './styles.module.css'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
+import { useIsWalletProposer } from '@/hooks/useProposers'
+import SignerSelector from '@/components/common/SignerSelector'
 
-export const SignerForm = ({ willExecute }: { willExecute?: boolean }) => {
+export const SignerForm = ({ willExecute, txId }: { willExecute?: boolean; txId?: string }) => {
   const { signer, setSignerAddress, connectedWallet: wallet } = useWalletContext() ?? {}
   const nestedSafeOwners = useNestedSafeOwners()
   const signerAddress = signer?.address
   const { safe } = useSafeInfo()
   const { safeTx } = useContext(SafeTxContext)
   const isNestedOwner = useIsNestedSafeOwner()
+  const isProposer = useIsWalletProposer()
+  const isCreation = !txId
 
-  const onChange = (event: SelectChangeEvent<string>) => {
+  const onChange = (address: string) => {
     trackEvent(MODALS_EVENTS.CHANGE_SIGNER)
-    setSignerAddress?.(event.target.value)
+    setSignerAddress?.(address)
   }
 
   const isOptionEnabled = useCallback(
@@ -53,6 +44,8 @@ export const SignerForm = ({ willExecute }: { willExecute?: boolean }) => {
     [safeTx, safe.threshold],
   )
 
+  const isOptionDisabled = useCallback((address: string) => !isOptionEnabled(address), [isOptionEnabled])
+
   const options = useMemo(() => {
     if (!wallet) {
       return []
@@ -70,8 +63,12 @@ export const SignerForm = ({ willExecute }: { willExecute?: boolean }) => {
       owners.add(wallet.address)
     }
 
+    if (isProposer && isCreation) {
+      owners.add(wallet.address)
+    }
+
     return Array.from(owners)
-  }, [nestedSafeOwners, safe.owners, safe.threshold, safeTx, wallet, willExecute])
+  }, [nestedSafeOwners, safe.owners, safe.threshold, safeTx, wallet, willExecute, isProposer, isCreation])
 
   // Select first option if no signer is selected and the connected wallet cannot sign
   useEffect(() => {
@@ -91,7 +88,7 @@ export const SignerForm = ({ willExecute }: { willExecute?: boolean }) => {
   }
 
   return (
-    <TxCard>
+    <>
       <Typography variant="h5" display="flex" gap={1} alignItems="center">
         <SvgIcon component={SignatureIcon} inheritViewBox fontSize="small" />
         {willExecute ? 'Execute' : 'Sign'} with
@@ -106,30 +103,13 @@ export const SignerForm = ({ willExecute }: { willExecute?: boolean }) => {
         </Tooltip>
       </Typography>
 
-      <Box display="flex" alignItems="center" gap={1}>
-        <FormControl fullWidth size="medium">
-          <InputLabel id="signer-label">Signer Account</InputLabel>
-          <Select
-            className={css.signerForm}
-            labelId="signer-label"
-            label="Signer account"
-            fullWidth
-            onChange={onChange}
-            value={signerAddress}
-          >
-            {options?.map((owner) => (
-              <MenuItem key={owner} value={owner} disabled={!isOptionEnabled(owner)}>
-                <EthHashInfo address={owner} avatarSize={32} onlyName copyAddress={false} />
-                {!isOptionEnabled(owner) && (
-                  <Typography variant="caption" component="span" className={css.disabledPill}>
-                    Already signed
-                  </Typography>
-                )}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
-    </TxCard>
+      <SignerSelector
+        options={options}
+        value={signerAddress}
+        onChange={onChange}
+        isOptionDisabled={isOptionDisabled}
+        disabledReason={() => 'Already signed'}
+      />
+    </>
   )
 }

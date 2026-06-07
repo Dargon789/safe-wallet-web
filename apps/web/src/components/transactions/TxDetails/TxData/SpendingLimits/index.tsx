@@ -1,29 +1,30 @@
+import type { CustomTransactionInfo, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
 import React, { useMemo } from 'react'
-import type { Custom, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import { Stack, Typography } from '@mui/material'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import TokenIcon from '@/components/common/TokenIcon'
 import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
 import { useCurrentChain } from '@/hooks/useChains'
-import { selectTokens } from '@/store/balancesSlice'
-import { useAppSelector } from '@/store'
+import useBalances from '@/hooks/useBalances'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import type { SpendingLimitMethods } from '@/utils/transaction-guards'
 import { isSetAllowance } from '@/utils/transaction-guards'
-import chains from '@/config/chains'
+import { getResetTimeOptions } from '@/features/spending-limits'
 import TxDetailsRow from '@/components/tx/ConfirmTxDetails/TxDetailsRow'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 
 type SpendingLimitsProps = {
-  txData?: TransactionData
-  txInfo: Custom
+  txData?: TransactionData | null
+  txInfo: CustomTransactionInfo
   type: SpendingLimitMethods
 }
 
-export const SpendingLimits = ({ txData, txInfo, type }: SpendingLimitsProps): ReactElement | null => {
+export const SpendingLimits = ({ txData, type }: SpendingLimitsProps): ReactElement | null => {
   const chain = useCurrentChain()
-  const tokens = useAppSelector(selectTokens)
+  const { balances } = useBalances()
+  const tokens = useMemo(() => balances.items.map(({ tokenInfo }) => tokenInfo), [balances.items])
   const isSetAllowanceMethod = useMemo(() => isSetAllowance(type), [type])
 
   const [beneficiary, tokenAddress, amount, resetTimeMin] =
@@ -37,7 +38,6 @@ export const SpendingLimits = ({ txData, txInfo, type }: SpendingLimitsProps): R
     () => tokens.find(({ address }) => sameAddress(address, tokenAddress as string)),
     [tokenAddress, tokens],
   )
-  const txTo = txInfo.to
 
   if (!txData) return null
 
@@ -49,9 +49,7 @@ export const SpendingLimits = ({ txData, txInfo, type }: SpendingLimitsProps): R
 
       <TxDetailsRow label="Beneficiary" grid>
         <EthHashInfo
-          address={(beneficiary as string) || txTo?.value || '0x'}
-          name={txTo.name}
-          customAvatar={txTo.logoUri}
+          address={(beneficiary as string) || ZERO_ADDRESS}
           shortAddress={false}
           showCopyButton
           hasExplorer
@@ -87,23 +85,3 @@ export const SpendingLimits = ({ txData, txInfo, type }: SpendingLimitsProps): R
     </Stack>
   )
 }
-
-const RESET_TIME_OPTIONS = [
-  { label: 'One time', value: '0' },
-  { label: '1 day', value: '1440' },
-  { label: '1 week', value: '10080' },
-  { label: '1 month', value: '43200' },
-]
-
-const TEST_RESET_TIME_OPTIONS = [
-  { label: 'One time', value: '0' },
-  { label: '5 minutes', value: '5' },
-  { label: '30 minutes', value: '30' },
-  { label: '1 hour', value: '60' },
-]
-
-export const getResetTimeOptions = (chainId = ''): { label: string; value: string }[] => {
-  return chainId === chains.gor || chainId === chains.sep ? TEST_RESET_TIME_OPTIONS : RESET_TIME_OPTIONS
-}
-
-export default SpendingLimits

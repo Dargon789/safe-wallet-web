@@ -1,7 +1,7 @@
 import type { NewSafeFormData } from '@/components/new-safe/create'
 import * as useChains from '@/hooks/useChains'
 import * as relay from '@/utils/relaying'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import { render } from '@/tests/test-utils'
 import ReviewStep, { NetworkFee } from '@/components/new-safe/create/steps/ReviewStep/index'
@@ -9,24 +9,24 @@ import * as useWallet from '@/hooks/wallets/useWallet'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { act, fireEvent, screen } from '@testing-library/react'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
-import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
+import { type SafeVersion } from '@safe-global/types-kit'
 
-const mockChainInfo = {
+const mockChain = {
   chainId: '100',
   chainName: 'Gnosis Chain',
   l2: false,
   nativeCurrency: {
     symbol: 'ETH',
   },
-} as ChainInfo
+} as Chain
 
 describe('NetworkFee', () => {
   it('should display the total fee', () => {
     jest.spyOn(useWallet, 'default').mockReturnValue({ label: 'MetaMask' } as unknown as ConnectedWallet)
     const mockTotalFee = '0.0123'
-    const result = render(<NetworkFee totalFee={mockTotalFee} chain={mockChainInfo} isWaived={true} />)
+    const result = render(<NetworkFee totalFee={mockTotalFee} chain={mockChain} isWaived={true} />)
 
-    expect(result.getByText(`≈ ${mockTotalFee} ${mockChainInfo.nativeCurrency.symbol}`)).toBeInTheDocument()
+    expect(result.getByText(`≈ ${mockTotalFee} ${mockChain.nativeCurrency.symbol}`)).toBeInTheDocument()
   })
 })
 
@@ -38,7 +38,7 @@ describe('ReviewStep', () => {
   it('should display a pay now pay later option for counterfactual safe setups', () => {
     const mockData: NewSafeFormData = {
       name: 'Test',
-      networks: [mockChainInfo],
+      networks: [mockChain],
       threshold: 1,
       owners: [{ name: '', address: '0x1' }],
       saltNonce: 0,
@@ -56,7 +56,7 @@ describe('ReviewStep', () => {
   it('should display a pay later option as selected by default for counterfactual safe setups', () => {
     const mockData: NewSafeFormData = {
       name: 'Test',
-      networks: [mockChainInfo],
+      networks: [mockChain],
       threshold: 1,
       owners: [{ name: '', address: '0x1' }],
       saltNonce: 0,
@@ -64,7 +64,17 @@ describe('ReviewStep', () => {
     }
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
-    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />)
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+      initialReduxState: {
+        auth: {
+          sessionExpiresAt: Date.now() + 60000,
+          lastUsedSpace: null,
+          isStoreHydrated: true,
+          cfSafeSynced: false,
+          isOidcLoginPending: false,
+        },
+      },
+    })
 
     const payLaterOption = screen.getByRole('radio', { name: /Pay later/i })
     expect(payLaterOption).toBeChecked()
@@ -73,7 +83,7 @@ describe('ReviewStep', () => {
   it('should not display the network fee for counterfactual safes', () => {
     const mockData: NewSafeFormData = {
       name: 'Test',
-      networks: [mockChainInfo],
+      networks: [mockChain],
       threshold: 1,
       owners: [{ name: '', address: '0x1' }],
       saltNonce: 0,
@@ -91,7 +101,7 @@ describe('ReviewStep', () => {
   it('should not display the execution method for counterfactual safes', () => {
     const mockData: NewSafeFormData = {
       name: 'Test',
-      networks: [mockChainInfo],
+      networks: [mockChain],
       threshold: 1,
       owners: [{ name: '', address: '0x1' }],
       saltNonce: 0,
@@ -109,7 +119,7 @@ describe('ReviewStep', () => {
   it('should display the network fee for counterfactual safes if the user selects pay now', async () => {
     const mockData: NewSafeFormData = {
       name: 'Test',
-      networks: [mockChainInfo],
+      networks: [mockChain],
       threshold: 1,
       owners: [{ name: '', address: '0x1' }],
       saltNonce: 0,
@@ -133,7 +143,7 @@ describe('ReviewStep', () => {
   it('should display the execution method for counterfactual safes if the user selects pay now and there is relaying', async () => {
     const mockData: NewSafeFormData = {
       name: 'Test',
-      networks: [mockChainInfo],
+      networks: [mockChain],
       threshold: 1,
       owners: [{ name: '', address: '0x1' }],
       saltNonce: 0,
@@ -156,7 +166,7 @@ describe('ReviewStep', () => {
   })
 
   it('should display the execution method for counterfactual safes if the user selects pay now and there is relaying', async () => {
-    const mockMultiChainInfo = [
+    const mockMultiChain = [
       {
         chainId: '100',
         chainName: 'Gnosis Chain',
@@ -173,10 +183,10 @@ describe('ReviewStep', () => {
           symbol: 'ETH',
         },
       },
-    ] as ChainInfo[]
+    ] as Chain[]
     const mockData: NewSafeFormData = {
       name: 'Test',
-      networks: mockMultiChainInfo,
+      networks: mockMultiChain,
       threshold: 1,
       owners: [{ name: '', address: '0x1' }],
       saltNonce: 0,

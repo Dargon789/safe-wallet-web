@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { MenuView, NativeActionEvent, MenuAction } from '@react-native-menu/menu'
 import { useSignersActions } from './hooks/useSignersActions'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -6,34 +6,40 @@ import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard
 import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SignerSection } from './SignersList'
 import { View } from 'tamagui'
-import { TouchableOpacity } from 'react-native-gesture-handler'
-import { useColorScheme } from 'react-native'
+import { TouchableOpacity } from 'react-native'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
+import { selectPendingSafe } from '@/src/store/signerImportFlowSlice'
+import { selectSignerByAddress } from '@/src/store/signersSlice'
+import { ImportedBadge } from './ImportedBadge'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
-import { router, useLocalSearchParams } from 'expo-router'
+import { router } from 'expo-router'
 import logger from '@/src/utils/logger'
+import { SignerTypeBadge } from '@/src/components/SignerTypeBadge'
+import { Address } from '@/src/types/address'
 
 interface SignersListItemProps {
   item: AddressInfo
-  index: number
   signersGroup: SignerSection[]
 }
 
-function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
-  const colorScheme = useColorScheme()
+function SignersListItem({ item, signersGroup }: SignersListItemProps) {
+  const { isDark } = useTheme()
   const contact = useAppSelector(selectContactByAddress(item.value))
-  const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
+  const pendingSafe = useAppSelector(selectPendingSafe)
+  const signer = useAppSelector((state) => selectSignerByAddress(state, item.value))
 
-  // Check if the current item belongs to the 'Imported signers' section
-  const isMySigner = signersGroup.some(
-    (section) => section.id === 'imported_signers' && section.data.some((signer) => signer.value === item.value),
+  const isMySigner = useMemo(
+    () =>
+      signersGroup.some(
+        (section) => section.id === 'imported_signers' && section.data.some((s) => s.value === item.value),
+      ),
+    [signersGroup, item.value],
   )
 
-  const fullActions = useSignersActions(isMySigner) // This was necessary to prevent typescript from complaining about the actions array
-  // Filter out any false values to ensure the array type matches MenuAction[]
+  const fullActions = useSignersActions(isMySigner)
   const actions = fullActions.filter(Boolean) as MenuAction[]
-  const isLastItem = signersGroup.some((section) => section.data.length === index + 1)
   const copy = useCopyAndDispatchToast()
 
   const redirectToDetails = (editMode?: boolean) => {
@@ -44,18 +50,11 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
   }
 
   const redirectToImport = () => {
-    router.push({
-      pathname: '/import-signers',
-      params: {
-        safeAddress: local.safeAddress,
-        chainId: local.chainId,
-        import_safe: local.import_safe,
-      },
-    })
+    router.push('/import-signers')
   }
 
   const handleItemPress = () => {
-    if (local.import_safe && !isMySigner) {
+    if (pendingSafe && !isMySigner) {
       return redirectToImport()
     }
 
@@ -79,18 +78,23 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
   }
 
   return (
-    <View position="relative">
+    <View position="relative" marginBottom="$2">
       <TouchableOpacity onPress={handleItemPress} testID={`signer-${item.value}`}>
-        <View
-          backgroundColor={colorScheme === 'dark' ? '$backgroundPaper' : '$background'}
-          borderTopRightRadius={index === 0 ? '$4' : undefined}
-          borderTopLeftRadius={index === 0 ? '$4' : undefined}
-          borderBottomRightRadius={isLastItem ? '$4' : undefined}
-          borderBottomLeftRadius={isLastItem ? '$4' : undefined}
-        >
+        <View backgroundColor={isDark ? '$backgroundPaper' : '$background'} borderRadius="$2" collapsable={false}>
           <SignersCard
             name={contact ? (contact.name as string) : (item.name as string)}
             address={item.value as `0x${string}`}
+            rightNode={
+              <View flexDirection="row" alignItems="center" flexShrink={0} gap="$2">
+                {signer?.type === 'private-key' && <ImportedBadge />}
+                <SignerTypeBadge
+                  address={item.value as Address}
+                  testID={`signer-type-badge-${item.value}`}
+                  skipStatus
+                />
+                <View width={32} />
+              </View>
+            }
           />
         </View>
       </TouchableOpacity>
@@ -103,6 +107,7 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
         display="flex"
         alignItems="center"
         justifyContent="center"
+        flexDirection="row"
       >
         <MenuView
           onPressAction={onPressMenuAction}
@@ -114,6 +119,7 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
             paddingRight: 16,
             paddingLeft: 16,
           }}
+          testID="signer-menu"
         >
           <SafeFontIcon name="options-horizontal" />
         </MenuView>

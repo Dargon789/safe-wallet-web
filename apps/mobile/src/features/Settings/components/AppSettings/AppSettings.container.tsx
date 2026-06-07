@@ -1,31 +1,92 @@
 import React from 'react'
-import { Linking } from 'react-native'
+import { Alert, Linking, Platform } from 'react-native'
 import { router } from 'expo-router'
 
 import { Text, View } from 'tamagui'
 import { AppSettings } from './AppSettings'
+import { type SettingsSection } from './AppSettings.types'
 import { useTheme } from '@/src/theme/hooks/useTheme'
 import { SafeFontIcon as Icon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { FloatingMenu } from '../FloatingMenu'
 import { LoadableSwitch } from '@/src/components/LoadableSwitch'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
+import Logger from '@/src/utils/logger'
+import { useNotificationManager } from '@/src/hooks/useNotificationManager'
+import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
+import { selectAppNotificationStatus } from '@/src/store/notificationsSlice'
+import { selectCurrency } from '@/src/store/settingsSlice'
 import { capitalize } from '@/src/utils/formatters'
-import { SAFE_WEB_FEEDBACK_URL } from '@/src/config/constants'
+import { APP_STORE_URL, GOOGLE_PLAY_URL, SAFE_WEB_FEEDBACK_URL } from '@/src/config/constants'
+import { clearAllPendingTxs } from '@/src/store/pendingTxsSlice'
 
 export const AppSettingsContainer = () => {
-  const { toggleBiometrics, isBiometricsEnabled, isLoading, getBiometricsUIInfo } = useBiometrics()
+  const dispatch = useAppDispatch()
+  const {
+    toggleBiometrics,
+    promptBiometricsSetup,
+    isBiometricsEnabled,
+    isLoading: isBiometricsLoading,
+    getBiometricsUIInfo,
+  } = useBiometrics()
+  const { enableNotification, disableNotification, isLoading: isNotificationsLoading } = useNotificationManager()
+  const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
+  const currency = useAppSelector(selectCurrency)
   const { themePreference, setThemePreference } = useTheme()
 
-  const settingsSections = [
+  const handleToggleNotifications = () => {
+    if (isAppNotificationEnabled) {
+      disableNotification()
+    } else {
+      enableNotification()
+    }
+  }
+
+  const handleToggleBiometrics = async () => {
+    const result = await toggleBiometrics(!isBiometricsEnabled)
+    if (result.status === 'os-not-configured') {
+      promptBiometricsSetup()
+    } else if (result.status === 'error') {
+      Logger.error('Biometrics toggle failed:', result.error)
+      Alert.alert('Biometrics error', 'Something went wrong. Please try again.', [{ text: 'OK' }])
+    }
+  }
+
+  const handleClearPendingTxs = () => {
+    Alert.alert(
+      'Clear pending transactions',
+      'This will cleanup all your pending transactions. This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            dispatch(clearAllPendingTxs())
+          },
+        },
+      ],
+      { cancelable: true },
+    )
+  }
+
+  const settingsSections: SettingsSection[] = [
     {
       sectionName: 'Preferences',
       items: [
         {
           label: 'Currency',
           leftIcon: 'token',
-          onPress: () => console.log('currency'),
-          disabled: true,
-          tag: 'Coming soon',
+          onPress: () => router.push('/currency'),
+          disabled: false,
+          rightNode: (
+            <View flexDirection="row" alignItems="center" gap={4}>
+              <Text color="$colorSecondary">{currency.toUpperCase()}</Text>
+              <Icon name={'chevron-right'} />
+            </View>
+          ),
         },
         {
           label: 'Appearance',
@@ -34,7 +95,6 @@ export const AppSettingsContainer = () => {
           type: 'floating-menu',
           rightNode: (
             <FloatingMenu
-              themeVariant={themePreference}
               onPressAction={({ nativeEvent }) => {
                 const mode = nativeEvent.event as 'auto' | 'dark' | 'light'
                 setThemePreference(mode)
@@ -73,20 +133,13 @@ export const AppSettingsContainer = () => {
           rightNode: (
             <LoadableSwitch
               testID="toggle-app-biometrics"
-              onChange={() => toggleBiometrics(!isBiometricsEnabled)}
+              onChange={handleToggleBiometrics}
               value={isBiometricsEnabled}
-              isLoading={isLoading}
+              isLoading={isBiometricsLoading}
               trackColor={{ true: '$primary' }}
             />
           ),
           disabled: false,
-        },
-        {
-          label: 'Change passcode',
-          leftIcon: 'lock',
-          onPress: () => console.log('change passcode'),
-          disabled: true,
-          tag: 'Coming soon',
         },
       ],
     },
@@ -100,6 +153,28 @@ export const AppSettingsContainer = () => {
           onPress: () => router.push('/address-book'),
           disabled: false,
         },
+        {
+          label: 'Allow notifications',
+          leftIcon: 'bell',
+          type: 'switch',
+          rightNode: (
+            <LoadableSwitch
+              testID="toggle-global-notifications"
+              onChange={handleToggleNotifications}
+              value={isAppNotificationEnabled}
+              isLoading={isNotificationsLoading}
+              trackColor={{ true: '$primary' }}
+            />
+          ),
+          disabled: false,
+        },
+        {
+          label: 'Clear pending transactions',
+          leftIcon: 'delete',
+          type: 'menu',
+          onPress: handleClearPendingTxs,
+          disabled: false,
+        },
       ],
     },
     {
@@ -108,10 +183,11 @@ export const AppSettingsContainer = () => {
         {
           label: 'Rate us',
           leftIcon: 'star',
-          onPress: () => console.log('rate us'),
-          disabled: true,
+          onPress: () => {
+            Linking.openURL(Platform.OS === 'ios' ? `${APP_STORE_URL}?action=write-review` : `${GOOGLE_PLAY_URL}`)
+          },
+          disabled: false,
           type: 'external-link',
-          tag: 'Coming soon',
         },
         {
           label: 'Follow us on X',
@@ -130,7 +206,7 @@ export const AppSettingsContainer = () => {
         {
           label: 'Help center',
           leftIcon: 'question',
-          onPress: () => Linking.openURL('https://help.safe.global/en/'),
+          onPress: () => Linking.openURL('https://help.safe.global'),
           disabled: false,
           type: 'external-link',
         },

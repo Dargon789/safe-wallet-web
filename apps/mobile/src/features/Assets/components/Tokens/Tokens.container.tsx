@@ -1,55 +1,34 @@
-import React from 'react'
-import { ListRenderItem } from 'react-native'
-import { useSelector } from 'react-redux'
-import { Text } from 'tamagui'
-
+import React, { useCallback, useEffect, useState } from 'react'
+import { ListRenderItem, RefreshControl } from 'react-native'
+import { getTokenValue } from 'tamagui'
 import { SafeTab } from '@/src/components/SafeTab'
-import { AssetsCard } from '@/src/components/transactions-list/Card/AssetsCard'
-import { POLLING_INTERVAL } from '@/src/config/constants'
-import { selectActiveSafe } from '@/src/store/activeSafeSlice'
-import { Balance, useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { Fallback } from '../Fallback'
-import { skipToken } from '@reduxjs/toolkit/query'
-import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
-import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
-import { shouldDisplayPreciseBalance } from '@/src/utils/balance'
 import { NoFunds } from '@/src/features/Assets/components/NoFunds'
 import { AssetError } from '@/src/features/Assets/Assets.error'
+import { TokenItem } from './TokenItem'
+import { useTokenBalances } from './useTokenBalances'
+
 export function TokensContainer() {
-  const activeSafe = useSelector(selectActiveSafe)
+  const { visibleItems, currency, isFetching, error, isLoading, hasItems, allFilteredByDust, refetch } =
+    useTokenBalances()
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
-  const { data, isFetching, error, isLoading, refetch } = useBalancesGetBalancesV1Query(
-    !activeSafe
-      ? skipToken
-      : {
-          chainId: activeSafe.chainId,
-          fiatCode: 'USD',
-          safeAddress: activeSafe.address,
-          excludeSpam: false,
-          trusted: true,
-        },
-    {
-      pollingInterval: POLLING_INTERVAL,
-    },
+  useEffect(() => {
+    if (!isFetching) {
+      setIsRefreshing(false)
+    }
+  }, [isFetching])
+
+  const onRefresh = useCallback(() => {
+    setIsRefreshing(true)
+    refetch()
+  }, [refetch])
+
+  const renderItem: ListRenderItem<Balance> = useCallback(
+    ({ item }) => <TokenItem item={item} currency={currency} />,
+    [currency],
   )
-
-  const renderItem: ListRenderItem<Balance> = React.useCallback(({ item }) => {
-    const fiatBalance = item.fiatBalance
-    return (
-      <AssetsCard
-        name={item.tokenInfo.name}
-        logoUri={item.tokenInfo.logoUri}
-        description={`${formatVisualAmount(item.balance, item.tokenInfo.decimals as number)} ${item.tokenInfo.symbol}`}
-        rightNode={
-          <Text fontSize="$4" fontWeight={600} color="$color">
-            {shouldDisplayPreciseBalance(fiatBalance, 7)
-              ? formatCurrencyPrecise(fiatBalance, 'usd')
-              : formatCurrency(fiatBalance, 'usd')}
-          </Text>
-        }
-      />
-    )
-  }, [])
 
   if (error) {
     return (
@@ -59,7 +38,7 @@ export function TokensContainer() {
     )
   }
 
-  if (isLoading || !data?.items.length) {
+  if (isLoading || !hasItems) {
     return (
       <Fallback loading={isFetching}>
         <NoFunds fundsType={'token'} />
@@ -67,11 +46,26 @@ export function TokensContainer() {
     )
   }
 
+  if (allFilteredByDust) {
+    return (
+      <Fallback loading={isFetching}>
+        <NoFunds
+          fundsType={'token'}
+          title={'No tokens to show'}
+          description={'All tokens have a value below $0.01. Disable "Hide small balances" to see them.'}
+        />
+      </Fallback>
+    )
+  }
+
   return (
     <SafeTab.FlatList<Balance>
-      data={data?.items}
+      data={visibleItems}
       renderItem={renderItem}
       keyExtractor={(item, index): string => item.tokenInfo.name + index}
+      contentContainerStyle={{ paddingHorizontal: getTokenValue('$4'), gap: getTokenValue('$2') }}
+      style={{ marginTop: getTokenValue('$4') }}
+      refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
     />
   )
 }

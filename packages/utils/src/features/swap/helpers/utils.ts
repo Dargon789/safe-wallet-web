@@ -1,9 +1,10 @@
 import type { OrderTransactionInfo as SwapOrder } from '@safe-global/store/gateway/types'
 import type { DataDecoded } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatUnits } from 'ethers'
-import type { AnyAppDataDocVersion, latest, LatestAppDataDocVersion } from '@cowprotocol/app-data'
+import type { AnyAppDataDocVersion, latest } from '@cowprotocol/app-data'
 
 import { TradeType, UiOrderType } from '@safe-global/utils/features/swap/types'
+import { getOrderFeeBps as getOrderFeeBpsHelper } from '@safe-global/utils/features/swap/helpers/fee'
 
 type Quantity = {
   amount: string | number | bigint
@@ -24,9 +25,6 @@ function asDecimal(amount: number | bigint, decimals: number): number {
 }
 
 export const TWAP_FALLBACK_HANDLER = '0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5'
-
-// https://github.com/cowprotocol/composable-cow/blob/main/networks.json
-export const TWAP_FALLBACK_HANDLER_NETWORKS = ['1', '100', '11155111', '42161']
 
 export const getExecutionPrice = (
   order: Pick<SwapOrder, 'executedSellAmount' | 'executedBuyAmount' | 'buyToken' | 'sellToken'>,
@@ -169,10 +167,7 @@ export const getOrderClass = (order: Pick<SwapOrder, 'fullAppData'>): latest.Ord
 }
 
 export const getOrderFeeBps = (order: Pick<SwapOrder, 'fullAppData'>): number => {
-  const fullAppData = order.fullAppData as unknown as LatestAppDataDocVersion
-  const basisPoints = (fullAppData?.metadata?.partnerFee as latest.PartnerFee)?.bps
-
-  return Number(basisPoints) || 0
+  return getOrderFeeBpsHelper(order)
 }
 
 export const isOrderPartiallyFilled = (
@@ -210,7 +205,6 @@ export const isSettingTwapFallbackHandler = (decodedData: DataDecoded) => {
           (decoded) =>
             decoded.dataDecoded?.method === 'setFallbackHandler' &&
             decoded.dataDecoded.parameters?.some(
-              // @ts-ignore
               (parameter) => parameter.name === 'handler' && parameter.value === TWAP_FALLBACK_HANDLER,
             ),
         ),

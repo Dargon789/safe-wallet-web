@@ -1,12 +1,12 @@
 import { useEffect } from 'react'
 import { type WalletState, type OnboardAPI } from '@web3-onboard/core'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { Eip1193Provider } from 'ethers'
-import { getAddress } from 'ethers'
+import { getAddress } from 'viem'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { logError, Errors } from '@/services/exceptions'
-import { trackEvent, WALLET_EVENTS } from '@/services/analytics'
+import { trackEvent, WALLET_EVENTS, MixpanelEventParams } from '@/services/analytics'
 import { useAppSelector, useAppDispatch } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
@@ -28,9 +28,13 @@ export type ConnectedWallet = {
 
 const { getStore, setStore, useStore } = new ExternalStore<OnboardAPI>()
 
+const { setStore: setWalletReady, useStore: useIsWalletReady } = new ExternalStore<boolean>()
+
+export { useIsWalletReady }
+
 export const initOnboard = async (
-  chainConfigs: ChainInfo[],
-  currentChain: ChainInfo,
+  chainConfigs: Chain[],
+  currentChain: Chain,
   rpcConfig: EnvState['rpc'] | undefined,
 ) => {
   const { createOnboard } = await import('@/services/onboard')
@@ -89,8 +93,18 @@ export const getWalletConnectLabel = (wallet: ConnectedWallet): string | undefin
   return peerWalletV2 || UNKNOWN_PEER
 }
 
-const trackWalletType = (wallet: ConnectedWallet) => {
-  trackEvent({ ...WALLET_EVENTS.CONNECT, label: wallet.label })
+export const trackWalletType = (wallet: ConnectedWallet, configs: Chain[]) => {
+  const chainInfo = configs.find((config) => config.chainId === wallet.chainId)
+  const networkName = chainInfo?.chainName || `Chain ${wallet.chainId}`
+
+  trackEvent(
+    { ...WALLET_EVENTS.CONNECT, label: wallet.label },
+    {
+      [MixpanelEventParams.EOA_WALLET_LABEL]: wallet.label,
+      [MixpanelEventParams.EOA_WALLET_ADDRESS]: wallet.address,
+      [MixpanelEventParams.EOA_WALLET_NETWORK]: networkName,
+    },
+  )
 
   const wcLabel = getWalletConnectLabel(wallet)
   if (wcLabel) {
@@ -142,7 +156,7 @@ const connectLastWallet = async (onboard: OnboardAPI) => {
     const isUnlocked = await isWalletUnlocked(lastWalletLabel)
 
     if (isUnlocked === true || isUnlocked === undefined) {
-      connectWallet(onboard, {
+      await connectWallet(onboard, {
         autoSelect: { label: lastWalletLabel, disableModals: isUnlocked || false },
       })
     }
@@ -177,9 +191,11 @@ export const useInitOnboard = () => {
       onboard.state.actions.setWalletModules(supportedWallets)
     }
 
-    enableWallets().then(() => {
-      // Reconnect last wallet
-      connectLastWallet(onboard)
+    enableWallets().then(async () => {
+      // Reconnect last wallet and mark wallet provider as ready
+      await connectLastWallet(onboard)
+
+      setWalletReady(true)
     })
   }, [chain, onboard])
 
@@ -190,11 +206,12 @@ export const useInitOnboard = () => {
 
     const walletSubscription = onboard.state.select('wallets').subscribe((wallets) => {
       const newWallet = getConnectedWallet(wallets)
+
       if (newWallet) {
         if (newWallet.label !== lastConnectedWallet) {
           lastConnectedWallet = newWallet.label
           saveLastWallet(lastConnectedWallet)
-          trackWalletType(newWallet)
+          trackWalletType(newWallet, configs)
         }
       } else if (lastConnectedWallet) {
         lastConnectedWallet = ''
@@ -206,7 +223,7 @@ export const useInitOnboard = () => {
     return () => {
       walletSubscription.unsubscribe()
     }
-  }, [onboard, dispatch])
+  }, [onboard, dispatch, configs])
 }
 
 export default useStore

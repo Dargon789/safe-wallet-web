@@ -1,5 +1,5 @@
 import { createMockSafeTransaction } from '@/tests/transactions'
-import { OperationType } from '@safe-global/safe-core-sdk-types'
+import { OperationType } from '@safe-global/types-kit'
 import * as zodiacRoles from 'zodiac-roles-deployments'
 import { waitFor, renderHook, mockWeb3Provider } from '@/tests/test-utils'
 
@@ -9,14 +9,14 @@ import * as wallet from '@/hooks/wallets/useWallet'
 import * as onboardHooks from '@/hooks/wallets/useOnboard'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { type OnboardAPI } from '@web3-onboard/core'
-import { AbiCoder, ZeroAddress, encodeBytes32String } from 'ethers'
+import { AbiCoder, encodeBytes32String } from 'ethers'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { chainBuilder } from '@/tests/builders/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import { useRoles } from '../hooks'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const mockChain = chainBuilder()
-  // @ts-expect-error - we are using a local FEATURES enum
   .with({ features: [FEATURES.ZODIAC_ROLES, FEATURES.EIP1559] })
   .with({ chainId: '1' })
   .with({ shortName: 'eth' })
@@ -89,7 +89,7 @@ describe('useRoles', () => {
     mockConnectedWalletAddress(SAFE_INFO.owners[0].value) // connect as safe owner (not a role member)
 
     const safeTx = createMockSafeTransaction({
-      to: ZeroAddress,
+      to: ZERO_ADDRESS,
       data: '0xd0e30db0', // deposit()
       value: AbiCoder.defaultAbiCoder().encode(['uint256'], [123]),
       operation: OperationType.Call,
@@ -107,7 +107,7 @@ describe('useRoles', () => {
     mockConnectedWalletAddress(SAFE_INFO.owners[0].value) // connect as safe owner (not a role member)
 
     const safeTx = createMockSafeTransaction({
-      to: ZeroAddress,
+      to: ZERO_ADDRESS,
       data: '0xd0e30db0', // deposit()
       value: AbiCoder.defaultAbiCoder().encode(['uint256'], [123]),
       operation: OperationType.Call,
@@ -150,7 +150,7 @@ describe('useRoles', () => {
     mockConnectedWalletAddress(MEMBER_ADDRESS) // connect as a role member
 
     const safeTxWrongTarget = createMockSafeTransaction({
-      to: ZeroAddress,
+      to: ZERO_ADDRESS,
       data: '0xd0e30db0', // deposit()
       value: '0',
       operation: OperationType.Call,

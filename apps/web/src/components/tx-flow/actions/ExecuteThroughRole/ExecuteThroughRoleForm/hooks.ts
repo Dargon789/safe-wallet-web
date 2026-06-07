@@ -1,6 +1,6 @@
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { Errors, logError } from '@/services/exceptions'
 import { getModuleTransactionId } from '@/services/transactions'
 import { backOff } from 'exponential-backoff'
@@ -14,19 +14,14 @@ import {
   ExecutionOptions,
   Status,
 } from 'zodiac-roles-deployments'
-import {
-  OperationType,
-  type Transaction,
-  type MetaTransactionData,
-  type SafeTransaction,
-} from '@safe-global/safe-core-sdk-types'
+import { OperationType, type Transaction, type MetaTransactionData, type SafeTransaction } from '@safe-global/types-kit'
 import { type JsonRpcProvider } from 'ethers'
 import { KnownContracts, getModuleInstance } from '@gnosis.pm/zodiac'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useHasFeature } from '@/hooks/useChains'
 import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import { Multi_send__factory } from '@safe-global/utils/types/contracts'
-import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
+import { decodeMultiSendData } from '@safe-global/protocol-kit'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const ROLES_V2_SUPPORTED_CHAINS = Object.keys(chains)
