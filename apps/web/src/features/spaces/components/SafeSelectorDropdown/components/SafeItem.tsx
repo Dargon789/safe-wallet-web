@@ -4,17 +4,20 @@ import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeInfoDisplay from './SafeInfoDisplay'
 import BalanceDisplay from './BalanceDisplay'
 import ChainLogo from './ChainLogo'
+import NotActivatedBadge from './NotActivatedBadge'
 import type { SafeItemData } from '../types'
 
 const SafeItem = ({ name, address, threshold, owners, chains, balance, isLoading, parentSafeId }: SafeItemData) => {
   const isNested = Boolean(parentSafeId)
   const chainId = chains[0]?.chainId ?? ''
   const chainShortName = chains[0]?.shortName ?? ''
+  const isUndeployed = Boolean(chains[0]?.isUndeployed)
+  const isActivating = Boolean(chains[0]?.isActivating)
 
   const resolvedName = useSafeDisplayName(address, chainId, name)
 
   return (
-    <div className={cn('flex items-center gap-3 w-full', isNested && 'pl-8')}>
+    <div className={cn('flex items-center gap-3 w-full', isNested && 'pl-8')} data-testid="multichain-item-summary">
       <SafeInfoDisplay
         name={resolvedName}
         address={address}
@@ -32,13 +35,17 @@ const SafeItem = ({ name, address, threshold, owners, chains, balance, isLoading
           </span>
         ))}
       </div>
-      <BalanceDisplay
-        balance={<FiatValue value={balance} />}
-        threshold={threshold}
-        owners={owners}
-        isLoading={isLoading}
-        showThreshold={chains.length <= 1}
-      />
+      {isUndeployed ? (
+        <NotActivatedBadge isActivating={isActivating} className="shrink-0" />
+      ) : (
+        <BalanceDisplay
+          balance={<FiatValue value={balance} />}
+          threshold={threshold}
+          owners={owners}
+          isLoading={isLoading}
+          showThreshold={chains.length <= 1}
+        />
+      )}
     </div>
   )
 }

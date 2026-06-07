@@ -1,3 +1,4 @@
+import { getEip3770NetworkPrefixFromChainId, getChainIdFromEip3770NetworkPrefix } from '@safe-global/protocol-kit'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import type { SafeVersion } from '@safe-global/types-kit'
 import { getSafeSingletonDeployment } from '@safe-global/safe-deployments'
@@ -41,6 +42,8 @@ export enum FEATURES {
   NESTED_SAFES = 'NESTED_SAFES',
   MASS_PAYOUTS = 'MASS_PAYOUTS',
   SPACES = 'SPACES',
+  PRIVATE_ADDRESS_BOOK = 'PRIVATE_ADDRESS_BOOK',
+  SECURITY_HUB = 'SECURITY_HUB',
   EARN = 'EARN',
   EARN_PROMO = 'EARN_PROMO',
   MIXPANEL = 'MIXPANEL',
@@ -48,7 +51,6 @@ export enum FEATURES {
   PORTFOLIO_ENDPOINT = 'PORTFOLIO_ENDPOINT',
   NATIVE_COW_SWAP_FEE_V2 = 'NATIVE_COW_SWAP_FEE_V2',
   CSV_TX_EXPORT = 'CSV_TX_EXPORT',
-  SAFE_LABS_TERMS_DISABLED = 'SAFE_LABS_TERMS_DISABLED',
   NO_FEE_NOVEMBER = 'NO_FEE_NOVEMBER',
   HYPERNATIVE = 'HYPERNATIVE',
   HYPERNATIVE_RELAX_GUARD_CHECK = 'HYPERNATIVE_RELAX_GUARD_CHECK',
@@ -57,11 +59,16 @@ export enum FEATURES {
   MY_ACCOUNTS = 'MY_ACCOUNTS',
   SEND_FLOW = 'SEND_FLOW',
   BATCHING = 'BATCHING',
+  OIDC_AUTH = 'OIDC_AUTH',
   HIDE_NATIVE_TOKEN = 'HIDE_NATIVE_TOKEN',
   TEMPO_GAS_TOKEN = 'TEMPO_GAS_TOKEN',
   SUPPORT_CHAT = 'SUPPORT_CHAT',
   GTF = 'GTF',
   SAFE_STAKING = 'SAFE_STAKING',
+  WELCOME_ACCOUNTS_REDESIGN = 'WELCOME_ACCOUNTS_REDESIGN',
+  REQUIRE_LOGIN = 'REQUIRE_LOGIN',
+  CLASSIC_VIEW = 'CLASSIC_VIEW',
+  SPACE_ONBOARDING_SURVEY = 'SPACE_ONBOARDING_SURVEY',
 }
 
 const MIN_SAFE_VERSION = '1.3.0'
@@ -117,25 +124,43 @@ export const getBlockExplorerLink = (
     return getExplorerLink(address, chain.blockExplorerUriTemplate)
   }
 }
-/** This version is used if a network does not have the LATEST_SAFE_VERSION deployed yet */
-const FALLBACK_SAFE_VERSION = '1.3.0' as const
 export const getLatestSafeVersion = (
   chain: Pick<Chain, 'recommendedMasterCopyVersion' | 'chainId'> | undefined,
 ): SafeVersion => {
-  const latestSafeVersion = chain?.recommendedMasterCopyVersion || LATEST_SAFE_VERSION
+  const recommendedVersion = chain?.recommendedMasterCopyVersion || LATEST_SAFE_VERSION
 
-  // Without version filter it will always return the LATEST_SAFE_VERSION constant to avoid automatically updating to the newest version if the deployments change
-  const latestDeploymentVersion = (getSafeSingletonDeployment({ network: chain?.chainId, released: true })?.version ??
-    FALLBACK_SAFE_VERSION) as SafeVersion
+  // For chains registered in safe-deployments, cap at the latest deployed version
+  // to avoid using a version that isn't actually deployed on-chain yet.
+  const deployedVersion = getSafeSingletonDeployment({ network: chain?.chainId, released: true })?.version
 
-  // The version needs to be smaller or equal to the
-  if (semverSatisfies(latestDeploymentVersion, `<=${latestSafeVersion}`)) {
-    return latestDeploymentVersion
-  } else {
-    return latestSafeVersion as SafeVersion
+  if (deployedVersion) {
+    return (
+      semverSatisfies(deployedVersion, `<=${recommendedVersion}`) ? deployedVersion : recommendedVersion
+    ) as SafeVersion
   }
+
+  // For chains not in safe-deployments, trust the CGW's recommended version directly
+  return recommendedVersion as SafeVersion
 }
 
 export const isNonCriticalUpdate = (version?: string | null) => {
   return version && semverSatisfies(version, `>= ${MIN_SAFE_VERSION}`)
+}
+
+/** Returns the EIP-3770 short name for a given chainId, or undefined if not found. */
+export const getEip3770ShortName = (chainId: string | bigint): string | undefined => {
+  try {
+    return getEip3770NetworkPrefixFromChainId(BigInt(chainId))
+  } catch {
+    return undefined
+  }
+}
+
+/** Returns the chainId (as a string) for a given EIP-3770 short name, or undefined if not found. */
+export const getEip3770ChainId = (shortName: string): string | undefined => {
+  try {
+    return getChainIdFromEip3770NetworkPrefix(shortName).toString()
+  } catch {
+    return undefined
+  }
 }
