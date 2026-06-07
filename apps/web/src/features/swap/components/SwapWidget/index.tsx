@@ -28,6 +28,7 @@ import { skipToken } from '@reduxjs/toolkit/query/react'
 import { getKeyWithTrueValue } from '@/utils/helpers'
 import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { parseCowSupportedChainId } from '../../helpers/cowSupportedChainId'
 
 const BASE_URL = typeof window !== 'undefined' && window.location.origin ? window.location.origin : ''
 
@@ -43,6 +44,7 @@ const SwapWidget = ({ sell }: Params) => {
   const { palette } = useTheme()
   const darkMode = useDarkMode()
   const chainId = useChainId()
+  const cowChainId = useMemo(() => parseCowSupportedChainId(chainId), [chainId])
   const dispatch = useAppDispatch()
   const swapParams = useAppSelector(selectSwapParams)
   const { safeAddress, safeLoading } = useSafeInfo()
@@ -70,8 +72,7 @@ const SwapWidget = ({ sell }: Params) => {
     appCode: 'Safe Wallet Swaps', // Name of your app (max 50 characters)
     width: '100%', // Width in pixels (or 100% to use all available space)
     height: '860px',
-    chainId,
-    baseUrl: cowSwapBaseUrl,
+    chainId: cowChainId,
     standaloneMode: false,
     disableToastMessages: true,
     disablePostedOrderConfirmationModal: true,
@@ -116,7 +117,7 @@ const SwapWidget = ({ sell }: Params) => {
     },
     content: {
       feeLabel: 'Widget Fee',
-      feeTooltipMarkdown: `The [tiered widget fee](https://help.safe.global/en/articles/178530-how-does-the-widget-fee-work-for-native-swaps) incurred here is charged by CoW Protocol for the operation of this widget. The fee is automatically calculated into this quote. Part of the fee will contribute to a license fee that supports the Safe Community. Neither the Safe Ecosystem Foundation nor ${BRAND_NAME} operate the CoW Swap Widget and/or CoW Swap`,
+      feeTooltipMarkdown: `The [tiered widget fee](https://help.safe.global/articles/9969629388-How-does-the-widget-fee-work-for-native-swaps) incurred here is charged by CoW Protocol for the operation of this widget. The fee is automatically calculated into this quote. Part of the fee will contribute to a license fee that supports the Safe Community. Neither the Safe Ecosystem Foundation nor ${BRAND_NAME} operate the CoW Swap Widget and/or CoW Swap`,
     },
   })
 
@@ -226,7 +227,7 @@ const SwapWidget = ({ sell }: Params) => {
   useEffect(() => {
     setParams((params) => ({
       ...params,
-      chainId,
+      chainId: cowChainId,
       theme: {
         baseTheme: darkMode ? 'dark' : 'light',
         primary: palette.primary.main,
@@ -240,7 +241,7 @@ const SwapWidget = ({ sell }: Params) => {
         alert: palette.warning.main,
       },
     }))
-  }, [palette, darkMode, chainId])
+  }, [palette, darkMode, cowChainId])
 
   useEffect(() => {
     if (!sell) return

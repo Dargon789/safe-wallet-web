@@ -1,5 +1,10 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
+import {
+  visualSpacesApiMockSpace,
+  visualSpacesApiMockInviteFromAddress,
+  visualSpacesApiMockInviteFromEmail,
+} from '../../fixtures/spaces/visualSpacesApiMock.js'
 import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
 const SPACE_ID = '1'
@@ -17,11 +22,9 @@ function setupSpacesAuth() {
   cy.fixture('spaces/user.json').then((mockUser) => {
     cy.intercept('GET', constants.usersEndpoint, mockUser).as('getUser')
   })
-  cy.fixture('spaces/space.json').then((mockSpace) => {
-    cy.intercept('GET', constants.spacesSafesEndpoint, { safes: {} }).as('getSpaceSafes')
-    cy.intercept('GET', constants.spacesGetOneEndpoint, mockSpace).as('getSpace')
-    cy.intercept('GET', `${constants.stagingCGWUrlv1}/spaces`, [mockSpace]).as('getSpaces')
-  })
+  cy.intercept('GET', constants.spacesSafesEndpoint, { safes: {} }).as('getSpaceSafes')
+  cy.intercept('GET', constants.spacesGetOneEndpoint, visualSpacesApiMockSpace).as('getSpace')
+  cy.intercept('GET', `${constants.stagingCGWUrlv1}/spaces`, [visualSpacesApiMockSpace]).as('getSpaces')
   cy.fixture('spaces/members.json').then((mockMembers) => {
     cy.intercept('GET', constants.spacesMembersEndpoint, mockMembers).as('getSpaceMembers')
   })
@@ -63,6 +66,24 @@ describe('[VISUAL] Spaces page screenshots', { defaultCommandTimeout: 60000, ...
 
   it('[VISUAL] Screenshot spaces address book page', () => {
     cy.visit(constants.spaceAddressBookUrl + SPACE_ID)
+    main.awaitVisualStability()
+  })
+
+  it('[VISUAL] Screenshot spaces list with invite banner — address inviter', () => {
+    cy.intercept('GET', `${constants.stagingCGWUrlv1}/spaces`, [visualSpacesApiMockInviteFromAddress]).as(
+      'getSpacesInvitedByAddress',
+    )
+    cy.visit(constants.spacesUrl)
+    cy.contains('You were invited to join', { timeout: 30000 }).should('be.visible')
+    main.awaitVisualStability()
+  })
+
+  it('[VISUAL] Screenshot spaces list with invite banner — email inviter', () => {
+    cy.intercept('GET', `${constants.stagingCGWUrlv1}/spaces`, [visualSpacesApiMockInviteFromEmail]).as(
+      'getSpacesInvitedByEmail',
+    )
+    cy.visit(constants.spacesUrl)
+    cy.contains('You were invited to join', { timeout: 30000 }).should('be.visible')
     main.awaitVisualStability()
   })
 })

@@ -9,6 +9,7 @@ import {
   determineExecutionPath,
   getErrorMessage,
 } from './helpers'
+import { BIOMETRY_ROTATION_DESCRIPTION, BiometryInvalidationError } from '@/src/services/key-storage'
 
 // Mock chain with relay feature enabled
 const mockChainWithRelay = {
@@ -33,6 +34,13 @@ const mockLedgerSigner: Signer = {
   name: 'Ledger Signer',
   type: 'ledger',
   derivationPath: "m/44'/60'/0'/0/0",
+}
+
+const mockWalletConnectSigner: Signer = {
+  value: '0x789',
+  name: 'WC Signer',
+  type: 'walletconnect',
+  walletName: 'MetaMask',
 }
 
 describe('helpers', () => {
@@ -70,6 +78,21 @@ describe('helpers', () => {
     it('should fallback to WITH_LEDGER when relay not available and signer is Ledger', () => {
       const result = getExecutionMethod(ExecutionMethod.WITH_RELAY, false, mockChainWithRelay, mockLedgerSigner)
       expect(result).toBe(ExecutionMethod.WITH_LEDGER)
+    })
+
+    it('should return WITH_WC when signer is WalletConnect', () => {
+      const result = getExecutionMethod(ExecutionMethod.WITH_PK, true, mockChainWithRelay, mockWalletConnectSigner)
+      expect(result).toBe(ExecutionMethod.WITH_WC)
+    })
+
+    it('should return WITH_RELAY over WITH_WC when relay is requested and available', () => {
+      const result = getExecutionMethod(ExecutionMethod.WITH_RELAY, true, mockChainWithRelay, mockWalletConnectSigner)
+      expect(result).toBe(ExecutionMethod.WITH_RELAY)
+    })
+
+    it('should fallback to WITH_WC when relay not available and signer is WalletConnect', () => {
+      const result = getExecutionMethod(ExecutionMethod.WITH_RELAY, false, mockChainWithRelay, mockWalletConnectSigner)
+      expect(result).toBe(ExecutionMethod.WITH_WC)
     })
 
     it('should return WITH_PK when no signer is provided', () => {
@@ -150,6 +173,16 @@ describe('helpers', () => {
       expect(determineExecutionPath(mockPrivateKeySigner, false, ExecutionMethod.WITH_RELAY)).toBe('standard')
     })
 
+    it('should return "walletconnect" when signer is WalletConnect', () => {
+      expect(determineExecutionPath(mockWalletConnectSigner, true)).toBe('walletconnect')
+      expect(determineExecutionPath(mockWalletConnectSigner, false)).toBe('walletconnect')
+    })
+
+    it('should return "standard" when relay is selected with WalletConnect signer', () => {
+      expect(determineExecutionPath(mockWalletConnectSigner, true, ExecutionMethod.WITH_RELAY)).toBe('standard')
+      expect(determineExecutionPath(mockWalletConnectSigner, false, ExecutionMethod.WITH_RELAY)).toBe('standard')
+    })
+
     it('should return "biometrics" when biometrics is not enabled', () => {
       expect(determineExecutionPath(mockPrivateKeySigner, false)).toBe('biometrics')
     })
@@ -178,6 +211,16 @@ describe('helpers', () => {
       expect(getErrorMessage({ foo: 'bar' })).toBe('Failed to execute transaction')
       expect(getErrorMessage(null)).toBe('Failed to execute transaction')
       expect(getErrorMessage(undefined)).toBe('Failed to execute transaction')
+    })
+
+    it('should use the provided fallback for non-Error throwables', () => {
+      expect(getErrorMessage('string error', 'Failed to sign transaction')).toBe('Failed to sign transaction')
+      expect(getErrorMessage(null, 'Failed to sign transaction')).toBe('Failed to sign transaction')
+    })
+
+    it('should map BiometryInvalidationError to the shared re-import copy', () => {
+      const err = new BiometryInvalidationError(new Error('SE invalidated'))
+      expect(getErrorMessage(err, 'Failed to sign transaction')).toBe(BIOMETRY_ROTATION_DESCRIPTION)
     })
   })
 })

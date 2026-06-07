@@ -3,7 +3,7 @@ import type { SerializedError } from '@reduxjs/toolkit'
 import type { UserWithWallets } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import type {
   GetSpaceResponse,
-  MemberDto,
+  SpaceMemberDto,
   SpaceAddressBookItemDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { MemberStatus, MemberRole } from './hooks/useSpaceMembers'
@@ -23,6 +23,11 @@ export const filterSpacesByStatus = (
     return space.members.some((member) => member.user.id === currentUser?.id && member.status === status)
   })
 }
+
+export const getInvitedByName = (
+  space: GetSpaceResponse | undefined,
+  currentUserId: number | undefined,
+): string | undefined => space?.members.find((member) => member.user.id === currentUserId)?.invitedByName
 
 export const getNonDeclinedSpaces = (currentUser: UserWithWallets | undefined, spaces: GetSpaceResponse[]) => {
   const pendingInvites = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.INVITED)
@@ -52,7 +57,7 @@ export const mapSpaceContactsToAddressBookState = (spaceContacts: SpaceAddressBo
  * @param members - Array of members from GetSpaceResponse
  * @param userId - The user ID to check
  */
-export const isUserActiveAdmin = (members: MemberDto[], userId: number | undefined): boolean => {
+export const isUserActiveAdmin = (members: SpaceMemberDto[], userId: number | undefined): boolean => {
   if (!userId) return false
   const membership = members.find((member) => member.user.id === userId)
   return !!membership && membership.role === MemberRole.ADMIN && membership.status === MemberStatus.ACTIVE

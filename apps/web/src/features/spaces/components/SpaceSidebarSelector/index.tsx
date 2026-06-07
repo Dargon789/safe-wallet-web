@@ -4,7 +4,7 @@ import { useState } from 'react'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import CheckIcon from '@mui/icons-material/Check'
 import SpaceCard from '../SpaceCard'
-import InitialsAvatar from '../InitialsAvatar'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
 
 import css from './styles.module.css'
 import { useRouter } from 'next/router'
@@ -12,9 +12,9 @@ import { AppRoutes } from '@/config/routes'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { SPACE_LABELS } from '@/services/analytics/events/spaces'
+import { SPACE_LABELS, SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 import { getNonDeclinedSpaces } from '@/features/spaces/utils'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 
@@ -117,12 +117,12 @@ const SpaceSidebarSelector = () => {
           <MenuItem
             onClick={() => {
               handleClose()
-              trackEvent({ ...SPACE_EVENTS.CREATE_SPACE_MODAL, label: SPACE_LABELS.space_selector })
+              trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.SIDEBAR })
               router.push(AppRoutes.spaces.createSpace)
             }}
             sx={{ fontWeight: 700 }}
           >
-            Create space
+            Create workspace
           </MenuItem>
 
           <MenuItem
@@ -133,7 +133,7 @@ const SpaceSidebarSelector = () => {
             }}
             sx={{ fontWeight: 700 }}
           >
-            View spaces
+            View workspaces
           </MenuItem>
         </Menu>
       </Box>

@@ -325,7 +325,7 @@ export function createMockSpace(spaceId: number = 1) {
         id: 1,
         role: 'ADMIN' as const,
         name: 'Admin User',
-        invitedBy: 'system',
+        invitedBy: null,
         status: 'ACTIVE' as const,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -710,6 +710,7 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     hypernative: features.hypernative ?? false,
     earn: features.earn ?? false,
     spaces: features.spaces ?? false,
+    oidcAuth: features.oidcAuth ?? false,
   }
 
   // Build handlers array
