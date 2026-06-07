@@ -86,7 +86,7 @@
     "@safe-global/store": "workspace:^",
     "@safe-global/theme": "workspace:^",
     "@tailwindcss/postcss": "^4.1.18",
-    "@trezor/connect-web": "9.7.2",
+    "@trezor/connect-web": "9.7.3",
     "@walletconnect/core": "^2.21.10",
     "@walletconnect/utils": "^2.21.10",
     "@web3-onboard/coinbase": "^2.4.2",
