@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "paths": {
+      "@safe-global/store/*": ["../../packages/store/src/*"],
+      "@safe-global/utils/*": ["../../packages/utils/src/*"],
+      "@safe-global/test/*": ["../../config/test/*"]
+    },
+    "importHelpers": true,
+    "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    "downlevelIteration": true,
+    "esModuleInterop": true,
+    "preserveSymlinks": true,
+    "incremental": true,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "forceConsistentCasingInFileNames": true,
+    "noEmitOnError": false,
+    "noImplicitAny": false,
+    "noImplicitReturns": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "experimentalDecorators": true,
+    "useUnknownInCatchVariables": false,
+    "preserveConstEnums": true,
+    "removeComments": false,
+    "strict": true,
+    "skipLibCheck": true,
+    "sourceMap": false,
+    "target": "ESNext",
+    "types": ["node", "jest"],
+    "jsx": "react-jsx",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "resolveJsonModule": true,
+    "plugins": []
+  },
+  "exclude": ["_"],
+  "typeAcquisition": {
+    "enable": true
+  }
+}

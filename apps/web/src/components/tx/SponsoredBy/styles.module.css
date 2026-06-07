@@ -1,0 +1,31 @@
+.sponsoredBy {
+  padding: 8px 12px;
+  background-color: var(--color-background-main);
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  border-top: 1px solid var(--color-border-light);
+  display: flex;
+}
+
+.icon {
+  margin-right: 8px;
+  margin-top: -1px;
+  color: var(--color-text-secondary);
+  width: 24px;
+}
+
+.logo {
+  width: 16px;
+  height: 16px;
+  margin-left: 2px;
+}
+
+[data-theme='dark'] .logo {
+  filter: brightness(0) invert(1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .logo {
+    filter: brightness(0) invert(1);
+  }
+}

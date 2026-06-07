@@ -1,0 +1,161 @@
+import { Errors, CodedException } from '..'
+
+const defaultPublicIsProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION
+describe('CodedException', () => {
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_IS_PRODUCTION = 'false'
+    jest.resetModules()
+    jest.clearAllMocks()
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
+    jest.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  afterAll(() => {
+    process.env.NEXT_PUBLIC_IS_PRODUCTION = defaultPublicIsProduction
+    jest.restoreAllMocks()
+  })
+
+  it('throws an error if code is not found', () => {
+    expect(Errors.___0).toBe('0: No such error code')
+
+    expect(() => {
+      new CodedException('weird error' as any)
+    }).toThrow('Code 0: No such error code (weird error)')
+  })
+
+  it('creates an error', () => {
+    const err = new CodedException(Errors._100)
+    expect(err.message).toBe('Code 100: Invalid input in the address field')
+    expect(err.code).toBe(100)
+    expect(err.content).toBe(Errors._100)
+  })
+
+  it('creates an error with an extra message from a string', () => {
+    const err = new CodedException(Errors._100, '0x123')
+    expect(err.message).toBe('Code 100: Invalid input in the address field (0x123)')
+    expect(err.code).toBe(100)
+    expect(err.content).toBe(Errors._100)
+  })
+
+  it('creates an error with an extra message from an Error instance', () => {
+    const err = new CodedException(Errors._100, new Error('0x123'))
+    expect(err.message).toBe('Code 100: Invalid input in the address field (0x123)')
+    expect(err.code).toBe(100)
+    expect(err.content).toBe(Errors._100)
+  })
+
+  it('creates an error with an extra message from an object', () => {
+    const err = new CodedException(Errors._100, { secretKey: '0x123' })
+    expect(err.message).toBe('Code 100: Invalid input in the address field (Non-Error object of type: object)')
+    expect(err.code).toBe(100)
+    expect(err.content).toBe(Errors._100)
+
+    // Verify it does NOT expose object contents (security test)
+    expect(err.message).not.toContain('0x123')
+    expect(err.message).not.toContain('secretKey')
+  })
+
+  it('creates an error with an extra message', () => {
+    const err = new CodedException(Errors._901, 'getSafeBalance: Server responded with 429 Too Many Requests')
+    expect(err.message).toBe(
+      'Code 901: Error processing Safe Apps SDK request (getSafeBalance: Server responded with 429 Too Many Requests)',
+    )
+    expect(err.code).toBe(901)
+  })
+
+  describe('Logging (warn level)', () => {
+    it('logs caught exceptions to console.warn, not console.error', async () => {
+      const { logError } = await import('..')
+
+      const err = logError(Errors._100, '123')
+      expect(err.message).toBe('Code 100: Invalid input in the address field (123)')
+      expect(console.warn).toHaveBeenCalledWith(err)
+      expect(console.error).not.toHaveBeenCalled()
+    })
+
+    it('public log method routes through console.warn', () => {
+      const err = new CodedException(Errors._601)
+      expect(err.message).toBe('Code 601: Error fetching balances')
+      expect(console.warn).not.toHaveBeenCalled()
+      err.log()
+      expect(console.warn).toHaveBeenCalledWith(err)
+    })
+
+    it('logs only the message on prod', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const { logError, Errors } = await import('..')
+
+      logError(Errors._100)
+      expect(console.warn).toHaveBeenCalledWith('Code 100: Invalid input in the address field')
+    })
+
+    it('forwards to logger.warn in production (NOT addError)', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockWarn = jest.fn()
+      const mockError = jest.fn()
+      jest.doMock('@/services/observability', () => ({
+        __esModule: true,
+        ...jest.requireActual('@/services/observability'),
+        logger: { info: jest.fn(), warn: mockWarn, error: mockError, debug: jest.fn() },
+      }))
+
+      const { logError, Errors } = await import('..')
+
+      logError(Errors._601, 'rpc down')
+      expect(mockWarn).toHaveBeenCalledWith(expect.stringContaining('601'), { code: 601 })
+      expect(mockError).not.toHaveBeenCalled()
+    })
+
+    it('does not forward to logger in non-production envs', async () => {
+      const mockWarn = jest.fn()
+      jest.doMock('@/services/observability', () => ({
+        __esModule: true,
+        ...jest.requireActual('@/services/observability'),
+        logger: { info: jest.fn(), warn: mockWarn, error: jest.fn(), debug: jest.fn() },
+      }))
+
+      const { logError, Errors } = await import('..')
+
+      logError(Errors._601)
+      expect(mockWarn).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('Tracking (error level)', () => {
+    it('logs at error level AND forwards to captureException on production', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+
+      const mockCaptureException = jest.fn()
+      const mockError = jest.fn()
+
+      jest.doMock('@/services/observability', () => ({
+        __esModule: true,
+        ...jest.requireActual('@/services/observability'),
+        captureException: mockCaptureException,
+        logger: { info: jest.fn(), warn: jest.fn(), error: mockError, debug: jest.fn() },
+      }))
+
+      const { trackError, Errors } = await import('..')
+
+      const err = trackError(Errors._100)
+      expect(mockCaptureException).toHaveBeenCalled()
+      expect(mockError).toHaveBeenCalledWith(err.message, { code: 100 })
+      expect(console.error).toHaveBeenCalledWith(err.message)
+    })
+
+    it('does not track in non-production envs', async () => {
+      const mockCaptureException = jest.fn()
+      jest.doMock('@/services/observability', () => ({
+        __esModule: true,
+        ...jest.requireActual('@/services/observability'),
+        captureException: mockCaptureException,
+      }))
+
+      const { trackError, Errors } = await import('..')
+
+      const err = trackError(Errors._100)
+      expect(mockCaptureException).not.toHaveBeenCalled()
+      expect(console.error).toHaveBeenCalledWith(err)
+    })
+  })
+})

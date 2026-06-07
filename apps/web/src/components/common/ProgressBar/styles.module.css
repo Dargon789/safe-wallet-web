@@ -1,0 +1,20 @@
+.progressBar {
+  height: 6px;
+  border-radius: 6px;
+  background-color: var(--color-border-light);
+}
+
+.progressBar :global .MuiLinearProgress-bar {
+  background: var(--color-primary-main);
+  border-radius: 6px;
+}
+
+[data-theme='light'] .progressBar :global .MuiLinearProgress-bar {
+  background: var(--color-secondary-main);
+}
+
+@media (max-width: 599.95px) {
+  .progressBar {
+    border-radius: 0;
+  }
+}

@@ -1,0 +1,149 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PendingTransactions should render the pending transactions in fullWidth layout 1`] = `
+<View>
+  <View
+    style={
+      {
+        "flex": 1,
+      }
+    }
+    testID="theme-light"
+  >
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "opacity": 1,
+        }
+      }
+      testID="pending-transactions"
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#FFECC2",
+            "borderBottomLeftRadius": 8,
+            "borderBottomRightRadius": 8,
+            "borderTopLeftRadius": 8,
+            "borderTopRightRadius": 8,
+            "flexDirection": "row",
+            "justifyContent": "space-between",
+            "paddingBottom": 12,
+            "paddingLeft": 12,
+            "paddingRight": 12,
+            "paddingTop": 12,
+            "width": "100%",
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "gap": 8,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "alignSelf": "flex-start",
+                "backgroundColor": "#FF8C00",
+                "borderBottomLeftRadius": 8,
+                "borderBottomRightRadius": 8,
+                "borderTopLeftRadius": 8,
+                "borderTopRightRadius": 8,
+                "gap": 4,
+                "justifyContent": "center",
+                "minWidth": 24,
+                "paddingBottom": 1,
+                "paddingLeft": 4,
+                "paddingRight": 4,
+                "paddingTop": 1,
+              }
+            }
+          >
+            <Text
+              style={
+                {
+                  "color": "#6C2D19",
+                  "fontSize": 16,
+                  "fontWeight": 700,
+                  "lineHeight": 22,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              2
+            </Text>
+          </View>
+          <Text
+            style={
+              {
+                "color": "#6C2D19",
+                "fontSize": 14,
+                "fontWeight": 600,
+                "letterSpacing": -0.1,
+              }
+            }
+            suppressHighlighting={true}
+          >
+            Pending transactions
+          </Text>
+        </View>
+        <Text
+          allowFontScaling={false}
+          selectable={false}
+          style={
+            [
+              {
+                "color": "#6C2D19",
+                "fontSize": 24,
+              },
+              undefined,
+              {
+                "fontFamily": "SafeIcons",
+                "fontStyle": "normal",
+                "fontWeight": "normal",
+              },
+              {},
+            ]
+          }
+        >
+          
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
+`;

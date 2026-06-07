@@ -1,0 +1,112 @@
+name: Web Deploy to dev/staging
+
+on:
+  pull_request:
+
+  push:
+    branches:
+      - dev
+      - main
+    paths:
+      - apps/web/**
+      - packages/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+
+    name: Deploy to dev/staging
+
+    steps:
+      # Post a PR comment before deploying
+      - name: Post a comment while building
+        if: github.event.number
+        uses: mshick/add-pr-comment@8e4927817251f1ff60c001f04568532b38e0b4a0 # v3.11.0
+        with:
+          message-id: praul
+          message: |
+            ## Branch preview
+            ⏳ Deploying a preview site...
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token-user-login: 'github-actions[bot]'
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+
+      - uses: ./.github/actions/yarn
+
+      - uses: ./.github/actions/build
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          # if: startsWith(github.ref, 'refs/heads/main')
+
+      - uses: ./.github/actions/build-storybook
+        with:
+          secrets: ${{ toJSON(secrets) }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Staging
+      - name: Deploy to the staging S3
+        if: startsWith(github.ref, 'refs/heads/main')
+        env:
+          BUCKET: s3://${{ secrets.AWS_STAGING_BUCKET_NAME }}/current
+        working-directory: apps/web
+        run: bash  ./scripts/github/s3_upload.sh
+
+      # Dev
+      - name: Deploy to the dev S3
+        if: startsWith(github.ref, 'refs/heads/dev')
+        env:
+          BUCKET: s3://${{ secrets.AWS_DEVELOPMENT_BUCKET_NAME }}
+        working-directory: apps/web
+        run: bash  ./scripts/github/s3_upload.sh
+
+      ### PRs ###
+
+      # Extract branch name
+      - name: Extract branch name
+        id: extract_branch
+        uses: ./.github/actions/branch-slug
+
+      # Deploy to S3
+      - name: Deploy PR branch
+        if: github.event.number
+        env:
+          BUCKET: s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/walletweb/${{ steps.extract_branch.outputs.slug }}
+        working-directory: apps/web
+        run: bash  ./scripts/github/s3_upload.sh
+
+      # Comment
+      - name: Post a deployment link in the PR
+        if: always() && github.event.number
+        uses: mshick/add-pr-comment@8e4927817251f1ff60c001f04568532b38e0b4a0 # v3.11.0
+        with:
+          message-id: praul
+          message: |
+            ## Branch preview
+            ✅  Deploy successful!
+
+            **Website:**
+            https://${{ steps.extract_branch.outputs.slug }}--walletweb.review.5afe.dev/home?safe=eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6
+
+            **Storybook:**
+            https://${{ steps.extract_branch.outputs.slug }}--walletweb.review.5afe.dev/storybook/
+          message-failure: |
+            ## Branch preview
+            ❌  Deploy failed!

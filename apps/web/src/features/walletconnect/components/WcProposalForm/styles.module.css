@@ -1,0 +1,74 @@
+.container {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+.icon {
+  padding: var(--space-2);
+}
+
+.chain {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chainContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  margin: 0 auto;
+  gap: 10px;
+  padding: 0;
+}
+
+.origin {
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-border-background);
+  border-radius: 6px;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+.alert {
+  width: 100%;
+  text-align: left;
+}
+
+.checkbox {
+  text-align: left;
+  margin-top: var(--space-2);
+}
+
+.divider {
+  margin: var(--space-3) calc(-1 * var(--space-4));
+}
+
+.buttons {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  /* The button order is reversed to prioritize the primary action on the right for better UX. */
+  flex-direction: row-reverse;
+}
+
+.button {
+  padding: var(--space-1) var(--space-4);
+  min-width: 130px;
+}

@@ -1,0 +1,40 @@
+name: EAS Mobile E2E tests
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * *'
+  pull_request:
+    paths:
+      - apps/mobile/**
+      - packages/**
+      - expo-plugins/**
+
+jobs:
+  build:
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'mobile-e2e-test')
+    name: Install and build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+
+      - uses: ./.github/actions/yarn
+        with:
+          after-install: 'false'
+
+      - name: Build expo plugins
+        run: yarn workspace @safe-global/notification-service-ios build
+
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@c7b66a9c327a43a8fa7c0158e7f30d6040d2481e # 8.2.1
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build on EAS
+        working-directory: apps/mobile
+        run: eas build --profile build-and-maestro-test --non-interactive --no-wait --platform ios

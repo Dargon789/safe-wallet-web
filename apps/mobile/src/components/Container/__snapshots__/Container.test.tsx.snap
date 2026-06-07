@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Container applies the correct styles 1`] = `
+{
+  "backgroundColor": "#FFFFFF",
+  "borderBottomLeftRadius": 6,
+  "borderBottomRightRadius": 6,
+  "borderTopLeftRadius": 6,
+  "borderTopRightRadius": 6,
+  "flexDirection": "column",
+  "paddingBottom": 16,
+  "paddingLeft": 12,
+  "paddingRight": 12,
+  "paddingTop": 16,
+}
+`;

@@ -1,8 +1,17 @@
 # Contributing
 
-When contributing to this repository, please first discuss the change you wish to make via a GitHub issue before making it.
+### tl;dr
 
-Please note we have a Code of Conduct (see below), please follow it in all your interactions with the project.
+- Pull requests are very welcome
+- Check [**good first issues**](https://github.com/safe-global/safe-wallet-monorepo/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) if you want to contribute but don't know what
+- We do NOT accept tiny text edits, typo fixes etc, which is typically bot activity/airdrop farming
+- Each pull requests is rewarded with a [GitPOAP](https://www.gitpoap.io/gh/safe-global/safe-wallet-monorepo) but this does NOT guarantee any other perks
+
+## Code Style
+
+The packages inside the repo try to follow the same code style, but there might be small differences. Check the `code-style.md`
+file in the package you are working on for specific guidelines.
+We use [semantic commits](https://www.conventionalcommits.org/en/v1.0.0/) for pull request titles and commit messages.
 
 ## CLA
 
@@ -13,7 +22,7 @@ It is a requirement for all contributors to sign the [Contributor License Agreem
 - When opening a pull request, please make sure to fully fill out the pull request template that will appear in the description text box.
 - Make sure to cover your changes with unit tests.
 - Automatic linting and tests should pass once the workflows are approved by a maintainer.
-- Please follow our [Code Style Guidelines](docs/code-style.md).
+- Please follow our Code Style Guidelines for the package you are working on.
 
 ## Code of Conduct
 

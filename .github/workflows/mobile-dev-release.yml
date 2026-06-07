@@ -1,0 +1,53 @@
+name: EAS Dev Build
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - apps/mobile/**
+      - packages/**
+      - expo-plugins/**
+  pull_request:
+    paths:
+      - apps/mobile/**
+      - packages/**
+      - expo-plugins/**
+
+permissions: {}
+
+jobs:
+  build:
+    permissions:
+      contents: read
+
+    if: >
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' &&
+       contains(github.event.pull_request.labels.*.name, 'mobile-dev-release'))
+    name: Install and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+
+      - uses: ./.github/actions/yarn
+        with:
+          after-install: 'false'
+
+      - name: Build expo plugins
+        run: yarn workspace @safe-global/notification-service-ios build
+
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@c7b66a9c327a43a8fa7c0158e7f30d6040d2481e # 8.2.1
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build & deploy iOS on EAS
+        working-directory: apps/mobile
+        run: eas build --profile development --non-interactive --no-wait --platform ios --auto-submit-with-profile=development
+
+      - name: Build & deploy Android on EAS
+        working-directory: apps/mobile
+        run: eas build --profile development --non-interactive --no-wait --platform android --auto-submit-with-profile=development

@@ -1,0 +1,120 @@
+name: 'Build'
+
+description: 'Build the app'
+
+inputs:
+  secrets:
+    required: true
+    description: 'GitHub secrets as JSON'
+
+  prod: # id of input
+    description: 'Production build flag'
+    required: false
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: Restore Next.js Build Cache & Cypress cache
+      id: restore-nc
+      uses: ./.github/actions/cache-deps
+      with:
+        mode: restore-nc
+
+    - name: Export NEXT_PUBLIC secrets to env
+      shell: bash
+      env:
+        SECRETS_JSON: ${{ inputs.secrets }}
+      run: |
+        set -euo pipefail
+
+        # Auto-export all NEXT_PUBLIC_* secrets.
+        # New secrets with this prefix are picked up automatically.
+        # Uses per-key heredoc delimiters to safely handle multi-line values
+        # (e.g. NEXT_PUBLIC_FIREBASE_OPTIONS_* are JSON strings).
+        EXPORTED=$(echo "$SECRETS_JSON" | jq -r '
+          to_entries[]
+          | select(.key | startswith("NEXT_PUBLIC_"))
+          | select(.value != null and .value != "")
+          | "\(.key)<<EOF_\(.key)\n\(.value)\nEOF_\(.key)"
+        ')
+
+        if [ -n "$EXPORTED" ]; then
+          echo "$EXPORTED" >> "$GITHUB_ENV"
+          # Log exported key names (values masked)
+          echo "$EXPORTED" | grep -oP '^[A-Z0-9_]+(?=<<)' | while read -r key; do
+            echo "  Exported: $key"
+          done
+        else
+          echo "Warning: No NEXT_PUBLIC_* secrets found to export"
+        fi
+
+    - name: Set environment variables
+      shell: bash
+      run: |
+        SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+        echo "NEXT_PUBLIC_COMMIT_HASH=$SHORT_SHA" >> $GITHUB_ENV
+
+        # Datadog RUM env:
+        # - can be overridden by setting NEXT_PUBLIC_DATADOG_RUM_ENV in repo secrets
+        # - otherwise set to "production" or "development" based on prod flag
+        DATADOG_RUM_ENV="${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_ENV }}"
+        if [ -z "$DATADOG_RUM_ENV" ]; then
+          if [ "${{ inputs.prod }}" = "true" ]; then
+            DATADOG_RUM_ENV="production"
+          else
+            DATADOG_RUM_ENV="development"
+          fi
+        fi
+        echo "NEXT_PUBLIC_DATADOG_RUM_ENV=$DATADOG_RUM_ENV" >> $GITHUB_ENV
+
+        if [ "${{ inputs.prod }}" = "true" ]; then
+          echo "NEXT_PUBLIC_INFURA_TOKEN=${{ fromJSON(inputs.secrets).NEXT_PUBLIC_INFURA_TOKEN }}" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN=${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN }}" >> $GITHUB_ENV
+        else
+          echo "NEXT_PUBLIC_INFURA_TOKEN=${{ fromJSON(inputs.secrets).NEXT_PUBLIC_INFURA_TOKEN_DEVSTAGING }}" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN=${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN_DEVSTAGING }}" >> $GITHUB_ENV
+        fi
+
+    - name: Build
+      shell: bash
+      run: yarn workspace @safe-global/web build
+      env:
+        NEXT_PUBLIC_IS_PRODUCTION: ${{ inputs.prod }}
+
+    - name: Upload source maps to Datadog
+      if: ${{ fromJSON(inputs.secrets).DATADOG_API_KEY }}
+      shell: bash
+      working-directory: apps/web
+      run: |
+        RELEASE_VERSION="${NEXT_PUBLIC_COMMIT_HASH:-$(echo "${{ github.sha }}" | cut -c1-7)}"
+        DATADOG_SERVICE="${NEXT_PUBLIC_DATADOG_RUM_SERVICE:-safe-wallet-web}"
+        echo "Uploading Datadog sourcemaps:"
+        echo "- env: ${NEXT_PUBLIC_DATADOG_RUM_ENV:-unset}"
+        echo "- service: $DATADOG_SERVICE"
+        echo "- release-version: $RELEASE_VERSION"
+        echo "- minified-path-prefix: /_next/static"
+        echo "- sourcemaps-dir: ./out/_next/static"
+        npx @datadog/datadog-ci sourcemaps upload ./out/_next/static \
+          --service="$DATADOG_SERVICE" \
+          --release-version="$RELEASE_VERSION" \
+          --minified-path-prefix=/_next/static
+      env:
+        DATADOG_API_KEY: ${{ fromJSON(inputs.secrets).DATADOG_API_KEY }}
+        DATADOG_SITE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SITE || 'datadoghq.eu' }}
+    - name: Generate SRI for static scripts
+      shell: bash
+      # Skip SRI for Cypress test builds (NODE_ENV=cypress)
+      run: |
+        if [ "$NODE_ENV" != "cypress" ]; then
+          yarn workspace @safe-global/web integrity
+        else
+          echo "Skipping SRI generation for Cypress test environment"
+        fi
+
+    - name: Save Next.js Build Cache & Cypress cache
+      if: steps.restore-nc.outputs.cache-hit-nc != 'true'
+      uses: ./.github/actions/cache-deps
+      with:
+        mode: save-nc
+        key: ${{ steps.restore-nc.outputs.computed-cache-key-nc }}

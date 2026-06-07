@@ -1,0 +1,35 @@
+/* Shared legacy styles consumed by RecoverySigners and MsgSigners */
+.signers {
+  padding: 0;
+}
+
+.signers::before {
+  content: '';
+  position: absolute;
+  border-left: 2px solid var(--color-border-light);
+  left: 15px;
+  top: 20px;
+  height: calc(100% - 40px);
+}
+
+.signers :global .MuiListItem-root {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.signers :global .MuiListItemIcon-root {
+  color: var(--color-primary-main);
+  justify-content: center;
+  min-width: 32px;
+  padding: var(--space-1) 0;
+  background-color: var(--color-background-paper);
+}
+
+.icon {
+  height: 16px;
+  width: 16px;
+}
+
+.listFooter {
+  margin-left: var(--space-4);
+}
