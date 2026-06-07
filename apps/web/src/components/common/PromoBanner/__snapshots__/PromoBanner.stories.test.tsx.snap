@@ -5,7 +5,7 @@ exports[`./PromoBanner.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-t31lyp-MuiPaper-root-MuiCard-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-fmnm4n-MuiPaper-root-MuiCard-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -40,7 +40,7 @@ exports[`./PromoBanner.stories Default 1`] = `
           href="#"
         >
           <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic bannerCtaText mui-style-9raz31-MuiButtonBase-root-MuiButton-root"
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic bannerCtaText mui-style-1upwgwi-MuiButtonBase-root-MuiButton-root"
             tabindex="0"
             type="button"
           >
@@ -51,7 +51,7 @@ exports[`./PromoBanner.stories Default 1`] = `
     </div>
     <button
       aria-label="close"
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-le4ea9-MuiButtonBase-root-MuiIconButton-root"
       tabindex="0"
       type="button"
     >
@@ -76,7 +76,7 @@ exports[`./PromoBanner.stories ShortText 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-t31lyp-MuiPaper-root-MuiCard-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-fmnm4n-MuiPaper-root-MuiCard-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -94,7 +94,7 @@ exports[`./PromoBanner.stories ShortText 1`] = `
           href="#"
         >
           <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic bannerCtaText mui-style-9raz31-MuiButtonBase-root-MuiButton-root"
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic bannerCtaText mui-style-1upwgwi-MuiButtonBase-root-MuiButton-root"
             tabindex="0"
             type="button"
           >
@@ -105,7 +105,7 @@ exports[`./PromoBanner.stories ShortText 1`] = `
     </div>
     <button
       aria-label="close"
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-le4ea9-MuiButtonBase-root-MuiIconButton-root"
       tabindex="0"
       type="button"
     >
@@ -130,7 +130,7 @@ exports[`./PromoBanner.stories WithCustomColors 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-nfvyn6-MuiPaper-root-MuiCard-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-17ay4e8-MuiPaper-root-MuiCard-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -165,7 +165,7 @@ exports[`./PromoBanner.stories WithCustomColors 1`] = `
           href="#"
         >
           <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic bannerCtaText mui-style-9raz31-MuiButtonBase-root-MuiButton-root"
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic bannerCtaText mui-style-1upwgwi-MuiButtonBase-root-MuiButton-root"
             tabindex="0"
             type="button"
           >
@@ -176,7 +176,7 @@ exports[`./PromoBanner.stories WithCustomColors 1`] = `
     </div>
     <button
       aria-label="close"
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-le4ea9-MuiButtonBase-root-MuiIconButton-root"
       tabindex="0"
       type="button"
     >
@@ -201,7 +201,7 @@ exports[`./PromoBanner.stories WithOnClick 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-t31lyp-MuiPaper-root-MuiCard-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-fmnm4n-MuiPaper-root-MuiCard-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -233,7 +233,7 @@ exports[`./PromoBanner.stories WithOnClick 1`] = `
           Click the button to perform a custom action
         </p>
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary bannerCtaContained mui-style-reb66-MuiButtonBase-root-MuiButton-root"
+          class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary bannerCtaContained mui-style-m1g3nl-MuiButtonBase-root-MuiButton-root"
           tabindex="0"
           type="button"
         >
@@ -243,7 +243,7 @@ exports[`./PromoBanner.stories WithOnClick 1`] = `
     </div>
     <button
       aria-label="close"
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-le4ea9-MuiButtonBase-root-MuiIconButton-root"
       tabindex="0"
       type="button"
     >
@@ -268,7 +268,7 @@ exports[`./PromoBanner.stories WithoutDismiss 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-t31lyp-MuiPaper-root-MuiCard-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-fmnm4n-MuiPaper-root-MuiCard-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -303,7 +303,7 @@ exports[`./PromoBanner.stories WithoutDismiss 1`] = `
           href="#"
         >
           <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic bannerCtaText mui-style-9raz31-MuiButtonBase-root-MuiButton-root"
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic bannerCtaText mui-style-1upwgwi-MuiButtonBase-root-MuiButton-root"
             tabindex="0"
             type="button"
           >
@@ -321,7 +321,7 @@ exports[`./PromoBanner.stories WithoutImage 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-t31lyp-MuiPaper-root-MuiCard-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-fmnm4n-MuiPaper-root-MuiCard-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -344,7 +344,7 @@ exports[`./PromoBanner.stories WithoutImage 1`] = `
           href="#"
         >
           <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic bannerCtaText mui-style-9raz31-MuiButtonBase-root-MuiButton-root"
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic bannerCtaText mui-style-1upwgwi-MuiButtonBase-root-MuiButton-root"
             tabindex="0"
             type="button"
           >
@@ -355,7 +355,7 @@ exports[`./PromoBanner.stories WithoutImage 1`] = `
     </div>
     <button
       aria-label="close"
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-le4ea9-MuiButtonBase-root-MuiIconButton-root"
       tabindex="0"
       type="button"
     >

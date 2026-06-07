@@ -1,6 +1,5 @@
 .container {
   height: 100vh;
-  padding-top: var(--header-height);
   display: flex;
   overflow: hidden;
   flex-direction: column;
@@ -16,12 +15,12 @@
   position: relative;
   overflow-y: auto;
   overflow-x: hidden;
+  scrollbar-width: none;
 }
 
 .drawer {
   width: 550px;
   max-width: 90vw;
-  padding-top: var(--header-height);
   overflow-y: auto;
   height: 100%;
 }
@@ -65,10 +64,6 @@
 }
 
 @media (max-width: 899.95px) {
-  .container {
-    padding-top: var(--header-height);
-  }
-
   .drawer {
     max-width: 90vw;
   }

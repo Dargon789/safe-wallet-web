@@ -5,6 +5,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { createTx } from '@/services/tx/tx-sender'
 import { useRecommendedNonce, useSafeTxGas } from '@/components/tx/shared/hooks'
 import { Errors, logError } from '@/services/exceptions'
+import { getTxOrigin } from '@/utils/transactions'
 
 export type SafeTxContextParams = {
   safeTx?: SafeTransaction
@@ -12,6 +13,9 @@ export type SafeTxContextParams = {
 
   safeMessage?: TypedData
   setSafeMessage: Dispatch<SetStateAction<TypedData | undefined>>
+
+  safeMessageHash?: `0x${string}`
+  setSafeMessageHash: Dispatch<SetStateAction<`0x${string}` | undefined>>
 
   safeTxError?: Error
   setSafeTxError: Dispatch<SetStateAction<Error | undefined>>
@@ -35,6 +39,7 @@ export type SafeTxContextParams = {
 export const SafeTxContext = createContext<SafeTxContextParams>({
   setSafeTx: () => {},
   setSafeMessage: () => {},
+  setSafeMessageHash: () => {},
   setSafeTxError: () => {},
   setNonce: () => {},
   setNonceNeeded: () => {},
@@ -46,11 +51,14 @@ export const SafeTxContext = createContext<SafeTxContextParams>({
 const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => {
   const [safeTx, setSafeTx] = useState<SafeTransaction>()
   const [safeMessage, setSafeMessage] = useState<TypedData>()
+  const [safeMessageHash, setSafeMessageHash] = useState<`0x${string}`>()
   const [safeTxError, setSafeTxError] = useState<Error>()
   const [nonce, setNonce] = useState<number>()
   const [nonceNeeded, setNonceNeeded] = useState<boolean>(true)
   const [safeTxGas, setSafeTxGas] = useState<string>()
-  const [txOrigin, setTxOrigin] = useState<string>()
+  const [txOrigin, setTxOrigin] = useState<string | undefined>(() =>
+    typeof window !== 'undefined' ? getTxOrigin({ url: window.location.origin, name: '' }) : undefined,
+  )
 
   // Signed txs cannot be updated
   const isSigned = Boolean(safeTx && safeTx.signatures.size > 0)
@@ -97,6 +105,8 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
         setSafeTxError,
         safeMessage,
         setSafeMessage,
+        safeMessageHash,
+        setSafeMessageHash,
         nonce: finalNonce,
         setNonce,
         nonceNeeded,

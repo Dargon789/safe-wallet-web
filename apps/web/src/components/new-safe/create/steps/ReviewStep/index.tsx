@@ -5,6 +5,7 @@ import {
   SafeCreationEvent,
   replayCounterfactualSafeDeployment,
   activateReplayedSafe,
+  persistCounterfactualSafe,
 } from '@/features/counterfactual/services'
 import { PayNowPayLater } from '@/features/counterfactual/components'
 import { CF_TX_GROUP_KEY } from '@/features/counterfactual'
@@ -18,6 +19,15 @@ import {
   relaySafeCreation,
 } from '@/components/new-safe/create/logic'
 import { getAvailableSaltNonce } from '@/components/new-safe/create/logic/utils'
+import {
+  buildTransactionOptions,
+  getDeploymentType,
+  getNetworkLabel,
+  getPaymentMethodLabel,
+  getThresholdLabel,
+  getWillRelay,
+  shouldShowNetworkWarning,
+} from '@/components/new-safe/create/steps/ReviewStep/utils'
 import css from '@/components/new-safe/create/steps/ReviewStep/styles.module.css'
 import layoutCss from '@/components/new-safe/create/styles.module.css'
 import { useEstimateSafeCreationGas } from '@/components/new-safe/create/useEstimateSafeCreationGas'
@@ -54,11 +64,19 @@ import NetworkWarning from '../../NetworkWarning'
 import { useAllSafes } from '@/hooks/safes'
 import uniq from 'lodash/uniq'
 import { selectRpc } from '@/store/settingsSlice'
+import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
+import { useIsAdmin } from '@/features/spaces'
+import { parseSpaceId } from '@/utils/spaces'
 import { AppRoutes } from '@/config/routes'
 import type { CreateSafeResult, ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { updateAddressBook } from '../../logic/address-book'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import {
+  FEATURES,
+  hasFeature,
+  getNativeTokenDisplay,
+  NATIVE_TOKEN_DISPLAY_DEFAULT,
+} from '@safe-global/utils/utils/chains'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { type TransactionOptions } from '@safe-global/types-kit'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
@@ -99,7 +117,7 @@ export const SafeSetupOverview = ({
   return (
     <Grid container spacing={3}>
       <ReviewRow
-        name={networks.length > 1 ? 'Networks' : 'Network'}
+        name={getNetworkLabel(networks.length)}
         value={
           <Tooltip
             title={
@@ -152,9 +170,7 @@ export const SafeSetupOverview = ({
       <ReviewRow
         name="Threshold"
         value={
-          <Typography data-testid="review-step-threshold">
-            {threshold} out of {owners.length} {owners.length > 1 ? 'signers' : 'signer'}
-          </Typography>
+          <Typography data-testid="review-step-threshold">{getThresholdLabel(threshold, owners.length)}</Typography>
         }
       />
     </Grid>
@@ -175,7 +191,13 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   const [isCreating, setIsCreating] = useState<boolean>(false)
   const [submitError, setSubmitError] = useState<string>()
   const isCounterfactualEnabled = useHasFeature(FEATURES.COUNTERFACTUAL)
+  const isUserAuthenticated = useAppSelector(isAuthenticated)
+  const spaceId = useAppSelector(lastUsedSpace)
+  const isAdminOfActiveSpace = useIsAdmin(parseSpaceId(spaceId) ?? undefined)
   const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
+  const { showGasFeeEstimation, showInsufficientFundsWarning, showFeeInConfirmationText } = chain
+    ? getNativeTokenDisplay(chain)
+    : NATIVE_TOKEN_DISPLAY_DEFAULT
 
   const ownerAddresses = useMemo(() => data.owners.map((owner) => owner.address), [data.owners])
   const [minRelays] = useLeastRemainingRelays(ownerAddresses)
@@ -184,7 +206,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
   // Every owner has remaining relays and relay method is selected
   const canRelay = hasRemainingRelays(minRelays)
-  const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
+  const willRelay = getWillRelay(canRelay, executionMethod)
 
   const newSafeProps = useMemo(
     () =>
@@ -225,6 +247,9 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   const knownAddresses = useMemo(() => uniq(allSafes?.map((safe) => safe.address)), [allSafes])
 
   const customRPCs = useAppSelector(selectRpc)
+
+  // Derive effective pay method synchronously to avoid one-render gap
+  const effectivePayMethod = !isUserAuthenticated && payMethod === PayMethod.PayLater ? PayMethod.PayNow : payMethod
 
   const handleBack = () => {
     onBack(data)
@@ -272,15 +297,17 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
       gtmSetChainId(chain.chainId)
 
-      if (isCounterfactualEnabled && payMethod === PayMethod.PayLater) {
+      if (isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater) {
+        if (successfulChains.length === 0) return
+
         await router?.push({
           pathname: AppRoutes.home,
-          query: { safe: `${data.networks[0].shortName}:${safeAddress}` },
+          query: { safe: `${successfulChains[0].chain.shortName}:${safeAddress}` },
         })
         safeCreationDispatch(SafeCreationEvent.AWAITING_EXECUTION, {
           groupKey: CF_TX_GROUP_KEY,
           safeAddress,
-          networks: data.networks,
+          networks: successfulChains.map((r) => r.chain),
         })
       }
     } catch (err) {
@@ -302,37 +329,48 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
       [MixpanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
       [MixpanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
       [MixpanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
-      [MixpanelEventParams.DEPLOYMENT_TYPE]:
-        isCounterfactualEnabled && payMethod === PayMethod.PayLater ? 'Counterfactual' : 'Direct',
-      [MixpanelEventParams.PAYMENT_METHOD]:
-        isCounterfactualEnabled && payMethod === PayMethod.PayLater
-          ? 'Pay-later'
-          : willRelay
-            ? 'Sponsored'
-            : 'Self-paid',
+      [MixpanelEventParams.DEPLOYMENT_TYPE]: getDeploymentType(isCounterfactualEnabled, effectivePayMethod),
+      [MixpanelEventParams.PAYMENT_METHOD]: getPaymentMethodLabel(
+        isCounterfactualEnabled,
+        effectivePayMethod,
+        willRelay,
+      ),
     })
 
     try {
-      if (isCounterfactualEnabled && payMethod === PayMethod.PayLater) {
+      if (isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater) {
         gtmSetSafeAddress(safeAddress)
 
         trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
-        replayCounterfactualSafeDeployment(chain.chainId, safeAddress, props, data.name, dispatch, payMethod)
+
+        // Single code path for backend persist + Redux add — shared with the
+        // "Add another network" flow to keep the write path consistent.
+        const result = await persistCounterfactualSafe({
+          chainId: chain.chainId,
+          safeAddress,
+          props,
+          name: data.name,
+          payMethod: effectivePayMethod,
+          spaceId,
+          isUserAuthenticated,
+          isAdminOfActiveSpace,
+          dispatch,
+        })
+        if (!result.ok) throw result.error
 
         return { chain, safeAddress, success: true }
       }
 
-      const options: TransactionOptions = isEIP1559
-        ? {
-            maxFeePerGas: maxFeePerGas?.toString(),
-            maxPriorityFeePerGas: maxPriorityFeePerGas?.toString(),
-            gasLimit: gasLimit?.toString(),
-          }
-        : { gasPrice: maxFeePerGas?.toString(), gasLimit: gasLimit?.toString() }
+      const options: TransactionOptions = buildTransactionOptions(
+        !!isEIP1559,
+        maxFeePerGas,
+        maxPriorityFeePerGas,
+        gasLimit,
+      )
 
       const onSubmitCallback = async (taskId?: string, txHash?: string) => {
         // Create a counterfactual Safe
-        replayCounterfactualSafeDeployment(chain.chainId, safeAddress, props, data.name, dispatch, payMethod)
+        replayCounterfactualSafeDeployment(chain.chainId, safeAddress, props, data.name, dispatch, effectivePayMethod)
 
         if (taskId) {
           safeCreationDispatch(SafeCreationEvent.RELAYING, { groupKey: CF_TX_GROUP_KEY, taskId, safeAddress })
@@ -385,9 +423,13 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
     return { chain, safeAddress, success: true }
   }
 
-  const showNetworkWarning =
-    (isWrongChain && payMethod === PayMethod.PayNow && !willRelay && !isMultiChainDeployment) ||
-    (isWrongChain && !isCounterfactualEnabled && !isMultiChainDeployment)
+  const showNetworkWarning = shouldShowNetworkWarning(
+    isWrongChain,
+    effectivePayMethod,
+    willRelay,
+    isMultiChainDeployment,
+    isCounterfactualEnabled,
+  )
 
   const isDisabled = showNetworkWarning || isCreating
 
@@ -404,11 +446,12 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
               totalFee={totalFee}
               isMultiChain={isMultiChainDeployment}
               canRelay={canRelay}
-              payMethod={payMethod}
+              payMethod={effectivePayMethod}
               setPayMethod={setPayMethod}
+              isUserAuthenticated={isUserAuthenticated}
             />
 
-            {canRelay && payMethod === PayMethod.PayNow && (
+            {canRelay && effectivePayMethod === PayMethod.PayNow && (
               <>
                 <Grid
                   container
@@ -436,7 +479,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
               </Box>
             )}
 
-            {payMethod === PayMethod.PayNow && (
+            {effectivePayMethod === PayMethod.PayNow && (
               <Grid item>
                 <Typography
                   component="div"
@@ -444,9 +487,15 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
                     mt: 2,
                   }}
                 >
-                  You will have to confirm a transaction and pay an estimated fee of{' '}
-                  <NetworkFee totalFee={totalFee} isWaived={willRelay} chain={chain} inline /> with your connected
-                  wallet
+                  {!showFeeInConfirmationText ? (
+                    'You will have to confirm a transaction with your connected wallet'
+                  ) : (
+                    <>
+                      You will have to confirm a transaction and pay an estimated fee of{' '}
+                      <NetworkFee totalFee={totalFee} isWaived={willRelay} chain={chain} inline /> with your connected
+                      wallet
+                    </>
+                  )}
                 </Typography>
               </Grid>
             )}
@@ -479,32 +528,34 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
               </Grid>
             )}
 
-            <Grid data-testid="network-fee-section" container spacing={3}>
-              <ReviewRow
-                name="Est. network fee"
-                value={
-                  <>
-                    <NetworkFee totalFee={totalFee} isWaived={willRelay} chain={chain} />
+            {showGasFeeEstimation && (
+              <Grid data-testid="network-fee-section" container spacing={3}>
+                <ReviewRow
+                  name="Est. network fee"
+                  value={
+                    <>
+                      <NetworkFee totalFee={totalFee} isWaived={willRelay} chain={chain} />
 
-                    {!willRelay && (
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: 'text.secondary',
-                          mt: 1,
-                        }}
-                      >
-                        You will have to confirm a transaction with your connected wallet.
-                      </Typography>
-                    )}
-                  </>
-                }
-              />
-            </Grid>
+                      {!willRelay && (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: 'text.secondary',
+                            mt: 1,
+                          }}
+                        >
+                          You will have to confirm a transaction with your connected wallet.
+                        </Typography>
+                      )}
+                    </>
+                  }
+                />
+              </Grid>
+            )}
 
             {showNetworkWarning && <NetworkWarning action="create a Safe Account" />}
 
-            {!walletCanPay && !willRelay && (
+            {!walletCanPay && !willRelay && showInsufficientFundsWarning && (
               <ErrorMessage>
                 Your connected wallet doesn&apos;t have enough funds to execute this transaction
               </ErrorMessage>
@@ -526,7 +577,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           <Button
             data-testid="back-btn"
             variant="outlined"
-            size="small"
+            size="large"
             onClick={handleBack}
             startIcon={<ArrowBackIcon fontSize="small" />}
           >
@@ -536,7 +587,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
             data-testid="review-step-next-btn"
             onClick={handleCreateSafeClick}
             variant="contained"
-            size="stretched"
+            size="large"
             disabled={isDisabled}
           >
             {isCreating ? <CircularProgress size={18} /> : 'Create account'}

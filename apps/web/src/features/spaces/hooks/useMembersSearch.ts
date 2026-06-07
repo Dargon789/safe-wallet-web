@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
 import Fuse from 'fuse.js'
-import type { Member } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
-const useMembersSearch = (members: Member[], query: string): Member[] => {
+const useMembersSearch = (members: MemberDto[], query: string): MemberDto[] => {
   const fuse = useMemo(
     () =>
       new Fuse(members, {
-        keys: [{ name: 'name' }],
+        keys: [{ name: 'name' }, { name: 'user.email' }],
         threshold: 0.2,
         findAllMatches: true,
         ignoreLocation: true,

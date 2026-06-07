@@ -62,6 +62,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# turborepo
+.turbo/
+**/.turbo/
+
 # typescript
 *.tsbuildinfo
 
@@ -107,3 +111,17 @@ apps/web/src/types/contracts/*
 
 # tx-builder
 apps/tx-builder/build/*
+apps/tx-builder/vite.config.js
+apps/tx-builder/vite.config.d.ts
+
+# claude-workflows
+todos/*
+/docs/plans/
+/docs/todos/
+/docs/brainstorms/
+/docs/superpowers/
+
+.codemod
+.serena
+# Claude Code worktrees
+.claude/worktrees/

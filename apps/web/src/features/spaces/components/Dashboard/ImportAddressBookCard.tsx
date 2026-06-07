@@ -1,11 +1,11 @@
 import { Typography, Paper, Box, Button, SvgIcon, Chip, Stack } from '@mui/material'
-import css from '@/features/spaces/components/Dashboard/styles.module.css'
+import css from './styles.module.css'
 import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { useState } from 'react'
-import ImportAddressBookDialog from '@/features/spaces/components/SpaceAddressBook/Import/ImportAddressBookDialog'
-import useGetSpaceAddressBook from '@/features/spaces/hooks/useGetSpaceAddressBook'
+import ImportAddressBookDialog from '../SpaceAddressBook/Import/ImportAddressBookDialog'
+import { useGetSpaceAddressBook } from '@/features/spaces'
 import CheckIcon from '@/public/images/common/check.svg'
 import classnames from 'classnames'
 
@@ -20,7 +20,7 @@ const AddressBookCard = () => {
 
   return (
     <>
-      <Paper sx={{ p: 3, borderRadius: '12px', height: '100%' }}>
+      <Paper sx={{ p: 3, borderRadius: '24px', height: '100%' }}>
         <Box position="relative" width={1}>
           <Box className={classnames(css.iconBG, css.iconBGBlue)}>
             <SvgIcon component={AddressBookIcon} inheritViewBox color="info" />
@@ -49,7 +49,7 @@ const AddressBookCard = () => {
             <Button
               onClick={handleImport}
               variant="outlined"
-              size="compact"
+              size="medium"
               sx={{ position: 'absolute', top: 0, right: 0 }}
               aria-label="Import address book"
             >
@@ -63,7 +63,7 @@ const AddressBookCard = () => {
           </Typography>
           <Typography variant="body2" color="primary.light">
             Simplify managing your funds collaboratively by importing your local address book. It will be available to
-            all members of the space.
+            all members of the workspace.
           </Typography>
         </Box>
       </Paper>

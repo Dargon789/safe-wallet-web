@@ -28,6 +28,7 @@ const customJestConfig = {
     '^.+/markdown/terms/terms\\.md$': '<rootDir>/mocks/terms.md.js',
     isows: '<rootDir>/node_modules/isows/_cjs/index.js',
     '^@safe-global/utils/(.*)$': '<rootDir>/../../packages/utils/src/$1',
+    '^@safe-global/store/(.*)$': '<rootDir>/../../packages/store/src/$1',
   },
   // https://github.com/mswjs/jest-fixed-jsdom
   // without this environment it is basically impossible to run tests with msw
@@ -40,8 +41,16 @@ const customJestConfig = {
     customExportConditions: ['node'],
   },
   coveragePathIgnorePatterns: ['/node_modules/', '/src/tests/', '/src/types/contracts/'],
-  // Exclude storybook snapshot tests from main test run - they have their own CI workflow
-  testPathIgnorePatterns: ['/node_modules/', '/.next/', '\\.stories\\.test\\.tsx$'],
+  coverageThreshold: {
+    global: {
+      branches: 56,
+      functions: 62,
+      lines: 78,
+      statements: 76,
+    },
+  },
+  // Exclude storybook snapshot tests and Playwright e2e specs from main test run - they have their own CI workflows
+  testPathIgnorePatterns: ['/node_modules/', '/.next/', '/e2e/', '\\.stories\\.test\\.tsx$'],
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

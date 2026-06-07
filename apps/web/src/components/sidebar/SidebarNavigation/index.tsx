@@ -21,6 +21,7 @@ import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { GA_LABEL_TO_MIXPANEL_PROPERTY } from '@/services/analytics/ga-mixpanel-mapping'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
+import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 import { STAKE_EVENTS, STAKE_LABELS } from '@/services/analytics/events/stake'
 import { Tooltip } from '@mui/material'
 import { BRIDGE_EVENTS, BRIDGE_LABELS } from '@/services/analytics/events/bridge'
@@ -47,6 +48,8 @@ const Navigation = (): ReactElement | null => {
   const currentSubdirectory = getSubdirectory(router.pathname)
   const queueSize = useQueuedTxsLength()
   const isBlockedCountry = useContext(GeoblockingContext)
+  // The standalone address book is only relevant when login isn't required (REQUIRE_LOGIN_DISABLED enabled).
+  const showAddressBook = useIsRequireLoginEnabled() === false
 
   const visibleNavItems = useMemo(() => {
     return navItems.filter((item) => {
@@ -54,9 +57,13 @@ const Navigation = (): ReactElement | null => {
         return false
       }
 
+      if (item.href === AppRoutes.addressBook && !showAddressBook) {
+        return false
+      }
+
       return isRouteEnabled(item.href, chain)
     })
-  }, [chain, isBlockedCountry])
+  }, [chain, isBlockedCountry, showAddressBook])
 
   const enabledNavItems = useMemo(() => {
     return safe.deployed
@@ -105,7 +112,7 @@ const Navigation = (): ReactElement | null => {
   return (
     <SidebarList>
       {visibleNavItems.map((item) => {
-        const isSelected = currentSubdirectory === getSubdirectory(item.href)
+        const isSelected = !item.externalUrl && currentSubdirectory === getSubdirectory(item.href)
         const isDisabled = item.disabled || !enabledNavItems.includes(item)
         let ItemTag = item.tag ? item.tag : null
         const spaceId = router.query.spaceId
@@ -124,25 +131,31 @@ const Navigation = (): ReactElement | null => {
           <Tooltip
             title={isDisabled ? 'You need to activate your Safe first.' : ''}
             placement="right"
-            key={item.href}
+            key={item.externalUrl || item.href}
             arrow
           >
             <div>
               <ListItemButton
-                // disablePadding
                 sx={{ padding: 0 }}
                 disabled={isDisabled}
                 selected={isSelected}
                 onClick={isDisabled ? undefined : () => handleNavigationClick(item)}
-                key={item.href}
+                {...(item.externalUrl && {
+                  component: 'a',
+                  href: item.externalUrl,
+                  target: '_blank',
+                  rel: 'noopener noreferrer',
+                })}
               >
                 <SidebarListItemButton
                   selected={isSelected}
                   href={
-                    item.href && {
-                      pathname: getRoute(item.href),
-                      query,
-                    }
+                    item.href
+                      ? {
+                          pathname: getRoute(item.href),
+                          query,
+                        }
+                      : undefined
                   }
                   disabled={isDisabled}
                 >

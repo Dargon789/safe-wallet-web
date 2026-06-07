@@ -17,15 +17,14 @@ import adminIcon from '@/public/images/spaces/admin.svg'
 import CheckIcon from '@mui/icons-material/Check'
 import css from './styles.module.css'
 import { useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId } from 'src/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId, MemberRole } from '@/features/spaces'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
-import MemberInfoForm from '@/features/spaces/components/AddMemberModal/MemberInfoForm'
+import MemberInfoForm from './MemberInfoForm'
 import AddressBookInput from '@/components/common/AddressBookInput'
 import useAddressBook from '@/hooks/useAddressBook'
 
@@ -58,7 +57,9 @@ export const RoleMenuItem = ({
         <>
           <Box gridArea="description">
             <Typography variant="body2" sx={{ maxWidth: '300px', whiteSpace: 'normal', wordWrap: 'break-word' }}>
-              {isAdmin ? 'Admins can create and delete spaces, invite members, and more.' : 'Can view the space data.'}
+              {isAdmin
+                ? 'Admins can create and delete workspaces, invite members, and more.'
+                : 'Can view the workspace data.'}
             </Typography>
           </Box>
           <Box gridArea="checkIcon" sx={{ visibility: selected ? 'visible' : 'hidden', mx: 1 }}>
@@ -109,13 +110,19 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
 
     try {
       setIsSubmitting(true)
-      trackEvent({ ...SPACE_EVENTS.ADD_MEMBER })
       const response = await inviteMembers({
         spaceId: Number(spaceId),
-        inviteUsersDto: { users: [{ address: data.address, role: data.role, name: data.name }] },
+        inviteUsersDto: { users: [{ type: 'wallet', address: data.address, role: data.role, name: data.name }] },
       })
 
       if (response.data) {
+        response.data.forEach((invitation) => {
+          trackEvent(
+            { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_SENT, label: spaceId },
+            { workspace_id: spaceId, user_id: invitation.userId, role: invitation.role.toLowerCase() },
+          )
+        })
+
         if (router.pathname !== AppRoutes.spaces.members) {
           router.push({ pathname: AppRoutes.spaces.members, query: { spaceId } })
         }
@@ -149,7 +156,8 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
         <form onSubmit={onSubmit}>
           <DialogContent sx={{ py: 2 }}>
             <Typography mb={2}>
-              Invite a signer of the Safe Accounts, or any other wallet address. Anyone in the space can see their name.
+              Invite a signer of the Safe Accounts, or any other wallet address. Anyone in the workspace can see their
+              name.
             </Typography>
 
             <Stack spacing={3}>

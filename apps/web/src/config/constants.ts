@@ -1,4 +1,4 @@
-import chains from './chains'
+import chains from '@safe-global/utils/config/chains'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 
 type Environment = 'development' | 'production' | 'test' | 'cypress'
@@ -6,7 +6,12 @@ type Environment = 'development' | 'production' | 'test' | 'cypress'
 export const APP_ENV = process.env.NODE_ENV as Environment
 export const IS_PRODUCTION = process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true'
 export const IS_DEV = APP_ENV === 'development'
-export const IS_TEST_E2E = APP_ENV === 'cypress'
+// NOTE: `next build` rewrites process.env.NODE_ENV to 'production' in client
+// bundles, so the APP_ENV check below only works during `next dev`. For
+// production-built Cypress runs (where the workflow serves the static export)
+// we also honour an explicit NEXT_PUBLIC_IS_TEST_E2E flag, which survives the
+// build because of its NEXT_PUBLIC_ prefix.
+export const IS_TEST_E2E = APP_ENV === 'cypress' || process.env.NEXT_PUBLIC_IS_TEST_E2E === 'true'
 export const COMMIT_HASH = process.env.NEXT_PUBLIC_COMMIT_HASH || ''
 
 // default chain ID's as provided to the environment
@@ -19,6 +24,7 @@ export const DEFAULT_CHAIN_ID = IS_PRODUCTION ? DEFAULT_MAINNET_CHAIN_ID : DEFAU
 export const GATEWAY_URL_PRODUCTION =
   process.env.NEXT_PUBLIC_GATEWAY_URL_PRODUCTION || 'https://safe-client.safe.global'
 export const GATEWAY_URL_STAGING = process.env.NEXT_PUBLIC_GATEWAY_URL_STAGING || 'https://safe-client.staging.5afe.dev'
+export const CONFIG_SERVICE_KEY = process.env.NEXT_PUBLIC_CONFIG_SERVICE_KEY || 'WALLET_WEB'
 
 // Status page
 export const STATUS_PAGE_URL = process.env.NEXT_PUBLIC_SAFE_STATUS_PAGE_URL || 'https://status.safe.global'
@@ -30,10 +36,7 @@ export const BASE_TX_GAS = 21_000
 export const LS_NAMESPACE = 'SAFE_v2__'
 export const DUST_THRESHOLD = 0.01
 
-export const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN || ''
 export const BEAMER_ID = process.env.NEXT_PUBLIC_BEAMER_ID || ''
-export const DATADOG_CLIENT_TOKEN = process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN || ''
-
 // Datadog RUM
 export const DATADOG_RUM_APPLICATION_ID = process.env.NEXT_PUBLIC_DATADOG_RUM_APPLICATION_ID || ''
 export const DATADOG_RUM_CLIENT_TOKEN = process.env.NEXT_PUBLIC_DATADOG_RUM_CLIENT_TOKEN || ''
@@ -52,12 +55,6 @@ export const DATADOG_RUM_TRACE_SAMPLE_RATE =
     ? parsedTraceSampleRate
     : 20
 
-const parsedLogsSampleRate = Number(process.env.NEXT_PUBLIC_DATADOG_LOGS_SAMPLE_RATE)
-export const DATADOG_LOGS_SAMPLE_RATE =
-  process.env.NEXT_PUBLIC_DATADOG_LOGS_SAMPLE_RATE !== undefined && !Number.isNaN(parsedLogsSampleRate)
-    ? parsedLogsSampleRate
-    : 100
-
 const parsedSessionReplaySampleRate = Number(process.env.NEXT_PUBLIC_DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE)
 export const DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE =
   process.env.NEXT_PUBLIC_DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE !== undefined &&
@@ -65,7 +62,6 @@ export const DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE =
     ? parsedSessionReplaySampleRate
     : 0
 
-export const DATADOG_FORCE_ENABLE = process.env.NEXT_PUBLIC_DATADOG_FORCE_ENABLE === 'true'
 export const DATADOG_RUM_TRACING_ENABLED = process.env.NEXT_PUBLIC_DATADOG_RUM_TRACING_ENABLED === 'true'
 
 const parseBoolean = (value: string | undefined, defaultValue: boolean): boolean => {
@@ -86,6 +82,8 @@ export const DATADOG_RUM_DEFAULT_PRIVACY_LEVEL = (process.env.NEXT_PUBLIC_DATADO
 
 // Wallets
 export const WC_PROJECT_ID = process.env.NEXT_PUBLIC_WC_PROJECT_ID || ''
+export const TREZOR_APP_URL = 'app.safe.global'
+export const TREZOR_EMAIL = 'support@safe.global'
 
 // Safe Token
 export const SAFE_TOKEN_ADDRESSES: { [chainId: string]: string } = {
@@ -93,15 +91,13 @@ export const SAFE_TOKEN_ADDRESSES: { [chainId: string]: string } = {
   [chains.sep]: '0xd16d9C09d13E9Cf77615771eADC5d51a1Ae92a26',
 }
 
-export const SAFE_LOCKING_ADDRESS: { [chainId: string]: string } = {
-  [chains.eth]: '0x0a7CB434f96f65972D46A5c1A64a9654dC9959b2',
-  [chains.sep]: '0xb161ccb96b9b817F9bDf0048F212725128779DE9',
-}
+export const DEVELOPER_PORTAL_URL =
+  process.env.NEXT_PUBLIC_DEVELOPER_PORTAL_URL || 'https://developer.safe.global/login'
 
 export const SAFE_APPS_THIRD_PARTY_COOKIES_CHECK_URL = 'https://third-party-cookies-check.gnosis-safe.com'
 export const SAFE_APPS_DEMO_SAFE_MAINNET = 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7'
 export const SAFE_APPS_SDK_DOCS_URL =
-  'https://help.safe.global/en/articles/145503-how-to-create-a-safe-app-with-safe-apps-sdk-and-list-it'
+  'https://help.safe.global/articles/6872363437-How-to-create-a-Safe-App-with-Safe-Apps-SDK-and-list-it'
 
 // Google Analytics
 export const PROD_GA_TRACKING_ID = process.env.NEXT_PUBLIC_PROD_GA_TRACKING_ID || ''
@@ -114,6 +110,14 @@ const PROD_MIXPANEL_TOKEN = process.env.NEXT_PUBLIC_PROD_MIXPANEL_TOKEN || ''
 const STAGING_MIXPANEL_TOKEN = process.env.NEXT_PUBLIC_STAGING_MIXPANEL_TOKEN || ''
 export const MIXPANEL_TOKEN = IS_PRODUCTION ? PROD_MIXPANEL_TOKEN : STAGING_MIXPANEL_TOKEN
 
+// Support chat (Pylon)
+export const SUPPORT_CHAT_ALIAS_DOMAIN = process.env.NEXT_PUBLIC_SUPPORT_CHAT_ALIAS_DOMAIN || 'anon.safe.global'
+export const SUPPORT_CHAT_URL = process.env.NEXT_PUBLIC_PYLON_CHAT_URL || 'https://safe-support.vercel.app/chat'
+export const SUPPORT_CHAT_ALLOWED_PARENTS =
+  process.env.NEXT_PUBLIC_SUPPORT_CHAT_ALLOWED_PARENTS ||
+  'http://localhost https://app.safe.global https://safe-support.vercel.app/'
+export const SUPPORT_CHAT_APP_ID = process.env.NEXT_PUBLIC_PYLON_APP_ID || ''
+
 // Safe Apps tags
 export enum SafeAppsTag {
   NFT = 'nft',
@@ -121,6 +125,7 @@ export enum SafeAppsTag {
   SAFE_GOVERNANCE_APP = 'safe-governance-app',
   RECOVERY_SYGNUM = 'recovery-sygnum',
   SWAP_FALLBACK = 'swap-fallback',
+  SAFENET = 'safenet',
 }
 
 // Safe Apps names

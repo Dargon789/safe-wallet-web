@@ -16,17 +16,17 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
         {
           "alignItems": "flex-start",
           "backgroundColor": "#FFFFFF",
-          "borderBottomLeftRadius": 7,
-          "borderBottomRightRadius": 7,
-          "borderTopLeftRadius": 7,
-          "borderTopRightRadius": 7,
+          "borderBottomLeftRadius": 6,
+          "borderBottomRightRadius": 6,
+          "borderTopLeftRadius": 6,
+          "borderTopRightRadius": 6,
           "flexDirection": "column",
           "flexWrap": "wrap",
           "gap": 12,
           "justifyContent": "flex-start",
           "paddingBottom": 16,
-          "paddingLeft": 16,
-          "paddingRight": 16,
+          "paddingLeft": 12,
+          "paddingRight": 12,
           "paddingTop": 16,
         }
       }
@@ -36,6 +36,7 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
           {
             "alignItems": "center",
             "flexDirection": "row",
+            "gap": 8,
             "justifyContent": "space-between",
             "width": "100%",
           }
@@ -55,7 +56,6 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
             style={
               {
                 "color": "#121312",
-                "fontFamily": "DM Sans",
               }
             }
             suppressHighlighting={true}
@@ -92,13 +92,14 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
                 }
                 testID="safe-list-add-owner-icon"
               >
-                
+                
               </Text>
               <Text
+                ellipsizeMode="tail"
+                numberOfLines={1}
                 style={
                   {
                     "color": "#A1A3A7",
-                    "fontFamily": "DM Sans",
                     "fontSize": 12,
                     "lineHeight": 20,
                   }
@@ -113,7 +114,6 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
                 style={
                   {
                     "color": "#121312",
-                    "fontFamily": "DM Sans",
                   }
                 }
                 suppressHighlighting={true}
@@ -145,17 +145,17 @@ exports[`SafeListItem should render bottomContent with proper styling and layout
         {
           "alignItems": "flex-start",
           "backgroundColor": "#FFFFFF",
-          "borderBottomLeftRadius": 7,
-          "borderBottomRightRadius": 7,
-          "borderTopLeftRadius": 7,
-          "borderTopRightRadius": 7,
+          "borderBottomLeftRadius": 6,
+          "borderBottomRightRadius": 6,
+          "borderTopLeftRadius": 6,
+          "borderTopRightRadius": 6,
           "flexDirection": "column",
           "flexWrap": "wrap",
           "gap": 12,
           "justifyContent": "flex-start",
           "paddingBottom": 16,
-          "paddingLeft": 16,
-          "paddingRight": 16,
+          "paddingLeft": 12,
+          "paddingRight": 12,
           "paddingTop": 16,
         }
       }
@@ -165,6 +165,7 @@ exports[`SafeListItem should render bottomContent with proper styling and layout
           {
             "alignItems": "center",
             "flexDirection": "row",
+            "gap": 8,
             "justifyContent": "space-between",
             "width": "100%",
           }
@@ -184,7 +185,6 @@ exports[`SafeListItem should render bottomContent with proper styling and layout
             style={
               {
                 "color": "#121312",
-                "fontFamily": "DM Sans",
               }
             }
             suppressHighlighting={true}
@@ -198,8 +198,8 @@ exports[`SafeListItem should render bottomContent with proper styling and layout
               style={
                 {
                   "color": "#121312",
-                  "fontFamily": "DMSans-SemiBold",
                   "fontSize": 14,
+                  "fontWeight": 600,
                   "letterSpacing": -0.01,
                   "lineHeight": 20,
                 }
@@ -226,7 +226,6 @@ exports[`SafeListItem should render bottomContent with proper styling and layout
             style={
               {
                 "color": "#121312",
-                "fontFamily": "DM Sans",
               }
             }
             suppressHighlighting={true}

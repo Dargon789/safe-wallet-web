@@ -1,49 +1,11 @@
 import { cgwClient as api } from '../cgwClient'
-export const addTagTypes = ['accounts', 'spaces'] as const
+export const addTagTypes = ['spaces'] as const
 const injectedRtkApi = api
   .enhanceEndpoints({
     addTagTypes,
   })
   .injectEndpoints({
     endpoints: (build) => ({
-      addressBooksGetAddressBookV1: build.query<
-        AddressBooksGetAddressBookV1ApiResponse,
-        AddressBooksGetAddressBookV1ApiArg
-      >({
-        query: (queryArg) => ({ url: `/v1/accounts/${queryArg.address}/address-books/${queryArg.chainId}` }),
-        providesTags: ['accounts'],
-      }),
-      addressBooksCreateAddressBookItemV1: build.mutation<
-        AddressBooksCreateAddressBookItemV1ApiResponse,
-        AddressBooksCreateAddressBookItemV1ApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/v1/accounts/${queryArg.address}/address-books/${queryArg.chainId}`,
-          method: 'POST',
-          body: queryArg.createAddressBookItemDto,
-        }),
-        invalidatesTags: ['accounts'],
-      }),
-      addressBooksDeleteAddressBookV1: build.mutation<
-        AddressBooksDeleteAddressBookV1ApiResponse,
-        AddressBooksDeleteAddressBookV1ApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/v1/accounts/${queryArg.address}/address-books/${queryArg.chainId}`,
-          method: 'DELETE',
-        }),
-        invalidatesTags: ['accounts'],
-      }),
-      addressBooksDeleteAddressBookItemV1: build.mutation<
-        AddressBooksDeleteAddressBookItemV1ApiResponse,
-        AddressBooksDeleteAddressBookItemV1ApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/v1/accounts/${queryArg.address}/address-books/${queryArg.chainId}/${queryArg.addressBookItemId}`,
-          method: 'DELETE',
-        }),
-        invalidatesTags: ['accounts'],
-      }),
       addressBooksGetAddressBookItemsV1: build.query<
         AddressBooksGetAddressBookItemsV1ApiResponse,
         AddressBooksGetAddressBookItemsV1ApiArg
@@ -69,6 +31,72 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/v1/spaces/${queryArg.spaceId}/address-book/${queryArg.address}`,
           method: 'DELETE',
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      userAddressBookGetPrivateItemsV1: build.query<
+        UserAddressBookGetPrivateItemsV1ApiResponse,
+        UserAddressBookGetPrivateItemsV1ApiArg
+      >({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/address-book/private` }),
+        providesTags: ['spaces'],
+      }),
+      userAddressBookUpsertPrivateItemsV1: build.mutation<
+        UserAddressBookUpsertPrivateItemsV1ApiResponse,
+        UserAddressBookUpsertPrivateItemsV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/private`,
+          method: 'PUT',
+          body: queryArg.upsertAddressBookItemsDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      userAddressBookDeletePrivateItemV1: build.mutation<
+        UserAddressBookDeletePrivateItemV1ApiResponse,
+        UserAddressBookDeletePrivateItemV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/private/${queryArg.address}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      addressBookRequestsGetPendingRequestsV1: build.query<
+        AddressBookRequestsGetPendingRequestsV1ApiResponse,
+        AddressBookRequestsGetPendingRequestsV1ApiArg
+      >({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/address-book/requests` }),
+        providesTags: ['spaces'],
+      }),
+      addressBookRequestsCreateRequestV1: build.mutation<
+        AddressBookRequestsCreateRequestV1ApiResponse,
+        AddressBookRequestsCreateRequestV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/requests`,
+          method: 'POST',
+          body: queryArg.createAddressBookRequestDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      addressBookRequestsApproveRequestV1: build.mutation<
+        AddressBookRequestsApproveRequestV1ApiResponse,
+        AddressBookRequestsApproveRequestV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/requests/${queryArg.requestId}/approve`,
+          method: 'PUT',
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      addressBookRequestsRejectRequestV1: build.mutation<
+        AddressBookRequestsRejectRequestV1ApiResponse,
+        AddressBookRequestsRejectRequestV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/requests/${queryArg.requestId}/reject`,
+          method: 'PUT',
         }),
         invalidatesTags: ['spaces'],
       }),
@@ -144,6 +172,10 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members`, method: 'DELETE' }),
         invalidatesTags: ['spaces'],
       }),
+      membersGetMembershipV1: build.query<MembersGetMembershipV1ApiResponse, MembersGetMembershipV1ApiArg>({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/membership` }),
+        providesTags: ['spaces'],
+      }),
       membersUpdateRoleV1: build.mutation<MembersUpdateRoleV1ApiResponse, MembersUpdateRoleV1ApiArg>({
         query: (queryArg) => ({
           url: `/v1/spaces/${queryArg.spaceId}/members/${queryArg.userId}/role`,
@@ -164,32 +196,17 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members/${queryArg.userId}`, method: 'DELETE' }),
         invalidatesTags: ['spaces'],
       }),
+      spaceCounterfactualSafesGetV1: build.query<
+        SpaceCounterfactualSafesGetV1ApiResponse,
+        SpaceCounterfactualSafesGetV1ApiArg
+      >({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/counterfactual-safes` }),
+        providesTags: ['spaces'],
+      }),
     }),
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type AddressBooksGetAddressBookV1ApiResponse = /** status 200  */ AddressBook
-export type AddressBooksGetAddressBookV1ApiArg = {
-  address: string
-  chainId: string
-}
-export type AddressBooksCreateAddressBookItemV1ApiResponse = /** status 200  */ AddressBookItem
-export type AddressBooksCreateAddressBookItemV1ApiArg = {
-  address: string
-  chainId: string
-  createAddressBookItemDto: CreateAddressBookItemDto
-}
-export type AddressBooksDeleteAddressBookV1ApiResponse = unknown
-export type AddressBooksDeleteAddressBookV1ApiArg = {
-  address: string
-  chainId: string
-}
-export type AddressBooksDeleteAddressBookItemV1ApiResponse = unknown
-export type AddressBooksDeleteAddressBookItemV1ApiArg = {
-  address: string
-  chainId: string
-  addressBookItemId: number
-}
 export type AddressBooksGetAddressBookItemsV1ApiResponse =
   /** status 200 Address book items retrieved successfully */ SpaceAddressBookDto
 export type AddressBooksGetAddressBookItemsV1ApiArg = {
@@ -211,6 +228,55 @@ export type AddressBooksDeleteByAddressV1ApiArg = {
   /** Address to remove from the address book (0x prefixed hex string) */
   address: string
 }
+export type UserAddressBookGetPrivateItemsV1ApiResponse =
+  /** status 200 Private address book items retrieved successfully */ UserAddressBookDto
+export type UserAddressBookGetPrivateItemsV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+}
+export type UserAddressBookUpsertPrivateItemsV1ApiResponse =
+  /** status 200 Private address book updated successfully */ UserAddressBookDto
+export type UserAddressBookUpsertPrivateItemsV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+  /** Address book items to create or update */
+  upsertAddressBookItemsDto: UpsertAddressBookItemsDto
+}
+export type UserAddressBookDeletePrivateItemV1ApiResponse = unknown
+export type UserAddressBookDeletePrivateItemV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+  /** Address to remove (0x prefixed) */
+  address: string
+}
+export type AddressBookRequestsGetPendingRequestsV1ApiResponse =
+  /** status 200 Pending requests retrieved successfully */ AddressBookRequestsDto
+export type AddressBookRequestsGetPendingRequestsV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+}
+export type AddressBookRequestsCreateRequestV1ApiResponse =
+  /** status 201 Request created successfully */ AddressBookRequestItemDto
+export type AddressBookRequestsCreateRequestV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+  /** Address of the private contact to request adding */
+  createAddressBookRequestDto: CreateAddressBookRequestDto
+}
+export type AddressBookRequestsApproveRequestV1ApiResponse = unknown
+export type AddressBookRequestsApproveRequestV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+  /** Request ID to approve */
+  requestId: number
+}
+export type AddressBookRequestsRejectRequestV1ApiResponse = unknown
+export type AddressBookRequestsRejectRequestV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+  /** Request ID to reject */
+  requestId: number
+}
 export type SpacesCreateV1ApiResponse = /** status 200 Space created successfully */ CreateSpaceResponse
 export type SpacesCreateV1ApiArg = {
   /** Space creation data including the name of the space */
@@ -218,8 +284,7 @@ export type SpacesCreateV1ApiArg = {
 }
 export type SpacesGetV1ApiResponse = /** status 200 User spaces retrieved successfully */ GetSpaceResponse[]
 export type SpacesGetV1ApiArg = void
-export type SpacesCreateWithUserV1ApiResponse =
-  /** status 200 Space and user created successfully */ CreateSpaceResponse
+export type SpacesCreateWithUserV1ApiResponse = /** status 200 Space created successfully */ CreateSpaceResponse
 export type SpacesCreateWithUserV1ApiArg = {
   /** Space creation data including the name of the space */
   createSpaceDto: CreateSpaceDto
@@ -288,6 +353,11 @@ export type MembersSelfRemoveV1ApiResponse = unknown
 export type MembersSelfRemoveV1ApiArg = {
   spaceId: number
 }
+export type MembersGetMembershipV1ApiResponse = /** status 200 Membership retrieved successfully */ MemberDto
+export type MembersGetMembershipV1ApiArg = {
+  /** Space ID to fetch the caller's membership for */
+  spaceId: number
+}
 export type MembersUpdateRoleV1ApiResponse = unknown
 export type MembersUpdateRoleV1ApiArg = {
   /** Space ID containing the member */
@@ -309,34 +379,78 @@ export type MembersRemoveUserV1ApiArg = {
   /** User ID of the member to remove */
   userId: number
 }
-export type AddressBookItem = {
-  name: string
-  address: string
-  chainIds: string[]
-}
-export type AddressBook = {
-  id: string
-  accountId: string
-  chainId: string
-  data: AddressBookItem[]
-}
-export type CreateAddressBookItemDto = {
-  name: string
-  address: string
+export type SpaceCounterfactualSafesGetV1ApiResponse =
+  /** status 200 Counterfactual Safes retrieved successfully */ GetCounterfactualSafesResponse
+export type SpaceCounterfactualSafesGetV1ApiArg = {
+  /** Space ID */
+  spaceId: number
 }
 export type SpaceAddressBookItemDto = {
   name: string
   address: string
   chainIds: string[]
+  /** Email or wallet address of the creator, "Unknown user" if the user has no display identity, or "Deleted user" */
   createdBy: string
+  /** User ID of the creator */
+  createdByUserId: number
+  /** Email or wallet address of the last editor, "Unknown user" if the user has no display identity, or "Deleted user" */
   lastUpdatedBy: string
+  /** User ID of the last editor */
+  lastUpdatedByUserId: number
+  createdAt: string
+  updatedAt: string
 }
 export type SpaceAddressBookDto = {
   spaceId: string
   data: SpaceAddressBookItemDto[]
 }
+export type AddressBookItem = {
+  name: string
+  address: string
+  chainIds: string[]
+}
 export type UpsertAddressBookItemsDto = {
   items: AddressBookItem[]
+}
+export type UserAddressBookItemDto = {
+  name: string
+  address: string
+  chainIds: string[]
+  /** Email or wallet address of the creator, "Unknown user" if the user has no display identity, or "Deleted user" */
+  createdBy: string
+  /** User ID of the creator */
+  createdByUserId: number
+  createdAt: object
+  updatedAt: object
+}
+export type UserAddressBookDto = {
+  spaceId: string
+  data: UserAddressBookItemDto[]
+}
+export type AddressBookRequestItemDto = {
+  id: number
+  name: string
+  address: string
+  chainIds: string[]
+  /** Email or wallet address of the requester, "Unknown user" if the user has no display identity, or "Deleted user" */
+  requestedBy: string
+  /** User ID of the requester */
+  requestedByUserId: number
+  /** Email or wallet address of the reviewing admin, "Unknown user", "Deleted user", or null when still PENDING */
+  reviewedBy: string | null
+  /** User ID of the reviewing admin, null when still PENDING */
+  reviewedByUserId: number | null
+  status: 'PENDING' | 'APPROVED' | 'REJECTED'
+  createdAt: string
+  updatedAt: string
+}
+export type AddressBookRequestsDto = {
+  spaceId: string
+  data: AddressBookRequestItemDto[]
+}
+export type CreateAddressBookRequestDto = {
+  /** Address of the private contact to request adding to space */
+  address: string
 }
 export type CreateSpaceResponse = {
   name: string
@@ -347,23 +461,22 @@ export type CreateSpaceDto = {
 }
 export type UserDto = {
   id: number
-  status: 'PENDING' | 'ACTIVE'
 }
-export type MemberDto = {
-  id: number
+export type SpaceMemberDto = {
   role: 'ADMIN' | 'MEMBER'
   name: string
-  invitedBy: string
+  invitedBy: number | null
+  inviteExpiresAt: string | null
+  invitedByName?: string
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
-  createdAt: string
-  updatedAt: string
   user: UserDto
 }
 export type GetSpaceResponse = {
   id: number
   name: string
-  status: 'ACTIVE'
-  members: MemberDto[]
+  members: SpaceMemberDto[]
+  /** Total count of Safes in the space */
+  safeCount: number
 }
 export type UpdateSpaceResponse = {
   id: number
@@ -372,24 +485,20 @@ export type UpdateSpaceDto = {
   name?: string
   status?: 'ACTIVE'
 }
-export type CreateSpaceSafeDto = {
+export type SpaceSafeDto = {
   chainId: string
   address: string
 }
 export type CreateSpaceSafesDto = {
-  safes: CreateSpaceSafeDto[]
+  safes: SpaceSafeDto[]
 }
 export type GetSpaceSafeResponse = {
   safes: {
     [key: string]: string[]
   }
 }
-export type DeleteSpaceSafeDto = {
-  chainId: string
-  address: string
-}
 export type DeleteSpaceSafesDto = {
-  safes: DeleteSpaceSafeDto[]
+  safes: SpaceSafeDto[]
 }
 export type Invitation = {
   userId: number
@@ -397,15 +506,22 @@ export type Invitation = {
   spaceId: number
   role: 'ADMIN' | 'MEMBER'
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
-  invitedBy?: string | null
+  invitedBy: number | null
 }
-export type InviteUserDto = {
+export type WalletInviteUserDto = {
+  type: 'wallet'
   address: string
-  name: string
   role: 'ADMIN' | 'MEMBER'
+  name: string
+}
+export type EmailInviteUserDto = {
+  type: 'email'
+  email: string
+  role: 'ADMIN' | 'MEMBER'
+  name: string
 }
 export type InviteUsersDto = {
-  users: InviteUserDto[]
+  users: (WalletInviteUserDto | EmailInviteUserDto)[]
 }
 export type AcceptInviteDto = {
   name: string
@@ -413,20 +529,22 @@ export type AcceptInviteDto = {
 export type MemberUser = {
   id: number
   status: 'PENDING' | 'ACTIVE'
+  email: string | null
 }
-export type Member = {
+export type MemberDto = {
   id: number
   role: 'ADMIN' | 'MEMBER'
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   name: string
   alias?: string | null
-  invitedBy?: string | null
+  invitedBy: number | null
+  inviteExpiresAt?: string | null
   createdAt: string
   updatedAt: string
   user: MemberUser
 }
 export type MembersDto = {
-  members: Member[]
+  members: MemberDto[]
 }
 export type UpdateRoleDto = {
   role: 'ADMIN' | 'MEMBER'
@@ -435,16 +553,40 @@ export type UpdateMemberAliasDto = {
   /** The new alias for the member */
   alias: string
 }
+export type GetCounterfactualSafeItem = {
+  address: string
+  factoryAddress: string
+  masterCopy: string
+  saltNonce: string
+  safeVersion: string
+  threshold: number
+  owners: string[]
+  fallbackHandler: string | null
+  to: string | null
+  data: string
+  paymentToken: string | null
+  payment: string | null
+  paymentReceiver: string | null
+}
+export type GetCounterfactualSafesResponse = {
+  safes: {
+    [key: string]: GetCounterfactualSafeItem[]
+  }
+}
 export const {
-  useAddressBooksGetAddressBookV1Query,
-  useLazyAddressBooksGetAddressBookV1Query,
-  useAddressBooksCreateAddressBookItemV1Mutation,
-  useAddressBooksDeleteAddressBookV1Mutation,
-  useAddressBooksDeleteAddressBookItemV1Mutation,
   useAddressBooksGetAddressBookItemsV1Query,
   useLazyAddressBooksGetAddressBookItemsV1Query,
   useAddressBooksUpsertAddressBookItemsV1Mutation,
   useAddressBooksDeleteByAddressV1Mutation,
+  useUserAddressBookGetPrivateItemsV1Query,
+  useLazyUserAddressBookGetPrivateItemsV1Query,
+  useUserAddressBookUpsertPrivateItemsV1Mutation,
+  useUserAddressBookDeletePrivateItemV1Mutation,
+  useAddressBookRequestsGetPendingRequestsV1Query,
+  useLazyAddressBookRequestsGetPendingRequestsV1Query,
+  useAddressBookRequestsCreateRequestV1Mutation,
+  useAddressBookRequestsApproveRequestV1Mutation,
+  useAddressBookRequestsRejectRequestV1Mutation,
   useSpacesCreateV1Mutation,
   useSpacesGetV1Query,
   useLazySpacesGetV1Query,
@@ -463,7 +605,11 @@ export const {
   useMembersGetUsersV1Query,
   useLazyMembersGetUsersV1Query,
   useMembersSelfRemoveV1Mutation,
+  useMembersGetMembershipV1Query,
+  useLazyMembersGetMembershipV1Query,
   useMembersUpdateRoleV1Mutation,
   useMembersUpdateAliasV1Mutation,
   useMembersRemoveUserV1Mutation,
+  useSpaceCounterfactualSafesGetV1Query,
+  useLazySpaceCounterfactualSafesGetV1Query,
 } = injectedRtkApi

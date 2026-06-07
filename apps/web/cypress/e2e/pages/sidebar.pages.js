@@ -18,7 +18,9 @@ const explorerBtn = '[data-testid="explorer-btn"]'
 export const sideBarListItem = '[data-testid="sidebar-list-item"]'
 const sideBarListItemWhatsNew = '[data-testid="list-item-whats-new"]'
 const sideBarListItemNeedHelp = '[data-testid="list-item-need-help"]'
-const sideSafeListItem = '[data-testid="safe-list-item"]'
+export const sidebarSettingsItem = '[data-testid="sidebar-settings-item"]'
+export const sidebarListItem = '[data-testid="sidebar-list-item"]'
+export const sideSafeListItem = '[data-testid="safe-list-item"]'
 const sidebarSafeHeader = '[data-testid="safe-header-info"]'
 const sidebarSafeContainer = '[data-testid="sidebar-safe-container"]'
 const safeItemOptionsBtn = '[data-testid="safe-options-btn"]'
@@ -45,6 +47,7 @@ const groupBalance = '[data-testid="group-balance"]'
 const groupAddress = '[data-testid="group-address"]'
 const groupSafeIcon = '[data-testid="group-safe-icon"]'
 const multichainTooltip = '[data-testid="multichain-tooltip"]'
+const tooltipTrigger = '[data-slot="tooltip-trigger"]'
 const networkInput = '[id="network-input"]'
 const networkOption = 'li[role="option"]'
 const showAllNetworks = '[data-testid="show-all-networks"]'
@@ -122,10 +125,6 @@ export const undeployedSafe = 'Undeployed Sepolia'
 export const notActivatedStr = 'Not activated'
 export const addingNetworkNotPossibleStr = 'Adding another network is not possible for this Safe.'
 export const createSafeMsg = (network) => `Successfully added your account on ${network}`
-const signersNotConsistentMsg = 'Signers are not consistent'
-const signersNotConsistentMsg2 = (network) => `Signers are different on these networks of this account:${network}`
-const signersNotConsistentMsg3 =
-  'To manage your account easier and to prevent lose of funds, we recommend keeping the same signers'
 const signersNotConsistentConfirmTxViewMsg = (network) =>
   `Signers are not consistent across networks on this account. Changing signers will only affect the account on ${network}`
 const activateStr = 'You need to activate your Safe first'
@@ -134,6 +133,7 @@ const emptyPinnedMessage = 'Personalize your account list by clicking theicon on
 export const addedSafesEth = ['0x8675...a19b']
 export const addedSafesSepolia = ['0x6d0b...6dC1', '0x5912...fFdb', '0x0637...708e', '0xD157...DE9a']
 export const sideBarListItems = ['Home', 'Assets', 'Transactions', 'Address book', 'Apps', 'Settings', 'Swap']
+export const sideBarListItemsNew = ['Overview', 'Assets', 'Transactions', 'Address book', 'Apps']
 export const sideBarSafes = {
   safe1: '0xBb26E3717172d5000F87DeFd391994f789D80aEB',
   safe2: '0x905934aA8758c06B2422F0C90D97d2fbb6677811',
@@ -351,6 +351,15 @@ export function verifyTxCounter(counter) {
   cy.get(sideBarListItem).contains(sideBarListItems[2]).should('contain', counter)
 }
 
+export function verifySideListItemsNew() {
+  main.verifyValuesExist(sideBarListItem, sideBarListItemsNew)
+  main.verifyElementsExist([sidebarSettingsItem, sideBarListItemNeedHelp])
+}
+
+export function verifyTxCounterNew(counter) {
+  cy.get('[data-testid="queued-tx-info"]').should('be.visible').and('contain.text', String(counter))
+}
+
 export function verifyNavItemDisabled(item) {
   cy.get(`div[aria-label*="${activateStr}"]`).contains(item).should('exist')
 }
@@ -450,7 +459,7 @@ export function clickOnMultichainItemOptionsBtn(index) {
 }
 
 export function checkMultichainTooltipExists(index) {
-  cy.get(multichainItemSummary).eq(index).find(chainLogo).eq(0).trigger('mouseover', { force: true })
+  cy.get(multichainItemSummary).eq(index).find(tooltipTrigger).eq(0).focus()
   cy.get(multichainTooltip).should('exist')
 }
 
@@ -697,12 +706,6 @@ export function checkNetworksInRange(expectedString, expectedCount, direction = 
     })
 }
 
-export function checkInconsistentSignersMsgDisplayed(network) {
-  cy.contains(signersNotConsistentMsg).should('exist')
-  cy.contains(signersNotConsistentMsg2(network)).should('exist')
-  cy.contains(signersNotConsistentMsg3).should('exist')
-}
-
 export function checkInconsistentSignersMsgDisplayedConfirmTxView(network) {
   cy.contains(signersNotConsistentConfirmTxViewMsg(network)).should('exist')
 }
@@ -723,4 +726,24 @@ export function checkNetworkDisabled(networks) {
       expect($el).not.to.have.attr('aria-disabled')
     }
   })
+}
+
+export function verifySidebarContainerVisible() {
+  cy.get(sidebarContainer).should('be.visible')
+}
+
+export function verifySidebarSettingsItemVisible() {
+  cy.get(sidebarSettingsItem).should('be.visible')
+}
+
+export function verifySidebarListItem() {
+  cy.get(sidebarListItem).should('be.visible')
+}
+
+export function verifyQueuedTxInfoCount(count) {
+  cy.get(queuedTxInfo).should('be.visible').and('contain.text', String(count))
+}
+
+export function verifyListItemNeedHelp() {
+  cy.get(sideBarListItemNeedHelp).should('be.visible')
 }
