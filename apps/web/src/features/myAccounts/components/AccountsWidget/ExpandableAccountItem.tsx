@@ -1,11 +1,11 @@
 import { useState, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
-import { ChevronDown } from 'lucide-react'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import { AccountItem } from '../AccountItem'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { cn } from '@/utils/cn'
 import { AccountItemContent } from './AccountItemContent'
+import { NotActivatedBadge } from '@/components/common/SpaceSafeBar/AccountsModal/shared'
 import type { Account } from './types'
 
 interface ExpandableAccountItemProps {
@@ -35,10 +35,11 @@ const ExpandableAccountItem = ({
       >
         <AccountItemContent account={account}>
           <div className="flex items-center gap-2">
-            <AccountItem.Balance fiatTotal={account.fiatTotal} isLoading={!account.fiatTotal && loading} />
-            <ChevronDown
-              className={cn('size-4 text-muted-foreground transition-transform duration-200', open && 'rotate-180')}
-            />
+            {account.isUndeployed ? (
+              <NotActivatedBadge isActivating={!!account.isActivating} />
+            ) : (
+              <AccountItem.Balance fiatTotal={account.fiatTotal} isLoading={!account.fiatTotal && loading} />
+            )}
           </div>
         </AccountItemContent>
       </CollapsibleTrigger>

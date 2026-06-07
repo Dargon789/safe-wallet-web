@@ -7,19 +7,21 @@ import { cn } from '@/utils/cn'
 import { LogOut, User } from 'lucide-react'
 import { useCurrentMemberProfile, MemberStatus } from '@/features/spaces'
 import useLogout from '@/hooks/useLogout'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import InitialsAvatar from '../InitialsAvatar'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
 import css from './styles.module.css'
 
 export interface SidebarProfileViewProps {
-  memberName: string
+  profileName: string
   displayName: string
   role: string
   onSignOut: () => void
 }
 
 export const SidebarProfileView = ({
-  memberName,
+  profileName,
   displayName,
   role,
   onSignOut,
@@ -43,7 +45,7 @@ export const SidebarProfileView = ({
               <span className={css.profileTriggerAvatar}>
                 <User className="size-4" aria-hidden="true" />
               </span>
-              <span className={css.profileName}>{memberName}</span>
+              <span className={css.profileName}>{profileName}</span>
             </PopoverTrigger>
 
             <PopoverContent
@@ -54,12 +56,12 @@ export const SidebarProfileView = ({
               data-testid="sidebar-profile-popover"
             >
               <div className={css.profileHeader}>
-                <InitialsAvatar name={memberName} size="medium" rounded />
+                <InitialsAvatar name={profileName} size="medium" rounded />
                 <span className={css.profileSignedIn}>Signed in</span>
               </div>
 
               <div className={css.profileInfo}>
-                <span className={css.textSmall}>{displayName}</span>
+                <span className={css.profileName}>{displayName}</span>
                 <span className={css.profileRole}>{role}</span>
               </div>
 
@@ -96,15 +98,23 @@ const ProfileSkeleton = () => (
 )
 
 export const SidebarProfileSection = (): ReactElement | null => {
-  const { membership, signerAddress, isLoading } = useCurrentMemberProfile()
+  const { membership, email, signerAddress, isLoading } = useCurrentMemberProfile()
   const { logout } = useLogout()
 
   if (isLoading && !membership) return <ProfileSkeleton />
   if (!membership || membership.status !== MemberStatus.ACTIVE) return null
 
   const memberName = membership.name || 'User'
-  const displayName = signerAddress ? shortenAddress(signerAddress) : memberName
+  const profileName = email || memberName
+  const displayName = email || (signerAddress ? shortenAddress(signerAddress) : memberName)
   const role = membership.role.toLowerCase()
 
-  return <SidebarProfileView memberName={memberName} displayName={displayName} role={role} onSignOut={logout} />
+  const handleSignOut = () => {
+    trackEvent(SPACE_EVENTS.AUTH_LOGGED_OUT, { timestamp: new Date().toISOString() })
+    logout()
+  }
+
+  return (
+    <SidebarProfileView profileName={profileName} displayName={displayName} role={role} onSignOut={handleSignOut} />
+  )
 }

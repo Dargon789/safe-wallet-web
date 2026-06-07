@@ -1,10 +1,10 @@
 import { useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { useSpaceSafes } from '@/features/spaces'
 import { isMultiChainSafeItem } from '@/hooks/safes'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -12,10 +12,13 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { ChainInfo } from '@/features/spaces/types'
+import { useSafeBarSafes } from './useSafeBarSafes'
 
 export function useSpaceChainSelector() {
-  const { allSafes } = useSpaceSafes()
-  const { safeAddress } = useSafeInfo()
+  const { chainSelectorSafes: allSafes } = useSafeBarSafes()
+  const { safeAddress: reduxSafeAddress } = useSafeInfo()
+  const urlSafeAddress = useSafeAddressFromUrl()
+  const safeAddress = urlSafeAddress || reduxSafeAddress
   const selectedChainId = useChainId()
   const { configs: chainConfigs } = useChains()
   const router = useRouter()
@@ -42,17 +45,6 @@ export function useSpaceChainSelector() {
     return { deployedChains: resolvedChains, deployedChainIds: chainIds, safeName: currentSafe.name }
   }, [allSafes, safeAddress, chainConfigs])
 
-  const availableChains: ChainInfo[] = useMemo(() => {
-    return chainConfigs
-      .filter((c) => !deployedChainIds.includes(c.chainId))
-      .map((c) => ({
-        chainId: c.chainId,
-        chainName: c.chainName,
-        chainLogoUri: c.chainLogoUri ?? null,
-        shortName: c.shortName,
-      }))
-  }, [chainConfigs, deployedChainIds])
-
   const handleChainChange = useCallback(
     (chainId: string) => {
       const chain = chainConfigs.find((c) => c.chainId === chainId)
@@ -72,7 +64,6 @@ export function useSpaceChainSelector() {
 
   return {
     deployedChains,
-    availableChains,
     selectedChainId,
     deployedChainIds,
     safeAddress,

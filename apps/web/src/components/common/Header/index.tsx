@@ -1,3 +1,8 @@
+/**
+ * @deprecated Legacy MUI Header component, replaced by TopBar (`./Topbar`).
+ * Remove this file, index.test.tsx, and styles.module.css once the Header
+ * migration to TopBar is complete.
+ */
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import type { Dispatch, SetStateAction } from 'react'

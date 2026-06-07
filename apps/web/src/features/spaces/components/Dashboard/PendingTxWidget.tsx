@@ -55,7 +55,7 @@ const PendingTxWidget = ({
   if (isEmpty) {
     return (
       <SafeWidget title="Pending" testId="space-dashboard-pending-widget">
-        <SafeWidget.EmptyState icon={<Users className="size-6" />} text="No pending transactions" />
+        <SafeWidget.EmptyState icon={<Users className="size-6 text-green-500" />} text="No pending transactions" />
       </SafeWidget>
     )
   }
@@ -78,6 +78,7 @@ const PendingTxWidget = ({
               href={href}
               onClick={tx.safeAddress ? () => onItemClick?.(tx.safeAddress!, tx.transaction.id) : undefined}
               className={css.widgetItem}
+              fixedActionWidth
               label={
                 <div className={css.widgetItemLabel}>
                   <TxTypeText tx={tx.transaction} /> <TxInfo info={tx.transaction.txInfo} />

@@ -17,7 +17,7 @@ import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } f
 import useWallet from '@/hooks/wallets/useWallet'
 import useChains from '@/hooks/useChains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
+import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 
 const _groupAndSort = (
   items: SafeItem[],
@@ -64,13 +64,9 @@ const useOnboardingSafes = () => {
     return { trustedSafeItems: trusted, ownedSafeItems: owned }
   }, [allChainIds, allAdded, allOwned, allUndeployed, walletAddress, allVisitedSafes, allSafeNames])
 
-  // Detect similar addresses across all safes
   const similarAddresses = useMemo<Set<string>>(() => {
     const allItems = [...trustedSafeItems, ...ownedSafeItems]
-    const uniqueAddresses = [...new Set(allItems.map((s) => s.address))]
-    if (uniqueAddresses.length < 2) return new Set()
-    const result = detectSimilarAddresses(uniqueAddresses)
-    return new Set(uniqueAddresses.filter((addr) => result.isFlagged(addr)).map((a) => a.toLowerCase()))
+    return getFlaggedSimilarAddressSet(allItems.map((s) => s.address))
   }, [trustedSafeItems, ownedSafeItems])
 
   // Group into multi-chain / single-chain and sort
@@ -89,11 +85,16 @@ const useOnboardingSafes = () => {
   const filteredTrusted = useSafesSearch(trustedGrouped, searchQuery)
   const filteredOwned = useSafesSearch(ownedGrouped, searchQuery)
 
+  // True only when the user has no safes at all — independent of the search query
+  // so a "no matches" filter doesn't masquerade as an empty account.
+  const hasNoSafes = trustedSafeItems.length === 0 && ownedSafeItems.length === 0
+
   return {
     trustedSafes: searchQuery ? filteredTrusted : trustedGrouped,
     ownedSafes: searchQuery ? filteredOwned : ownedGrouped,
     similarAddresses,
     handleSearch,
+    hasNoSafes,
   }
 }
 
