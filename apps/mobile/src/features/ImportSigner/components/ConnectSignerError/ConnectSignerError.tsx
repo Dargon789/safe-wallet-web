@@ -4,8 +4,8 @@ import { Text, View, useTheme } from 'tamagui'
 import { router, useLocalSearchParams } from 'expo-router'
 import { SafeButton } from '@/src/components/SafeButton/SafeButton'
 import { AbsoluteLinearGradient } from '@/src/components/LinearGradient'
-import { WalletConnectBadge } from '@/src/features/WalletConnect/components/WalletConnectBadge'
-import { useWalletConnectContext } from '@/src/features/WalletConnect/context/WalletConnectContext'
+import { WalletConnectBadge } from '@/src/features/WalletConnect/Signer/components/WalletConnectBadge'
+import { useWalletConnectContext } from '@/src/features/WalletConnect/Signer/context/WalletConnectContext'
 
 export function ConnectSignerError() {
   const { address, walletIcon } = useLocalSearchParams<{ address: string; walletIcon: string }>()
@@ -19,7 +19,7 @@ export function ConnectSignerError() {
 
   return (
     <View flex={1} justifyContent="space-between" testID="connect-signer-error">
-      <AbsoluteLinearGradient colors={[theme.error.get(), 'transparent']} />
+      <AbsoluteLinearGradient colors={[theme.error?.get() || 'red', 'transparent']} />
 
       <View flex={1}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>

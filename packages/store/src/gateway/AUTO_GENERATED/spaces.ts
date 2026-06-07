@@ -196,6 +196,13 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members/${queryArg.userId}`, method: 'DELETE' }),
         invalidatesTags: ['spaces'],
       }),
+      spaceCounterfactualSafesGetV1: build.query<
+        SpaceCounterfactualSafesGetV1ApiResponse,
+        SpaceCounterfactualSafesGetV1ApiArg
+      >({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/counterfactual-safes` }),
+        providesTags: ['spaces'],
+      }),
     }),
     overrideExisting: false,
   })
@@ -372,6 +379,12 @@ export type MembersRemoveUserV1ApiArg = {
   /** User ID of the member to remove */
   userId: number
 }
+export type SpaceCounterfactualSafesGetV1ApiResponse =
+  /** status 200 Counterfactual Safes retrieved successfully */ GetCounterfactualSafesResponse
+export type SpaceCounterfactualSafesGetV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+}
 export type SpaceAddressBookItemDto = {
   name: string
   address: string
@@ -403,7 +416,10 @@ export type UserAddressBookItemDto = {
   name: string
   address: string
   chainIds: string[]
+  /** Email or wallet address of the creator, "Unknown user" if the user has no display identity, or "Deleted user" */
   createdBy: string
+  /** User ID of the creator */
+  createdByUserId: number
   createdAt: object
   updatedAt: object
 }
@@ -416,7 +432,14 @@ export type AddressBookRequestItemDto = {
   name: string
   address: string
   chainIds: string[]
+  /** Email or wallet address of the requester, "Unknown user" if the user has no display identity, or "Deleted user" */
   requestedBy: string
+  /** User ID of the requester */
+  requestedByUserId: number
+  /** Email or wallet address of the reviewing admin, "Unknown user", "Deleted user", or null when still PENDING */
+  reviewedBy: string | null
+  /** User ID of the reviewing admin, null when still PENDING */
+  reviewedByUserId: number | null
   status: 'PENDING' | 'APPROVED' | 'REJECTED'
   createdAt: string
   updatedAt: string
@@ -442,7 +465,9 @@ export type UserDto = {
 export type SpaceMemberDto = {
   role: 'ADMIN' | 'MEMBER'
   name: string
-  invitedBy: string
+  invitedBy: number | null
+  inviteExpiresAt: string | null
+  invitedByName?: string
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   user: UserDto
 }
@@ -481,15 +506,22 @@ export type Invitation = {
   spaceId: number
   role: 'ADMIN' | 'MEMBER'
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
-  invitedBy?: string | null
+  invitedBy: number | null
 }
-export type InviteUserDto = {
+export type WalletInviteUserDto = {
+  type: 'wallet'
   address: string
-  name: string
   role: 'ADMIN' | 'MEMBER'
+  name: string
+}
+export type EmailInviteUserDto = {
+  type: 'email'
+  email: string
+  role: 'ADMIN' | 'MEMBER'
+  name: string
 }
 export type InviteUsersDto = {
-  users: InviteUserDto[]
+  users: (WalletInviteUserDto | EmailInviteUserDto)[]
 }
 export type AcceptInviteDto = {
   name: string
@@ -505,7 +537,8 @@ export type MemberDto = {
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   name: string
   alias?: string | null
-  invitedBy?: string | null
+  invitedBy: number | null
+  inviteExpiresAt?: string | null
   createdAt: string
   updatedAt: string
   user: MemberUser
@@ -519,6 +552,26 @@ export type UpdateRoleDto = {
 export type UpdateMemberAliasDto = {
   /** The new alias for the member */
   alias: string
+}
+export type GetCounterfactualSafeItem = {
+  address: string
+  factoryAddress: string
+  masterCopy: string
+  saltNonce: string
+  safeVersion: string
+  threshold: number
+  owners: string[]
+  fallbackHandler: string | null
+  to: string | null
+  data: string
+  paymentToken: string | null
+  payment: string | null
+  paymentReceiver: string | null
+}
+export type GetCounterfactualSafesResponse = {
+  safes: {
+    [key: string]: GetCounterfactualSafeItem[]
+  }
 }
 export const {
   useAddressBooksGetAddressBookItemsV1Query,
@@ -557,4 +610,6 @@ export const {
   useMembersUpdateRoleV1Mutation,
   useMembersUpdateAliasV1Mutation,
   useMembersRemoveUserV1Mutation,
+  useSpaceCounterfactualSafesGetV1Query,
+  useLazySpaceCounterfactualSafesGetV1Query,
 } = injectedRtkApi

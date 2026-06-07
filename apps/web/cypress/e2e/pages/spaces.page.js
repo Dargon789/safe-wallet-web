@@ -15,12 +15,15 @@ const spaceSelectorBtn = '[data-testid="space-selector-button"]'
 const spaceSelectorMenu = '[data-testid="space-selector-menu"]'
 
 // -- Space settings --
-const spaceEditInput = 'input[name="name"]'
+const spaceSettingsGeneralPage = '[data-testid="settings-general-page"]'
+const spaceEditInput = '[data-testid="space-name-input"]'
 const spaceSaveBtn = '[data-testid="space-save-button"]'
 const spaceDeleteBtn = '[data-testid="space-delete-button"]'
 const spaceConfirmDeleteBtn = '[data-testid="space-confirm-delete-button"]'
+const spaceConfirmNameInput = '[data-testid="space-confirm-name-input"]'
 const spaceCard = '[data-testid="space-card"]'
-const spaceVertMenuIcon = '[data-testid="MoreVertIcon"]'
+const spaceCardName = '[data-testid="org-name"]'
+const spaceCardContextMenuBtn = '[data-testid="space-card-context-menu-button"]'
 const contectMenuRemoveBtn = '[data-testid="remove-button"]'
 
 // -- Dashboard widgets --
@@ -59,7 +62,7 @@ const safeSelectorThreshold = '[data-testid="safe-selector-threshold"]'
 const safeLevelNavigation = '[data-testid="safe-level-navigation"]'
 const spaceSafesNavigationBlock = '[data-testid="space-safes-navigation-block"]'
 const spaceChainNavigationButton = '[data-testid="space-chain-navigation-button"]'
-const backToSpaceBtn = '[aria-label="Back to space"]'
+const backToSpaceBtn = '[aria-label="Back to workspace"]'
 const safeLevelNavigationBackToSpaceBtn = `${safeLevelNavigation} ${backToSpaceBtn}`
 
 // -- Space sidebar items --
@@ -75,6 +78,7 @@ const safeAccountsListItem = '[data-testid="safe-list-item"]'
 
 // -- Add account --
 const addSpaceAccountBtn = '[data-testid="add-space-account-button"]'
+const addSpaceAccountToWorkspaceBtn = '[data-testid="add-safe-accounts-to-workspace-button"]'
 const addSpaceAccountManuallyBtn = '[data-testid="add-space-account-manually-button"]'
 const addSpaceAccountManuallyModalBtn = '[data-testid="add-manually-button"]'
 const addAccountsBtn = '[data-testid="add-accounts-button"]'
@@ -87,20 +91,31 @@ const addMemberBtn = '[data-testid="add-member-button"]'
 const addMemberModalBtn = '[data-testid="add-member-modal-button"]'
 const memberAddressInput = '[data-testid="member-address-input"]'
 const memberNameInput = '[data-testid="member-name-input"]'
+const pendingMembersTab = '[data-testid="pending-members-tab"]'
 
 // -- Invites --
+const inviteBanner = '[data-testid="space-invite-banner"]'
+const inviteBannerHeadingText = 'You were invited to join'
 const acceptInviteBtn = '[data-testid="accept-invite-button"]'
 const inviteNameInput = '[data-testid="invite-name-input"]'
 const confirmAcceptInviteBtn = '[data-testid="confirm-accept-invite-button"]'
 
+// -- Sidebar profile (sign-out) --
+const sidebarProfileTrigger = '[data-testid="sidebar-profile-trigger"]'
+const sidebarProfilePopover = '[data-testid="sidebar-profile-popover"]'
+const sidebarProfileSignOutBtn = '[data-testid="sidebar-profile-sign-out"]'
+const continueWithWalletBtn = '[data-testid="continue-with-wallet-btn"]'
+
 // -- Onboarding --
 const orgSpaceInput = '[data-testid="space-name-input"]'
 const createSpaceOnboardingContinueBtn = '[data-testid="create-space-onboarding-continue-button"]'
-const selectSafesSkipBtn = '[data-testid="select-safes-skip-button"]'
 const inviteMembersSkipBtn = '[data-testid="invite-members-skip-button"]'
+const surveyOptionCard = '[data-testid="survey-option-card"]'
+const surveyFinishBtn = '[data-testid="survey-finish-button"]'
 const onboardingCreateSpacePath = '/welcome/create-space'
 const onboardingSelectSafesPath = '/welcome/select-safes'
 const onboardingInviteMembersPath = '/welcome/invite-members'
+const onboardingSurveyPath = '/welcome/survey'
 
 // -- Empty dashboard --
 export const gettingStartedLabel = 'Getting started'
@@ -111,7 +126,14 @@ export const importAddressBookLabel = 'Import address book'
 export const dashboardAddMemberBtn = '[data-testid="add-member-button"]'
 export const inviteMemberLabel = 'Add member'
 export const learnMoreBtn = '[data-testid="spaces-learn-more-button"]'
-export const exploreSpacesLabel = 'Introducing spaces'
+export const exploreSpacesLabel = 'Introducing workspaces'
+
+// -- Address book import dialog --
+const openImportDialogBtn = '[data-testid="import-address-book-btn"]'
+const uploadFileTab = '[data-testid="upload-file-tab"]'
+const importFileInput = '[data-testid="ab-file-input"]'
+const importSubmitBtn = '[data-testid="import-btn"]'
+const importSuccessLabel = 'Imported contact(s)'
 
 // ===========================================
 // Labels & regex patterns
@@ -119,7 +141,7 @@ export const exploreSpacesLabel = 'Introducing spaces'
 
 const spaceDashboardTotalValueLabelText = 'Total value'
 const viewAllAccountsLabel = 'View all accounts'
-const updateSuccessMsg = 'Updated space name'
+const updateSuccessMsg = 'Workspace name updated'
 const formattedSpaceTotalValuePattern = /^\$[\u200a\s]*[\d,]+\.\d{2}$/
 
 export const nonZeroBalanceRegex = /\$[\u200a\s]*[1-9][\d,]*(?:\.\d{2})?/
@@ -127,7 +149,7 @@ export const zeroBalanceRegex = /\$[\u200a\s]*0(?:\.00)?/
 export const txDetailsLabel = 'Transaction details'
 export const pendingTxName = 'Send'
 export const pendingTxStatus = 'Needs confirmation'
-export const deleteSpaceConfirmationMsg = (name) => `Deleted space ${name}`
+export const deleteSpaceConfirmationMsg = (name) => `Deleted workspace ${name}`
 export const acceptInviteConfirmationMsg = (spaceName) => `Accepted invite to ${spaceName}`
 
 // ===========================================
@@ -166,7 +188,23 @@ const spaceDashboardWidgetSelectorByTitle = {
 // ===========================================
 
 export function clickOnSignInBtn() {
-  cy.get('[data-testid="continue-with-wallet-btn"]').click()
+  cy.get(continueWithWalletBtn).click()
+}
+
+export function signOutViaSidebarProfile() {
+  cy.get(sidebarProfileTrigger, { timeout: 30000 }).should('be.visible').click()
+  cy.get(sidebarProfilePopover).should('be.visible')
+  cy.get(sidebarProfileSignOutBtn).should('be.visible').click()
+  cy.url({ timeout: 60000 }).should('include', constants.spacesUrl)
+  cy.get(continueWithWalletBtn, { timeout: 30000 }).should('be.visible')
+}
+
+export function verifyOnSingleSpaceDashboard(spaceName) {
+  cy.url({ timeout: 60000 })
+    .should('include', constants.spaceDashboardUrl)
+    .and('include', 'spaceId=')
+    .and('not.include', onboardingCreateSpacePath)
+  cy.get(spaceSelectorBtn, { timeout: 30000 }).should('be.visible').and('contain.text', spaceName)
 }
 
 export function waitForSpacesWelcomeReady() {
@@ -413,40 +451,47 @@ export function verifySpaceSelectorContainsSpaces(names) {
 // Space CRUD (basic flow)
 // ===========================================
 
+export function verifySpaceSettingsGeneralLoaded() {
+  cy.url({ timeout: 30000 }).should('include', '/spaces/settings/general').and('include', 'spaceId=')
+  cy.get(spaceSettingsGeneralPage, { timeout: 30000 }).should('be.visible')
+}
+
 export function editSpace(newName) {
-  cy.get(spaceEditInput).clear().type(newName)
-  cy.get(spaceSaveBtn).click()
+  cy.get(spaceEditInput).should('be.visible').and('be.enabled').clear().type(newName)
+  cy.get(spaceSaveBtn).should('be.enabled').click()
   cy.contains(updateSuccessMsg).should('be.visible')
 }
 
 export function deleteSpace(name) {
   cy.get(spaceDeleteBtn).click({ force: true })
-  cy.get(spaceConfirmDeleteBtn).click()
+  cy.get(spaceConfirmNameInput).type(name)
+  cy.get(spaceConfirmDeleteBtn).should('be.enabled').click()
   cy.contains(spaceCard, name).should('not.exist')
 }
 
-function deleteAllSpaces() {
-  cy.get('body').then(($body) => {
-    if ($body.find(spaceCard).length > 0) {
-      cy.get(spaceCard)
-        .first()
-        .within(() => {
-          cy.get(spaceVertMenuIcon).click({ force: true })
-        })
-      cy.get(contectMenuRemoveBtn).click({ force: true })
-      cy.get(spaceConfirmDeleteBtn).click()
-      cy.wait(1000)
-      deleteAllSpaces()
-    }
-  })
-}
+const MAX_SPACES = 10
 
 export function ensureReadyToCreateSpace() {
-  cy.get('body').then(($body) => {
-    if ($body.find(spaceCard).length > 0) {
-      deleteAllSpaces()
-    }
-  })
+  // Wait for the page to settle: either the spaces list or the create button must be visible
+  cy.get(`${orgList}, ${createSpaceBtn}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
+
+  // Use the live jQuery collection so the count reflects what's actually in the DOM now
+  cy.get('body')
+    .find(spaceCard)
+    .then(($cards) => {
+      if ($cards.length >= MAX_SPACES) {
+        // At the limit — delete one space to free a slot
+        const firstCardName = $cards.first().find(spaceCardName).text().trim()
+        cy.wrap($cards.first()).within(() => {
+          cy.get(spaceCardContextMenuBtn).click({ force: true })
+        })
+        cy.get(contectMenuRemoveBtn).click({ force: true })
+        cy.get(spaceConfirmNameInput).type(firstCardName)
+        cy.get(spaceConfirmDeleteBtn).should('be.enabled').click()
+        cy.get(spaceCard, { timeout: 10000 }).should('have.length.lessThan', MAX_SPACES)
+      }
+    })
+
   // Wait for either the create button or the create-space form to settle after deletion/redirect
   cy.get(`${createSpaceBtn}, ${orgSpaceInput}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
 }
@@ -462,6 +507,10 @@ export function selectNetwork(network) {
 
 export function addAccountManually(address, network) {
   cy.get(addSpaceAccountBtn).should('be.enabled').click()
+  cy.get(addSpaceAccountToWorkspaceBtn, { timeout: 30000 })
+    .should('be.visible')
+    .and('not.have.attr', 'aria-disabled')
+    .click()
   cy.get(addSpaceAccountManuallyModalBtn).should('be.visible').click()
   selectNetwork(network)
   cy.get(addAddressInput).find('input').clear().type(address)
@@ -476,11 +525,22 @@ export function addAccountManually(address, network) {
 // ===========================================
 
 export function addMember(name, address) {
-  cy.get(addMemberBtn).should('be.enabled').click()
+  cy.get(addMemberBtn, { timeout: 30000 }).should('be.enabled').click()
   cy.get(memberAddressInput).find('input').clear().type(address)
   cy.get(memberNameInput).find('input').clear().type(name)
   cy.get(addMemberModalBtn).should('be.enabled').click()
+
+  cy.get(pendingMembersTab).should('be.visible').click()
   cy.contains(name).should('be.visible')
+}
+
+export function verifySpaceInviteBannerVisible(spaceName) {
+  cy.get(inviteBanner, { timeout: 30000 })
+    .should('be.visible')
+    .within(() => {
+      cy.contains(inviteBannerHeadingText).should('be.visible')
+      cy.contains(spaceName).should('be.visible')
+    })
 }
 
 export function acceptInvite(name) {
@@ -521,7 +581,12 @@ function submitSpaceName(name) {
 
 function skipSelectSafesStep() {
   cy.url({ timeout: 30000 }).should('include', onboardingSelectSafesPath).and('include', 'spaceId=')
-  cy.get(selectSafesSkipBtn).should('be.visible').click()
+  cy.url().then((url) => {
+    const match = url.match(/spaceId=(\d+)/)
+    if (!match) throw new Error('spaceId not found in URL')
+    const spaceId = match[1]
+    cy.visit(`${onboardingInviteMembersPath}?spaceId=${spaceId}`)
+  })
 }
 
 function skipInviteMembersStep() {
@@ -529,8 +594,17 @@ function skipInviteMembersStep() {
   cy.get(inviteMembersSkipBtn).should('be.visible').click()
 }
 
+function completeSurveyStep() {
+  cy.get(`${surveyOptionCard}, ${dashboardSafeList}`, { timeout: 30000 }).filter(':visible').should('exist')
+  cy.url().then((url) => {
+    if (!url.includes(onboardingSurveyPath)) return
+    cy.get(surveyOptionCard, { timeout: 30000 }).filter(':visible').first().click()
+    cy.get(surveyFinishBtn).should('be.enabled').click()
+  })
+}
+
 function verifySpaceDashboardLoaded() {
-  cy.url().should('include', constants.spaceDashboardUrl).and('include', 'spaceId=')
+  cy.url({ timeout: 30000 }).should('include', constants.spaceDashboardUrl).and('include', 'spaceId=')
 }
 
 export function createSpaceViaOnboardingWithSkip(name) {
@@ -538,5 +612,53 @@ export function createSpaceViaOnboardingWithSkip(name) {
   submitSpaceName(name)
   skipSelectSafesStep()
   skipInviteMembersStep()
+  completeSurveyStep()
   verifySpaceDashboardLoaded()
+}
+
+// -- Address book import flow --
+
+export function visitSpaceAddressBook(spaceId) {
+  cy.visit(constants.spaceAddressBookUrl + String(spaceId))
+}
+
+export function openImportAddressBookDialog() {
+  cy.get(openImportDialogBtn, { timeout: 30000 }).should('be.visible').click()
+  cy.contains(importAddressBookLabel).should('be.visible')
+}
+
+export function switchToUploadFileTab() {
+  cy.get(uploadFileTab).should('be.visible').click()
+  cy.get(importFileInput).should('exist')
+}
+
+export function uploadAddressBookFile(fixturePath) {
+  // force: true because react-dropzone hides the native file input (display: none), which Cypress treats as non-interactable.
+  cy.get(importFileInput).selectFile(`cypress/fixtures/${fixturePath}`, { force: true })
+}
+
+export function clickImportUploadedFile() {
+  cy.get(importSubmitBtn).should('be.enabled').click()
+}
+
+export function verifyUploadSummary(entryCount, chainCount) {
+  const entryWord = entryCount === 1 ? 'entry' : 'entries'
+  const chainWord = chainCount > 1 ? 'chains' : 'chain'
+  cy.contains(`Found ${entryCount} ${entryWord} on ${chainCount} ${chainWord}`).should('be.visible')
+}
+
+export function verifyImportSubmitDisabled() {
+  cy.get(importSubmitBtn).should('be.disabled')
+}
+
+export function verifyImportError(message) {
+  cy.contains(message).should('be.visible')
+}
+
+export function verifyImportRequestItemCount(alias, expectedCount) {
+  cy.wait(alias).its('request.body.items').should('have.length', expectedCount)
+}
+
+export function verifyImportSuccessNotification() {
+  cy.contains(importSuccessLabel).should('be.visible')
 }

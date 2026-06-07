@@ -16,6 +16,7 @@ import useChainId from '@/hooks/useChainId'
 import useWallet from '@/hooks/wallets/useWallet'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import { useAllSafes } from '@/hooks/safes'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
@@ -28,7 +29,16 @@ const HIDDEN_ROUTES = [
   AppRoutes.welcome.accounts,
   AppRoutes.welcome.spaces,
   AppRoutes.newSafe.create,
+  AppRoutes.newSafe.advancedCreate,
   AppRoutes.newSafe.load,
+  AppRoutes.terms,
+  AppRoutes.privacy,
+  AppRoutes.licenses,
+  AppRoutes.imprint,
+  AppRoutes.cookie,
+  AppRoutes['403'],
+  AppRoutes['404'],
+  AppRoutes['_offline'],
 ]
 
 function DropdownHeader({ isPinned, onPin }: { isPinned: boolean; onPin: () => void }) {
@@ -50,11 +60,21 @@ function DropdownHeader({ isPinned, onPin }: { isPinned: boolean; onPin: () => v
   )
 }
 
-function DropdownFooter({ onOpen }: { onOpen: () => void }) {
+function DropdownWorkspaceHeader() {
+  return (
+    <div className="flex items-center gap-1 px-4 pt-3 pb-2">
+      <span className="text-sm font-semibold text-secondary-foreground" data-testid="workspace-header">
+        Safes in this workspace
+      </span>
+    </div>
+  )
+}
+
+function DropdownFooter({ onOpen, label }: { onOpen: () => void; label: string }) {
   return (
     <div className="px-4 py-3">
       <Button variant="secondary" size="sm" className="w-full" onClick={onOpen} data-testid="all-accounts-btn">
-        All Accounts
+        {label}
         <ChevronRight className="size-4" />
       </Button>
     </div>
@@ -83,6 +103,7 @@ function ConnectWalletFooter({ onConnect, onClose }: { onConnect: () => void; on
 
 function SpaceSafeBar() {
   const pathname = usePathname()
+  const urlSafeAddress = useSafeAddressFromUrl()
   const dispatch = useAppDispatch()
   const isQualifiedSafe = useIsQualifiedSafe()
   const { items, selectedItemId, handleItemSelect, isLoading, isError, refetch } = useSpaceSafeSelectorItems()
@@ -97,6 +118,8 @@ function SpaceSafeBar() {
   const { txFlow } = useContext(TxModalContext)
 
   if (HIDDEN_ROUTES.includes(pathname ?? '')) return null
+  // /settings/* serves both per-safe (URL has ?safe=) and global pages — hide when no safe context.
+  if (pathname?.startsWith(AppRoutes.settings.index) && !urlSafeAddress) return null
 
   // Check if current safe is pinned on any chain
   const isPinned = Boolean(addedSafes[chainId]?.[safeAddress])
@@ -136,23 +159,27 @@ function SpaceSafeBar() {
     setAccountsModalOpen(true)
   }
 
-  const dropdownHeader = !isQualifiedSafe ? <DropdownHeader isPinned={isPinned} onPin={handleTogglePin} /> : undefined
+  const dropdownHeader = isQualifiedSafe ? (
+    <DropdownWorkspaceHeader />
+  ) : (
+    <DropdownHeader isPinned={isPinned} onPin={handleTogglePin} />
+  )
 
   const hasPinnedSafes = Object.values(addedSafes).some((chain) => Object.keys(chain).length > 0)
   const showConnectWallet = !wallet && !hasPinnedSafes
 
-  const dropdownFooter = !isQualifiedSafe
-    ? showConnectWallet
+  const dropdownFooter =
+    showConnectWallet && !isQualifiedSafe
       ? (close: () => void) => <ConnectWalletFooter onConnect={connectWallet} onClose={close} />
       : (close: () => void) => (
           <DropdownFooter
+            label={isQualifiedSafe ? 'Explore other Safes' : 'All Accounts'}
             onOpen={() => {
               close()
               handleOpenAccountsModal()
             }}
           />
         )
-    : undefined
 
   return (
     <div data-testid="safe-level-navigation" className="flex flex-wrap items-center gap-2">
