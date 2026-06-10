@@ -1,13 +1,15 @@
 import { type AllSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
 import SafeCard from './SafeCard'
-import SimilarAddressAlert from './SimilarAddressAlert'
+import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
 import SelectAllToggle, { type SelectAllState } from '@/features/spaces/components/SelectAllToggle/SelectAllToggle'
+import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/components/Sidebar/constants'
 
 interface SectionSelectAll {
   state: SelectAllState
   count: number
   total: number
   onToggle: (check: boolean) => void
+  disabled?: boolean
 }
 
 interface SafeListProps {
@@ -36,7 +38,9 @@ const SectionRow = ({ label, selectAll, testId }: { label: string; selectAll?: S
         count={selectAll.count}
         total={selectAll.total}
         onToggle={selectAll.onToggle}
+        disabled={selectAll.disabled}
         label="Select all"
+        labelTooltip={`You can select up to ${SAFE_ACCOUNTS_LIMIT} Safe accounts`}
         showCount
         countTooltip="Multi-chain safes count once per network"
         testId={testId}
@@ -54,7 +58,7 @@ const OnboardingSafesList = ({
   ownedSelectAll,
 }: SafeListProps) => {
   return (
-    <div className="flex h-full min-h-0 w-full min-w-0 flex-col gap-2 overflow-y-auto overflow-x-hidden overscroll-contain [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb:hover]:bg-[color-mix(in_srgb,var(--muted-foreground)_55%,var(--border))]">
+    <div className="flex w-full min-w-0 flex-col gap-2">
       {similarAddresses.size > 0 && <SimilarAddressAlert />}
 
       {trustedSafes.length > 0 && (

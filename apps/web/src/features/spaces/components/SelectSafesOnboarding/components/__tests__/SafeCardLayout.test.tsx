@@ -26,19 +26,18 @@ describe('SafeCardLayout', () => {
   it('renders FiatBalance when the safe is deployed', () => {
     render(<SafeCardLayout {...baseProps} fiatValue="123.45" isUndeployed={false} isActivating={false} />)
 
-    expect(screen.queryByText(/Not activated/i)).toBeNull()
-    expect(screen.queryByText(/Activating account/i)).toBeNull()
+    expect(screen.queryByTestId('onboarding-not-activated-icon')).toBeNull()
   })
 
-  it('renders the Not activated chip when the safe is undeployed', () => {
+  it('renders the Inactive warning icon when the safe is undeployed', () => {
     render(<SafeCardLayout {...baseProps} fiatValue={undefined} isUndeployed isActivating={false} />)
 
-    expect(screen.getByText(/Not activated/i)).toBeInTheDocument()
+    expect(screen.getByTestId('onboarding-not-activated-icon')).toHaveAttribute('aria-label', 'Inactive')
   })
 
-  it('renders the Activating account chip when activation is in flight', () => {
+  it('renders the Activating warning icon when activation is in flight', () => {
     render(<SafeCardLayout {...baseProps} fiatValue={undefined} isUndeployed isActivating />)
 
-    expect(screen.getByText(/Activating account/i)).toBeInTheDocument()
+    expect(screen.getByTestId('onboarding-not-activated-icon')).toHaveAttribute('aria-label', 'Activating')
   })
 })

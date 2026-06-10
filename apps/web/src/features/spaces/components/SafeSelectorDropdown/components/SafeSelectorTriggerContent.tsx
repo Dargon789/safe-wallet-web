@@ -7,6 +7,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 import { getInitials, getSafeDisplayInfo } from '../utils'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeBalanceBlock from './SafeBalanceBlock'
+import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import type { SafeItemData } from '../types'
 import { OVERVIEW_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
@@ -20,6 +21,8 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
   const [copied, setCopied] = useState(false)
   const selectedChain = selectedItem.chains.find((c) => c.chainId === selectedChainId) ?? selectedItem.chains[0]
   const chainShortName = selectedChain?.shortName ?? ''
+  const isUndeployed = Boolean(selectedChain?.isUndeployed)
+  const isActivating = Boolean(selectedChain?.isActivating)
 
   const resolvedName = useSafeDisplayName(selectedItem.address, selectedChainId)
   const { addressWithPrefix, displayName, showAddressLine } = getSafeDisplayInfo(
@@ -94,13 +97,17 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
           </div>
         )}
       </div>
-      <SafeBalanceBlock
-        isLoading={selectedItem.isLoading ?? false}
-        balance={selectedItem.balance}
-        threshold={selectedItem.threshold}
-        owners={selectedItem.owners}
-        showBalanceDisplay
-      />
+      {isUndeployed ? (
+        <NotActivatedBadge isActivating={isActivating} data-testid="safe-selector-not-activated-icon" />
+      ) : (
+        <SafeBalanceBlock
+          isLoading={selectedItem.isLoading ?? false}
+          balance={selectedItem.balance}
+          threshold={selectedItem.threshold}
+          owners={selectedItem.owners}
+          showBalanceDisplay
+        />
+      )}
     </div>
   )
 }

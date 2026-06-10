@@ -5,6 +5,7 @@ import { AccountItem } from '@/features/myAccounts/components/AccountItem'
 import Identicon from '@/components/common/Identicon'
 import { Badge } from '@/components/ui/badge'
 import { TriangleAlert } from 'lucide-react'
+import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import { cn } from '@/utils/cn'
 import FiatBalance from './FiatBalance'
 import ThresholdBadge from './ThresholdBadge'
@@ -91,16 +92,19 @@ export const SafeCardLayout = ({
       </div>
     </div>
 
-    <div className="ml-auto flex shrink-0 items-center justify-end pl-1 sm:pl-2">
+    <div className="ml-auto flex shrink-0 items-center justify-end gap-1.5 pl-1 sm:gap-2 sm:pl-2">
+      {isUndeployed && (
+        <NotActivatedBadge
+          isActivating={isActivating}
+          data-testid="onboarding-not-activated-icon"
+          onClick={(e) => e.stopPropagation()}
+        />
+      )}
       <AccountItem.ChainBadge safes={safes} className="justify-end" />
     </div>
 
     <div className="flex min-w-0 shrink-0 flex-col items-end gap-2 pl-1 sm:min-w-16 sm:pl-0">
-      {isUndeployed ? (
-        <AccountItem.StatusChip undeployedSafe isActivating={isActivating} />
-      ) : (
-        <FiatBalance value={fiatValue} />
-      )}
+      {!isUndeployed && <FiatBalance value={fiatValue} />}
       {threshold > 0 && <ThresholdBadge threshold={threshold} owners={ownersCount} />}
     </div>
   </button>

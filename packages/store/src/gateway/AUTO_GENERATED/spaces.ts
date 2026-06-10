@@ -164,6 +164,13 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members/decline`, method: 'POST' }),
         invalidatesTags: ['spaces'],
       }),
+      membersRenewInviteV1: build.mutation<MembersRenewInviteV1ApiResponse, MembersRenewInviteV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/members/${queryArg.userId}/invite/renew`,
+          method: 'POST',
+        }),
+        invalidatesTags: ['spaces'],
+      }),
       membersGetUsersV1: build.query<MembersGetUsersV1ApiResponse, MembersGetUsersV1ApiArg>({
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members` }),
         providesTags: ['spaces'],
@@ -344,6 +351,13 @@ export type MembersDeclineInviteV1ApiArg = {
   /** Space ID to decline invitation for */
   spaceId: number
 }
+export type MembersRenewInviteV1ApiResponse = /** status 200 Invitation renewed successfully */ Invitation
+export type MembersRenewInviteV1ApiArg = {
+  /** Space ID containing the invitation */
+  spaceId: number
+  /** User ID of the invited member */
+  userId: number
+}
 export type MembersGetUsersV1ApiResponse = /** status 200 Space members retrieved successfully */ MembersDto
 export type MembersGetUsersV1ApiArg = {
   /** Space ID to get members for */
@@ -465,7 +479,9 @@ export type UserDto = {
 export type SpaceMemberDto = {
   role: 'ADMIN' | 'MEMBER'
   name: string
-  invitedBy: string
+  invitedBy: number | null
+  inviteExpiresAt: string | null
+  invitedByName?: string
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   user: UserDto
 }
@@ -504,15 +520,22 @@ export type Invitation = {
   spaceId: number
   role: 'ADMIN' | 'MEMBER'
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
-  invitedBy?: string | null
+  invitedBy: number | null
 }
-export type InviteUserDto = {
+export type WalletInviteUserDto = {
+  type: 'wallet'
   address: string
-  name: string
   role: 'ADMIN' | 'MEMBER'
+  name: string
+}
+export type EmailInviteUserDto = {
+  type: 'email'
+  email: string
+  role: 'ADMIN' | 'MEMBER'
+  name: string
 }
 export type InviteUsersDto = {
-  users: InviteUserDto[]
+  users: (WalletInviteUserDto | EmailInviteUserDto)[]
 }
 export type AcceptInviteDto = {
   name: string
@@ -528,7 +551,8 @@ export type MemberDto = {
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   name: string
   alias?: string | null
-  invitedBy?: string | null
+  invitedBy: number | null
+  inviteExpiresAt?: string | null
   createdAt: string
   updatedAt: string
   user: MemberUser
@@ -592,6 +616,7 @@ export const {
   useMembersInviteUserV1Mutation,
   useMembersAcceptInviteV1Mutation,
   useMembersDeclineInviteV1Mutation,
+  useMembersRenewInviteV1Mutation,
   useMembersGetUsersV1Query,
   useLazyMembersGetUsersV1Query,
   useMembersSelfRemoveV1Mutation,
