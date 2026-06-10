@@ -82,9 +82,9 @@ export const assert = {
 
     if (!wasRejected) {
       if (msg) {
-        throw new Error('expected to be rejected, ' + msg)
+        throw new Error(`expected to be rejected`)
       } else {
-        throw new Error('expected to be rejected')
+        throw new Error(`expected to be rejected, ${msg}`)
       }
     }
   }
