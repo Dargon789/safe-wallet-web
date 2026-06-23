@@ -4,5 +4,4 @@ module.exports = {
   ...preset,
   collectCoverage: true,
   collectCoverageFrom: ['<rootDir>/src/**/*.ts'],
-  testEnvironment: 'jest-fixed-jsdom',
 }
