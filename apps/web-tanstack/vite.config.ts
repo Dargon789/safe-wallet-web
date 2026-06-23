@@ -66,11 +66,11 @@ export default defineConfig(({ mode }) => {
     publicDir: path.resolve(webRoot, 'public'),
     envPrefix: ['VITE_', 'NEXT_PUBLIC_'],
     server: {
-      port: 3001,
+      port: 3000,
       strictPort: true,
     },
     preview: {
-      port: 3001,
+      port: 3000,
       strictPort: true,
     },
     // Eagerly pre-bundle the heavy MUI / web3 / Redux subgraph. By default Vite
@@ -214,20 +214,17 @@ export default defineConfig(({ mode }) => {
           jsx: { runtime: 'automatic' },
         },
       }),
-      // Scoped `require()` polyfill. Two reused apps/web files use sync
-      // CommonJS require (chains.json, 'blo'). We can't use a global Vite
+      // Scoped `require()` polyfill. One reused apps/web file uses sync
+      // CommonJS require ('blo'). We can't use a global Vite
       // `define` for `require` because it would rewrite Vite's own client
       // code. Instead, prepend a module-local `const require = ...` only to
-      // those exact files so the call site resolves at runtime through
+      // that exact file so the call site resolves at runtime through
       // `globalThis.__safeBrowserRequire` (installed by compat/require-shim.ts).
       {
         name: 'safe-scoped-require-shim',
         enforce: 'pre',
         transform(code, id) {
-          if (
-            id.includes('apps/web/src/store/index.ts') ||
-            id.includes('apps/web/src/components/common/SpaceSafeBar/AccountsModal/shared.tsx')
-          ) {
+          if (id.includes('apps/web/src/components/common/SpaceSafeBar/AccountsModal/shared.tsx')) {
             return {
               code: `const require = globalThis.__safeBrowserRequire;\n${code}`,
               map: null,

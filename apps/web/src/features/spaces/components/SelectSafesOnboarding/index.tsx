@@ -6,22 +6,17 @@ import { Typography } from '@/components/ui/typography'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ChevronLeft, ChevronRight, Search, Loader2 } from 'lucide-react'
-import {
-  OnboardingLayout,
-  StepCounter,
-  SafeAppMockup,
-  deriveSidePanelAccountsFromSpace,
-} from '@/features/spaces/components/OnboardingLayout'
+import { OnboardingLayout, StepCounter, SafeAppMockup, deriveSidePanelAccountsFromSpace } from '../OnboardingLayout'
 import useWallet from '@/hooks/wallets/useWallet'
 import { type AllSafeItems } from '@/hooks/safes'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import { useSpaceSafes } from '../../hooks/useSpaceSafes'
+import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import OnboardingSafesList from './components/OnboardingSafesList'
 import ConnectWalletHint from '../ConnectWalletHint'
 import useOnboardingNavigation from './hooks/useOnboardingNavigation'
 import useOnboardingSafes from './hooks/useOnboardingSafes'
 import useOnboardingSubmit from './hooks/useOnboardingSubmit'
-import { useSelectAll } from '@/features/spaces/hooks/useSelectAll'
-import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/components/Sidebar/constants'
+import { useSelectAll } from '../../hooks/useSelectAll'
 import {
   deriveSidePanelAccounts,
   deriveSelectedBalanceSafes,
@@ -29,11 +24,11 @@ import {
 } from './utils/deriveSelectedAccounts'
 
 const ONBOARDING_STEP = 2
-const TOTAL_STEPS = 4
 const FORM_ID = 'select-safes-form'
 
 const SelectSafesOnboarding = (): ReactElement => {
   const wallet = useWallet()
+  const totalSteps = useOnboardingStepCount()
   const { spaceId, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
   const { trustedSafes, ownedSafes, similarAddresses, handleSearch, hasNoSafes } = useOnboardingSafes()
   const allSafes = useMemo<AllSafeItems>(() => [...trustedSafes, ...ownedSafes], [trustedSafes, ownedSafes])
@@ -51,7 +46,7 @@ const SelectSafesOnboarding = (): ReactElement => {
     setValue,
   })
 
-  const { data: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !spaceId })
+  const { data: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !spaceId })
   const { allSafes: spaceSafes } = useSpaceSafes()
 
   const selectedSafes = useWatch({ control, name: 'selectedSafes' })
@@ -78,7 +73,7 @@ const SelectSafesOnboarding = (): ReactElement => {
   const main = (
     <FormProvider {...formMethods}>
       <form id={FORM_ID} onSubmit={onSubmit} className="flex flex-col gap-6">
-        <StepCounter currentStep={ONBOARDING_STEP} totalSteps={TOTAL_STEPS} />
+        <StepCounter currentStep={ONBOARDING_STEP} totalSteps={totalSteps} />
 
         <div className="flex flex-col gap-2 shrink-0">
           <Typography variant="h2">Select Safes</Typography>
@@ -108,15 +103,11 @@ const SelectSafesOnboarding = (): ReactElement => {
             </InputGroup>
 
             <div className="relative min-w-0" data-testid="onboarding-safes-list-region">
-              {isAtLimit && (
-                <Typography variant="paragraph" color="muted" className="text-xs pb-1">
-                  Limit of {SAFE_ACCOUNTS_LIMIT} accounts reached
-                </Typography>
-              )}
               <OnboardingSafesList
                 trustedSafes={trustedSafes}
                 ownedSafes={ownedSafes}
                 similarAddresses={similarAddresses}
+                isAtLimit={isAtLimit}
                 trustedSelectAll={{
                   state: trustedSelection.state,
                   count: trustedSelection.selectedCount,
