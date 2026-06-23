@@ -50,6 +50,7 @@ import signingState from './signingStateSlice'
 import signerImportFlow from './signerImportFlowSlice'
 import executingState from './executingStateSlice'
 import draftTx from './draftTxSlice'
+import walletKit, { walletKitSliceName } from '@/src/features/WalletConnect/Wallet/store/walletKitSlice'
 import { withE2EReset } from './resetE2EState'
 
 setBaseUrl(GATEWAY_URL)
@@ -100,6 +101,7 @@ export const persistBlacklist = [
   'signerImportFlow',
   'executingState',
   'draftTx',
+  walletKitSliceName,
 ]
 
 export const persistTransforms = [cgwClientFilter, sanitizePendingQueriesTransform]
@@ -112,6 +114,17 @@ const persistConfig = {
   transforms: persistTransforms,
   migrate,
 }
+
+// Sessions/pending stay volatile (walletKit is in the root blacklist) and rehydrate from
+// walletKit.getActiveSessions() on app start. We persist ONLY verifyByTopic so a session's
+// verify badge survives a restart. The nested persistor is flushed by the parent persistStore.
+export const walletKitPersistConfig = {
+  key: walletKitSliceName,
+  storage: reduxStorage,
+  version: 1,
+  whitelist: ['verifyByTopic'],
+}
+const persistedWalletKit = persistReducer(walletKitPersistConfig, walletKit)
 
 const combinedReducer = combineReducers({
   txHistory,
@@ -134,6 +147,7 @@ const combinedReducer = combineReducers({
   signerImportFlow,
   executingState,
   draftTx,
+  walletKit: persistedWalletKit,
   [web3API.reducerPath]: web3API.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,

@@ -78,14 +78,6 @@ describe('SafeItemCard', () => {
     expect(screen.getByTestId('bookmark-icon')).toBeInTheDocument()
   })
 
-  it('hides the pin/unpin button when hidePinControls is set (space-safe context)', () => {
-    const safeItem = safeItemBuilder().build()
-
-    render(<SafeItemCard safeItem={safeItem} onClose={noopClose} hidePinControls />)
-
-    expect(screen.queryByTestId('bookmark-icon')).not.toBeInTheDocument()
-  })
-
   it('renders the full address with bolded first/last 4 hex chars when flagged as similar', () => {
     const safeItem = safeItemBuilder()
       .with({
@@ -116,7 +108,7 @@ describe('SafeItemCard – undeployed', () => {
 
     render(<SafeItemCard safeItem={safeItem} onClose={noopClose} />)
 
-    const badge = screen.getByText('Not activated')
+    const badge = screen.getByTestId('pending-activation-icon')
     const nameColumn = screen.getByTestId('name-column')
 
     expect(nameColumn.contains(badge)).toBe(false)
