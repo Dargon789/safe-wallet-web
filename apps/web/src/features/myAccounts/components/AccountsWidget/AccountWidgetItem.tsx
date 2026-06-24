@@ -3,7 +3,7 @@ import { UserRound } from 'lucide-react'
 import { Typography } from '@/components/ui/typography'
 import { Badge } from '@/components/ui/badge'
 import { Avatar } from '@/components/ui/avatar'
-import { WidgetItem } from '@/features/spaces/components/SafeWidget'
+import { WidgetItem } from '@/features/spaces'
 import { AccountItem } from '../AccountItem'
 import type { Account } from './types'
 import Identicon from '@/components/common/Identicon'
@@ -49,7 +49,7 @@ const AccountWidgetItem = ({
         </div>
       }
       actionNode={
-        <div className="flex flex-col items-end gap-2">
+        <div className="flex w-20 flex-col items-end gap-2">
           {account.isUndeployed ? (
             <NotActivatedBadge isActivating={!!account.isActivating} />
           ) : (

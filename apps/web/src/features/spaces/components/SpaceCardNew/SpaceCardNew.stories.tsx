@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import SpaceCardNew from './index'
-import { MemberRole, MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
+import { MemberRole, MemberStatus } from '../../hooks/useSpaceMembers'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { withMockProvider } from '@/storybook/preview'
 
@@ -17,9 +17,10 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 const mockSpace: GetSpaceResponse = {
-  id: 1,
+  uuid: 'uuid-1',
   name: 'Space Name',
   safeCount: 5,
+  memberCount: 3,
   members: [
     {
       name: 'Admin User',
