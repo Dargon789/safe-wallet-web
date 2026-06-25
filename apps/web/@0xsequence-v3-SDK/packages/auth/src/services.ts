@@ -295,7 +295,7 @@ export class Services {
     })
 
     proof.claims.app = this.settings.metadata.name
-    if (typeof window === 'object') {
+    if (typeof window === 'object' && window.location) {
       proof.claims.ogn = window.location.origin
     }
     proof.setExpiryIn(this.expiration)
