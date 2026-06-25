@@ -1,6 +1,7 @@
-import { SENTINEL_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
 import memoize from 'lodash/memoize'
-import { getMultiSendCallOnlyDeployment } from '@safe-global/safe-deployments'
+import { getMultiSendCallOnlyDeployments } from '@safe-global/safe-deployments'
+import { getChainAgnosticAddress } from '@safe-global/utils/services/contracts/deployments'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { Delay } from '@gnosis.pm/zodiac'
 import type { TransactionAddedEvent } from '@gnosis.pm/zodiac/dist/cjs/types/Delay'
@@ -8,7 +9,8 @@ import { toBeHex, type JsonRpcProvider, type TransactionReceipt } from 'ethers'
 import { trimTrailingSlash } from '@/utils/url'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
-import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
+import { decodeMultiSendData } from '@safe-global/protocol-kit'
+import { multicall } from '@safe-global/utils/utils/multicall'
 
 export const MAX_RECOVERER_PAGE_SIZE = 100
 
@@ -55,14 +57,14 @@ export function _isMaliciousRecovery({
   }
 
   const multiSendDeployment =
-    getMultiSendCallOnlyDeployment({ network: chainId, version: version ?? undefined }) ??
-    getMultiSendCallOnlyDeployment({ network: chainId, version: BASE_MULTI_SEND_CALL_ONLY_VERSION })
+    getMultiSendCallOnlyDeployments({ version: version ?? undefined }) ??
+    getMultiSendCallOnlyDeployments({ version: BASE_MULTI_SEND_CALL_ONLY_VERSION })
 
-  if (!multiSendDeployment) {
+  const multiSendAddress = getChainAgnosticAddress(multiSendDeployment, chainId)
+
+  if (!multiSendAddress) {
     return true
   }
-
-  const multiSendAddress = multiSendDeployment.networkAddresses[chainId] ?? multiSendDeployment.defaultAddress
 
   // Calling official MultiSend contract with a batch of transactions to the Safe itself
   return (
@@ -146,10 +148,14 @@ const queryAddedTransactions = async (
   const topics = await transactionAddedFilter.getTopicFilter()
   topics[1] = queryNonces
 
-  const { blockNumber } = (await _getSafeCreationReceipt({ transactionService, provider, safeAddress }))!
+  const creationReceipt = await _getSafeCreationReceipt({ transactionService, provider, safeAddress })
+
+  if (!creationReceipt) {
+    throw new Error(`Could not fetch creation receipt for Safe ${safeAddress}`)
+  }
 
   // @ts-expect-error
-  return await delayModifier.queryFilter(topics, blockNumber, 'latest')
+  return await delayModifier.queryFilter(topics, creationReceipt.blockNumber, 'latest')
 }
 
 const getRecoveryQueueItem = async ({
@@ -188,11 +194,15 @@ const getRecoveryQueueItem = async ({
     transaction: transactionAdded.args,
   })
 
+  if (!receipt) {
+    throw new Error(`Could not fetch transaction receipt for ${transactionAdded.transactionHash}`)
+  }
+
   return {
     ...transactionAdded,
     ...timestamps,
     isMalicious,
-    executor: receipt!.from,
+    executor: receipt.from,
   }
 }
 
@@ -211,18 +221,49 @@ export const _getRecoveryStateItem = async ({
   chainId: string
   version: SafeState['version']
 }): Promise<RecoveryStateItem> => {
-  const [[recoverers], expiry, delay, txNonce, queueNonce] = await Promise.all([
-    delayModifier.getModulesPaginated(SENTINEL_ADDRESS, MAX_RECOVERER_PAGE_SIZE),
-    delayModifier.txExpiration(),
-    delayModifier.txCooldown(),
-    delayModifier.txNonce(),
-    delayModifier.queueNonce(),
-  ])
+  const delayModifierAddress = await delayModifier.getAddress()
+  const calls = [
+    {
+      to: delayModifierAddress,
+      data: delayModifier.interface.encodeFunctionData('getModulesPaginated', [
+        SENTINEL_ADDRESS,
+        MAX_RECOVERER_PAGE_SIZE,
+      ]),
+    },
+    {
+      to: delayModifierAddress,
+      data: delayModifier.interface.encodeFunctionData('txExpiration'),
+    },
+    {
+      to: delayModifierAddress,
+      data: delayModifier.interface.encodeFunctionData('txCooldown'),
+    },
+    {
+      to: delayModifierAddress,
+      data: delayModifier.interface.encodeFunctionData('txNonce'),
+    },
+    {
+      to: delayModifierAddress,
+      data: delayModifier.interface.encodeFunctionData('queueNonce'),
+    },
+  ]
+  const callResults = await multicall(provider, calls)
+
+  const [[recoverers], expiry, delay, txNonce, queueNonce] = [
+    delayModifier.interface.decodeFunctionResult('getModulesPaginated', callResults[0].returnData) as unknown as [
+      string[],
+      string,
+    ],
+    BigInt(callResults[1].returnData),
+    BigInt(callResults[2].returnData),
+    BigInt(callResults[3].returnData),
+    BigInt(callResults[4].returnData),
+  ]
 
   const queuedTransactionsAdded = await queryAddedTransactions(
     delayModifier,
-    BigInt(queueNonce),
-    BigInt(txNonce),
+    queueNonce,
+    txNonce,
     transactionService,
     provider,
     safeAddress,

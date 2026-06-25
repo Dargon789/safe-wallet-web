@@ -4,9 +4,7 @@ import { format } from 'date-fns'
 const path = require('path')
 
 const pinnedAppsStr = 'My pinned apps'
-const enablePushNotificationsStr = 'Enable push notifications'
 const addressBookBtnStr = 'Address book'
-const dataImportModalStr = 'Data import'
 const appsBtnStr = 'Apps'
 const bookmarkedAppsBtnStr = 'Bookmarked apps'
 const settingsBtnStr = 'Settings'
@@ -28,7 +26,7 @@ export const darkModeStr = 'Dark mode'
 
 // Import messages for data_import.json
 const importMessages = [
-  'Added Safe Accounts on 4 chains',
+  'Added Safe accounts on 4 chains',
   'Address book for 4 chains',
   'Address book for 4 chains',
   'Settings (appearance, currency, hidden tokens and custom environment variables)',
@@ -91,13 +89,9 @@ export function clickOnImportBtnDataImportModal() {
   cy.contains('button', 'Import').click()
 }
 
-export function uploadFile(filePath) {
-  cy.get('[type="file"]').attachFile(filePath)
-}
-
 export function verifyImportModalData() {
   //verifies that the modal says the amount of chains/addressbook values it uploaded for file ../fixtures/data_import.json
-  cy.contains('Added Safe Accounts on 4 chains').should('be.visible')
+  cy.contains('Added Safe accounts on 4 chains').should('be.visible')
   cy.contains('Address book for 4 chains').should('be.visible')
   cy.contains('Settings').should('be.visible')
   cy.contains('Bookmarked Safe Apps').should('be.visible')
@@ -109,7 +103,7 @@ export function clickOnImportedSafe(safe) {
 }
 
 export function clickOnOpenSafeListSidebar() {
-  cy.contains('My Safe Accounts').click()
+  cy.contains('My Safe accounts').click()
 }
 
 export function clickOnAddressBookBtn() {
@@ -158,6 +152,8 @@ export function clickOnSettingsBtn() {
 
 export function clickOnAppearenceBtn() {
   cy.contains(tab, appearenceTabStr).click()
+  // Wait for appearance page content to render after Next.js client-side navigation
+  cy.contains('Chain-specific addresses').should('be.visible')
 }
 
 export function clickOnShowMoreTabsBtn() {
@@ -173,7 +169,8 @@ export function clickOnDataTab() {
 
 export function verifyCheckboxes(checkboxes, checked = false) {
   checkboxes.forEach((checkbox) => {
-    cy.contains('label', checkbox)
+    cy.get('main')
+      .contains('label', checkbox)
       .find('input[type="checkbox"]')
       .should(checked ? 'be.checked' : 'not.be.checked')
   })

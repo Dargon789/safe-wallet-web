@@ -1,14 +1,9 @@
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ProposalTypes, SessionTypes } from '@walletconnect/types'
-import { EIP155, BlockedBridges, WarnedBridges, WarnedBridgeNames } from '@/features/walletconnect/constants'
+import { EIP155, BlockedBridges, WarnedBridges, WarnedBridgeNames } from '../constants'
+import { getEip155ChainId, isPairingUri } from '@safe-global/utils/features/walletconnect/utils'
 
-export const isPairingUri = (uri: string): boolean => {
-  return uri.startsWith('wc:')
-}
-
-export const getEip155ChainId = (chainId: string): string => {
-  return `${EIP155}:${chainId}`
-}
+export { isPairingUri, getEip155ChainId }
 
 export const stripEip155Prefix = (eip155Address: string): string => {
   return eip155Address.split(':').pop() ?? ''
@@ -25,7 +20,7 @@ export const getSupportedEip155ChainIds = (
 }
 
 export const getSupportedChainIds = (
-  configs: Array<ChainInfo>,
+  configs: Array<Chain>,
   { requiredNamespaces, optionalNamespaces }: ProposalTypes.Struct,
 ): Array<string> => {
   const supportedEip155ChainIds = getSupportedEip155ChainIds(requiredNamespaces, optionalNamespaces)
@@ -48,10 +43,6 @@ export const isUnsupportedChain = (session: SessionTypes.Struct, chainId: string
 // Bridge enforces the same address on destination chain
 export const isBlockedBridge = (origin: string) => {
   return BlockedBridges.some((bridge) => origin.includes(bridge))
-}
-
-export const isSafePassApp = (origin: string) => {
-  return origin.includes('community.safe.global')
 }
 
 // Bridge defaults to same address on destination chain but allows changing it

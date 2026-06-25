@@ -1,7 +1,7 @@
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
-import { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
-import { CircularProgress, Box, Button, CardActions, Divider, Typography } from '@mui/material'
+import { type ReactElement, type SyntheticEvent, useContext } from 'react'
+import { Box, CardActions, Divider, Typography } from '@mui/material'
 
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
@@ -9,8 +9,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { getTxOptions } from '@/utils/transactions'
 import CheckWallet from '@/components/common/CheckWallet'
 
-import type { SignOrExecuteProps } from '@/components/tx/SignOrExecuteForm/SignOrExecuteFormV2'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
 import { SuccessScreenFlow } from '@/components/tx-flow/flows'
 import AdvancedParams, { useAdvancedParams } from '../../../../tx/AdvancedParams'
@@ -19,9 +18,7 @@ import { isWalletRejection } from '@/utils/wallets'
 
 import css from './styles.module.css'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { TxSecurityContext } from '@/components/tx/security/shared/TxSecurityContext'
 
-import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
 import { pollModuleTransactionId, useExecuteThroughRole, useGasLimit, useMetaTransactions, type Role } from './hooks'
 import { decodeBytes32String } from 'ethers'
 import useOnboard from '@/hooks/wallets/useOnboard'
@@ -30,8 +27,13 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { assertOnboard, assertWallet } from '@/utils/helpers'
 import { dispatchModuleTxExecution } from '@/services/tx/tx-sender'
 import { Status } from 'zodiac-roles-deployments'
+import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import SplitMenuButton from '@/components/common/SplitMenuButton'
+import type { SlotComponentProps, SlotName } from '../../../slots'
+import { TxFlowContext } from '../../../TxFlowProvider'
+import type { SubmitCallback } from '../../../TxFlow'
 
-const Role = ({ children }: { children: string }) => {
+const RoleChip = ({ children }: { children: string }) => {
   let humanReadableRoleKey = children
   try {
     humanReadableRoleKey = decodeBytes32String(children)
@@ -44,13 +46,18 @@ export const ExecuteThroughRoleForm = ({
   safeTx,
   role,
   onSubmit,
+  onSubmitSuccess,
   disableSubmit = false,
+  options = [],
+  onChange,
+  slotId,
   txSecurity,
-}: SignOrExecuteProps & {
+}: SlotComponentProps<SlotName.ComboSubmit> & {
   safeTx?: SafeTransaction
-  safeTxError?: Error
   role: Role
-  txSecurity: ReturnType<typeof useTxSecurityContext>
+  disableSubmit?: boolean
+  onSubmitSuccess?: SubmitCallback
+  txSecurity: ReturnType<typeof useSafeShield>
 }): ReactElement => {
   const currentChain = useCurrentChain()
   const onboard = useOnboard()
@@ -59,12 +66,9 @@ export const ExecuteThroughRoleForm = ({
 
   const chainId = currentChain?.chainId || '1'
 
-  const [isPending, setIsPending] = useState<boolean>(false)
-  const [isRejectedByUser, setIsRejectedByUser] = useState<boolean>(false)
-  const [submitError, setSubmitError] = useState<Error | undefined>()
-
   const { setTxFlow } = useContext(TxModalContext)
-  const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = txSecurity
+  const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
+  const { isSubmitLoading, setIsSubmitLoading, setSubmitError, setIsRejectedByUser } = useContext(TxFlowContext)
 
   const permissionsError = role.status !== null ? PermissionsErrorMessage[role.status] : null
   const metaTransactions = useMetaTransactions(safeTx)
@@ -84,16 +88,10 @@ export const ExecuteThroughRoleForm = ({
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()
 
-    if (needsRiskConfirmation && !isRiskConfirmed) {
-      setIsRiskIgnored(true)
-      return
-    }
-
     assertWallet(wallet)
     assertOnboard(onboard)
 
-    setIsRejectedByUser(false)
-    setIsPending(true)
+    setIsSubmitLoading(true)
     setSubmitError(undefined)
     setIsRejectedByUser(false)
 
@@ -103,9 +101,16 @@ export const ExecuteThroughRoleForm = ({
 
     const txOptions = getTxOptions(advancedParams, currentChain)
 
+    onSubmit?.()
+
     let txHash: string
     try {
-      txHash = await dispatchModuleTxExecution({ ...txThroughRole, ...txOptions }, wallet.provider, safe.address.value)
+      txHash = await dispatchModuleTxExecution(
+        { ...txThroughRole, ...txOptions },
+        wallet.provider,
+        safe.chainId,
+        safe.address.value,
+      )
     } catch (_err) {
       const err = asError(_err)
       if (isWalletRejection(err)) {
@@ -114,7 +119,7 @@ export const ExecuteThroughRoleForm = ({
         trackError(Errors._815, err)
         setSubmitError(err)
       }
-      setIsPending(false)
+      setIsSubmitLoading(false)
       return
     }
 
@@ -127,7 +132,7 @@ export const ExecuteThroughRoleForm = ({
       throw new Error('Transaction service not found')
     }
     const txId = await pollModuleTransactionId(chainId, safe.address.value, txHash)
-    onSubmit?.(txId, true)
+    onSubmitSuccess?.({ txId, isExecuted: true })
 
     // Update the success screen so it shows a link to the transaction
     setTxFlow(<SuccessScreenFlow txId={txId} />, undefined, false)
@@ -138,18 +143,17 @@ export const ExecuteThroughRoleForm = ({
     maxFeePerGas: advancedParams.maxFeePerGas,
   })
 
-  const submitDisabled = !txThroughRole || isPending || disableSubmit || (needsRiskConfirmation && !isRiskConfirmed)
+  const submitDisabled =
+    !txThroughRole || isSubmitLoading || disableSubmit || (needsRiskConfirmation && !isRiskConfirmed)
 
   return (
     <>
-      <Divider className={commonCss.nestedDivider} sx={{ pt: 1 }} />
-
       <form onSubmit={handleSubmit}>
         {!permissionsError && (
           <>
             <Typography sx={{ mb: 2 }}>
-              Your <Role>{role.roleKey}</Role> role allows you to execute this transaction without the confirmations of
-              other owners.
+              Your <RoleChip>{role.roleKey}</RoleChip> role allows you to execute this transaction without the
+              confirmations of other owners.
             </Typography>
 
             <div className={commonCss.params}>
@@ -167,7 +171,7 @@ export const ExecuteThroughRoleForm = ({
         {permissionsError && (
           <Box mb={2}>
             <Typography sx={{ mb: 2 }}>
-              You are a member of the <Role>{role.roleKey}</Role> role but it does not allow this transaction.
+              You are a member of the <RoleChip>{role.roleKey}</RoleChip> role but it does not allow this transaction.
             </Typography>
 
             <ErrorMessage>{permissionsError}</ErrorMessage>
@@ -205,35 +209,21 @@ export const ExecuteThroughRoleForm = ({
           )
         )}
 
-        {submitError && (
-          <Box mt={1}>
-            <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
-          </Box>
-        )}
-
-        {isRejectedByUser && (
-          <Box mt={1}>
-            <WalletRejectionError />
-          </Box>
-        )}
-
-        <Box mt={3}>
-          <Divider className={commonCss.nestedDivider} />
-        </Box>
+        <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
 
         <CardActions>
           {/* Submit button, also available to non-owner role members */}
           <CheckWallet allowNonOwner checkNetwork={!submitDisabled}>
             {(isOk) => (
-              <Button
-                data-testid="execute-through-role-form-btn"
-                variant="contained"
-                type="submit"
-                disabled={!isOk || submitDisabled}
-                sx={{ minWidth: '112px' }}
-              >
-                {isPending ? <CircularProgress size={20} /> : 'Execute'}
-              </Button>
+              <Box sx={{ minWidth: '112px', width: ['100%', '100%', '100%', 'auto'] }}>
+                <SplitMenuButton
+                  selected={slotId}
+                  onChange={({ id }) => onChange?.(id)}
+                  options={options}
+                  disabled={!isOk || submitDisabled}
+                  loading={isSubmitLoading}
+                />
+              </Box>
             )}
           </CheckWallet>
         </CardActions>
@@ -242,10 +232,8 @@ export const ExecuteThroughRoleForm = ({
   )
 }
 
-const useTxSecurityContext = () => useContext(TxSecurityContext)
-
 export default madProps(ExecuteThroughRoleForm, {
-  txSecurity: useTxSecurityContext,
+  txSecurity: useSafeShield,
 })
 
 const PermissionsErrorMessage: Record<Status, string | null> = {

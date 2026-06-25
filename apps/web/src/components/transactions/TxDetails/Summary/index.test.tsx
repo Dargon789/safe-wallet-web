@@ -1,16 +1,19 @@
-import { fireEvent, render, within } from '@/tests/test-utils'
-import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import DecodedTx from '.'
-import { waitFor } from '@testing-library/react'
-import { createMockTransactionDetails } from '@/tests/transactions'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { DataDecoded } from '@safe-global/store/gateway/AUTO_GENERATED/data-decoded'
+
 import {
   DetailedExecutionInfoType,
   SettingsInfoType,
   TransactionInfoType,
   TransactionTokenType,
   TransferDirection,
-} from '@safe-global/safe-gateway-typescript-sdk'
-import type { DecodedDataResponse, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+} from '@safe-global/store/gateway/types'
+
+import { fireEvent, render, within } from '@/tests/test-utils'
+import { type SafeTransaction } from '@safe-global/types-kit'
+import DecodedTx from '.'
+import { waitFor } from '@testing-library/react'
+import { createMockTransactionDetails } from '@/tests/transactions'
 
 jest.mock('@next/third-parties/google')
 
@@ -83,6 +86,8 @@ const txDetails = createMockTransactionDetails({
     baseGas: '0',
     gasPrice: '0',
     gasToken: '0x0000000000000000000000000000000000000000',
+    fee: '0',
+    payment: '0',
     refundReceiver: {
       value: '0x0000000000000000000000000000000000000000',
       name: 'MetaMultiSigWallet',
@@ -202,7 +207,7 @@ describe('DecodedTx', () => {
             ...txDetails.txData,
             dataDecoded: {
               method: '',
-            } as DecodedDataResponse,
+            } as DataDecoded,
           } as TransactionDetails['txData']
         }
       />,

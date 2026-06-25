@@ -10,6 +10,13 @@
   top: calc(var(--header-height) - 76px);
 }
 
+/* In dark mode the page background is black (var(--background), set on .mainSpace),
+   so match it here — otherwise the header's opaque sticky background shows as a
+   lighter strip behind the tabs even when it isn't pinned. */
+[data-theme='dark'] .container {
+  background-color: var(--background);
+}
+
 .title {
   font-weight: 700;
   margin-bottom: var(--space-3);
@@ -24,6 +31,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.pageHeader {
+  row-gap: var(--space-3);
 }
 
 .actionsWrapper {
@@ -55,6 +67,7 @@
   }
 
   .actionsWrapper {
-    padding-bottom: 16px;
+    padding-bottom: var(--space-2);
+    display: contents;
   }
 }

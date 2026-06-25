@@ -5,21 +5,21 @@ import { config } from '@/src/theme/tamagui.config'
 import { NavDarkTheme, NavLightTheme } from '@/src/theme/navigation'
 import { FontProvider } from '@/src/theme/provider/font'
 import { View } from 'tamagui'
-import { useColorScheme } from 'react-native'
 
 interface StorybookThemeProviderProps {
   children: React.ReactNode
+  theme?: 'light' | 'dark'
 }
 
-export const StorybookThemeProvider = ({ children }: StorybookThemeProviderProps) => {
-  const colorScheme = useColorScheme()
+export const StorybookThemeProvider = ({ children, theme = 'light' }: StorybookThemeProviderProps) => {
+  const isDark = theme === 'dark'
 
   return (
     <FontProvider>
-      <TamaguiProvider config={config} defaultTheme={colorScheme ?? 'light'}>
-        <ThemeProvider value={colorScheme === 'dark' ? NavDarkTheme : NavLightTheme}>
+      <TamaguiProvider config={config} defaultTheme={theme}>
+        <ThemeProvider value={isDark ? NavDarkTheme : NavLightTheme}>
           <View
-            backgroundColor={colorScheme === 'dark' ? NavDarkTheme.colors.background : NavLightTheme.colors.background}
+            backgroundColor={isDark ? NavDarkTheme.colors.background : NavLightTheme.colors.background}
             style={{ flex: 1 }}
           >
             {children}

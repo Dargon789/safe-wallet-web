@@ -1,10 +1,10 @@
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { ERC20__factory } from '@safe-global/utils/types/contracts'
 import { normalizeTypedData } from '@safe-global/utils/utils/web3'
-import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import { type SafeTransaction } from '@safe-global/types-kit'
 import { id } from 'ethers'
 import { type SecurityResponse, type SecurityModule, SecuritySeverity } from '../types'
-import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
+import { decodeMultiSendData } from '@safe-global/protocol-kit'
 import {
   APPROVAL_SIGNATURE_HASH,
   INCREASE_ALLOWANCE_SIGNATURE_HASH,
@@ -21,8 +21,8 @@ export type ApprovalModuleMessageRequest = {
 }
 
 export type Approval = {
-  spender: any
-  amount: any
+  spender: string
+  amount: bigint
   tokenAddress: string
   method: 'approve' | 'increaseAllowance' | 'Permit2' | 'Permit'
   transactionIndex: number

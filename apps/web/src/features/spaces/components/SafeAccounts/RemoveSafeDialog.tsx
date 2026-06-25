@@ -1,8 +1,6 @@
 import ModalDialog from '@/components/common/ModalDialog'
-import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
-import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import type { MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
+import { useCurrentSpaceId } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { Alert } from '@mui/material'
@@ -42,13 +40,20 @@ const RemoveSafeDialog = ({
 
     try {
       const result = await removeSafeAccounts({
-        spaceId: Number(spaceId),
+        spaceId: spaceId ?? '',
         deleteSpaceSafesDto: { safes: safeAccounts },
       })
 
       if (result.error) {
         throw result.error
       }
+
+      safeAccounts.forEach(({ chainId, address }) => {
+        trackEvent(
+          { ...SPACE_EVENTS.WORKSPACE_SAFE_UNLINKED, label: spaceId },
+          { workspace_id: spaceId, safe_address: address, chain_id: chainId },
+        )
+      })
 
       dispatch(
         showNotification({
@@ -63,7 +68,7 @@ const RemoveSafeDialog = ({
   }
 
   return (
-    <ModalDialog open onClose={handleClose} dialogTitle="Remove Safe Account" hideChainIndicator>
+    <ModalDialog open onClose={handleClose} dialogTitle="Remove Safe account" hideChainIndicator>
       <DialogContent sx={{ p: '24px !important' }}>
         <Typography>
           Are you sure you want to remove <b>{address}</b> from this space?

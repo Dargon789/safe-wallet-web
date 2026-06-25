@@ -10,10 +10,10 @@ import { BRAND_NAME } from '@/config/constants'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { useCompatibilityFallbackHandlerDeployments } from '@/hooks/useCompatibilityFallbackHandlerDeployments'
-import { useIsOfficialFallbackHandler } from '@/hooks/useIsOfficialFallbackHandler'
-import { useIsTWAPFallbackHandler } from '@/features/swap/hooks/useIsTWAPFallbackHandler'
+import { useHasUntrustedFallbackHandler } from '@/hooks/useHasUntrustedFallbackHandler'
 import css from '../TransactionGuards/styles.module.css'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import { useIsTWAPFallbackHandler } from '@/features/swap'
 
 const FALLBACK_HANDLER_VERSION = '>=1.1.1'
 
@@ -44,8 +44,8 @@ export const FallbackHandlerWarning = ({
 export const FallbackHandler = (): ReactElement | null => {
   const { safe } = useSafeInfo()
   const fallbackHandlerDeployments = useCompatibilityFallbackHandlerDeployments()
-  const isOfficial = useIsOfficialFallbackHandler()
   const isTWAPFallbackHandler = useIsTWAPFallbackHandler()
+  const isUntrusted = useHasUntrustedFallbackHandler()
 
   const supportsFallbackHandler = !!safe.version && semverSatisfies(safe.version, FALLBACK_HANDLER_VERSION)
 
@@ -62,7 +62,7 @@ export const FallbackHandler = (): ReactElement | null => {
     />
   ) : isTWAPFallbackHandler ? (
     <>This is CoW&apos;s fallback handler. It is needed for this Safe to be able to use the TWAP feature for Swaps.</>
-  ) : !isOfficial ? (
+  ) : isUntrusted ? (
     <FallbackHandlerWarning
       message={
         <>
@@ -96,7 +96,7 @@ export const FallbackHandler = (): ReactElement | null => {
         <Grid item xs>
           <Box>
             <Typography>
-              The fallback handler adds fallback logic for funtionality that may not be present in the Safe Account
+              The fallback handler adds fallback logic for funtionality that may not be present in the Safe account
               contract. Learn more about the fallback handler{' '}
               <ExternalLink href={HelpCenterArticle.FALLBACK_HANDLER}>here</ExternalLink>
             </Typography>
@@ -104,7 +104,7 @@ export const FallbackHandler = (): ReactElement | null => {
             <Box
               className={classnames(css.guardDisplay, {
                 [css.warning]: !hasFallbackHandler,
-                [css.info]: hasFallbackHandler && !isOfficial,
+                [css.info]: hasFallbackHandler && isUntrusted,
               })}
               sx={{ display: 'block !important' }}
             >

@@ -4,16 +4,34 @@ import { RootState } from '.'
 import merge from 'lodash/merge'
 
 import type { EnvState } from '@safe-global/store/settingsSlice'
+import { resetE2EState } from './resetE2EState'
+
+export enum TOKEN_LISTS {
+  TRUSTED = 'TRUSTED',
+  ALL = 'ALL',
+}
 
 export interface SettingsState {
   onboardingVersionSeen: string
   themePreference: ThemePreference
+  currency: string
+  tokenList: TOKEN_LISTS
+  hideDust: boolean
+  preferFiatInput: boolean
+  dataCollectionConsented: boolean
+  screenProtectionDisabled: boolean
   env: EnvState
 }
 
 const initialState: SettingsState = {
   onboardingVersionSeen: '',
   themePreference: 'auto' as ThemePreference,
+  currency: 'usd',
+  tokenList: TOKEN_LISTS.TRUSTED,
+  hideDust: true,
+  preferFiatInput: true,
+  dataCollectionConsented: false,
+  screenProtectionDisabled: false,
   env: {
     rpc: {},
     tenderly: {
@@ -33,6 +51,24 @@ const settingsSlice = createSlice({
     resetSettings() {
       return initialState
     },
+    setCurrency: (state, { payload }: PayloadAction<SettingsState['currency']>) => {
+      state.currency = payload
+    },
+    setTokenList: (state, { payload }: PayloadAction<SettingsState['tokenList']>) => {
+      state.tokenList = payload
+    },
+    setHideDust: (state, { payload }: PayloadAction<boolean>) => {
+      state.hideDust = payload
+    },
+    setPreferFiatInput: (state, { payload }: PayloadAction<boolean>) => {
+      state.preferFiatInput = payload
+    },
+    setDataCollectionConsented: (state, { payload }: PayloadAction<boolean>) => {
+      state.dataCollectionConsented = payload
+    },
+    setScreenProtectionDisabled: (state, { payload }: PayloadAction<boolean>) => {
+      state.screenProtectionDisabled = payload
+    },
     setRpc: (state, { payload }: PayloadAction<{ chainId: string; rpc: string }>) => {
       const { chainId, rpc } = payload
       if (rpc) {
@@ -46,11 +82,39 @@ const settingsSlice = createSlice({
       state.env.tenderly = merge({}, state.env.tenderly, payload)
     },
   },
+  extraReducers: (builder) => {
+    // E2E reset preserves `onboardingVersionSeen` so setup paths that skip
+    // setupBaseConfig don't accidentally surface the onboarding screen.
+    // Everything else is reset so per-test settings (theme/currency/RPC etc.)
+    // don't leak across the suite.
+    builder.addCase(resetE2EState, (state) => ({
+      ...initialState,
+      onboardingVersionSeen: state.onboardingVersionSeen,
+    }))
+  },
 })
 
 export const selectSettings = (state: RootState, setting: keyof SettingsState) => state.settings[setting]
 
 export const selectSettingsState = (state: RootState) => state.settings
+
+export const selectCurrency = createSelector(
+  selectSettingsState,
+  (settings) => settings.currency || initialState.currency,
+)
+
+export const selectTokenList = createSelector(
+  selectSettingsState,
+  (settings) => settings.tokenList || initialState.tokenList,
+)
+
+export const selectHideDust = createSelector(selectSettingsState, (settings) => settings.hideDust ?? true)
+
+export const selectPreferFiatInput = createSelector(selectSettingsState, (settings) => settings.preferFiatInput ?? true)
+export const selectDataCollectionConsented = createSelector(
+  selectSettingsState,
+  (settings) => settings.dataCollectionConsented ?? false,
+)
 
 export const selectRpc = createSelector(selectSettingsState, (settings) => {
   return settings?.env?.rpc
@@ -58,5 +122,19 @@ export const selectRpc = createSelector(selectSettingsState, (settings) => {
 
 export const selectTenderly = createSelector(selectSettingsState, (settings) => settings?.env?.tenderly)
 
-export const { updateSettings, resetSettings } = settingsSlice.actions
+export const selectScreenProtectionDisabled = createSelector(
+  selectSettingsState,
+  (settings) => settings.screenProtectionDisabled ?? false,
+)
+
+export const {
+  updateSettings,
+  resetSettings,
+  setCurrency,
+  setTokenList,
+  setHideDust,
+  setPreferFiatInput,
+  setDataCollectionConsented,
+  setScreenProtectionDisabled,
+} = settingsSlice.actions
 export default settingsSlice.reducer

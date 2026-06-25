@@ -8,7 +8,8 @@ import { CarouselItem } from './CarouselItem'
 import React from 'react'
 
 const windowHeight = Dimensions.get('window').height
-
+const windowWidth = Dimensions.get('window').width
+const maxGoodWidth = 375
 const styles = StyleSheet.create({
   image: {
     width: '100%',
@@ -35,7 +36,7 @@ export const items: CarouselItem[] = [
     name: 'tracking',
     image: (
       <View height={300} width={'100%'}>
-        <Image style={[styles.image, styles.anywhere]} source={TrackAnywhere} />
+        <Image style={[styles.image, styles.anywhere]} src={TrackAnywhere} />
       </View>
     ),
     title: (
@@ -51,26 +52,23 @@ export const items: CarouselItem[] = [
         </H1>
       </>
     ),
-    description: 'Easily track balances and get real-time updates on account activity - anytime.',
+    description: 'Easily track balances and get real-time updates on account activity — anytime.',
   },
   {
     name: 'signing',
     image: (
       <View height={300} width={'100%'}>
-        <Image style={[styles.image, styles.signing]} source={Signing} />
+        <Image style={[styles.image, styles.signing]} src={Signing} />
       </View>
     ),
     title: (
       <>
-        <H1 style={styles.textContainer} fontWeight={600}>
-          Sign transaction
+        <H1 style={styles.textContainer} fontWeight={600} marginHorizontal={windowWidth <= maxGoodWidth ? -10 : 0}>
+          Sign transactions
         </H1>
 
         <H1 style={styles.textContainer} fontWeight={600}>
-          securely on-
-        </H1>
-        <H1 style={styles.textContainer} fontWeight={600}>
-          the-go..
+          on the go
         </H1>
       </>
     ),
@@ -80,16 +78,16 @@ export const items: CarouselItem[] = [
     name: 'update-to-date',
     image: (
       <View height={300} width={'100%'}>
-        <Image style={[styles.image, styles.signing]} source={PersonalisedUpdates} />
+        <Image style={[styles.image, styles.signing]} src={PersonalisedUpdates} />
       </View>
     ),
     title: (
       <>
         <H1 style={styles.textContainer} fontWeight={600}>
-          ...and get
+          Get
         </H1>
         <H1 style={styles.textContainer} fontWeight={600}>
-          personalised
+          personalized
         </H1>
         <H1 style={styles.textContainer} fontWeight={600}>
           updates

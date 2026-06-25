@@ -2,12 +2,12 @@ import AddressInput from '@/components/common/AddressInput'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import ModalDialog from '@/components/common/ModalDialog'
 import networkSelectorCss from '@/components/common/NetworkSelector/styles.module.css'
-import chains from '@/config/chains'
+import chains from '@safe-global/utils/config/chains'
 import css from './styles.module.css'
 import useChains from '@/hooks/useChains'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Button, DialogActions, DialogContent, MenuItem, Select, Stack, Box } from '@mui/material'
-import { getSafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import React, { useCallback, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -18,9 +18,16 @@ export type AddManuallyFormValues = {
   chainId: string
 }
 
-const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormValues) => void }) => {
+const AddManually = ({
+  handleAddSafe,
+  disabled = false,
+}: {
+  handleAddSafe: (data: AddManuallyFormValues) => void
+  disabled?: boolean
+}) => {
   const [addManuallyOpen, setAddManuallyOpen] = useState(false)
   const { configs } = useChains()
+  const [triggerGetSafe] = useLazySafesGetSafeV1Query()
 
   const formMethods = useForm<AddManuallyFormValues>({
     mode: 'onChange',
@@ -48,9 +55,12 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
 
   const validateSafeAddress = async (address: string) => {
     try {
-      await getSafeInfo(chainId, address)
+      const result = await triggerGetSafe({ chainId, safeAddress: address }).unwrap()
+      if (!result) {
+        return 'Address given is not a valid Safe account address'
+      }
     } catch (error) {
-      return 'Address given is not a valid Safe Account address'
+      return 'Address given is not a valid Safe account address'
     }
   }
 
@@ -78,7 +88,14 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
 
   return (
     <>
-      <Button data-testid="add-manually-button" size="compact" onClick={() => setAddManuallyOpen(true)}>
+      <Button
+        data-testid="add-manually-button"
+        size="medium"
+        fullWidth
+        disabled={disabled}
+        onClick={() => setAddManuallyOpen(true)}
+        sx={{ borderRadius: 'var(--radius-md)' }}
+      >
         + Add manually
       </Button>
       <ModalDialog
@@ -99,7 +116,7 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
               <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
                 <AddressInput
                   data-testid="add-address-input"
-                  label="Safe Account"
+                  label="Safe account"
                   chain={selectedChain}
                   validate={validateSafeAddress}
                   name="address"

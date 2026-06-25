@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from 'react'
-import { useColorScheme, Platform } from 'react-native'
+import { Platform } from 'react-native'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 import { OptIn } from '@/src/components/OptIn'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useToastController } from '@tamagui/toast'
@@ -7,39 +8,41 @@ import { useBiometrics } from '@/src/hooks/useBiometrics'
 import Logger from '@/src/utils/logger'
 import { View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
 function BiometricsOptIn() {
-  const { toggleBiometrics, getBiometricsUIInfo, isBiometricsEnabled, isLoading } = useBiometrics()
+  const { toggleBiometrics, promptBiometricsSetup, getBiometricsUIInfo, isBiometricsEnabled, isLoading } =
+    useBiometrics()
   const { bottom } = useSafeAreaInsets()
   const local = useLocalSearchParams<{
-    safeAddress: string
-    chainId: string
-    import_safe: string
     txId: string
     signerAddress: string
-    caller: '/import-signers' | '/sign-transaction'
+    caller: '/import-signers' | '/review-and-confirm' | '/review-and-execute'
   }>()
 
   const redirectTo = useMemo(() => {
     if (local.caller === '/import-signers') {
       return {
-        pathname: '/import-signers/private-key' as const,
+        pathname: '/import-signers/signer' as const,
+      }
+    }
+    if (local.caller === '/review-and-execute') {
+      return {
+        pathname: '/review-and-execute' as const,
         params: {
-          safeAddress: local.safeAddress,
-          chainId: local.chainId,
-          import_safe: local.import_safe,
+          txId: local.txId,
         },
       }
     }
     return {
-      pathname: '/sign-transaction' as const,
+      pathname: '/review-and-confirm' as const,
       params: {
         txId: local.txId,
         signerAddress: local.signerAddress,
       },
     }
-  }, [local.caller])
+  }, [local.caller, local.txId, local.signerAddress])
 
-  const colorScheme = useColorScheme()
+  const { colorScheme, isDark } = useTheme()
   const toast = useToastController()
 
   useEffect(() => {
@@ -55,7 +58,16 @@ function BiometricsOptIn() {
 
   const handleAccept = async () => {
     try {
-      await toggleBiometrics(true)
+      const result = await toggleBiometrics(true)
+      if (result.status === 'os-not-configured') {
+        promptBiometricsSetup()
+      } else if (result.status === 'error') {
+        Logger.error('Error enabling biometrics:', result.error)
+        toast.show('Error enabling biometrics', {
+          native: false,
+          duration: 2000,
+        })
+      }
     } catch (error) {
       Logger.error('Error enabling biometrics', error)
       toast.show('Error enabling biometrics', {
@@ -75,7 +87,7 @@ function BiometricsOptIn() {
       ? require('@/assets/images/biometrics-light.png')
       : require('@/assets/images/biometrics-light-android.png')
 
-  const image = colorScheme === 'dark' ? darkImage : lightImage
+  const image = isDark ? darkImage : lightImage
 
   const infoMessage = 'Biometrics is required to import a signer.'
 
@@ -84,7 +96,7 @@ function BiometricsOptIn() {
       <OptIn
         testID="biometrics-opt-in-screen"
         title="Simplify access, enhance security"
-        description="Enable biometrics to unlock the app quickly and confirm transactions securely using Face ID."
+        description="Enable biometrics to unlock the app quickly and confirm transactions securely using your device's biometric authentication."
         image={image}
         isVisible
         isLoading={isLoading}

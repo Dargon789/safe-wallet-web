@@ -1,14 +1,16 @@
 import type { EthersError } from '@/utils/ethers-utils'
 import { getWalletConnectLabel, type ConnectedWallet } from '@/hooks/wallets/useOnboard'
-import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { getWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { WALLET_KEYS } from '@/hooks/wallets/consts'
-import { EMPTY_DATA } from '@safe-global/protocol-kit/dist/src/utils/constants'
+// Inlined to avoid importing from protocol-kit which has heavy dependencies
+const EMPTY_DATA = '0x'
 import memoize from 'lodash/memoize'
-import { PRIVATE_KEY_MODULE_LABEL } from '@/services/private-key-module'
+import { PRIVATE_KEY_MODULE_LABEL } from '@/services/private-key-module/constants'
 import { type JsonRpcProvider } from 'ethers'
 
 const WALLETCONNECT = 'WalletConnect'
 const WC_LEDGER = 'Ledger Wallet'
+export const EIP_7702_DELEGATED_ACCOUNT_PREFIX = '0xef0100'
 
 const isWCRejection = (err: Error): boolean => {
   return /rejected/.test(err?.message)
@@ -48,21 +50,31 @@ export const isPKWallet = (wallet: ConnectedWallet): boolean => {
   return wallet.label.toUpperCase() === WALLET_KEYS.PK
 }
 
-export const isSmartContract = async (address: string, provider?: JsonRpcProvider): Promise<boolean> => {
+const getAccountCode = async (address: string, provider?: JsonRpcProvider): Promise<string> => {
   const web3 = provider ?? getWeb3ReadOnly()
 
   if (!web3) {
     throw new Error('Provider not found')
   }
 
-  const code = await web3.getCode(address)
+  return await web3.getCode(address)
+}
 
+export const isSmartContract = async (address: string, provider?: JsonRpcProvider): Promise<boolean> => {
+  const code = await getAccountCode(address, provider)
   return code !== EMPTY_DATA
+}
+
+export const isEIP7702DelegatedAccount = async (address: string, provider?: JsonRpcProvider): Promise<boolean> => {
+  const code = await getAccountCode(address, provider)
+  return code.startsWith(EIP_7702_DELEGATED_ACCOUNT_PREFIX)
 }
 
 export const isSmartContractWallet = memoize(
   async (_chainId: string, address: string): Promise<boolean> => {
-    return isSmartContract(address)
+    const isContract = await isSmartContract(address)
+    const isEIP7702 = await isEIP7702DelegatedAccount(address)
+    return isContract && !isEIP7702
   },
   (chainId, address) => chainId + address,
 )
@@ -71,7 +83,7 @@ export const isSmartContractWallet = memoize(
 export const isWalletUnlocked = async (walletName: string): Promise<boolean | undefined> => {
   if ([PRIVATE_KEY_MODULE_LABEL, WALLETCONNECT].includes(walletName)) return true
 
-  const METAMASK_LIKE = ['MetaMask', 'Rabby Wallet', 'Zerion']
+  const METAMASK_LIKE = ['MetaMask', 'Rabby Wallet', 'Zerion', 'Ambire']
 
   // Only MetaMask exposes a method to check if the wallet is unlocked
   if (METAMASK_LIKE.includes(walletName)) {

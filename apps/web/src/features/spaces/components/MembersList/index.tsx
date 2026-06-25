@@ -1,15 +1,22 @@
-import { Box, Chip, IconButton, Stack, SvgIcon, Tooltip } from '@mui/material'
-import { type Member } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { Box, Chip, IconButton, Stack, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import EditIcon from '@/public/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import MemberName from './MemberName'
 import RemoveMemberDialog from './RemoveMemberDialog'
+import RenewInviteButton from './RenewInviteButton'
 import { useState } from 'react'
-import { MemberRole, useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
-import EditMemberDialog from '@/features/spaces/components/MembersList/EditMemberDialog'
-import { MemberStatus } from '../../hooks/useSpaceMembers'
+import {
+  useIsAdmin,
+  isAdmin as checkIsAdmin,
+  isActiveAdmin,
+  isInviteExpired,
+  MemberStatus,
+  useAdminCount,
+} from '@/features/spaces'
+import EditMemberDialog from './EditMemberDialog'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 
@@ -17,7 +24,12 @@ const headCells = [
   {
     id: 'name',
     label: 'Name',
-    width: '70%',
+    width: '40%',
+  },
+  {
+    id: 'email',
+    label: 'Email',
+    width: '30%',
   },
   {
     id: 'role',
@@ -32,7 +44,7 @@ const headCells = [
   },
 ]
 
-const EditButton = ({ member, disabled }: { member: Member; disabled: boolean }) => {
+const EditButton = ({ member, disabled }: { member: MemberDto; disabled: boolean }) => {
   const [open, setOpen] = useState(false)
 
   return (
@@ -54,7 +66,7 @@ export const RemoveMemberButton = ({
   disabled,
   isInvite,
 }: {
-  member: Member
+  member: MemberDto
   disabled: boolean
   isInvite: boolean
 }) => {
@@ -89,15 +101,21 @@ export const RemoveMemberButton = ({
   )
 }
 
-const MembersList = ({ members }: { members: Member[] }) => {
+const MembersList = ({ members }: { members: MemberDto[] }) => {
   const isAdmin = useIsAdmin()
-  const adminCount = members.filter((member) => member.role === MemberRole.ADMIN).length
+  const adminCount = useAdminCount(members)
 
   const rows = members.map((member) => {
-    const isLastAdmin = adminCount === 1 && member.role === MemberRole.ADMIN
-    const isInvite = member.status === MemberStatus.INVITED || member.status === MemberStatus.DECLINED
+    const isLastAdmin = adminCount === 1 && isActiveAdmin(member)
+    const isPendingInvite = member.status === MemberStatus.INVITED
     const isDeclined = member.status === MemberStatus.DECLINED
+    const isInvite = isPendingInvite || isDeclined
+    const isExpired = isInviteExpired(member)
     const isDisabled = isAdmin && isLastAdmin && !isInvite
+    const memberEmail = member.user.email
+    // Contract: Email invites can always be renewed (resending the email);
+    // wallet invites are only renewed once they have expired.
+    const canRenew = isPendingInvite && (Boolean(memberEmail) || isExpired)
 
     return {
       cells: {
@@ -113,15 +131,32 @@ const MembersList = ({ members }: { members: Member[] }) => {
                   sx={{ backgroundColor: 'error.light', color: 'static.main', borderRadius: 0.5 }}
                 />
               )}
+              {isExpired && (
+                <Chip
+                  label="Expired"
+                  size="small"
+                  sx={{ backgroundColor: 'warning.main', color: 'static.main', borderRadius: 0.5 }}
+                />
+              )}
             </Stack>
           ),
+        },
+        email: {
+          rawValue: memberEmail,
+          content: memberEmail ? (
+            <Tooltip title={memberEmail} placement="top">
+              <Typography variant="body2" noWrap sx={{ display: 'inline-block', maxWidth: '100%' }}>
+                {memberEmail}
+              </Typography>
+            </Tooltip>
+          ) : null,
         },
         role: {
           rawValue: member.role,
           content: (
             <Chip
               size="small"
-              label={member.role === MemberRole.ADMIN ? 'Admin' : 'Member'}
+              label={checkIsAdmin(member) ? 'Admin' : 'Member'}
               sx={{ backgroundColor: 'background.lightgrey', borderRadius: 0.5 }}
             />
           ),
@@ -132,6 +167,7 @@ const MembersList = ({ members }: { members: Member[] }) => {
           content: isAdmin ? (
             <div className={tableCss.actions}>
               {!isInvite && <EditButton member={member} disabled={isDisabled} />}
+              {canRenew && <RenewInviteButton member={member} />}
               <RemoveMemberButton member={member} disabled={isDisabled} isInvite={isInvite} />
             </div>
           ) : null,
@@ -144,7 +180,7 @@ const MembersList = ({ members }: { members: Member[] }) => {
     return null
   }
 
-  return <EnhancedTable rows={rows} headCells={headCells} />
+  return <EnhancedTable rows={rows} headCells={headCells} fixedLayout />
 }
 
 export default MembersList

@@ -1,0 +1,38 @@
+import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
+import { useSafeItemData, useMultiAccountItemData } from '@/features/myAccounts'
+
+const useSafeCardData = (safe: SafeItem | MultiChainSafeItem) => {
+  const isMultiChain = isMultiChainSafeItem(safe)
+  const singleData = useSafeItemData(isMultiChain ? (safe as MultiChainSafeItem).safes[0] : (safe as SafeItem))
+  const multiData = useMultiAccountItemData(
+    isMultiChain ? (safe as MultiChainSafeItem) : ({ address: '', safes: [] } as unknown as MultiChainSafeItem),
+  )
+
+  if (isMultiChain) {
+    const { name, totalFiatValue, sharedSetup, deployedChainIds, isFullyUndeployed, isActivating } = multiData
+    return {
+      name,
+      fiatValue: totalFiatValue?.toString(),
+      threshold: sharedSetup?.threshold ?? 0,
+      ownersCount: sharedSetup?.owners.length ?? 0,
+      chainIds: deployedChainIds,
+      elementRef: undefined,
+      isUndeployed: isFullyUndeployed,
+      isActivating,
+    }
+  }
+
+  const { name, threshold, owners, safeOverview, elementRef, undeployedSafe, isActivating } = singleData
+  return {
+    name,
+    fiatValue: safeOverview?.fiatTotal,
+    threshold,
+    ownersCount: owners.length,
+    chainIds: [(safe as SafeItem).chainId],
+    elementRef,
+    isUndeployed: !!undeployedSafe,
+    isActivating,
+  }
+}
+
+export default useSafeCardData

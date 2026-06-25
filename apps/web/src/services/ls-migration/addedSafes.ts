@@ -1,9 +1,9 @@
+import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type AddedSafesState, type AddedSafesOnChain } from '@/store/addedSafesSlice'
 import type { LOCAL_STORAGE_DATA } from './common'
 import { parseLsValue } from './common'
 import { isChecksummedAddress } from '@safe-global/utils/utils/addresses'
 import isObject from 'lodash/isObject'
-import type { AddressEx } from '@safe-global/safe-gateway-typescript-sdk'
 
 const IMMORTAL_PREFIX = '_immortal|v2_'
 
@@ -41,14 +41,14 @@ export const migrateAddedSafesOwners = (
       }
 
       if (isObject(value) && typeof value.address === 'string' && isChecksummedAddress(value.address)) {
-        const owner: AddressEx = {
+        const owner: AddressInfo = {
           value: value.address,
           ...(typeof value.name === 'string' && { name: value.name }),
         }
         return owner
       }
     })
-    .filter((owner): owner is AddressEx => !!owner)
+    .filter((owner): owner is AddressInfo => !!owner)
 
   return migratedOwners.length > 0 ? migratedOwners : undefined
 }
@@ -61,7 +61,7 @@ export const migrateAddedSafes = (lsData: LOCAL_STORAGE_DATA): AddedSafesState |
     const legacyAddedSafes = parseLsValue<OldAddedSafes>(lsData[IMMORTAL_PREFIX + chainPrefix + OLD_LS_KEY])
 
     if (legacyAddedSafes && Object.keys(legacyAddedSafes).length > 0) {
-      console.log('Migrating added Safe Accounts on chain', chainId)
+      console.log('Migrating added Safe accounts on chain', chainId)
 
       const safesPerChain = Object.values(legacyAddedSafes).reduce<AddedSafesOnChain>((acc, oldItem) => {
         const migratedOwners = migrateAddedSafesOwners(oldItem.owners)

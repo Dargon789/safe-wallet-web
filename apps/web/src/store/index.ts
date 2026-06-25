@@ -5,12 +5,11 @@ import {
   type ThunkAction,
   type Action,
   type Middleware,
-  type EnhancedStore,
-  type ThunkDispatch,
 } from '@reduxjs/toolkit'
 import { useDispatch, useSelector, type TypedUseSelectorHook } from 'react-redux'
+import { useEffect } from 'react'
 import merge from 'lodash/merge'
-import { IS_PRODUCTION } from '@/config/constants'
+import { IS_PRODUCTION, CONFIG_SERVICE_KEY } from '@/config/constants'
 import { getPreloadedState, persistState } from './persistStore'
 import { broadcastState, listenToBroadcast } from './broadcast'
 import {
@@ -22,20 +21,22 @@ import {
   txHistoryListener,
   txQueueListener,
   authListener,
+  counterfactualSyncListener,
 } from './slices'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
 import { ofacApi } from '@/store/api/ofac'
 import { safePassApi } from './api/safePass'
+import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { version as termsVersion } from '@/markdown/terms/version'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { GATEWAY_URL } from '@/config/gateway'
 import { setupListeners } from '@reduxjs/toolkit/query'
+import { migrateBatchTxs } from '@/services/ls-migration/batch'
+import { apiSliceWithChainsConfig } from '@safe-global/store/gateway'
 
 const rootReducer = combineReducers({
-  [slices.chainsSlice.name]: slices.chainsSlice.reducer,
   [slices.safeInfoSlice.name]: slices.safeInfoSlice.reducer,
-  [slices.balancesSlice.name]: slices.balancesSlice.reducer,
   [slices.sessionSlice.name]: slices.sessionSlice.reducer,
   [slices.txHistorySlice.name]: slices.txHistorySlice.reducer,
   [slices.txQueueSlice.name]: slices.txQueueSlice.reducer,
@@ -49,15 +50,22 @@ const rootReducer = combineReducers({
   [slices.popupSlice.name]: slices.popupSlice.reducer,
   [slices.spendingLimitSlice.name]: slices.spendingLimitSlice.reducer,
   [slices.safeAppsSlice.name]: slices.safeAppsSlice.reducer,
-  [slices.safeMessagesSlice.name]: slices.safeMessagesSlice.reducer,
   [slices.pendingSafeMessagesSlice.name]: slices.pendingSafeMessagesSlice.reducer,
   [slices.batchSlice.name]: slices.batchSlice.reducer,
   [slices.undeployedSafesSlice.name]: slices.undeployedSafesSlice.reducer,
+  [slices.pendingCfDeletesSlice.name]: slices.pendingCfDeletesSlice.reducer,
   [slices.swapParamsSlice.name]: slices.swapParamsSlice.reducer,
   [slices.visitedSafesSlice.name]: slices.visitedSafesSlice.reducer,
   [slices.orderByPreferenceSlice.name]: slices.orderByPreferenceSlice.reducer,
+  [slices.hnStateSlice.name]: slices.hnStateSlice.reducer,
+  [slices.hnQueueAssessmentsSlice.name]: slices.hnQueueAssessmentsSlice.reducer,
+  [slices.calendlySlice.name]: slices.calendlySlice.reducer,
+  [slices.globalSearchSlice.name]: slices.globalSearchSlice.reducer,
+  [slices.safeActionsModalSlice.name]: slices.safeActionsModalSlice.reducer,
+  [slices.gtfPaymentSourcePreferenceSlice.name]: slices.gtfPaymentSourcePreferenceSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
+  [hypernativeApi.reducerPath]: hypernativeApi.reducer,
   [slices.gatewayApi.reducerPath]: slices.gatewayApi.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
   [slices.authSlice.reducerPath]: slices.authSlice.reducer,
@@ -74,11 +82,14 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
   slices.pendingSafeMessagesSlice.name,
   slices.batchSlice.name,
   slices.undeployedSafesSlice.name,
+  slices.pendingCfDeletesSlice.name,
   slices.swapParamsSlice.name,
   slices.swapOrderSlice.name,
   slices.visitedSafesSlice.name,
   slices.orderByPreferenceSlice.name,
   slices.authSlice.name,
+  slices.hnStateSlice.name,
+  slices.gtfPaymentSourcePreferenceSlice.name,
 ]
 
 export const getPersistedState = () => {
@@ -93,6 +104,7 @@ const middleware: Middleware<{}, RootState>[] = [
   listenerMiddlewareInstance.middleware,
   ofacApi.middleware,
   safePassApi.middleware,
+  hypernativeApi.middleware,
   slices.gatewayApi.middleware,
 ]
 
@@ -103,6 +115,7 @@ const listeners = [
   swapOrderListener,
   swapOrderStatusListener,
   authListener,
+  counterfactualSyncListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {
@@ -125,6 +138,31 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
       }
     }
 
+    // Migrate batchSlice txDetails to txData
+    if (nextState[slices.batchSlice.name]) {
+      nextState[slices.batchSlice.name] = migrateBatchTxs(nextState[slices.batchSlice.name])
+    }
+
+    // One-time reset to the new default order (WA-2567 made "Name" / A→Z the default).
+    // Guarded on the slice being present so it only touches a real store, not synthetic state.
+    const orderByState = nextState[slices.orderByPreferenceSlice.name]
+    if (orderByState && orderByState.resetVersion !== slices.ORDER_BY_RESET_VERSION) {
+      nextState[slices.orderByPreferenceSlice.name] = {
+        orderBy: slices.OrderByOption.NAME,
+        resetVersion: slices.ORDER_BY_RESET_VERSION,
+      }
+    }
+
+    // Mark the store as hydrated so guards wait for persisted auth state.
+    // Reset cfSafeSynced so consumers wait for a fresh backend sync each page load.
+    // Reset isOidcLoginPending to avoid stale state from a previous session.
+    nextState.auth = {
+      ...nextState.auth,
+      isStoreHydrated: true,
+      cfSafeSynced: false,
+      isOidcLoginPending: false,
+    }
+
     return nextState
   }
   return rootReducer(state, action) as RootState
@@ -133,10 +171,7 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
 type MakeStoreOptions = {
   skipBroadcast?: boolean
 }
-export const makeStore = (
-  initialState?: Partial<RootState>,
-  options?: MakeStoreOptions,
-): EnhancedStore<RootState, Action> => {
+export const makeStore = (initialState?: Partial<RootState>, options?: MakeStoreOptions) => {
   setBaseUrl(GATEWAY_URL)
 
   const store = configureStore({
@@ -159,10 +194,40 @@ export const makeStore = (
 }
 
 export type RootState = ReturnType<typeof rootReducer>
-export type AppDispatch = ThunkDispatch<RootState, unknown, Action> & EnhancedStore<RootState, Action>['dispatch']
+export type AppStore = ReturnType<typeof makeStore>
+export type AppDispatch = AppStore['dispatch']
 export type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, Action>
 
 export const useAppDispatch = () => useDispatch<AppDispatch>()
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector
 
 export const useHydrateStore = hydrate.useHydrateStore
+
+// Store instance for imperative usage outside of React components
+// This is initialized in _app.tsx and should be used for non-component contexts
+let _store: ReturnType<typeof makeStore> | null = null
+
+export const setStoreInstance = (store: ReturnType<typeof makeStore>) => {
+  _store = store
+}
+
+export const getStoreInstance = () => {
+  if (!_store) {
+    throw new Error('Store not initialized. Ensure _app.tsx has called setStoreInstance.')
+  }
+  return _store
+}
+
+/**
+ * Kick off the runtime chains fetch at app root so chain config is available
+ * even on routes that have no other useChains() consumer.
+ */
+export const useInitChains = () => {
+  const dispatch = useAppDispatch()
+
+  useEffect(() => {
+    const result = dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
+
+    return result.unsubscribe
+  }, [dispatch])
+}

@@ -1,6 +1,5 @@
-import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import type { MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
-import RemoveSafeDialog from '@/features/spaces/components/SafeAccounts/RemoveSafeDialog'
+import { type SafeItem, type MultiChainSafeItem, isMultiChainSafeItem } from '@/hooks/safes'
+import RemoveSafeDialog from './RemoveSafeDialog'
 import { type MouseEvent, useState } from 'react'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import { SvgIcon } from '@mui/material'
@@ -14,10 +13,9 @@ import EditIcon from '@/public/images/common/edit.svg'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import { useAppSelector } from '@/store'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
-import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
-import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { useIsAdmin } from '@/features/spaces'
 
 enum ModalType {
   RENAME = 'rename',
@@ -34,9 +32,9 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
   const allAddressBooks = useAppSelector(selectAllAddressBooks)
   const chainIds = isMultiChainSafeItem(safeItem) ? safeItem.safes.map((safe) => safe.chainId) : [safeItem.chainId]
   const name = isMultiChainSafeItem(safeItem) ? safeItem.name : allAddressBooks[safeItem.chainId]?.[safeItem.address]
-  const hasName = !!name
 
   const handleOpenContextMenu = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
+    e.preventDefault()
     e.stopPropagation()
     setAnchorEl(e.currentTarget)
   }
@@ -59,15 +57,26 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
 
   return (
     <>
-      <IconButton edge="end" size="small" onClick={handleOpenContextMenu}>
-        <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
-      </IconButton>
-      <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>
+      <span
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+        onMouseDown={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+      >
+        <IconButton edge="end" size="small" onClick={handleOpenContextMenu}>
+          <MoreVertIcon />
+        </IconButton>
+      </span>
+      <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu} autoFocus={false}>
         <MenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)}>
           <ListItemIcon>
             <SvgIcon component={EditIcon} inheritViewBox fontSize="small" color="success" />
           </ListItemIcon>
-          <ListItemText>{hasName ? 'Rename' : 'Give name'}</ListItemText>
+          <ListItemText>Rename</ListItemText>
         </MenuItem>
 
         {isAdmin && (

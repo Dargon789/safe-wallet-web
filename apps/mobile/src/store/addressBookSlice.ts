@@ -5,6 +5,7 @@ import { RootState } from '.'
 
 export type Contact = Omit<AddressInfo, 'name'> & {
   name: string
+  chainIds: string[]
 }
 
 interface AddressBookState {
@@ -28,8 +29,8 @@ export const addressBookSlice = createSlice({
 
     removeContact: (state, action: PayloadAction<string>) => {
       const addressValue = action.payload
-      const { [addressValue]: _, ...remainingContacts } = state.contacts
-      state.contacts = remainingContacts
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+      delete state.contacts[addressValue]
 
       if (state.selectedContact?.value === addressValue) {
         state.selectedContact = null
@@ -60,6 +61,22 @@ export const addressBookSlice = createSlice({
       state.contacts[contact.value] = contact
     },
 
+    mergeContactChainIds: (state, action: PayloadAction<{ value: string; chainIds: string[] }>) => {
+      const { value, chainIds } = action.payload
+      const existing = state.contacts[value]
+      if (!existing) {
+        return
+      }
+
+      // If currently "all networks", don't restrict
+      if (existing.chainIds.length === 0) {
+        return
+      }
+
+      const merged = [...new Set([...existing.chainIds, ...chainIds])]
+      existing.chainIds = merged
+    },
+
     addContacts: (state, action: PayloadAction<Contact[]>) => {
       action.payload.forEach((contact) => {
         state.contacts[contact.value] = contact
@@ -68,7 +85,15 @@ export const addressBookSlice = createSlice({
   },
 })
 
-export const { addContact, removeContact, updateContact, addContacts, upsertContact } = addressBookSlice.actions
+export const {
+  addContact,
+  removeContact,
+  selectContact,
+  updateContact,
+  addContacts,
+  upsertContact,
+  mergeContactChainIds,
+} = addressBookSlice.actions
 
 export const selectAddressBookState = (state: RootState) => state.addressBook
 
@@ -81,5 +106,7 @@ export const selectAllContacts = createSelector(selectAddressBookState, (address
 
 export const selectContactByAddress = (address: string) =>
   createSelector(selectAddressBookState, (addressBook): Contact | null => addressBook.contacts[address] || null)
+
+export const selectTotalContactCount = (state: RootState) => Object.keys(state.addressBook.contacts).length
 
 export default addressBookSlice.reducer

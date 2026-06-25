@@ -1,6 +1,5 @@
-import { generatePreValidatedSignature } from '@safe-global/protocol-kit/dist/src/utils/signatures'
-import EthSafeTransaction from '@safe-global/protocol-kit/dist/src/utils/transactions/SafeTransaction'
-import { encodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils/transactions/utils'
+import { generatePreValidatedSignature } from '@safe-global/protocol-kit'
+import { EthSafeTransaction, encodeMultiSendData } from '@safe-global/protocol-kit'
 
 import {
   getReadOnlyCurrentGnosisSafeContract,
@@ -64,8 +63,12 @@ export const _getSingleTransactionPayload = async (
 export const _getMultiSendCallOnlyPayload = async (
   params: MultiSendTransactionSimulationParams,
 ): Promise<Pick<TenderlySimulatePayload, 'to' | 'input'>> => {
-  const data = encodeMultiSendData(params.transactions)
-  const readOnlyMultiSendContract = await getReadOnlyMultiSendCallOnlyContract(params.safe.version)
+  const data = encodeMultiSendData(params.transactions) as `0x${string}`
+  const readOnlyMultiSendContract = await getReadOnlyMultiSendCallOnlyContract(
+    params.safe.version,
+    params.safe.chainId,
+    params.safe.implementation?.value,
+  )
 
   return {
     to: await readOnlyMultiSendContract.getAddress(),
@@ -73,7 +76,7 @@ export const _getMultiSendCallOnlyPayload = async (
   }
 }
 
-const getLatestBlockGasLimit = async (): Promise<number> => {
+export const getLatestBlockGasLimit = async (): Promise<number> => {
   const web3ReadOnly = getWeb3ReadOnly()
   const latestBlock = await web3ReadOnly?.getBlock('latest')
   if (!latestBlock) {

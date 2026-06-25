@@ -1,10 +1,7 @@
 import React from 'react'
 import { Container } from '@/src/components/Container'
-import { View, YStack, Text, Button, H3 } from 'tamagui'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { View, YStack, Text, H3 } from 'tamagui'
 import { Logo } from '@/src/components/Logo'
-import { EthAddress } from '@/src/components/EthAddress'
-import { Identicon } from '@/src/components/Identicon'
 import { TransactionHeader } from '../../TransactionHeader'
 import {
   MultisigExecutionDetails,
@@ -17,21 +14,22 @@ import { RootState } from '@/src/store'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { Address } from '@/src/types/address'
 import { TokenAmount } from '@/src/components/TokenAmount'
-import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
+import { ParametersButton } from '@/src/components/ParametersButton'
+import { HashDisplay } from '@/src/components/HashDisplay'
+
 interface TokenTransferProps {
+  txId: string
   txInfo: TransferTransactionInfo
   executionInfo: MultisigExecutionDetails
   executedAt: number
 }
 
-export function TokenTransfer({ txInfo, executionInfo, executedAt }: TokenTransferProps) {
+export function TokenTransfer({ txId, txInfo, executionInfo, executedAt }: TokenTransferProps) {
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const { value, tokenSymbol, logoUri, decimals } = useTokenDetails(txInfo)
 
   const recipientAddress = txInfo.recipient.value as Address
-
-  const viewOnExplorer = useOpenExplorer(recipientAddress)
 
   return (
     <>
@@ -60,24 +58,8 @@ export function TokenTransfer({ txInfo, executionInfo, executedAt }: TokenTransf
             <View alignItems="center" flexDirection="row" justifyContent="space-between">
               <Text color="$textSecondaryLight">To</Text>
 
-              <View flexDirection="row" alignItems="center">
-                <View flexDirection="row" alignItems="center" gap="$2">
-                  <Identicon address={recipientAddress} size={24} />
-                  <EthAddress
-                    address={recipientAddress}
-                    copy
-                    copyProps={{ color: '$textSecondaryLight', size: 18 }}
-                    textProps={{ fontSize: '$4' }}
-                  />
-                </View>
-                <Button
-                  onPress={viewOnExplorer}
-                  height={18}
-                  style={{ marginLeft: -12 }}
-                  pressStyle={{ backgroundColor: 'transparent' }}
-                >
-                  <SafeFontIcon name="external-link" color="$textSecondaryLight" size={16} />
-                </Button>
+              <View flexDirection="row" alignItems="center" gap="$2">
+                <HashDisplay value={recipientAddress} />
               </View>
             </View>
 
@@ -89,6 +71,8 @@ export function TokenTransfer({ txInfo, executionInfo, executedAt }: TokenTransf
                 <Text fontSize="$4">{activeChain?.chainName}</Text>
               </View>
             </View>
+
+            <ParametersButton txId={txId} />
           </Container>
         </YStack>
       </View>

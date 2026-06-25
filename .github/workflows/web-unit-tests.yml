@@ -3,16 +3,20 @@ on:
   pull_request:
     paths:
       - apps/web/**
+      - packages/**
 
   push:
     branches:
       - main
+      - dev
     paths:
       - apps/web/**
       - packages/**
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions: {}
 
 jobs:
   test:
@@ -23,12 +27,13 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.0
 
       - uses: ./.github/actions/yarn
 
       - name: Annotations and coverage report
-        uses: ArtiomTr/jest-coverage-report-action@v2.3.1
+        if: github.event_name == 'pull_request'
+        uses: ArtiomTr/jest-coverage-report-action@262a7bb0b20c4d1d6b6b026af0f008f78da72788 # v2.3.1
         with:
           skip-step: install
           annotations: failed-tests
@@ -38,3 +43,40 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         env:
           NEXT_PUBLIC_IS_OFFICIAL_HOST: true
+
+      - name: Run tests (push only)
+        if: github.event_name == 'push'
+        run: yarn test:ci
+        working-directory: apps/web
+        env:
+          NEXT_PUBLIC_IS_OFFICIAL_HOST: true
+
+      - name: Upload coverage to Datadog
+        if: success() && github.event_name == 'push'
+        uses: ./.github/actions/upload-coverage
+        with:
+          api-key: ${{ secrets.DATADOG_API_KEY }}
+          site: datadoghq.eu
+          coverage-path: apps/web/coverage
+          base-path: apps/web
+          flag: workspace:web
+
+      - name: Notify Slack on failure
+        if: failure() && github.event_name == 'push'
+        uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_DEV_ALERT }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "❌ Web unit tests failed on ${{ github.ref_name }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*❌ Web Unit Tests Failed*\n• Branch: `${{ github.ref_name }}`\n• Commit: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n• Author: ${{ github.actor }}\n• <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+                  }
+                }
+              ]
+            }

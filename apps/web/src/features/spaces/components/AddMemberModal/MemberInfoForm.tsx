@@ -1,8 +1,8 @@
 import NameInput from '@/components/common/NameInput'
 import { Controller, useFormContext } from 'react-hook-form'
 import { MenuItem, Select, Stack } from '@mui/material'
-import { RoleMenuItem } from '@/features/spaces/components/AddMemberModal/index'
-import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
+import { RoleMenuItem } from './index'
+import { MemberRole } from '@/features/spaces'
 import css from './styles.module.css'
 
 const MemberInfoForm = ({ isEdit = false }: { isEdit?: boolean }) => {
@@ -22,7 +22,7 @@ const MemberInfoForm = ({ isEdit = false }: { isEdit?: boolean }) => {
             value={value}
             onChange={onChange}
             required
-            sx={{ minWidth: '150px', py: 0.5 }}
+            className={css.roleSelect}
             renderValue={(role) => <RoleMenuItem role={role as MemberRole} />}
           >
             <MenuItem value={MemberRole.ADMIN} className={css.menuItem}>

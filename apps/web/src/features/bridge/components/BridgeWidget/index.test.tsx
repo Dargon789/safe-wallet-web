@@ -1,4 +1,4 @@
-import { _getAppData } from '@/features/bridge/components/BridgeWidget'
+import { _getAppData } from './'
 import { chainBuilder } from '@/tests/builders/chains'
 
 describe('BridgeWidget', () => {
@@ -14,6 +14,7 @@ describe('BridgeWidget', () => {
         chainIds: [chain.chainId],
         description: '',
         developerWebsite: '',
+        featured: false,
         features: [],
         iconUrl: '/images/common/safe-bridge.svg',
         id: expect.any(Number),
@@ -36,6 +37,7 @@ describe('BridgeWidget', () => {
         chainIds: [chain.chainId],
         description: '',
         developerWebsite: '',
+        featured: false,
         features: [],
         iconUrl: '/images/common/safe-bridge-dark.svg',
         id: expect.any(Number),

@@ -1,7 +1,7 @@
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import { useMemo, type ReactElement } from 'react'
-import useIsOnlySpendingLimitBeneficiary from '@/hooks/useIsOnlySpendingLimitBeneficiary'
+import { useIsOnlySpendingLimitBeneficiary } from '@/features/spending-limits'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useWallet from '@/hooks/wallets/useWallet'
 import useConnectWallet from '../ConnectWallet/useConnectWallet'
@@ -23,7 +23,7 @@ type CheckWalletProps = {
 enum Message {
   WalletNotConnected = 'Please connect your wallet',
   SDKNotInitialized = 'SDK is not initialized yet',
-  NotSafeOwner = 'Your connected wallet is not a signer of this Safe Account',
+  NotSafeOwner = 'Your connected wallet is not a signer of this Safe account',
   SafeNotActivated = 'You need to activate the Safe before transacting',
 }
 
@@ -72,7 +72,7 @@ const CheckWallet = ({
       return Message.NotSafeOwner
     }
 
-    if (!allowProposer && isProposer && !isSafeOwner) {
+    if (!allowProposer && isProposer && !isSafeOwner && !isNestedSafeOwner) {
       return Message.NotSafeOwner
     }
   }, [

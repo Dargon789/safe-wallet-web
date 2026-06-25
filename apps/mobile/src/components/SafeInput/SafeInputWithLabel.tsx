@@ -1,5 +1,7 @@
-import { Input, InputProps, styled, View, Text, Theme } from 'tamagui'
+import { Input, styled, View, Text, Theme } from 'tamagui'
+import type { ColorTokens, GetProps } from 'tamagui'
 import React from 'react'
+import { Platform } from 'react-native'
 
 interface Props {
   label: string
@@ -9,6 +11,7 @@ interface Props {
   left?: React.ReactNode
   right?: React.ReactNode
   testID?: string
+  editable?: boolean
 }
 
 const StyledInputContainer = styled(View, {
@@ -41,10 +44,12 @@ const StyledInputContainer = styled(View, {
 
 const StyledInput = styled(Input, {
   color: '$inputTextColor',
-  placeholderTextColor: '$placeholderColor',
+  placeholderTextColor: '$placeholderColor' as ColorTokens,
   borderWidth: 0,
+  padding: 0,
 
   style: {
+    boxSizing: Platform.OS === 'android' ? 'content-box' : undefined,
     borderWidth: 0,
     backgroundColor: '$borderColorHover',
     paddingLeft: 0,
@@ -58,8 +63,9 @@ export const SafeInputWithLabel = ({
   placeholder,
   left,
   right,
+  editable,
   ...props
-}: Props & Omit<InputProps, 'left' | 'right'>) => {
+}: Props & Omit<GetProps<typeof StyledInput>, 'left' | 'right' | 'editable'>) => {
   return (
     <Theme name={'input_with_label'}>
       <StyledInputContainer
@@ -68,9 +74,23 @@ export const SafeInputWithLabel = ({
         error={error}
         gap={'$1'}
       >
-        <Text color={'$colorSecondary'}>{label}</Text>
-        <View flex={1} flexDirection="row">
-          <StyledInput size="$5" flex={1} placeholder={placeholder} {...props} />
+        <View flex={1} flexDirection="row" alignItems="center">
+          {left ? <View marginRight={'$2'}>{left}</View> : null}
+
+          <View flex={1}>
+            <Text color={'$colorSecondary'}>{label}</Text>
+            <View flex={1} flexDirection="row" alignItems="center">
+              <StyledInput
+                size="$5"
+                flex={1}
+                placeholder={placeholder}
+                {...props}
+                {...(editable === false ? { readOnly: true } : {})}
+              />
+            </View>
+          </View>
+
+          {right ? <View marginLeft={'$2'}>{right}</View> : null}
         </View>
       </StyledInputContainer>
     </Theme>

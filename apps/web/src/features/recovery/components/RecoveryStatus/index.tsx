@@ -2,10 +2,10 @@ import { CircularProgress, SvgIcon } from '@mui/material'
 import type { ReactElement } from 'react'
 
 import ClockIcon from '@/public/images/common/clock.svg'
-import { useRecoveryTxState } from '@/features/recovery/hooks/useRecoveryTxState'
-import { RecoveryEvent } from '@/features/recovery/services/recoveryEvents'
+import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
+import { RecoveryEvent } from '../../services/recoveryEvents'
 import store from '../RecoveryContext'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '../../services/recovery-state'
 import TxStatusChip from '@/components/transactions/TxStatusChip'
 
 const STATUS_LABELS: Partial<Record<RecoveryEvent, string>> = {
@@ -13,7 +13,7 @@ const STATUS_LABELS: Partial<Record<RecoveryEvent, string>> = {
   [RecoveryEvent.PROCESSED]: 'Loading',
 }
 
-export const RecoveryStatus = ({ recovery }: { recovery: RecoveryQueueItem }): ReactElement => {
+const RecoveryStatus = ({ recovery }: { recovery: RecoveryQueueItem }): ReactElement => {
   const { isExecutable, isExpired } = useRecoveryTxState(recovery)
   const pending = store.useStore()?.pending
 
@@ -37,3 +37,5 @@ export const RecoveryStatus = ({ recovery }: { recovery: RecoveryQueueItem }): R
 
   return <TxStatusChip color={isExpired ? 'error' : 'warning'}>{status}</TxStatusChip>
 }
+
+export default RecoveryStatus

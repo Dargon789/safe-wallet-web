@@ -1,9 +1,9 @@
 import ConnectWalletButton from '@/components/common/ConnectWallet/ConnectWalletButton'
 import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
-import SafesList from '@/features/myAccounts/components/SafesList'
-import type { AllSafeItems } from '@/features/myAccounts/hooks/useAllSafesGrouped'
-import css from '@/features/myAccounts/styles.module.css'
+import SafesList from '../SafesList'
+import type { AllSafeItems } from '@/hooks/safes'
+import css from '../../styles.module.css'
 import useWallet from '@/hooks/wallets/useWallet'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -66,7 +66,7 @@ const AllSafes = ({
           >
             {!wallet ? (
               <>
-                <Box mb={2}>Connect a wallet to view your Safe Accounts or to create a new one</Box>
+                <Box mb={2}>Connect a wallet to view your Safe accounts or to create a new one</Box>
                 <Track {...OVERVIEW_EVENTS.OPEN_ONBOARD} label={trackingLabel}>
                   <ConnectWalletButton text="Connect a wallet" contained />
                 </Track>

@@ -7,7 +7,7 @@ const texts = {
   token: {
     icon: <EmptyToken />,
     title: 'Top up your balance',
-    description: 'Send funds to your Safe Account from another wallet by copying your address.',
+    description: 'Send funds to your Safe account from another wallet by copying your address.',
   },
   nft: {
     icon: <EmptyNft />,
@@ -18,14 +18,16 @@ const texts = {
 
 type Props = {
   fundsType: 'token' | 'nft'
+  title?: string
+  description?: string
 }
-export const NoFunds = ({ fundsType }: Props) => {
+export const NoFunds = ({ fundsType, title, description }: Props) => {
   return (
     <View testID="empty-token" alignItems="center" gap="$2">
       {texts[fundsType].icon}
-      <H4 fontWeight={600}>{texts[fundsType].title}</H4>
+      <H4 fontWeight={600}>{title ?? texts[fundsType].title}</H4>
       <Text textAlign="center" color="$colorSecondary" width="70%" fontSize="$4">
-        {texts[fundsType].description}
+        {description ?? texts[fundsType].description}
       </Text>
     </View>
   )

@@ -1,7 +1,7 @@
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { render } from '@/tests/test-utils'
 import CheckWallet from '.'
-import useIsOnlySpendingLimitBeneficiary from '@/hooks/useIsOnlySpendingLimitBeneficiary'
+import { useIsOnlySpendingLimitBeneficiary } from '@/features/spending-limits'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -29,9 +29,9 @@ jest.mock('@/hooks/useIsSafeOwner', () => ({
 }))
 
 // mock useIsOnlySpendingLimitBeneficiary
-jest.mock('@/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
-  __esModule: true,
-  default: jest.fn(() => false),
+jest.mock('@/features/spending-limits', () => ({
+  ...jest.requireActual('@/features/spending-limits'),
+  useIsOnlySpendingLimitBeneficiary: jest.fn(() => false),
 }))
 
 // mock useCurrentChain
@@ -106,7 +106,7 @@ describe('CheckWallet', () => {
     const { getByText, getByLabelText } = renderButton()
 
     expect(getByText('Continue')).toBeDisabled()
-    expect(getByLabelText('Your connected wallet is not a signer of this Safe Account')).toBeInTheDocument()
+    expect(getByLabelText('Your connected wallet is not a signer of this Safe account')).toBeInTheDocument()
   })
 
   it('should be disabled when connected to the wrong network', () => {

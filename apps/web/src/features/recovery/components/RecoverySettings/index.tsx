@@ -1,12 +1,11 @@
 import Track from '@/components/common/Track'
-import { ChooseRecoveryMethodModal } from './ChooseRecoveryMethodModal'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
 import { Box, Button, Grid, Paper, SvgIcon, Tooltip, Typography } from '@mui/material'
-import { type ReactElement, useMemo, useState } from 'react'
+import { type ReactElement, useContext, useMemo } from 'react'
 
 import ExternalLink from '@/components/common/ExternalLink'
 import { DelayModifierRow } from './DelayModifierRow'
-import useRecovery from '@/features/recovery/hooks/useRecovery'
+import useRecovery from '../../hooks/useRecovery'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -16,6 +15,8 @@ import { TOOLTIP_TITLES } from '@/components/tx-flow/common/constants'
 
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'
+import { TxModalContext } from '@/components/tx-flow'
+import UpsertRecoveryFlow from '@/components/tx-flow/flows/UpsertRecovery'
 
 enum HeadCells {
   Recoverer = 'recoverer',
@@ -123,8 +124,8 @@ function RecoverySettings(): ReactElement {
         <Grid item xs>
           <Typography mb={2}>
             {isRecoveryEnabled
-              ? 'The trusted Recoverer will be able to recover your Safe Account if you ever lose access. You can change Recoverers or alter your recovery setup at any time.'
-              : 'Choose a trusted Recoverer to recover your Safe Account if you ever lose access. Enabling the Account recovery module will require a transaction.'}{' '}
+              ? 'The trusted Recoverer will be able to recover your Safe account if you ever lose access. You can change Recoverers or alter your recovery setup at any time.'
+              : 'Choose a trusted Recoverer to recover your Safe account if you ever lose access. Enabling the Account recovery module will require a transaction.'}{' '}
             <Track {...RECOVERY_EVENTS.LEARN_MORE} label="settings">
               <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
                 Learn more
@@ -143,9 +144,8 @@ function RecoverySettings(): ReactElement {
   )
 }
 
-export const SetupRecoveryButton = ({ eventLabel }: { eventLabel: string }) => {
-  const [open, setOpen] = useState<boolean>(false)
-
+const SetupRecoveryButton = ({ eventLabel }: { eventLabel: string }) => {
+  const { setTxFlow } = useContext(TxModalContext)
   return (
     <>
       <CheckWallet>
@@ -155,7 +155,7 @@ export const SetupRecoveryButton = ({ eventLabel }: { eventLabel: string }) => {
               data-testid="setup-recovery-btn"
               variant="contained"
               disabled={!isOk}
-              onClick={() => setOpen(true)}
+              onClick={() => setTxFlow(<UpsertRecoveryFlow />)}
               sx={{ mt: 2 }}
             >
               Set up recovery
@@ -163,8 +163,6 @@ export const SetupRecoveryButton = ({ eventLabel }: { eventLabel: string }) => {
           </Track>
         )}
       </CheckWallet>
-
-      <ChooseRecoveryMethodModal open={open} onClose={() => setOpen(false)} />
     </>
   )
 }

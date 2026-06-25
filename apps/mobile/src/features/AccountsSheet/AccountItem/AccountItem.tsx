@@ -21,12 +21,12 @@ interface AccountItemProps {
   onSelect: (accountAddress: string) => void
 }
 
-const getRightNodeLayout = (isEdit: boolean, isActive: boolean) => {
+const getRightNodeLayout = (isEdit: boolean) => {
   if (isEdit) {
     return <SafeFontIcon name="rows" color="$backgroundPress" />
   }
 
-  return isActive ? <SafeFontIcon name="check" color="$color" /> : null
+  return null
 }
 
 export function AccountItem({ account, drag, chains, isDragging, activeAccount, onSelect }: AccountItemProps) {
@@ -34,10 +34,13 @@ export function AccountItem({ account, drag, chains, isDragging, activeAccount, 
   const isActive = activeAccount === account.address.value
   const contact = useAppSelector(selectContactByAddress(account.address.value))
   const handleChainSelect = () => {
+    if (isEdit) {
+      return
+    }
     onSelect(account.address.value)
   }
 
-  const rightNode = useMemo(() => getRightNodeLayout(isEdit, isActive), [isEdit, isActive])
+  const rightNode = useMemo(() => getRightNodeLayout(isEdit), [isEdit])
 
   const onDeleteSafePress = useCallback(() => {
     Alert.alert('Delete Safe', 'Are you sure you want to delete this safe?', [
@@ -56,12 +59,7 @@ export function AccountItem({ account, drag, chains, isDragging, activeAccount, 
   }, [account.address.value, deleteSafe])
 
   return (
-    <TouchableOpacity
-      style={styles.container}
-      disabled={isDragging}
-      onLongPress={drag}
-      onPress={isEdit ? undefined : handleChainSelect}
-    >
+    <TouchableOpacity style={styles.container} disabled={isDragging} onLongPress={drag} onPress={handleChainSelect}>
       <View
         testID="account-item-wrapper"
         backgroundColor={isActive && !isEdit ? '$borderLight' : '$backgroundTransparent'}

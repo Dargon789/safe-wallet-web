@@ -1,4 +1,5 @@
 import CustomLink from '@/components/common/CustomLink'
+import MarkdownContent from '@/components/common/MarkdownContent'
 import type { MDXComponents } from 'mdx/types'
 import type { NextPage } from 'next'
 import Head from 'next/head'
@@ -19,7 +20,13 @@ const PrivacyPolicy: NextPage = () => {
         <title>{`${BRAND_NAME} – Privacy policy`}</title>
       </Head>
 
-      <main>{isOfficialHost && <SafePrivacyPolicy components={overrideComponents} />}</main>
+      <main style={{ lineHeight: '1.5' }}>
+        {isOfficialHost && (
+          <MarkdownContent>
+            <SafePrivacyPolicy components={overrideComponents} />
+          </MarkdownContent>
+        )}
+      </main>
     </>
   )
 }
