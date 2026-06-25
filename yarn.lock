@@ -9887,7 +9887,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/device-management-kit@npm:^0.9.0, @ledgerhq/device-management-kit@npm:^0.9.1":
+"@ledgerhq/device-management-kit@npm:^0.9.0":
   version: 0.9.1
   resolution: "@ledgerhq/device-management-kit@npm:0.9.1"
   dependencies:
@@ -9905,6 +9905,26 @@ __metadata:
   peerDependencies:
     rxjs: 7.8.2
   checksum: 10/dfc3e46f93fbd12ce79962a10973d67ba4f285872bbd3f758685100d284e3cc8acd6fd1f436465d766a83b4867281f86bacc998b947eb5284d166574fa262a15
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/device-management-kit@npm:^1.3.0":
+  version: 1.7.1
+  resolution: "@ledgerhq/device-management-kit@npm:1.7.1"
+  dependencies:
+    "@noble/hashes": "npm:^1.8.0"
+    "@sentry/minimal": "npm:6.19.7"
+    inversify: "npm:7.5.1"
+    isomorphic-ws: "npm:^5.0.0"
+    purify-ts: "npm:2.1.0"
+    reflect-metadata: "npm:0.2.2"
+    semver: "npm:7.7.2"
+    uuid: "npm:11.0.3"
+    ws: "npm:^8.18.0"
+    xstate: "npm:5.19.2"
+  peerDependencies:
+    rxjs: 7.8.2
+  checksum: 10/bb46a39b98c87b094cc67f8caceb9445f9c17156478c763a67e99fca2ae75b09bb5e3d75a77f842bb86d45323cf8c9a071cd27dbe8b2cc167e1f0ac247554083
   languageName: node
   linkType: hard
 
@@ -14061,7 +14081,7 @@ __metadata:
     "@faker-js/faker": "npm:^9.0.3"
     "@gnosis.pm/zodiac": "npm:^4.0.3"
     "@ledgerhq/context-module": "npm:^1.8.0"
-    "@ledgerhq/device-management-kit": "npm:^0.9.1"
+    "@ledgerhq/device-management-kit": "npm:^1.3.0"
     "@ledgerhq/device-signer-kit-ethereum": "npm:^1.8.0"
     "@ledgerhq/device-transport-kit-web-hid": "npm:^1.2.0"
     "@mdx-js/loader": "npm:^3.0.1"
@@ -14105,7 +14125,7 @@ __metadata:
     "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/react": "npm:^16.1.0"
     "@testing-library/user-event": "npm:^14.5.2"
-    "@trezor/connect-web": "npm:9.7.2"
+    "@trezor/connect-web": "npm:9.7.3"
     "@typechain/ethers-v6": "npm:^0.5.1"
     "@types/jest": "npm:^29.5.14"
     "@types/jest-image-snapshot": "npm:^6.4.0"
@@ -18549,18 +18569,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@trezor/blockchain-link-types@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@trezor/blockchain-link-types@npm:1.5.0"
-  dependencies:
-    "@trezor/utils": "npm:9.5.0"
-    "@trezor/utxo-lib": "npm:2.5.0"
-  peerDependencies:
-    tslib: ^2.6.2
-  checksum: 10/0a3c75d8700d09b79ebd1cac66c72e75b7e3b8c21a105bfdc3897e4f4f69c690d0a9e45883d285942c82f64edfdd6ce93919ddc4b3d6217b4479c6e5059edbaf
-  languageName: node
-  linkType: hard
-
 "@trezor/blockchain-link-types@npm:1.5.1":
   version: 1.5.1
   resolution: "@trezor/blockchain-link-types@npm:1.5.1"
@@ -18570,22 +18578,6 @@ __metadata:
   peerDependencies:
     tslib: ^2.6.2
   checksum: 10/b54dc59abfa41eff615639cd3dafde338f0b6aefb3e52aec9beb72278742df30d8525eba60dc2b3bc3f4980dc927cb24e0851b86fedf2acaadd758685b77f708
-  languageName: node
-  linkType: hard
-
-"@trezor/blockchain-link-utils@npm:1.5.1":
-  version: 1.5.1
-  resolution: "@trezor/blockchain-link-utils@npm:1.5.1"
-  dependencies:
-    "@mobily/ts-belt": "npm:^3.13.1"
-    "@stellar/stellar-sdk": "npm:14.2.0"
-    "@trezor/env-utils": "npm:1.5.0"
-    "@trezor/protobuf": "npm:1.5.1"
-    "@trezor/utils": "npm:9.5.0"
-    xrpl: "npm:4.4.3"
-  peerDependencies:
-    tslib: ^2.6.2
-  checksum: 10/351c7f46dda73b5f367d603b8bdf4bb482939f367804d583754083b925676049637529b989adc34196ec8c2472bd16cc4623f9d7ff768509c0714af9adbe4b5e
   languageName: node
   linkType: hard
 
@@ -18605,9 +18597,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@trezor/blockchain-link@npm:2.6.1":
-  version: 2.6.1
-  resolution: "@trezor/blockchain-link@npm:2.6.1"
+"@trezor/blockchain-link@npm:2.6.2":
+  version: 2.6.2
+  resolution: "@trezor/blockchain-link@npm:2.6.2"
   dependencies:
     "@solana-program/compute-budget": "npm:^0.8.0"
     "@solana-program/stake": "npm:^0.2.1"
@@ -18616,8 +18608,8 @@ __metadata:
     "@solana/kit": "npm:^2.3.0"
     "@solana/rpc-types": "npm:^2.3.0"
     "@stellar/stellar-sdk": "npm:14.2.0"
-    "@trezor/blockchain-link-types": "npm:1.5.0"
-    "@trezor/blockchain-link-utils": "npm:1.5.1"
+    "@trezor/blockchain-link-types": "npm:1.5.1"
+    "@trezor/blockchain-link-utils": "npm:1.5.2"
     "@trezor/env-utils": "npm:1.5.0"
     "@trezor/utils": "npm:9.5.0"
     "@trezor/utxo-lib": "npm:2.5.0"
@@ -18629,7 +18621,7 @@ __metadata:
     xrpl: "npm:4.4.3"
   peerDependencies:
     tslib: ^2.6.2
-  checksum: 10/ec24cf990d7a666842f5a5b61d0c94bfe06ddca508f4a2cc40d58ddb7dc8d8d24ad08a77d69d125864eb6661f1e57a0add189a066a2f14f6e1473ed8a341aed1
+  checksum: 10/1032bfa88c28026f302e10c3a135a30435a2b64c2ce2b1a4a24cac8a3d951bf509b9d9b9513813b46217d76bdbb99995f20c11dc4aa3dc2f8bd8c584b6724018
   languageName: node
   linkType: hard
 
@@ -18657,23 +18649,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@trezor/connect-web@npm:9.7.2":
-  version: 9.7.2
-  resolution: "@trezor/connect-web@npm:9.7.2"
+"@trezor/connect-web@npm:9.7.3":
+  version: 9.7.3
+  resolution: "@trezor/connect-web@npm:9.7.3"
   dependencies:
-    "@trezor/connect": "npm:9.7.2"
+    "@trezor/connect": "npm:9.7.3"
     "@trezor/connect-common": "npm:0.5.1"
     "@trezor/utils": "npm:9.5.0"
     "@trezor/websocket-client": "npm:1.3.0"
   peerDependencies:
     tslib: ^2.6.2
-  checksum: 10/2c33926c1e5baec8e6f522e31ae75beecce1d324b9e92c76ab3e625149f9138bb0a1399adbf0c98b81424de8fcb083ce09885abc30ac79a246c774c7632d6c04
+  checksum: 10/55dc4f38719d910cbd4120a36c97b9efb0bcd03edddbe7daecbdc4fbf45601a951163dc6b07e3f4a0d66045faff01a897f75b887888958eb58334a8024e41755
   languageName: node
   linkType: hard
 
-"@trezor/connect@npm:9.7.2":
-  version: 9.7.2
-  resolution: "@trezor/connect@npm:9.7.2"
+"@trezor/connect@npm:9.7.3":
+  version: 9.7.3
+  resolution: "@trezor/connect@npm:9.7.3"
   dependencies:
     "@ethereumjs/common": "npm:^10.1.0"
     "@ethereumjs/tx": "npm:^10.1.0"
@@ -18686,7 +18678,7 @@ __metadata:
     "@solana-program/token": "npm:^0.5.1"
     "@solana-program/token-2022": "npm:^0.4.2"
     "@solana/kit": "npm:^2.3.0"
-    "@trezor/blockchain-link": "npm:2.6.1"
+    "@trezor/blockchain-link": "npm:2.6.2"
     "@trezor/blockchain-link-types": "npm:1.5.1"
     "@trezor/blockchain-link-utils": "npm:1.5.2"
     "@trezor/connect-analytics": "npm:1.4.0"
@@ -18695,10 +18687,10 @@ __metadata:
     "@trezor/device-authenticity": "npm:1.1.2"
     "@trezor/device-utils": "npm:1.2.0"
     "@trezor/env-utils": "npm:^1.5.0"
-    "@trezor/protobuf": "npm:1.5.2"
-    "@trezor/protocol": "npm:1.3.0"
+    "@trezor/protobuf": "npm:1.5.3"
+    "@trezor/protocol": "npm:1.3.1"
     "@trezor/schema-utils": "npm:1.4.0"
-    "@trezor/transport": "npm:1.6.2"
+    "@trezor/transport": "npm:1.6.3"
     "@trezor/type-utils": "npm:1.2.0"
     "@trezor/utils": "npm:9.5.0"
     "@trezor/utxo-lib": "npm:2.5.0"
@@ -18710,7 +18702,7 @@ __metadata:
     jws: "npm:^4.0.0"
   peerDependencies:
     tslib: ^2.6.2
-  checksum: 10/738bf28d5dc3cde9865ebdeca39cf6564cd9dad1cb885e27f81d41fd51483f3856a5306d1a29bad14f4bcec75acf914a3ebd8386a8393d122abb874d39c37a39
+  checksum: 10/113c1aa48fb01f4612376da424a52503d7fc5ad28c5d1ec4d6c2afa6b05d6d54182ac1396f94e9fde6162ff433fd41c8c29884ee59c95d400de3ffddc9a83ddd
   languageName: node
   linkType: hard
 
@@ -18764,19 +18756,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@trezor/protobuf@npm:1.5.1":
-  version: 1.5.1
-  resolution: "@trezor/protobuf@npm:1.5.1"
-  dependencies:
-    "@trezor/schema-utils": "npm:1.4.0"
-    long: "npm:5.2.5"
-    protobufjs: "npm:7.4.0"
-  peerDependencies:
-    tslib: ^2.6.2
-  checksum: 10/73c90592bec1ff58125a36531a5e7edea45cdd89ae21e187f5802af10c31a0ec647297dd4932b549b91e15f56da74cb8d27718492557fd00186e337620e57f90
-  languageName: node
-  linkType: hard
-
 "@trezor/protobuf@npm:1.5.2":
   version: 1.5.2
   resolution: "@trezor/protobuf@npm:1.5.2"
@@ -18790,12 +18769,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@trezor/protocol@npm:1.3.0":
-  version: 1.3.0
-  resolution: "@trezor/protocol@npm:1.3.0"
+"@trezor/protobuf@npm:1.5.3":
+  version: 1.5.3
+  resolution: "@trezor/protobuf@npm:1.5.3"
+  dependencies:
+    "@trezor/schema-utils": "npm:1.4.0"
+    long: "npm:5.2.5"
+    protobufjs: "npm:7.5.5"
   peerDependencies:
     tslib: ^2.6.2
-  checksum: 10/37fa0bc71846d6687864c4406dc60437dc4d87e0daba973a29f7cb10f8547598454cb2ee35e21be762ca7c0e14b1e7004eed7b285922ca9a085fffe07f2f69a7
+  checksum: 10/c504c91653250c96bc447faab5fa3b26454db71c5d0d62aab68669ca355b5fbbec54489ec6fd8f8f0efe479fe8324a06651be2b8ef65bce38a93ad89c996570b
+  languageName: node
+  linkType: hard
+
+"@trezor/protocol@npm:1.3.1":
+  version: 1.3.1
+  resolution: "@trezor/protocol@npm:1.3.1"
+  peerDependencies:
+    tslib: ^2.6.2
+  checksum: 10/ba8468b4d022fa14c81246b9093474d7a86d2724c85c459c5c3abd2dccf85203c09b3de382c693fceb257cab6bffdc4e1b727fad380b247c774372eb40426e6d
   languageName: node
   linkType: hard
 
@@ -18811,19 +18803,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@trezor/transport@npm:1.6.2":
-  version: 1.6.2
-  resolution: "@trezor/transport@npm:1.6.2"
+"@trezor/transport@npm:1.6.3":
+  version: 1.6.3
+  resolution: "@trezor/transport@npm:1.6.3"
   dependencies:
-    "@trezor/protobuf": "npm:1.5.2"
-    "@trezor/protocol": "npm:1.3.0"
+    "@trezor/protobuf": "npm:1.5.3"
+    "@trezor/protocol": "npm:1.3.1"
     "@trezor/type-utils": "npm:1.2.0"
     "@trezor/utils": "npm:9.5.0"
     cross-fetch: "npm:^4.0.0"
     usb: "npm:^2.15.0"
   peerDependencies:
     tslib: ^2.6.2
-  checksum: 10/16231cc38c3ac28320ca6ea1384a71411088515c10c2d0a7ab2c71e600a53cfe36b2097927d9628b1f03ec05bceac67bf78af144c3baef965c126edc369bf048
+  checksum: 10/3fcfeedd9b37aabc32de6e70f521528e3367fc7a2c03bb2a5499900a2cfd0ab09c6bbf1f0d2beb8c3d995b3f2773f52d159d806d04736f00d93bc175be794737
   languageName: node
   linkType: hard
 
@@ -39205,6 +39197,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"protobufjs@npm:7.5.5":
+  version: 7.5.5
+  resolution: "protobufjs@npm:7.5.5"
+  dependencies:
+    "@protobufjs/aspromise": "npm:^1.1.2"
+    "@protobufjs/base64": "npm:^1.1.2"
+    "@protobufjs/codegen": "npm:^2.0.4"
+    "@protobufjs/eventemitter": "npm:^1.1.0"
+    "@protobufjs/fetch": "npm:^1.1.0"
+    "@protobufjs/float": "npm:^1.0.2"
+    "@protobufjs/inquire": "npm:^1.1.0"
+    "@protobufjs/path": "npm:^1.1.2"
+    "@protobufjs/pool": "npm:^1.1.0"
+    "@protobufjs/utf8": "npm:^1.1.0"
+    "@types/node": "npm:>=13.7.0"
+    long: "npm:^5.0.0"
+  checksum: 10/048898023a38d22f5fc9a1bcf0dcce5cfbcd37fb00753bd72283720eee7e2cb6055b23957542e5bcdc136379af66203a2ddb8d8c39d11f73169bacf07885fedd
+  languageName: node
+  linkType: hard
+
 "protobufjs@npm:^6.10.2":
   version: 6.11.6
   resolution: "protobufjs@npm:6.11.6"
@@ -45278,11 +45290,11 @@ __metadata:
   linkType: hard
 
 "ua-parser-js@npm:^0.7.33":
-  version: 0.7.40
-  resolution: "ua-parser-js@npm:0.7.40"
+  version: 0.7.41
+  resolution: "ua-parser-js@npm:0.7.41"
   bin:
     ua-parser-js: script/cli.js
-  checksum: 10/914b8134894e0060a695e519c4b25625613572911466fdcd60f995babc2a61e75a318d98f5e777961ab428069b6ee2f7c5e3a4595eee858a1e86de694579baac
+  checksum: 10/e41306332d8ace098d51a644a3ba95522ddfc04243727a3c0419efcdf486c8f868c3af8e6a56f6aa86bdc26e6b893abb0b2bde0c9e1a1625a183dfdf839cac82
   languageName: node
   linkType: hard
 
