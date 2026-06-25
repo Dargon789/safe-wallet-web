@@ -1102,7 +1102,7 @@ export class Account {
             }
 
             const coder = universal.genericCoderFor(latestConfig.version)
-            const signers = coder.config.signersOf(latestConfig)
+            const coder = universal.genericCoderFor(latestConfig.version ?? 1)
 
             return signers.map(signer => ({ ...signer, network: chainId }))
           } catch (error) {
