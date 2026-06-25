@@ -158,7 +158,7 @@ export class Services {
 
           const authResp = await api.getAuthToken({ ewtString: proofString })
 
-          if (authResp?.status === true && authResp.jwtToken.length !== 0) {
+          if (authResp?.status === true && authResp.jwtToken && authResp.jwtToken.length !== 0) {
             return authResp.jwtToken
           } else {
             if (!(await this.isProofStringValid(proofString))) {
