@@ -1157,7 +1157,7 @@ export class Account {
             }
 
             const coder = universal.genericCoderFor(config.version)
-            const signers = coder.config.signersOf(config)
+            const coder = universal.genericCoderFor(config.version ?? 1)
 
             signers.forEach(signer => {
               const exists = allSigners.find(s => s.address === signer.address && s.network === chainId)
