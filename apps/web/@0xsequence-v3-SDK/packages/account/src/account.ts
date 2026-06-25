@@ -413,7 +413,7 @@ export class Account {
     }
 
     // On immutable chains, we add the WalletProxyHook
-    const { proxyImplementationHook } = this.contexts[status.config.version]
+    const proxyImplementationHook = this.contexts[status.config.version]?.proxyImplementationHook
     if (proxyImplementationHook && (chainId === ChainId.IMMUTABLE_ZKEVM || chainId === ChainId.IMMUTABLE_ZKEVM_TESTNET)) {
       const provider = this.providerFor(chainId)
       if (provider) {
