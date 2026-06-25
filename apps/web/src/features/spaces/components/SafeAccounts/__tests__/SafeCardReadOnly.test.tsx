@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { render, screen, fireEvent, mockClipboard } from '@/tests/test-utils'
 import SafeCardReadOnly from '../SafeCardReadOnly'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
 import { chainBuilder } from '@/tests/builders/chains'
@@ -52,7 +52,6 @@ jest.mock('@/features/__core__', () => ({
 jest.mock('@/features/spaces', () => ({
   SpacesFeature: {},
   useGetSpaceAddressBook: () => [],
-  useGetPrivateAddressBook: () => [],
   useCurrentSpaceId: () => undefined,
 }))
 
@@ -70,7 +69,20 @@ describe('SafeCardReadOnly', () => {
 
     render(<SafeCardReadOnly safe={safe} />)
 
-    expect(screen.queryByText(/Not activated/i)).toBeNull()
+    expect(screen.queryByTestId('pending-activation-chip')).toBeNull()
+  })
+
+  it('renders a copy-address button and copies the address', () => {
+    const writeText = mockClipboard()
+    const safe = safeItemBuilder().with({ chainId: '1', address: '0xDEADBEEF' }).build()
+
+    render(<SafeCardReadOnly safe={safe} />)
+
+    const copyButton = screen.getByRole('button', { name: 'Copy address' })
+    expect(copyButton).toBeInTheDocument()
+
+    fireEvent.click(copyButton)
+    expect(writeText).toHaveBeenCalledWith(safe.address)
   })
 
   it('renders the Not activated chip for an undeployed safe', () => {
@@ -89,10 +101,10 @@ describe('SafeCardReadOnly', () => {
       } as unknown as Partial<RootState>,
     })
 
-    expect(screen.getByText(/Not activated/i)).toBeInTheDocument()
+    expect(screen.getByTestId('pending-activation-chip')).toBeInTheDocument()
   })
 
-  it('renders the Not activated chip ahead of the chain badge and drops the balance column', () => {
+  it('renders the Not activated chip in place of the balance for an undeployed safe', () => {
     const safe = safeItemBuilder().with({ chainId: '1', address: '0xDEADBEEF' }).build()
 
     render(<SafeCardReadOnly safe={safe} />, {
@@ -111,7 +123,7 @@ describe('SafeCardReadOnly', () => {
     const chip = screen.getByTestId('pending-activation-chip')
 
     const balanceColumn = screen.getByTestId('balance-column')
-    expect(balanceColumn.contains(chip)).toBe(false)
+    expect(balanceColumn.contains(chip)).toBe(true)
     expect(screen.queryByText(/\$/)).not.toBeInTheDocument()
   })
 })

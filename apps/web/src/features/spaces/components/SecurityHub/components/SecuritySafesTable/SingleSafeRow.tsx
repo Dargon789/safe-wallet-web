@@ -4,13 +4,14 @@ import { motion } from 'framer-motion'
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
 import type { ScanResult } from '@/features/security/types'
 import Identicon from '@/components/common/Identicon'
+import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { cn } from '@/utils/cn'
 import StatusCell from '../StatusCell/StatusCell'
 import { BalanceCell, ScoreCell } from './cells'
 import { CARD_ROW_CLASS, CELL_BASE, GRID_COLS, HIDE_BALANCE, ROW_VARIANTS } from './constants'
-import { countChecks, getStatusCount, type GetSafeSecurityHref, type RowSecurity } from './utils'
+import { getNonPassingCount, type GetSafeSecurityHref, type RowSecurity } from './utils'
 import type { SelectedSafe, SpaceSafeEntry } from '../../types'
 
 export type SingleSafeRowProps = {
@@ -45,7 +46,7 @@ const SingleSafeRow = ({
   const results = scanResults[key]
   const summary = results ? computeSummary(results) : null
   const grade = results ? getSafeGrade(results) : null
-  const statusCount = getStatusCount(grade, countChecks(results))
+  const statusCount = getNonPassingCount(results)
   const isSelected = selectedSafe?.address === safe.address && selectedSafe?.chainId === safe.chainId
   const isScanning = scanningKeys?.has(key)
   const safeHref = getSafeSecurityHref(safe.address, safe.chainId)
@@ -90,9 +91,12 @@ const SingleSafeRow = ({
             >
               {safe.name || shortenAddress(safe.address)}
             </Typography>
-            <Typography sx={{ fontSize: '0.6875rem', color: 'text.secondary', lineHeight: 1 }}>
-              {shortenAddress(safe.address)}
-            </Typography>
+            <Stack direction="row" alignItems="center" spacing={0.5} sx={{ minWidth: 0 }}>
+              <Typography noWrap sx={{ fontSize: '0.6875rem', color: 'text.secondary', lineHeight: 1 }}>
+                {shortenAddress(safe.address)}
+              </Typography>
+              <CopyAddressIconButton address={safe.address} />
+            </Stack>
           </Stack>
         </Stack>
       </div>

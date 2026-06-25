@@ -51,7 +51,7 @@ export const spaceSafeAccountsUrl = '/spaces/safe-accounts?spaceId='
 export const spaceAddressBookUrl = '/spaces/address-book?spaceId='
 export const userSettingsUrl = '/user-settings'
 export const prodbaseUrl = 'https://app.safe.global'
-export const swapWidget = 'https://swap.cow.finance/#/11155111/widget/swap/'
+export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
 export const bridgeWidget = 'https://iframe.jumper.exchange/bridge'
 export const safeTestAppurl = 'https://safe-apps-test-app.pages.dev'
 export const TX_Builder_url = 'https://tx-builder.staging.5afe.dev'
@@ -250,15 +250,15 @@ export const addressBookErrrMsg = {
   invalidFormat: 'Invalid address format',
   invalidChecksum: 'Invalid address checksum',
   exceedChars: 'Maximum 50 symbols',
-  ownSafeManage: 'The Safe Account cannot own itself',
-  ownSafe: 'Cannot use Safe Account itself as signer',
+  ownSafeManage: 'The Safe account cannot own itself',
+  ownSafe: 'Cannot use Safe account itself as signer',
   alreadyAdded: 'Address already added',
   ownerAdded: 'Signer is already added',
   failedResolve: 'Failed to resolve the address',
   emptyAddress: 'Owner',
-  safeAlreadyAdded: 'Safe Account is already added',
+  safeAlreadyAdded: 'Safe account is already added',
   prefixMismatch: "doesn't match the current chain",
-  ownSafeGuardian: 'The Safe Account cannot be a Recoverer of itself',
+  ownSafeGuardian: 'The Safe account cannot be a Recoverer of itself',
   invalidPrefix(prefix) {
     return `"${prefix}" doesn't match the current chain`
   },

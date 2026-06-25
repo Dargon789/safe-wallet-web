@@ -3,9 +3,9 @@ import { Button } from '@/components/ui/button'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
-import { removeAddressBookEntry } from '@/store/addressBookSlice'
 import { useAppDispatch } from '@/store'
 import { Spinner } from '@/components/ui/spinner'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
 type AddToWorkspaceButtonProps = {
   address: string
@@ -27,20 +27,19 @@ const AddToWorkspaceButton = ({ address, name, chainIds }: AddToWorkspaceButtonP
       setIsSubmitting(true)
 
       const result = await upsertAddressBook({
-        spaceId: Number(spaceId),
+        spaceId: spaceId ?? '',
         upsertAddressBookItemsDto: { items: [{ name, address, chainIds }] },
       })
 
       if (result.error) {
         dispatch(
-          showNotification({ message: 'Failed to add contact', variant: 'error', groupKey: 'add-to-workspace-error' }),
+          showNotification({
+            message: getRtkQueryErrorMessage(result.error),
+            variant: 'error',
+            groupKey: 'add-to-workspace-error',
+          }),
         )
         return
-      }
-
-      // Remove from local address book
-      for (const chainId of chainIds) {
-        dispatch(removeAddressBookEntry({ chainId, address }))
       }
 
       setAdded(true)
