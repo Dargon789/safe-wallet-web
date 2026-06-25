@@ -112,7 +112,7 @@ export function NameSourceIcon({ source }: { source: ContactSource }) {
           <Cloud className="size-3 text-muted-foreground stroke-[2.5]" />
         )}
       </TooltipTrigger>
-      <TooltipContent>From your {source} address book</TooltipContent>
+      <TooltipContent>From your {source === ContactSource.space ? 'workspace' : 'local'} address book</TooltipContent>
     </Tooltip>
   )
 }
@@ -204,7 +204,7 @@ export function CopyAddressButton({ address }: { address: string }) {
 /** Skeleton row mimicking a safe card — used while data is loading */
 export function SafeItemSkeleton() {
   return (
-    <div className="flex items-center gap-3 rounded-md border border-border bg-card px-3 py-3 mb-2">
+    <div className="flex items-center gap-3 rounded-lg px-3 py-3 mb-1">
       <Skeleton className="size-9 rounded-full shrink-0" />
       <div className="flex flex-col gap-1.5 flex-1 min-w-0">
         <Skeleton className="h-3.5 w-28" />
@@ -248,7 +248,7 @@ export function NotActivatedBadge({ isActivating }: { isActivating: boolean }) {
 /** "High similarity" warning badge */
 export function SimilarityBadge() {
   return (
-    <span className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-full bg-amber-50 px-1.5 py-px text-[11px] leading-none text-amber-700">
+    <span className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-full bg-amber-50 px-1.5 py-px text-[11px] leading-none text-amber-700 dark:bg-[var(--color-warning-background)] dark:text-[var(--color-warning1-contrast-text)]">
       <TriangleAlert className="size-3 shrink-0" />
       High similarity
     </span>

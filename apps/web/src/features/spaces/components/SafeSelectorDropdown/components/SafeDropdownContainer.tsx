@@ -1,12 +1,15 @@
 import { RotateCw, Search } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { SelectContent, SelectItem } from '@/components/ui/select'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
+import { useBottomScrollFade } from '@/hooks/useBottomScrollFade'
+import useWallet from '@/hooks/wallets/useWallet'
 import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
+import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import type { SafeItemData } from '../types'
 
 const matchesSearch = (item: SafeItemData, displayName: string, query: string): boolean => {
@@ -77,6 +80,7 @@ const SafeDropdownContainer = ({
   const [search, setSearch] = useState('')
   const query = search.trim().toLowerCase()
   const resolveName = useSafeNameResolver()
+  const wallet = useWallet()
 
   // Multi-chain items stay visible even when currently selected so the user can expand and switch chains.
   const structuralItems = items.filter((item) => item.chains.length > 1 || item.id !== selectedItemId)
@@ -86,51 +90,11 @@ const SafeDropdownContainer = ({
       )
     : structuralItems
 
-  const showSearch = !isError && items.length > 0
-
-  const scrollRef = useRef<HTMLDivElement | null>(null)
-  const detachScrollRef = useRef<(() => void) | null>(null)
-  const [showScrollHint, setShowScrollHint] = useState(false)
+  // Key the search bar to displayable rows, so it's hidden when there's nothing to filter.
+  const showSearch = !isError && structuralItems.length > 0
 
   // Bottom-fade scroll hint, shown only while more rows lie below the fold.
-  const measureScrollHint = useCallback(() => {
-    const el = scrollRef.current
-    if (!el) return
-    const hasOverflow = el.scrollHeight > el.clientHeight + 1
-    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1
-    setShowScrollHint(hasOverflow && !atBottom)
-  }, [])
-
-  // Callback ref so the listeners/observer always bind to the LIVE scroll node. base-ui can remount
-  // the popup content after it sizes the popup async; a plain effect (deps unchanged) would stay
-  // closed over a stale, detached node and leave the hint stuck off. Re-measure next frame too.
-  const attachScrollArea = useCallback(
-    (node: HTMLDivElement | null) => {
-      detachScrollRef.current?.()
-      detachScrollRef.current = null
-      scrollRef.current = node
-      if (!node) return
-      node.addEventListener('scroll', measureScrollHint, { passive: true })
-      const resizeObserver = new ResizeObserver(measureScrollHint)
-      resizeObserver.observe(node)
-      Array.from(node.children).forEach((child) => resizeObserver.observe(child))
-      measureScrollHint()
-      const raf = requestAnimationFrame(measureScrollHint)
-      detachScrollRef.current = () => {
-        cancelAnimationFrame(raf)
-        node.removeEventListener('scroll', measureScrollHint)
-        resizeObserver.disconnect()
-      }
-    },
-    [measureScrollHint],
-  )
-
-  // Re-measure when the rendered rows change (the scroll node itself can stay the same).
-  useEffect(() => {
-    measureScrollHint()
-    const raf = requestAnimationFrame(measureScrollHint)
-    return () => cancelAnimationFrame(raf)
-  }, [filteredItems.length, isLoading, isError, measureScrollHint])
+  const { setScrollNode, showFade: showScrollHint } = useBottomScrollFade([filteredItems.length, isLoading, isError])
 
   const renderContent = () => {
     if (isError) {
@@ -144,7 +108,11 @@ const SafeDropdownContainer = ({
     if (filteredItems.length === 0) {
       return (
         <p className="px-4 py-6 text-center text-sm text-muted-foreground" data-testid="dropdown-empty">
-          {query ? 'No safes match your search' : 'No safes yet'}
+          {query
+            ? 'No safes match your search'
+            : wallet
+              ? 'No safes yet'
+              : 'Connect a wallet to find your Safe Accounts'}
         </p>
       )
     }
@@ -184,13 +152,13 @@ const SafeDropdownContainer = ({
           <div className="shrink-0 bg-card">
             {header}
             {showSearch && (
-              <div className="px-3 pb-2 pt-1">
-                <InputGroup className="rounded-md border-gray-100 shadow-none">
+              <div className="flex items-center gap-2 px-3 pb-2 pt-1">
+                <InputGroup className="flex-1 rounded-md border-gray-100 shadow-none">
                   <InputGroupAddon>
                     <Search className="size-4" />
                   </InputGroupAddon>
                   <InputGroupInput
-                    placeholder="Search by name, address or network"
+                    placeholder="by name, address or network"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     // Stop keystrokes reaching base-ui Select's typeahead, which would hijack typing.
@@ -202,13 +170,14 @@ const SafeDropdownContainer = ({
                     data-testid="safe-dropdown-search-input"
                   />
                 </InputGroup>
+                <SafeListSortToggle />
               </div>
             )}
           </div>
         )}
 
         <div
-          ref={attachScrollArea}
+          ref={setScrollNode}
           data-testid="dropdown-scroll-area"
           className="min-h-0 flex-1 overflow-y-auto overscroll-y-none px-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
         >
