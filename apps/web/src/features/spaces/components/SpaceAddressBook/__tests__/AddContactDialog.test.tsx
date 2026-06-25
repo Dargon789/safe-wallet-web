@@ -47,9 +47,9 @@ jest.mock('@/components/common/NameInput', () => ({
 
 jest.mock('@/components/common/AddressInput', () => ({
   __esModule: true,
-  default: ({ name, label }: { name: string; label: string }) => {
+  default: ({ name, label, chain }: { name: string; label: string; chain?: { chainId: string } }) => {
     const { register } = (jest.requireActual('react-hook-form') as typeof ReactHookForm).useFormContext()
-    return <input aria-label={label} {...register(name, { required: true })} />
+    return <input aria-label={label} data-ens-chain={chain?.chainId ?? ''} {...register(name, { required: true })} />
   },
 }))
 
@@ -69,7 +69,7 @@ const openDialog = () => fireEvent.click(screen.getByRole('button', { name: /add
 
 const fillRequiredFields = () => {
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Alice' } })
-  fireEvent.change(screen.getByLabelText('Address'), { target: { value: '0xabc' } })
+  fireEvent.change(screen.getByLabelText('Address or ENS'), { target: { value: '0xabc' } })
 }
 
 describe('AddContactDialog', () => {
@@ -204,5 +204,12 @@ describe('AddContactDialog', () => {
     openDialog()
 
     expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument()
+  })
+
+  it('resolves ENS on mainnet by passing the mainnet chain to the address input', () => {
+    render(<AddContactDialog {...baseProps} submit={jest.fn()} />)
+    openDialog()
+
+    expect(screen.getByLabelText('Address or ENS')).toHaveAttribute('data-ens-chain', '1')
   })
 })

@@ -114,16 +114,22 @@ function SafeSelectorDropdown({
       onValueChange={handleSafeChange}
       open={variants.canOpen && !isDisabled ? dropdownOpen : false}
       onOpenChange={isDisabled ? undefined : handleOpenChange}
-      disabled={isDisabled}
+      // Deliberately not disabled: a disabled <button> blocks the inline address actions (copy,
+      // explorer, env hint). Safe switching is prevented by the forced-closed `open` above instead.
     >
       <SelectTrigger
         className={cn(
-          '-m-4 flex-1 border-0 shadow-none bg-transparent dark:bg-transparent py-0 pl-6 hover:bg-transparent dark:hover:bg-transparent data-[state=open]:bg-transparent [&_[data-slot=select-value]]:pr-0 relative',
+          // The wrapper's overflow-hidden clips this focus-visible ring into stray top/bottom bars,
+          // so suppress it — the card shows no focus ring by design (wrapper sets focus:ring-0).
+          '-m-4 flex-1 border-0 shadow-none bg-transparent dark:bg-transparent py-0 pl-6 hover:bg-transparent dark:hover:bg-transparent data-[state=open]:bg-transparent focus-visible:ring-0 focus-visible:border-0 [&_[data-slot=select-value]]:pr-0 relative',
           variants.triggerClass,
           isDisabled && 'cursor-not-allowed opacity-50',
         )}
         size="default"
         iconWrapperClassName={variants.iconWrapperClass}
+        // Not the native `disabled` (that would kill the nested copy/explorer buttons); aria-disabled
+        // just announces the inert trigger to assistive tech while leaving descendants operable.
+        aria-disabled={isDisabled || undefined}
         data-testid="open-safes-icon"
       >
         <SelectValue>

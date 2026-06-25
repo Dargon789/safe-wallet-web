@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { render, screen, fireEvent, mockClipboard } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import type { SafeItem } from '@/hooks/safes'
 import type { Account } from '../types'
@@ -74,6 +74,22 @@ describe('AccountsWidget', () => {
 
     expect(screen.getByText('Vault')).toBeInTheDocument()
     expect(screen.getByText('1/1')).toBeInTheDocument()
+  })
+
+  it('renders a copy address button for every account row', () => {
+    render(<AccountsWidget accounts={mockAccounts} />)
+
+    expect(screen.getAllByRole('button', { name: 'Copy address' })).toHaveLength(mockAccounts.length)
+  })
+
+  it('copies the account address when the copy button is clicked', () => {
+    const writeText = mockClipboard()
+
+    render(<AccountsWidget accounts={[mockAccounts[1]]} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Copy address' }))
+
+    expect(writeText).toHaveBeenCalledWith(mockAccounts[1].address)
   })
 
   it('renders an identicon for each account', () => {
@@ -192,7 +208,7 @@ describe('AccountsWidget', () => {
     const undeployedAccount: Account[] = [{ ...mockAccounts[1], isUndeployed: true, isActivating: false }]
     render(<AccountsWidget accounts={undeployedAccount} />)
 
-    expect(screen.getByText('Not activated')).toBeInTheDocument()
+    expect(screen.getByLabelText('Inactive')).toBeInTheDocument()
     expect(screen.queryByLabelText('$ 1,200,000.00')).not.toBeInTheDocument()
   })
 
@@ -200,14 +216,14 @@ describe('AccountsWidget', () => {
     const activatingAccount: Account[] = [{ ...mockAccounts[1], isUndeployed: true, isActivating: true }]
     render(<AccountsWidget accounts={activatingAccount} />)
 
-    expect(screen.getByText('Activating')).toBeInTheDocument()
+    expect(screen.getByLabelText('Activating')).toBeInTheDocument()
   })
 
   it('renders the Not activated badge for an undeployed multi-chain account', () => {
     const undeployedMultichain: Account[] = [{ ...mockAccounts[0], isUndeployed: true, isActivating: false }]
     render(<AccountsWidget accounts={undeployedMultichain} />)
 
-    expect(screen.getByText('Not activated')).toBeInTheDocument()
+    expect(screen.getByLabelText('Inactive')).toBeInTheDocument()
     expect(screen.queryByLabelText('$ 39,950,000.00')).not.toBeInTheDocument()
   })
 
