@@ -17,7 +17,7 @@ import OnboardingSafesList from '../SelectSafesOnboarding/components/OnboardingS
 import ConnectWalletHint from '../ConnectWalletHint'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
-import { AdminOnlyWorkspaceTooltip } from '@/features/spaces/components/AdminOnlyWorkspaceTooltip'
+import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import {
   useSpaceSafesCreateV1Mutation,
   useSpaceSafesDeleteV1Mutation,
@@ -45,7 +45,7 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
-import { SAFE_ACCOUNTS_LIMIT } from '../Sidebar/constants'
+import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/constants'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
 import { useSelectAll } from '../../hooks/useSelectAll'
 import type { AddAccountsFormValues } from '../../hooks/useSelectAll.types'
@@ -253,7 +253,7 @@ const AddAccounts = ({
       // Add new safes
       if (safesToAdd.length > 0) {
         const result = await addSafesToSpace({
-          spaceId: Number(spaceId),
+          spaceId: spaceId ?? '',
           createSpaceSafesDto: { safes: safesToAdd },
         })
 
@@ -274,7 +274,7 @@ const AddAccounts = ({
       // Remove unchecked safes
       if (safesToRemove.length > 0) {
         const result = await removeSafesFromSpace({
-          spaceId: Number(spaceId),
+          spaceId: spaceId ?? '',
           deleteSpaceSafesDto: { safes: safesToRemove },
         })
 
@@ -444,32 +444,26 @@ const AddAccounts = ({
                           No safes match your search
                         </Typography>
                       ) : (
-                        <>
-                          {isAtLimit && (
-                            <Typography variant="paragraph" color="muted" className="text-xs pb-1">
-                              Limit of {SAFE_ACCOUNTS_LIMIT} accounts reached
-                            </Typography>
-                          )}
-                          <OnboardingSafesList
-                            trustedSafes={visibleTrusted}
-                            ownedSafes={visibleOwned}
-                            similarAddresses={similarAddresses}
-                            trustedSelectAll={{
-                              state: trustedSelection.state,
-                              count: trustedSelection.selectedCount,
-                              total: trustedSelection.total,
-                              onToggle: (check) => handleSelectAll('trusted', check),
-                              disabled: trustedSelection.disabled,
-                            }}
-                            ownedSelectAll={{
-                              state: ownedSelection.state,
-                              count: ownedSelection.selectedCount,
-                              total: ownedSelection.total,
-                              onToggle: (check) => handleSelectAll('owned', check),
-                              disabled: ownedSelection.disabled,
-                            }}
-                          />
-                        </>
+                        <OnboardingSafesList
+                          trustedSafes={visibleTrusted}
+                          ownedSafes={visibleOwned}
+                          similarAddresses={similarAddresses}
+                          isAtLimit={isAtLimit}
+                          trustedSelectAll={{
+                            state: trustedSelection.state,
+                            count: trustedSelection.selectedCount,
+                            total: trustedSelection.total,
+                            onToggle: (check) => handleSelectAll('trusted', check),
+                            disabled: trustedSelection.disabled,
+                          }}
+                          ownedSelectAll={{
+                            state: ownedSelection.state,
+                            count: ownedSelection.selectedCount,
+                            total: ownedSelection.total,
+                            onToggle: (check) => handleSelectAll('owned', check),
+                            disabled: ownedSelection.disabled,
+                          }}
+                        />
                       )}
                     </div>
 
@@ -489,7 +483,7 @@ const AddAccounts = ({
 
                   <div className="flex shrink-0 flex-col gap-2">
                     <Track {...SPACE_EVENTS.ADD_ACCOUNT_MANUALLY_MODAL}>
-                      <AddManually handleAddSafe={handleAddSafe} />
+                      <AddManually handleAddSafe={handleAddSafe} disabled={isAtLimit} />
                     </Track>
 
                     <div className="flex shrink-0 flex-col gap-2">

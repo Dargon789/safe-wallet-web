@@ -5,7 +5,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { type AllSafeItems, flattenSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
-import type { AddAccountsFormValues } from '@/features/spaces/hooks/useSelectAll.types'
+import type { AddAccountsFormValues } from '../../../hooks/useSelectAll.types'
 import {
   useSpaceSafesCreateV1Mutation,
   useSpaceSafesDeleteV1Mutation,
@@ -14,7 +14,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import useChains from '@/hooks/useChains'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import { useSpaceSafes } from '../../../hooks/useSpaceSafes'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { getSafeId, getMultiChainSafeId } from '../components/SafeCard'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
@@ -127,7 +127,7 @@ const useOnboardingSubmit = (
     ([key, isSelected]) => isSelected && !key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX),
   ).length
 
-  const addNewSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdNum: number) => {
+  const addNewSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdStr: string) => {
     const flatSpaceSafes = flattenSafeItems(spaceSafes)
 
     const safesToAdd = Object.entries(selectedSafes)
@@ -145,7 +145,7 @@ const useOnboardingSubmit = (
     if (safesToAdd.length === 0) return
 
     const result = await addSafesToSpace({
-      spaceId: spaceIdNum,
+      spaceId: spaceIdStr,
       createSpaceSafesDto: { safes: safesToAdd },
     })
     if (result.error) {
@@ -153,7 +153,7 @@ const useOnboardingSubmit = (
     }
   }
 
-  const removeUnselectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdNum: number) => {
+  const removeUnselectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdStr: string) => {
     const flatSpaceSafes = flattenSafeItems(spaceSafes)
 
     const safesToRemove = flatSpaceSafes
@@ -166,7 +166,7 @@ const useOnboardingSubmit = (
     if (safesToRemove.length === 0) return
 
     const result = await removeSafesFromSpace({
-      spaceId: spaceIdNum,
+      spaceId: spaceIdStr,
       deleteSpaceSafesDto: { safes: safesToRemove },
     })
     if (result.error) {
@@ -174,9 +174,9 @@ const useOnboardingSubmit = (
     }
   }
 
-  const processSelectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdNum: number) => {
-    await addNewSafes(selectedSafes, spaceIdNum)
-    await removeUnselectedSafes(selectedSafes, spaceIdNum)
+  const processSelectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdStr: string) => {
+    await addNewSafes(selectedSafes, spaceIdStr)
+    await removeUnselectedSafes(selectedSafes, spaceIdStr)
   }
 
   const onSubmit = handleSubmit(async (data) => {
@@ -187,7 +187,7 @@ const useOnboardingSubmit = (
 
     try {
       trackEvent({ ...SPACE_EVENTS.ADD_ACCOUNTS })
-      await processSelectedSafes(data.selectedSafes, Number(spaceId))
+      await processSelectedSafes(data.selectedSafes, spaceId)
 
       onSuccess()
     } catch (e) {
