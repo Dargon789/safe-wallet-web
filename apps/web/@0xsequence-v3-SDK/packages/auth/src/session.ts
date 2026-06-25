@@ -120,7 +120,7 @@ export class Session {
             continue
           }
 
-          const coder = universal.genericCoderFor(config.config.version)
+          const coder = universal.genericCoderFor(config.config.version ?? 1)
           const signers = coder.config.signersOf(config.config)
 
           if (signers.length === 1 && signers[0].address === referenceSigner) {
