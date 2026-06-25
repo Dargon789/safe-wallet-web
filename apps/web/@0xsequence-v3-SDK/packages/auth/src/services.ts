@@ -114,7 +114,7 @@ export class Services {
           jwtAuth = (await this.getJWT(true)).token
           break
         } catch (error) {
-          if (i === maxTries) {
+          if (i >= maxTries) {
             console.error(`couldn't authenticate after ${maxTries} attempts`, error)
             throw error
           }
