@@ -20,7 +20,7 @@ function getFullCertificateChain(hostname, port = 443) {
       hostname,
       port,
       method: 'HEAD',
-      rejectUnauthorized: false,
+      rejectUnauthorized: true,
     }
 
     const req = https.request(options, (res) => {

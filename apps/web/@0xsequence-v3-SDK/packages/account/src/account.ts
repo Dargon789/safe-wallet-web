@@ -414,7 +414,8 @@ export class Account {
 
     // On immutable chains, we add the WalletProxyHook
     const { proxyImplementationHook } = this.contexts[status.config.version]
-    if (proxyImplementationHook && (chainId === ChainId.IMMUTABLE_ZKEVM || chainId === ChainId.IMMUTABLE_ZKEVM_TESTNET)) {
+    const chainIdNum = Number(chainId)
+    if (proxyImplementationHook && (chainIdNum === ChainId.IMMUTABLE_ZKEVM || chainIdNum === ChainId.IMMUTABLE_ZKEVM_TESTNET)) {
       const provider = this.providerFor(chainId)
       if (provider) {
         const hook = new ethers.Contract(this.address, walletContracts.walletProxyHook.abi, provider)
