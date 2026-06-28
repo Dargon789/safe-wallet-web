@@ -14204,6 +14204,7 @@ __metadata:
     "@types/semver": "npm:^7.3.10"
     "@typescript-eslint/eslint-plugin": "npm:^7.6.0"
     "@typescript-eslint/parser": "npm:^8.18.1"
+    "@vercel/analytics": "npm:^2.0.1"
     "@walletconnect/core": "npm:^2.21.10"
     "@walletconnect/utils": "npm:^2.21.10"
     "@web3-onboard/coinbase": "npm:^2.4.2"
@@ -20608,6 +20609,39 @@ __metadata:
   peerDependencies:
     valibot: ^1.2.0
   checksum: 10/ea6285b258775f9112ad9b6a00bc6c7ab1af6491937e65edf43232a1ecf490cde3d14cd8474103684097ddcd9230bcd16d08805f3e0b62ecffa9d283f977c9b5
+  languageName: node
+  linkType: hard
+
+"@vercel/analytics@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "@vercel/analytics@npm:2.0.1"
+  peerDependencies:
+    "@remix-run/react": ^2
+    "@sveltejs/kit": ^1 || ^2
+    next: ">= 13"
+    nuxt: ">= 3"
+    react: ^18 || ^19 || ^19.0.0-rc
+    svelte: ">= 4"
+    vue: ^3
+    vue-router: ^4
+  peerDependenciesMeta:
+    "@remix-run/react":
+      optional: true
+    "@sveltejs/kit":
+      optional: true
+    next:
+      optional: true
+    nuxt:
+      optional: true
+    react:
+      optional: true
+    svelte:
+      optional: true
+    vue:
+      optional: true
+    vue-router:
+      optional: true
+  checksum: 10/ffef3eea08992e40e08d0fc9900396a9433855a4aaca90602bfea935c26faa30b6d208c034b6e249fb8a69c81cb5a11aa3acd725d5b9067fb30a4508879c6383
   languageName: node
   linkType: hard
 

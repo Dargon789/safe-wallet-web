@@ -1,4 +1,5 @@
 import Analytics from '@/services/analytics/Analytics'
+import { Analytics as VercelAnalytics } from '@vercel/analytics/next'
 import type { ReactNode } from 'react'
 import { type ReactElement } from 'react'
 import { type AppProps } from 'next/app'
@@ -236,6 +237,8 @@ const SafeWalletApp = ({
             <Analytics />
 
             <PkModulePopup />
+
+            <VercelAnalytics />
           </CaptchaProvider>
         </AppProviders>
       </CacheProvider>
