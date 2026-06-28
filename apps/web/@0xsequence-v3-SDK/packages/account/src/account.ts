@@ -414,7 +414,8 @@ export class Account {
 
     // On immutable chains, we add the WalletProxyHook
     const { proxyImplementationHook } = this.contexts[status.config.version]
-    if (proxyImplementationHook && (chainId === ChainId.IMMUTABLE_ZKEVM || chainId === ChainId.IMMUTABLE_ZKEVM_TESTNET)) {
+    const chainIdNum = Number(chainId)
+    if (proxyImplementationHook && (chainIdNum === ChainId.IMMUTABLE_ZKEVM || chainIdNum === ChainId.IMMUTABLE_ZKEVM_TESTNET)) {
       const provider = this.providerFor(chainId)
       if (provider) {
         const hook = new ethers.Contract(this.address, walletContracts.walletProxyHook.abi, provider)
@@ -1048,7 +1049,7 @@ export class Account {
 
     const predecorated = skipPreDecorate ? txs : await this.predecorateTransactions(txs, status, chainId)
     const hasTxs = commons.transaction.fromTransactionish(this.address, predecorated).length > 0
-    const signed = hasTxs ? await this.signTransactions(predecorated, chainId, undefined, options) : undefined
+    const signed = hasTxs ? await this.signTransactions(predecorated, chainId, status, options) : undefined
 
     const childBundles = await this.orchestrator.predecorateSignedTransactions({ chainId })
 
@@ -1058,7 +1059,7 @@ export class Account {
     }
     bundles.push(...childBundles.filter(b => b.transactions.length > 0))
 
-    return this.sendSignedTransactions(bundles, chainId, quote, undefined, callback, options?.projectAccessKey)
+    return this.sendSignedTransactions(bundles, chainId, quote, status, callback, options?.projectAccessKey)
   }
 
   async signTypedData(
