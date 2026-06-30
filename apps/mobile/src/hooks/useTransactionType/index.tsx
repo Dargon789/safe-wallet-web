@@ -50,7 +50,7 @@ export const getTransactionType = (tx: Transaction): TxType => {
       return {
         image: toAddress?.logoUri || <SafeFontIcon name={'settings'} />,
         icon: toAddress?.logoUri || <SafeFontIcon name={'settings'} />,
-        text: 'Safe Account created',
+        text: 'Safe account created',
       }
     }
     case TransactionInfoType.SWAP_TRANSFER:
@@ -94,6 +94,20 @@ export const getTransactionType = (tx: Transaction): TxType => {
         image: <SafeFontIcon name={'transaction-swap'} />,
         icon: <SafeFontIcon name={'transaction-swap'} />,
         text: 'TWAP order',
+      }
+    }
+    case 'SwapAndBridge': {
+      return {
+        image: <SafeFontIcon name={'transaction-swap'} />,
+        icon: <SafeFontIcon name={'transaction-swap'} />,
+        text: 'Bridge transaction',
+      }
+    }
+    case 'Swap': {
+      return {
+        image: <SafeFontIcon name={'transaction-swap'} />,
+        icon: <SafeFontIcon name={'transaction-swap'} />,
+        text: 'LiFi swap',
       }
     }
     case TransactionInfoType.CUSTOM: {

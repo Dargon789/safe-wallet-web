@@ -1,7 +1,8 @@
 import { useVisibleTokens } from '@/components/tx-flow/flows/TokenTransfer/utils'
 import { type ReactElement, useContext, useEffect, useMemo, useState } from 'react'
-import { type TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
+import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form'
+
 import {
   Alert,
   AlertTitle,
@@ -23,14 +24,14 @@ import {
   MultiTokenTransferFields,
   TokenTransferType,
   MultiTransfersFields,
-} from '.'
+} from './types'
 import TxCard from '../../common/TxCard'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import RecipientRow from './RecipientRow'
 import { SafeAppsName } from '@/config/constants'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
@@ -41,8 +42,16 @@ import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
+import {
+  NoFeeCampaignFeature,
+  useNoFeeCampaignEligibility,
+  useIsNoFeeCampaignEnabled,
+} from '@/features/no-fee-campaign'
+import { useLoadFeature } from '@/features/__core__'
+import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
+import uniq from 'lodash/uniq'
 
-export const AutocompleteItem = (item: { tokenInfo: TokenInfo; balance: string }): ReactElement => (
+export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balance: string }): ReactElement => (
   <Grid
     container
     sx={{
@@ -50,7 +59,12 @@ export const AutocompleteItem = (item: { tokenInfo: TokenInfo; balance: string }
       gap: 1,
     }}
   >
-    <TokenIcon logoUri={item.tokenInfo.logoUri} key={item.tokenInfo.address} tokenSymbol={item.tokenInfo.symbol} />
+    <TokenIcon
+      logoUri={item.tokenInfo.logoUri}
+      key={item.tokenInfo.address}
+      tokenSymbol={item.tokenInfo.symbol}
+      size={32}
+    />
 
     <Grid item xs data-testid="token-item">
       <Typography
@@ -75,7 +89,8 @@ export type CreateTokenTransferProps = {
   txNonce?: number
 }
 
-export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElement => {
+const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElement => {
+  const { NoFeeCampaignTransactionCard } = useLoadFeature(NoFeeCampaignFeature)
   const disableSpendingLimit = txNonce !== undefined
   const [csvAirdropModalOpen, setCsvAirdropModalOpen] = useState<boolean>(false)
   const [maxRecipientsInfo, setMaxRecipientsInfo] = useState<boolean>(false)
@@ -86,6 +101,8 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
   const [safeApps] = useRemoteSafeApps({ name: SafeAppsName.CSV })
   const isMassPayoutsEnabled = useHasFeature(FEATURES.MASS_PAYOUTS)
   const { onNext, data } = useContext(TxFlowContext) as TxFlowContextType<MultiTokenTransferParams>
+  const { isEligible } = useNoFeeCampaignEligibility()
+  const isNoFeeCampaignEnabled = useIsNoFeeCampaignEnabled()
 
   useEffect(() => {
     if (txNonce !== undefined) {
@@ -105,7 +122,9 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
         data?.recipients.map(({ tokenAddress, ...rest }) => ({
           ...rest,
           [TokenTransferFields.tokenAddress]:
-            canCreateSpendingLimitTx && !canCreateStandardTx ? balancesItems[0]?.tokenInfo.address : tokenAddress,
+            canCreateSpendingLimitTx && !canCreateStandardTx
+              ? tokenAddress || balancesItems[0]?.tokenInfo.address
+              : tokenAddress,
         })) || [],
     },
     mode: 'onChange',
@@ -164,6 +183,14 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
 
   const canBatch = isMassPayoutsEnabled && type === TokenTransferType.multiSig
 
+  const recipientsWatched = useWatch({ control, name: MultiTokenTransferFields.recipients })
+  const recipientAddresses = useMemo(
+    () => uniq(recipientsWatched.map((recipient) => recipient.recipient).filter(Boolean)),
+    [recipientsWatched],
+  )
+
+  useSafeShieldForRecipients(recipientAddresses)
+
   return (
     <TxCard>
       <FormProvider {...formMethods}>
@@ -202,6 +229,8 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
                     color={canAddMoreRecipients ? 'primary' : 'error.main'}
                   >{`${recipientFields.length}/${MAX_RECIPIENTS}`}</Typography>
                 </Stack>
+
+                {isEligible && isNoFeeCampaignEnabled && <NoFeeCampaignTransactionCard />}
 
                 {hasInsufficientFunds && (
                   <Alert data-testid="insufficient-balance-error" severity="error">
@@ -245,7 +274,7 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
               <Divider className={commonCss.nestedDivider} />
 
               <CardActions>
-                <Button variant="contained" type="submit">
+                <Button variant="contained" type="submit" disabled={!formState.isValid}>
                   Next
                 </Button>
               </CardActions>

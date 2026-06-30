@@ -5,14 +5,14 @@ const searchAppInput = 'input[id="search-by-name"]'
 const appUrlInput = 'input[name="appUrl"]'
 const closePreviewWindowBtn = 'button[aria-label*="Close"][aria-label*="preview"]'
 export const contractMethodIndex = '[name="contractMethodIndex"]'
-export const saveToLibraryBtn = 'button[title="Save to Library"]'
-export const downloadBatchBtn = 'button[title="Download batch"]'
-export const deleteBatchBtn = 'button[title="Delete Batch"]'
+export const saveToLibraryBtn = 'button[aria-label="Save to Library"]'
+export const downloadBatchBtn = 'button[aria-label="Download batch"]'
+export const deleteBatchBtn = 'button[aria-label="Delete Batch"]'
 const appModal = '[data-testid="app-info-modal"]'
 export const safeAppsList = '[data-testid="apps-list"]'
 const openSafeAppBtn = '[data-testid="open-safe-app-btn"]'
 const appMessageInput = 'input[placeholder="Message"]'
-const txBuilderUntrustedFallbackAlert = '[data-testid="untrusted-fallback-handler-alert"]'
+const txBuilderUntrustedFallbackWarning = '[data-testid="untrusted-fallback-handler-warning"]'
 export const handlerInput = 'input[id="contract-field-handler"]'
 const decodedTxSummary = '[data-testid="decoded-tx-summary"]'
 export const cowFallBackHandlerTitle = 'div[title="CowSwapFallbackHandler"]'
@@ -70,9 +70,9 @@ export const testBooleanValue3 = '3 testBooleanValue'
 export const transfer2AssetsStr = 'Transfer 2 assets'
 
 export const testTransfer1 = '1 transfer'
-export const testTransfer2 = '2 MetaMultiSigWallet: transfer'
-export const nativeTransfer2 = '2 native transfer'
-export const nativeTransfer1 = '1 native transfer'
+export const testTransfer2 = '2 transfer'
+export const nativeTransfer2 = /2 Send.*ETH to.*/
+export const nativeTransfer1 = /1 Send.*ETH to.*/
 
 export const testNativeTransfer = 'native transfer'
 
@@ -153,11 +153,11 @@ export const permissionCheckboxNames = {
 export const cowFallbackHandler = 'sep:0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5'
 
 export function verifyUntrustedHandllerWarningVisible() {
-  cy.get(txBuilderUntrustedFallbackAlert).should('be.visible')
+  cy.get(txBuilderUntrustedFallbackWarning).should('be.visible')
 }
 
 export function verifyUntrustedHandllerWarningDoesNotExist() {
-  cy.get(txBuilderUntrustedFallbackAlert).should('not.exist')
+  cy.get(txBuilderUntrustedFallbackWarning).should('not.exist')
 }
 
 export function clickOnAdvancedDetails() {
@@ -365,8 +365,4 @@ export function uncheckAllPermissions(element) {
 
 export function checkAllPermissions(element) {
   cy.wrap(element).findByText(allowAllPermissions).click()
-}
-
-export function verifyPinnedApp(name) {
-  cy.get(`[aria-label="${name}"]`)
 }

@@ -1,5 +1,5 @@
 import type { BigNumberish } from 'ethers'
-import { formatUnits, parseUnits } from 'ethers'
+import { formatUnits, isAddress, parseUnits } from 'ethers'
 import { formatAmount, formatAmountPrecise } from '@safe-global/utils/utils/formatNumber'
 import { formatDuration, intervalToDuration } from 'date-fns'
 
@@ -51,6 +51,16 @@ export const safeParseUnits = (value: string, decimals?: number | string | null)
     console.error('Error parsing units', err)
     return
   }
+}
+
+export type Address = `0x${string}`
+
+export const asAddress = (value: string): Address => {
+  if (!isAddress(value)) {
+    throw new Error(`Invalid address: ${value}`)
+  }
+
+  return value as Address
 }
 
 export const shortenAddress = (address: string, length = 4): string => {
@@ -110,11 +120,13 @@ export const maybePlural = (quantity: number | unknown[]) => {
   return quantity === 1 ? '' : 's'
 }
 
-export const formatPercentage = (value: number) => {
+export const formatPercentage = (value: number, hideFractions?: boolean) => {
+  const fraction = hideFractions ? 0 : 2
+
   return new Intl.NumberFormat(undefined, {
     style: 'percent',
-    maximumFractionDigits: 2,
+    maximumFractionDigits: fraction,
     signDisplay: 'never',
-    minimumFractionDigits: 2,
+    minimumFractionDigits: fraction,
   }).format(value)
 }

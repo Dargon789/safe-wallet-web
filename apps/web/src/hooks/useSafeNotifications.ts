@@ -1,11 +1,9 @@
+import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { useCallback, useEffect } from 'react'
 import { showNotification, closeNotification } from '@/store/notificationsSlice'
-import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
 import useSafeInfo from './useSafeInfo'
 import { useAppDispatch } from '@/store'
 import { AppRoutes } from '@/config/routes'
-import { isMigrationToL2Possible } from '@/services/contracts/safeContracts'
-import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
 import { useRouter } from 'next/router'
 import useIsSafeOwner from './useIsSafeOwner'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -97,8 +95,8 @@ const useSafeNotifications = (): void => {
         groupKey: OUTDATED_VERSION_KEY,
 
         message: isUnsupported
-          ? `Safe Account version ${version} is not supported by this web app anymore. You can update your Safe Account via the CLI.`
-          : `Your Safe Account version ${version} is out of date. Please update it.`,
+          ? `Safe account version ${version} is not supported by this web app anymore. You can update your Safe account via the CLI.`
+          : `Your Safe account version ${version} is out of date. Please update it.`,
 
         link: isUnsupported
           ? CLI_LINK
@@ -107,7 +105,7 @@ const useSafeNotifications = (): void => {
                 pathname: AppRoutes.settings.setup,
                 query: { safe: query.safe },
               },
-              title: 'Update Safe Account',
+              title: 'Update Safe account',
             },
 
         onClose: () => dismissUpdateNotification(OUTDATED_VERSION_KEY),
@@ -132,33 +130,10 @@ const useSafeNotifications = (): void => {
   ])
 
   /**
-   * Show a notification when the Safe master copy is not supported
+   * Notification for unsupported master copy has been moved to the
+   * "Attention required" panel on the dashboard (UnsupportedMastercopyWarning component)
+   * to consolidate all warning banners in one place.
    */
-  useEffect(() => {
-    if (isValidMasterCopy(safe.implementationVersionState)) return
-
-    const isMigrationPossible = isMigrationToL2Possible(safe)
-
-    const message = isMigrationPossible
-      ? `This Safe Account was created with an unsupported base contract.
-           It is possible to migrate it to a compatible base contract. You can migrate it to a compatible contract on the Home screen.`
-      : `This Safe Account was created with an unsupported base contract.
-           The web interface might not work correctly.
-           We recommend using the command line interface instead.`
-
-    const id = dispatch(
-      showNotification({
-        variant: isMigrationPossible ? 'info' : 'warning',
-        message,
-        groupKey: 'invalid-mastercopy',
-        link: isMigrationPossible ? undefined : CLI_LINK,
-      }),
-    )
-
-    return () => {
-      dispatch(closeNotification({ id }))
-    }
-  }, [dispatch, safe, safe.implementationVersionState])
 }
 
 export default useSafeNotifications

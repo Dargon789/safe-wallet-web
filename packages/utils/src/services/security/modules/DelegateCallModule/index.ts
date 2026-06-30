@@ -1,14 +1,14 @@
-import { OperationType } from '@safe-global/safe-core-sdk-types'
+import { OperationType } from '@safe-global/types-kit'
 import { getMultiSendCallOnlyContractDeployment } from '@safe-global/utils/services/contracts/deployments'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeTransaction } from '@safe-global/types-kit'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type SafeState as SafeInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import { SecuritySeverity } from '../types'
 import type { SecurityModule, SecurityResponse } from '../types'
 
 type DelegateCallModuleRequest = {
-  chain: ChainInfo
+  chain: Chain
   safeVersion: SafeInfo['version']
   safeTransaction: SafeTransaction
 }
@@ -46,7 +46,7 @@ export class DelegateCallModule implements SecurityModule<DelegateCallModuleRequ
       payload: {
         description: {
           short: 'Unexpected DelegateCall',
-          long: 'This transaction is a DelegateCall. It calls a smart contract that will be able to modify your Safe Account.',
+          long: 'This transaction is a DelegateCall. It calls a smart contract that will be able to modify your Safe account.',
         },
       },
     }

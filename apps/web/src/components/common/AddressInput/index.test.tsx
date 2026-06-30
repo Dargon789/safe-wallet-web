@@ -8,25 +8,35 @@ import AddressInput, { type AddressInputProps } from '.'
 import { useCurrentChain } from '@/hooks/useChains'
 import useNameResolver from '@/components/common/AddressInput/useNameResolver'
 import { chainBuilder } from '@/tests/builders/chains'
-import { FEATURES } from '@safe-global/safe-gateway-typescript-sdk'
+import { FEATURES } from '@safe-global/store/gateway/types'
 import userEvent from '@testing-library/user-event'
+import { ContactSource } from '@/hooks/useAllAddressBooks'
 
 const mockChain = chainBuilder()
   .with({ features: [FEATURES.DOMAIN_LOOKUP] })
   .with({ chainId: '11155111' })
   .build()
 
+const mockMainnetChain = chainBuilder()
+  .with({ features: [FEATURES.DOMAIN_LOOKUP] })
+  .with({ chainId: '1', shortName: 'eth' })
+  .build()
+
 // mock useCurrentChain
 jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: jest.fn(() => mockChain),
   useChain: jest.fn(() => mockChain),
+  useHasFeature: jest.fn(() => false),
 }))
 
 // mock useNameResolver
 jest.mock('@/components/common/AddressInput/useNameResolver', () => ({
   __esModule: true,
+  getEnsNotAvailableError: (chain?: { chainName?: string }) =>
+    `ENS name not available on ${chain?.chainName || 'this network'}`,
   default: jest.fn((val: string) => ({
     address: val === 'zero.eth' ? '0x0000000000000000000000000000000000000000' : undefined,
+    name: val === 'zero.eth' ? 'zero.eth' : undefined,
     resolverError: val === 'bogus.eth' ? new Error('Failed to resolve') : undefined,
     resolving: false,
   })),
@@ -36,10 +46,12 @@ const TestForm = ({
   address,
   validate,
   disabled,
+  chain,
 }: {
   address: string
   validate?: AddressInputProps['validate']
   disabled?: boolean
+  chain?: AddressInputProps['chain']
 }) => {
   const name = 'recipient'
 
@@ -55,15 +67,20 @@ const TestForm = ({
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(() => null)}>
-        <AddressInput name={name} label="Recipient address" validate={validate} disabled={disabled} />
+        <AddressInput name={name} label="Recipient address" validate={validate} disabled={disabled} chain={chain} />
         <button type="submit">Submit</button>
       </form>
     </FormProvider>
   )
 }
 
-const setup = (address: string, validate?: AddressInputProps['validate'], disabled?: boolean) => {
-  const utils = render(<TestForm address={address} validate={validate} disabled={disabled} />)
+const setup = (
+  address: string,
+  validate?: AddressInputProps['validate'],
+  disabled?: boolean,
+  chain?: AddressInputProps['chain'],
+) => {
+  const utils = render(<TestForm address={address} validate={validate} disabled={disabled} chain={chain} />)
   const input = utils.getByLabelText('Recipient address', { exact: false })
 
   return {
@@ -183,7 +200,60 @@ describe('AddressInput tests', () => {
 
     await waitFor(() => {
       expect(input.value).toBe('0x0000000000000000000000000000000000000000')
-      expect(useNameResolver).toHaveBeenCalledWith('zero.eth')
+      expect(useNameResolver).toHaveBeenCalledWith('zero.eth', undefined)
+    })
+  })
+
+  it('should label the field with the ENS name it resolved from', async () => {
+    const { input, utils } = setup('')
+
+    act(() => {
+      fireEvent.change(input, { target: { value: 'zero.eth' } })
+    })
+
+    await waitFor(() => {
+      expect(input.value).toBe('0x0000000000000000000000000000000000000000')
+      expect(utils.getByLabelText('Address resolved from zero.eth', { exact: false })).toBeDefined()
+    })
+  })
+
+  it('should revert the label when the resolved address is edited', async () => {
+    const { input, utils } = setup('')
+
+    act(() => {
+      fireEvent.change(input, { target: { value: 'zero.eth' } })
+    })
+
+    await waitFor(() => expect(utils.getByLabelText('Address resolved from zero.eth', { exact: false })).toBeDefined())
+
+    act(() => {
+      fireEvent.change(input, { target: { value: TEST_ADDRESS_B } })
+    })
+
+    await waitFor(() => {
+      expect(utils.queryByLabelText('Address resolved from zero.eth', { exact: false })).toBeNull()
+    })
+  })
+
+  it('should resolve ENS names against the given chain even if the current chain lacks the feature', async () => {
+    // The Spaces address book is chain-agnostic, so it passes mainnet to resolve .eth names while
+    // the connected/current chain (here without DOMAIN_LOOKUP) would otherwise gate resolution off.
+    ;(useCurrentChain as jest.Mock).mockImplementation(() => ({
+      shortName: 'gno',
+      chainId: '100',
+      chainName: 'Gnosis Chain',
+      features: [],
+    }))
+
+    const { input } = setup('', undefined, undefined, mockMainnetChain)
+
+    act(() => {
+      fireEvent.change(input, { target: { value: 'zero.eth' } })
+    })
+
+    await waitFor(() => {
+      expect(input.value).toBe('0x0000000000000000000000000000000000000000')
+      expect(useNameResolver).toHaveBeenCalledWith('zero.eth', mockMainnetChain)
     })
   })
 
@@ -195,7 +265,7 @@ describe('AddressInput tests', () => {
       jest.advanceTimersByTime(1000)
     })
 
-    expect(useNameResolver).toHaveBeenCalledWith('bogus.eth')
+    expect(useNameResolver).toHaveBeenCalledWith('bogus.eth', undefined)
     await waitFor(() => expect(utils.getByLabelText(`Failed to resolve`, { exact: false })).toBeDefined())
   })
 
@@ -214,9 +284,31 @@ describe('AddressInput tests', () => {
       jest.advanceTimersByTime(1000)
     })
 
-    expect(useNameResolver).toHaveBeenCalledWith('')
+    expect(useNameResolver).toHaveBeenCalledWith('', undefined)
     await waitFor(() => expect(input.value).toBe('zero.eth'))
-    await waitFor(() => expect(utils.getByLabelText('Invalid address format', { exact: false })).toBeDefined())
+    await waitFor(() =>
+      expect(utils.getByLabelText('ENS name not available on Goerli', { exact: false })).toBeDefined(),
+    )
+  })
+
+  it('shows a domain-specific error when an ENS name cannot be resolved on the chain', async () => {
+    ;(useCurrentChain as jest.Mock).mockImplementation(() => ({
+      shortName: 'matic',
+      chainId: '137',
+      chainName: 'Polygon',
+      features: [],
+    }))
+
+    const { input, utils } = setup('')
+
+    act(() => {
+      fireEvent.change(input, { target: { value: 'vitalik.eth' } })
+      jest.advanceTimersByTime(1000)
+    })
+
+    await waitFor(() =>
+      expect(utils.getByLabelText('ENS name not available on Polygon', { exact: false })).toBeDefined(),
+    )
   })
 
   it('should show chain prefix in an adornment', async () => {
@@ -225,18 +317,6 @@ describe('AddressInput tests', () => {
     await waitFor(() => expect(input.value).toBe(TEST_ADDRESS_A))
 
     expect(input.previousElementSibling?.textContent).toBe(`${mockChain.shortName}:`)
-  })
-
-  // TODO: Fix this test
-  it.skip('should not show the adornment prefix when the value contains correct prefix', async () => {
-    const mockChain = chainBuilder().with({ features: [] }).build()
-    ;(useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
-
-    const { input } = setup(`${mockChain.shortName}:${TEST_ADDRESS_A}`)
-
-    fireEvent.change(input, { target: { value: `${mockChain.shortName}:${TEST_ADDRESS_B}` } })
-
-    await waitFor(() => expect(input.previousElementSibling?.textContent).toBe(''))
   })
 
   it('should keep a bare address in the form state', async () => {
@@ -293,9 +373,21 @@ describe('AddressInput tests', () => {
     const mockChainId = '11155111'
     const mockSafeName = 'Test Safe'
     const mockAB = { [TEST_ADDRESS_A]: mockSafeName }
+    const mockContact = {
+      name: mockSafeName,
+      address: TEST_ADDRESS_A,
+      chainIds: [mockChainId],
+      createdBy: '',
+      createdByUserId: 0,
+      lastUpdatedBy: '',
+      lastUpdatedByUserId: 0,
+      createdAt: '',
+      updatedAt: '',
+      source: ContactSource.local,
+    }
 
     jest.spyOn(urlChainId, 'default').mockImplementation(() => mockChainId)
-    jest.spyOn(allAddressBooks, 'default').mockReturnValue({ [mockChainId]: mockAB })
+    jest.spyOn(allAddressBooks, 'useAddressBookItem').mockReturnValue(mockContact)
     jest.spyOn(addressBook, 'default').mockImplementation(() => mockAB)
 
     const { input, utils } = setup(TEST_ADDRESS_A)
@@ -307,13 +399,33 @@ describe('AddressInput tests', () => {
     await waitFor(() => expect(utils.getByText(mockSafeName)).toBeInTheDocument())
   })
 
+  it('should render a readable read-only field when disabled even if the address is not in the address book', async () => {
+    // Address book is empty (mocked in beforeEach), mirroring a contact shown under a source
+    // (e.g. spaceOnly) that does not contain it. The disabled field must still be readable.
+    const { utils } = setup(TEST_ADDRESS_A, undefined, true)
+
+    await waitFor(() => expect(utils.getByTestId('address-book-recipient')).toBeInTheDocument())
+  })
+
   it('should clear the input on click if the address is in the address book and not disabled', async () => {
     const mockChainId = '11155111'
     const mockSafeName = 'Test Safe'
     const mockAB = { [TEST_ADDRESS_A]: mockSafeName }
+    const mockContact = {
+      name: mockSafeName,
+      address: TEST_ADDRESS_A,
+      chainIds: [mockChainId],
+      createdBy: '',
+      createdByUserId: 0,
+      lastUpdatedBy: '',
+      lastUpdatedByUserId: 0,
+      createdAt: '',
+      updatedAt: '',
+      source: ContactSource.local,
+    }
 
     jest.spyOn(urlChainId, 'default').mockImplementation(() => mockChainId)
-    jest.spyOn(allAddressBooks, 'default').mockReturnValue({ [mockChainId]: mockAB })
+    jest.spyOn(allAddressBooks, 'useAddressBookItem').mockReturnValue(mockContact)
     jest.spyOn(addressBook, 'default').mockImplementation(() => mockAB)
 
     const { input, utils } = setup(TEST_ADDRESS_A)
@@ -338,9 +450,21 @@ describe('AddressInput tests', () => {
     const mockChainId = '11155111'
     const mockSafeName = 'Test Safe'
     const mockAB = { [TEST_ADDRESS_A]: mockSafeName }
+    const mockContact = {
+      name: mockSafeName,
+      address: TEST_ADDRESS_A,
+      chainIds: [mockChainId],
+      createdBy: '',
+      createdByUserId: 0,
+      lastUpdatedBy: '',
+      lastUpdatedByUserId: 0,
+      createdAt: '',
+      updatedAt: '',
+      source: ContactSource.local,
+    }
 
     jest.spyOn(urlChainId, 'default').mockImplementation(() => mockChainId)
-    jest.spyOn(allAddressBooks, 'default').mockReturnValue({ [mockChainId]: mockAB })
+    jest.spyOn(allAddressBooks, 'useAddressBookItem').mockReturnValue(mockContact)
     jest.spyOn(addressBook, 'default').mockImplementation(() => mockAB)
 
     const { input, utils } = setup(TEST_ADDRESS_A, undefined, true)

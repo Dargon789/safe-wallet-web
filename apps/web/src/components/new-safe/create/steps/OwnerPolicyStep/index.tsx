@@ -110,7 +110,7 @@ const OwnerPolicyStep = ({
             />
           ))}
           <Button
-            data-testid="add-owner-btn"
+            data-testid="add-new-signer"
             variant="text"
             onClick={() => appendOwner({ name: '', address: '' }, { shouldFocus: true })}
             startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
@@ -133,7 +133,7 @@ const OwnerPolicyStep = ({
           >
             Threshold
             <Tooltip
-              title="The threshold of a Safe Account specifies how many signers need to confirm a Safe Account transaction before it can be executed."
+              title="The threshold of a Safe account specifies how many signers need to confirm a Safe account transaction before it can be executed."
               arrow
               placement="top"
             >
@@ -194,13 +194,13 @@ const OwnerPolicyStep = ({
             <Button
               data-testid="back-btn"
               variant="outlined"
-              size="small"
+              size="large"
               onClick={handleBack}
               startIcon={<ArrowBackIcon fontSize="small" />}
             >
               Back
             </Button>
-            <Button data-testid="next-btn" type="submit" variant="contained" size="stretched" disabled={isDisabled}>
+            <Button data-testid="next-btn" type="submit" variant="contained" size="large" disabled={isDisabled}>
               Next
             </Button>
           </Box>

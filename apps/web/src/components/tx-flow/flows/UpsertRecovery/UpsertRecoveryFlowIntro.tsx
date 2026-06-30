@@ -22,23 +22,23 @@ const RecoverySteps = [
   {
     Icon: RecoveryRecoverer,
     title: 'Lost access? Let the Recoverer connect',
-    subtitle: 'The recovery process can be initiated by a trusted Recoverer when connected to your Safe Account.',
+    subtitle: 'The recovery process can be initiated by a trusted Recoverer when connected to your Safe account.',
   },
   {
     Icon: RecoveryDelay,
     title: 'Start the recovery process',
-    subtitle: 'Your Recoverer initiates the recovery process by proposing a new Safe Account setup on-chain.',
+    subtitle: 'Your Recoverer initiates the recovery process by proposing a new Safe account setup on-chain.',
   },
   {
     Icon: RecoveryExecution,
     title: 'All done! The Account is yours again',
     subtitle:
-      'Once the review window has passed, you can execute the recovery proposal and regain access to your Safe Account.',
+      'Once the review window has passed, you can execute the recovery proposal and regain access to your Safe account.',
   },
 ]
 
 export function UpsertRecoveryFlowIntro(): ReactElement {
-  const { onNext } = useContext(TxFlowContext)
+  const { onNext, data } = useContext(TxFlowContext)
   return (
     <TxCard>
       <Grid
@@ -78,7 +78,7 @@ export function UpsertRecoveryFlowIntro(): ReactElement {
       </Grid>
       <Divider className={commonCss.nestedDivider} />
       <CardActions sx={{ mt: 'var(--space-1) !important' }}>
-        <Button data-testid="next-btn" variant="contained" onClick={onNext}>
+        <Button data-testid="next-btn" variant="contained" onClick={() => onNext(data)}>
           Next
         </Button>
       </CardActions>

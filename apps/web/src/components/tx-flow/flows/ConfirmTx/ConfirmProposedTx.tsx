@@ -1,6 +1,5 @@
 import { type PropsWithChildren, type ReactElement, useContext, useEffect } from 'react'
-import { Typography } from '@mui/material'
-import { useChainId } from '@/hooks/useChainId'
+import useChainId from '@/hooks/useChainId'
 import { createExistingTx } from '@/services/tx/tx-sender'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import type { ReviewTransactionContentProps } from '@/components/tx/ReviewTransactionV2/ReviewTransactionContent'
@@ -13,20 +12,16 @@ type ConfirmProposedTxProps = PropsWithChildren<
   } & ReviewTransactionContentProps
 >
 
-const SIGN_TEXT = 'Sign this transaction.'
-const EXECUTE_TEXT = 'Submit the form to execute this transaction.'
-const SIGN_EXECUTE_TEXT = 'Sign or immediately execute this transaction.'
-
 const ConfirmProposedTx = ({ txNonce, children, ...props }: ConfirmProposedTxProps): ReactElement => {
   const chainId = useChainId()
-  const { setSafeTx, setSafeTxError, setNonce, setIsReadOnly } = useContext(SafeTxContext)
-  const { txId, onlyExecute, isExecutable } = useContext(TxFlowContext)
+  const { setSafeTx, setSafeTxError, setNonce } = useContext(SafeTxContext)
+  const { txId } = useContext(TxFlowContext)
 
   useEffect(() => {
-    txNonce !== undefined && setNonce(txNonce)
-    // Data of transactions in the queue should never be editable
-    setIsReadOnly(true)
-  }, [setNonce, txNonce, setIsReadOnly])
+    if (txNonce !== undefined) {
+      setNonce(txNonce)
+    }
+  }, [setNonce, txNonce])
 
   useEffect(() => {
     if (txId) {
@@ -34,14 +29,7 @@ const ConfirmProposedTx = ({ txNonce, children, ...props }: ConfirmProposedTxPro
     }
   }, [txId, chainId, setSafeTx, setSafeTxError])
 
-  const text = !onlyExecute ? (isExecutable ? SIGN_EXECUTE_TEXT : SIGN_TEXT) : EXECUTE_TEXT
-
-  return (
-    <ReviewTransaction {...props}>
-      <Typography mb={1}>{text}</Typography>
-      {children}
-    </ReviewTransaction>
-  )
+  return <ReviewTransaction {...props}>{children}</ReviewTransaction>
 }
 
 export default ConfirmProposedTx

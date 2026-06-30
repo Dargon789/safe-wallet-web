@@ -5,18 +5,30 @@ import React from 'react'
 import { Container } from '@/src/components/Container'
 import { CopyButton } from '@/src/components/CopyButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
-import { Pressable } from 'react-native'
+import { KeyboardAvoidingView, Pressable, TouchableOpacity } from 'react-native'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeInputWithLabel } from '@/src/components/SafeInput/SafeInputWithLabel'
 import { Controller, FieldNamesMarkedBoolean, type Control, type FieldErrors } from 'react-hook-form'
 import { type FormValues } from '@/src/features/Signer/types'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { SafeListItem } from '@/src/components/SafeListItem'
+import { BadgeWrapper } from '@/src/components/BadgeWrapper'
+import { SignerTypeBadge } from '@/src/components/SignerTypeBadge'
+import { useWalletConnectStatus } from '@/src/features/WalletConnect/Signer/hooks/useWalletConnectStatus'
+
 type Props = {
   signerAddress: string
   onPressExplorer: () => void
-  onPressDelete: () => void
+  onPressEdit: () => void
+  onPressViewPrivateKey?: () => void
+  onDeleteLedgerConnection?: () => void
   editMode: boolean
   name: string
+  hasPrivateKey: boolean
+  isLedgerSigner: boolean
+  isWcSigner: boolean
+  onReconnectWallet?: () => void
+  onRemoveWcSigner?: () => void
   control: Control<FormValues>
   errors: FieldErrors<FormValues>
   dirtyFields: FieldNamesMarkedBoolean<FormValues>
@@ -27,17 +39,31 @@ export const SignerView = ({
   errors,
   dirtyFields,
   signerAddress,
-  onPressDelete,
   onPressExplorer,
+  onPressEdit,
+  onPressViewPrivateKey,
+  onDeleteLedgerConnection,
   editMode,
   name,
+  hasPrivateKey,
+  isLedgerSigner,
+  isWcSigner,
+  onReconnectWallet,
+  onRemoveWcSigner,
 }: Props) => {
-  const { bottom } = useSafeAreaInsets()
+  const { bottom, top } = useSafeAreaInsets()
+  const isWcConnected = useWalletConnectStatus(signerAddress)
+
   return (
     <YStack flex={1}>
       <ScrollView flex={1}>
-        <View justifyContent={'center'} alignItems={'center'}>
-          <Identicon address={signerAddress as Address} size={56} />
+        <View justifyContent={'center'} alignItems={'center'} paddingTop={'$3'}>
+          <BadgeWrapper
+            badge={<SignerTypeBadge address={signerAddress as Address} testID="signer-detail-badge" />}
+            position="top-right"
+          >
+            <Identicon address={signerAddress as Address} size={56} />
+          </BadgeWrapper>
         </View>
         <View justifyContent={'center'} alignItems={'center'} marginTop={'$4'}>
           <H2 numberOfLines={1} maxWidth={300} marginTop={'$2'} textAlign={'center'}>
@@ -60,6 +86,11 @@ export const SignerView = ({
                   placeholder={'Enter signer name'}
                   error={dirtyFields.name && !!errors.name}
                   success={dirtyFields.name && !errors.name}
+                  right={
+                    <TouchableOpacity onPress={onPressEdit} hitSlop={8} testID="edit-signer-name-button">
+                      <SafeFontIcon name={editMode ? 'close' : 'edit'} color="$textSecondaryLight" size={16} />
+                    </TouchableOpacity>
+                  }
                 />
               )
             }}
@@ -72,23 +103,49 @@ export const SignerView = ({
           <XStack columnGap={'$3'}>
             <Text flex={1}>{signerAddress}</Text>
             <YStack justifyContent={'flex-start'}>
-              <XStack alignItems={'center'}>
-                <CopyButton value={signerAddress} color={'$colorSecondary'} />
-                <Pressable onPress={onPressExplorer}>
+              <XStack alignItems={'center'} gap="$1">
+                <CopyButton value={signerAddress} color={'$colorSecondary'} hitSlop={2} />
+                <Pressable onPress={onPressExplorer} hitSlop={2}>
                   <SafeFontIcon name={'external-link'} size={14} color={'$colorSecondary'} />
                 </Pressable>
               </XStack>
             </YStack>
           </XStack>
         </Container>
+
+        {hasPrivateKey && !editMode && (
+          <View marginTop={'$4'} borderTopWidth={1} borderColor={'$borderLight'} paddingTop={'$4'}>
+            <SafeListItem
+              label="View private key"
+              rightNode={<SafeFontIcon name="chevron-right" />}
+              onPress={onPressViewPrivateKey}
+              pressStyle={{ opacity: 0.2 }}
+            />
+          </View>
+        )}
       </ScrollView>
-      {!editMode && (
-        <View paddingHorizontal={'$4'} paddingTop={'$2'} paddingBottom={bottom ?? 60}>
-          <SafeButton danger={true} onPress={onPressDelete}>
-            Remove signer
-          </SafeButton>
+      <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={top + bottom}>
+        <View paddingTop={'$2'} paddingBottom={bottom ?? 60}>
+          {editMode ? (
+            <SafeButton onPress={onPressEdit}>Save</SafeButton>
+          ) : isLedgerSigner ? (
+            <SafeButton danger={true} onPress={onDeleteLedgerConnection}>
+              Delete connection
+            </SafeButton>
+          ) : isWcSigner ? (
+            <YStack gap="$3">
+              {onReconnectWallet && !isWcConnected && (
+                <SafeButton onPress={onReconnectWallet} testID="reconnect-wallet-button">
+                  Reconnect wallet
+                </SafeButton>
+              )}
+              <SafeButton danger={true} onPress={onRemoveWcSigner} testID="remove-wc-signer-button">
+                Remove signer
+              </SafeButton>
+            </YStack>
+          ) : null}
         </View>
-      )}
+      </KeyboardAvoidingView>
     </YStack>
   )
 }

@@ -19,7 +19,10 @@ export const useSimulation = (): UseSimulationReturn => {
   const [requestError, setRequestError] = useState<string | undefined>(undefined)
   const tenderly = useAppSelector(selectTenderly)
 
-  const simulationLink = useMemo(() => getSimulationLink(simulation?.simulation.id || ''), [simulation])
+  const simulationLink = useMemo(
+    () => getSimulationLink(simulation?.simulation.id || '', tenderly),
+    [simulation, tenderly],
+  )
 
   const resetSimulation = useCallback(() => {
     setSimulationRequestStatus(FETCH_STATUS.NOT_ASKED)
@@ -53,7 +56,7 @@ export const useSimulation = (): UseSimulationReturn => {
     simulateTransaction,
     // This is only used by the provider
     _simulationRequestStatus: simulationRequestStatus,
-    simulation,
+    simulationData: simulation,
     simulationLink,
     requestError,
     resetSimulation,

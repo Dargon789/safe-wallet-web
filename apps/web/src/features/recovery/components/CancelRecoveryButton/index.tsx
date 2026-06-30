@@ -9,15 +9,15 @@ import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
 import { CancelRecoveryFlow } from '@/components/tx-flow/flows'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { dispatchRecoverySkipExpired } from '@/features/recovery/services/recovery-sender'
+import { dispatchRecoverySkipExpired } from '../../services/recovery-sender'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { trackError, Errors } from '@/services/exceptions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { useRecoveryTxState } from '@/features/recovery/hooks/useRecoveryTxState'
+import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
 import { RecoveryListItemContext } from '../RecoveryListItem/RecoveryListItemContext'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '../../services/recovery-state'
 
-export function CancelRecoveryButton({
+export default function CancelRecoveryButton({
   recovery,
   compact = false,
 }: {
@@ -67,7 +67,7 @@ export function CancelRecoveryButton({
             onClick={onClick}
             variant="danger"
             disabled={isDisabled}
-            size={compact ? 'small' : 'stretched'}
+            size={compact ? 'small' : 'large'}
           >
             Cancel
           </Button>

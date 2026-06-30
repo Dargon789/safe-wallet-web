@@ -1,16 +1,15 @@
 import { H3, Text, View } from 'tamagui'
-import { Logo } from '@/src/components/Logo'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import React from 'react'
 import { YStack } from 'tamagui'
 import { IconName } from '@/src/types/iconTypes'
 import { BadgeThemeTypes } from '@/src/components/Logo/Logo'
-import { Identicon } from '@/src/components/Identicon'
-import { Address } from 'blo'
 import { formatWithSchema } from '@/src/utils/date'
+import { useDappOrigin } from '../DappOriginContext'
+import { TransactionHeaderLogo } from './TransactionHeaderLogo'
 
 interface TransactionHeaderProps {
   logo?: string
+  customLogo?: React.ReactNode
   badgeIcon: IconName
   badgeThemeName?: BadgeThemeTypes
   badgeColor: string
@@ -21,6 +20,7 @@ interface TransactionHeaderProps {
 
 export function TransactionHeader({
   logo,
+  customLogo,
   badgeIcon,
   badgeThemeName,
   badgeColor,
@@ -28,26 +28,36 @@ export function TransactionHeader({
   isIdenticon,
   submittedAt,
 }: TransactionHeaderProps) {
-  const date = formatWithSchema(submittedAt, 'MMM d yyyy')
+  const date = formatWithSchema(submittedAt, 'd MMM yyyy')
   const time = formatWithSchema(submittedAt, 'hh:mm a')
+  // When the tx originates from a WalletConnect dApp, surface its logo + name in place of the
+  // contract logo/title. Absent provider (history, native flows) → no-op.
+  const dappOrigin = useDappOrigin()
+  // `||` not `??`: a dApp publishing metadata.name = '' must not blank the header.
+  const showTitle = dappOrigin?.name || title
 
   return (
     <YStack position="relative" alignItems="center" gap="$2" marginTop="$4">
-      {isIdenticon ? (
-        <Identicon address={logo as Address} size={44} />
-      ) : (
-        <Logo
-          logoUri={logo}
-          size="$10"
-          badgeContent={<SafeFontIcon name={badgeIcon} color={badgeColor} size={12} />}
-          badgeThemeName={badgeThemeName}
-        />
-      )}
+      <TransactionHeaderLogo
+        dappOrigin={dappOrigin}
+        logo={logo}
+        customLogo={customLogo}
+        badgeIcon={badgeIcon}
+        badgeThemeName={badgeThemeName}
+        badgeColor={badgeColor}
+        isIdenticon={isIdenticon}
+      />
 
-      <View alignItems="center" gap="$1">
-        {typeof title === 'string' ? <H3 fontWeight={600}>{title}</H3> : title}
-        <Text color="$textSecondaryLight">
-          {date} at {time}
+      <View alignItems="center" gap="$2">
+        {typeof showTitle === 'string' ? (
+          <H3 fontWeight={600} fontSize="$7" textAlign="center">
+            {showTitle}
+          </H3>
+        ) : (
+          showTitle
+        )}
+        <Text color="$textSecondaryLight" fontSize="$2" lineHeight={16}>
+          {date}, {time}
         </Text>
       </View>
     </YStack>

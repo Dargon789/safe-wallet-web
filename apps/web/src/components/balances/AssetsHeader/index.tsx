@@ -2,7 +2,7 @@ import { useMemo, type ReactElement, type ReactNode } from 'react'
 
 import NavTabs from '@/components/common/NavTabs'
 import PageHeader from '@/components/common/PageHeader'
-import { balancesNavItems } from '@/components/sidebar/SidebarNavigation/config'
+import { balancesNavItems } from '@/components/common/NavTabs/navItemsConfig'
 
 import css from '@/components/common/PageHeader/styles.module.css'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -14,7 +14,6 @@ const AssetsHeader = ({ children }: { children?: ReactNode }): ReactElement => {
 
   return (
     <PageHeader
-      title="Assets"
       action={
         <div className={css.pageHeader}>
           <div className={css.navWrapper}>

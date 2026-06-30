@@ -4,7 +4,7 @@ import type { WalletKitTypes } from '@reown/walletkit'
 import useChains from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { capitalize } from '@safe-global/utils/utils/formatters'
-import { getPeerName, isBlockedBridge, isWarnedBridge } from '@/features/walletconnect/services/utils'
+import { getPeerName, isBlockedBridge, isWarnedBridge } from '../../services/utils'
 import { BRAND_NAME } from '@/config/constants'
 
 const NAME_FALLBACK = 'this dApp'
@@ -22,7 +22,7 @@ const Warnings: Record<string, { severity: AlertColor; message: string }> = {
   },
   UNSUPPORTED_CHAIN: {
     severity: 'error',
-    message: `${NAME_PLACEHOLDER} does not support this Safe Account's network (${CHAIN_PLACEHOLDER}). Please switch to a Safe Account on one of the supported networks below.`,
+    message: `${NAME_PLACEHOLDER} does not support this Safe account's network (${CHAIN_PLACEHOLDER}). Please switch to a Safe account on one of the supported networks below.`,
   },
   WRONG_CHAIN: {
     severity: 'info',

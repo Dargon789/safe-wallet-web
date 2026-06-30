@@ -3,6 +3,8 @@ import {
   formatAmount,
   formatCurrency,
   formatCurrencyPrecise,
+  formatCurrencyMinimal,
+  percentageOfTotal,
 } from '@safe-global/utils/utils/formatNumber'
 
 describe('formatNumber', () => {
@@ -93,6 +95,63 @@ describe('formatNumber', () => {
     it('should return "NaN" for invalid number input', () => {
       const result = formatCurrencyPrecise('invalid-number', 'USD')
       expect(result).toBe('$NaN ')
+    })
+  })
+
+  describe('formatCurrencyMinimal', () => {
+    it('returns "< $0.01" for tiny positive values that round to zero', () => {
+      expect(formatCurrencyMinimal(0.001, 'USD')).toMatch(/^<\s.*0\.01$/)
+      expect(formatCurrencyMinimal(0.004, 'USD')).toMatch(/^<\s.*0\.01$/)
+    })
+
+    it('rounds normally at the 0.005 boundary', () => {
+      expect(formatCurrencyMinimal(0.005, 'USD')).toMatch(/0\.01$/)
+      expect(formatCurrencyMinimal(0.005, 'USD')).not.toMatch(/^</)
+    })
+
+    it('returns "$ 0.00" for exact zero (no "<" prefix)', () => {
+      expect(formatCurrencyMinimal(0, 'USD')).toMatch(/0\.00$/)
+      expect(formatCurrencyMinimal(0, 'USD')).not.toMatch(/^</)
+    })
+
+    it('preserves precision for larger values (always x.xx)', () => {
+      expect(formatCurrencyMinimal(1.23, 'USD')).toMatch(/1\.23$/)
+      expect(formatCurrencyMinimal(1234.56, 'USD')).toMatch(/1,234\.56$/)
+    })
+
+    it('respects the currency symbol', () => {
+      expect(formatCurrencyMinimal(0.001, 'EUR')).toMatch(/€/)
+    })
+
+    it('does not apply the "<" prefix to negative tiny values', () => {
+      expect(formatCurrencyMinimal(-0.001, 'USD')).not.toMatch(/^</)
+    })
+  })
+
+  describe('percentageOfTotal', () => {
+    it('returns the correct fraction for typical inputs', () => {
+      expect(percentageOfTotal(30, 100)).toBeCloseTo(0.3)
+      expect(percentageOfTotal('75', '150')).toBeCloseTo(0.5)
+    })
+
+    it('handles a zero total by returning 0 (avoids division by 0)', () => {
+      expect(percentageOfTotal(10, 0)).toBe(0)
+    })
+
+    it('handles a negative total by returning 0', () => {
+      expect(percentageOfTotal(10, -50)).toBe(0)
+    })
+
+    it('handles non-numeric totals by returning 0', () => {
+      expect(percentageOfTotal(10, 'not-a-number')).toBe(0)
+    })
+
+    it('handles non-numeric balances by returning 0', () => {
+      expect(percentageOfTotal(NaN, 100)).toBe(0)
+    })
+
+    it('handles extremely large totals without throwing', () => {
+      expect(percentageOfTotal(1, Number.MAX_SAFE_INTEGER)).toBeCloseTo(1 / Number.MAX_SAFE_INTEGER)
     })
   })
 })

@@ -1,14 +1,21 @@
-import { SigningMethod } from '@safe-global/protocol-kit'
-import { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { SigningMethod } from '@safe-global/types-kit'
+import type { SafeTransaction } from '@safe-global/types-kit'
+import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { createConnectedWallet } from '@/src/services/web3'
 import { proposeTx } from '@/src/services/tx/tx-sender'
 import { SafeInfo } from '@/src/types/address'
 
 export type signTxParams = {
-  chain: ChainInfo
+  chain: Chain
   activeSafe: SafeInfo
   txId: string
   privateKey?: string
+  /**
+   * Pre-built SafeTransaction for un-proposed (draft) transactions. When
+   * supplied, the function signs this transaction directly instead of
+   * fetching its data from CGW by `txId`.
+   */
+  prebuiltSafeTx?: SafeTransaction
 }
 
 export const signTx = async ({
@@ -16,6 +23,7 @@ export const signTx = async ({
   activeSafe,
   txId,
   privateKey,
+  prebuiltSafeTx,
 }: signTxParams): Promise<{
   signature: string
   safeTransactionHash: string
@@ -28,12 +36,12 @@ export const signTx = async ({
   }
 
   const { protocolKit, wallet } = await createConnectedWallet(privateKey, activeSafe, chain)
-  const { safeTx } = await proposeTx({
-    activeSafe,
-    txId,
-    chain,
-    privateKey,
-  })
+
+  let safeTx: SafeTransaction | undefined = prebuiltSafeTx
+  if (!safeTx) {
+    const proposed = await proposeTx({ activeSafe, txId, chain, privateKey })
+    safeTx = proposed.safeTx ?? undefined
+  }
 
   if (!safeTx) {
     throw new Error('Safe transaction not found')

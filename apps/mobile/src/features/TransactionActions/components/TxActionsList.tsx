@@ -1,12 +1,18 @@
 import React, { useMemo } from 'react'
 import { Text, View, YStack } from 'tamagui'
-import { TransactionDetails, MultiSend } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { TransactionDetails, MultiSend, NativeToken } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ActionValueDecoded, AddressInfoIndex } from '@safe-global/store/gateway/types'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { formatVisualAmount, shortenAddress } from '@safe-global/utils/utils/formatters'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { router } from 'expo-router'
 import { useLocalSearchParams } from 'expo-router'
 import { Container } from '@/src/components/Container'
+import { useTxTokenInfo } from '@safe-global/utils/hooks/useTxTokenInfo'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectActiveChainCurrency } from '@/src/store/chains'
+import { HashDisplay } from '@/src/components/HashDisplay'
+import { multiSendDefaultsToSelf, resolveMultiSendToAddress } from '@safe-global/utils/utils/multiSend'
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 
 interface TxActionsListProps {
   txDetails: TransactionDetails
@@ -23,10 +29,71 @@ export const getActionName = (action: ActionValueDecoded | MultiSend, addressInf
   return contractName ? `${contractName}: ${name}` : action.dataDecoded?.method || 'contract interaction'
 }
 
+interface TxActionItemProps {
+  action: ActionValueDecoded | MultiSend
+  index: number
+  addressInfoIndex?: AddressInfoIndex
+  txData: TransactionDetails['txData']
+  safeAddress: string
+  defaultsToSelf: boolean
+}
+
+const TxActionItem = ({ action, index, addressInfoIndex, txData, safeAddress, defaultsToSelf }: TxActionItemProps) => {
+  const valueDecoded = txData?.dataDecoded?.parameters?.[0].valueDecoded
+  const tx = Array.isArray(valueDecoded) ? valueDecoded[index] : undefined
+  // MultiSend v1.5.0+ rewrites a zero-address sub-transaction `to` to the executing Safe.
+  const to = tx ? (defaultsToSelf ? resolveMultiSendToAddress(tx.to, safeAddress) : tx.to) : ''
+  const nativeCurrency = useAppSelector(selectActiveChainCurrency)
+
+  const transferTokenInfo = useTxTokenInfo(
+    tx?.data?.toString() || undefined,
+    tx?.value || undefined,
+    to,
+    nativeCurrency as NativeToken,
+    txData?.tokenInfoIndex ?? {},
+  )
+
+  if (!tx) {
+    return null
+  }
+
+  return (
+    <>
+      <View alignItems="center" flexDirection="row" justifyContent="space-between" gap={'$2'} flexWrap="wrap">
+        <View flexDirection="row" alignItems="center" gap={'$2'} maxWidth="80%">
+          <SafeFontIcon name="transaction-contract" color="$colorSecondary" size={18} />
+          <Text>{index + 1}</Text>
+
+          {transferTokenInfo?.tokenInfo?.symbol ? (
+            <View flexDirection="row" alignItems="center" gap={'$2'}>
+              <Text fontSize="$4" flex={1} numberOfLines={1} ellipsizeMode="tail">
+                Send {formatVisualAmount(transferTokenInfo.transferValue, transferTokenInfo?.tokenInfo?.decimals, 6)}{' '}
+                {transferTokenInfo.tokenInfo.symbol} to
+              </Text>
+              <HashDisplay value={to as `0x${string}`} showCopy={false} showExternalLink={false} />
+            </View>
+          ) : (
+            <Text fontSize="$4" flexShrink={1} flexWrap="wrap">
+              {getActionName(action, addressInfoIndex as AddressInfoIndex)}
+            </Text>
+          )}
+        </View>
+
+        <SafeFontIcon name="chevron-right" size={18} />
+      </View>
+    </>
+  )
+}
+
 export function TxActionsList({ txDetails }: TxActionsListProps) {
   const { txId } = useLocalSearchParams<{ txId: string }>()
 
   const { dataDecoded, addressInfoIndex } = txDetails.txData || {}
+  const safeAddress = txDetails.safeAddress
+  const { chainId } = useDefinedActiveSafe()
+  // Only MultiSend v1.5.0+ defaults a zero-address sub-transaction `to` to the executing Safe.
+  const multiSendAddress = txDetails.txData?.to?.value
+  const defaultsToSelf = !!multiSendAddress && multiSendDefaultsToSelf(multiSendAddress, chainId)
 
   const onActionPress = (action: MultiSend) => {
     router.push({
@@ -41,8 +108,16 @@ export function TxActionsList({ txDetails }: TxActionsListProps) {
 
   const transaction = dataDecoded?.parameters?.find((action) => action.name === 'transactions' && action.valueDecoded)
   const actions = useMemo(() => {
-    return Array.isArray(transaction?.valueDecoded) ? transaction?.valueDecoded : [transaction?.valueDecoded]
-  }, [transaction])
+    const rawActions = Array.isArray(transaction?.valueDecoded)
+      ? transaction?.valueDecoded
+      : [transaction?.valueDecoded]
+    // MultiSend v1.5.0+ rewrites a zero-address sub-transaction `to` to the executing Safe.
+    return rawActions?.map((action) =>
+      defaultsToSelf && action && 'to' in action
+        ? { ...action, to: resolveMultiSendToAddress(action.to, safeAddress) }
+        : action,
+    )
+  }, [transaction, safeAddress, defaultsToSelf])
 
   return (
     <YStack gap="$2" padding="$4">
@@ -57,19 +132,16 @@ export function TxActionsList({ txDetails }: TxActionsListProps) {
             gap="$5"
             borderRadius="$3"
             onPress={() => onActionPress(action)}
+            testID={`tx-action-item-${index}`}
+            collapsable={false}
           >
-            <View alignItems="center" flexDirection="row" justifyContent="space-between" gap={'$2'} flexWrap="wrap">
-              <View flexDirection="row" alignItems="center" gap={'$3'} maxWidth="90%">
-                <SafeFontIcon name="transaction-contract" color="$colorSecondary" size={18} />
-                <Text marginRight={'$2'}>{index + 1}</Text>
-
-                <Text fontSize="$4" flexShrink={1} flexWrap="wrap">
-                  {getActionName(action, addressInfoIndex as AddressInfoIndex)}
-                </Text>
-              </View>
-
-              <SafeFontIcon name="chevron-right" size={18} />
-            </View>
+            <TxActionItem
+              txData={txDetails.txData}
+              action={action}
+              index={index}
+              safeAddress={safeAddress}
+              defaultsToSelf={defaultsToSelf}
+            />
           </Container>
         )
       })}

@@ -1,12 +1,13 @@
 import { Box, Button, MenuItem, Select, Typography, Grid, FormControl, InputLabel } from '@mui/material'
-import type { ChainInfo, SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import type { UrlObject } from 'url'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { useAppSelector } from '@/store'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
-import { selectChains } from '@/store/chainsSlice'
+import useChains from '@/hooks/useChains'
 import useLastSafe from '@/hooks/useLastSafe'
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import SafeIcon from '@/components/common/SafeIcon'
@@ -20,7 +21,7 @@ type Props = {
   appUrl: string
   wallet: ConnectedWallet | null
   onConnectWallet: () => Promise<void>
-  chain: ChainInfo
+  chain: Chain
   app: SafeAppData
 }
 
@@ -30,12 +31,12 @@ const AppActions = ({ wallet, onConnectWallet, chain, appUrl, app }: Props): Rea
   const lastUsedSafe = useLastSafe()
   const ownedSafes = useOwnedSafes()
   const addressBook = useAppSelector(selectAllAddressBooks)
-  const chains = useAppSelector(selectChains)
+  const { configs: chains } = useChains()
   const compatibleChains = app.chainIds
 
   const compatibleSafes = useMemo(
-    () => getCompatibleSafes(ownedSafes, compatibleChains, chains.data),
-    [ownedSafes, compatibleChains, chains.data],
+    () => getCompatibleSafes(ownedSafes, compatibleChains, chains),
+    [ownedSafes, compatibleChains, chains],
   )
 
   const [safeToUse, setSafeToUse] = useState<CompatibleSafesType>()
@@ -77,7 +78,7 @@ const AppActions = ({ wallet, onConnectWallet, chain, appUrl, app }: Props): Rea
       button = (
         <Link href={createSafeHrefWithRedirect} passHref legacyBehavior>
           <Button variant="contained" sx={{ width: CTA_BUTTON_WIDTH }}>
-            Create new Safe Account
+            Create new Safe account
           </Button>
         </Link>
       )
@@ -93,7 +94,7 @@ const AppActions = ({ wallet, onConnectWallet, chain, appUrl, app }: Props): Rea
   if (hasWallet && hasSafes) {
     body = (
       <FormControl>
-        <InputLabel id="safe-select-label">Select a Safe Account</InputLabel>
+        <InputLabel id="safe-select-label">Select a Safe account</InputLabel>
         <Select
           labelId="safe-select-label"
           value={safeToUse?.address || ''}
@@ -102,7 +103,7 @@ const AppActions = ({ wallet, onConnectWallet, chain, appUrl, app }: Props): Rea
             setSafeToUse(safeToUse)
           }}
           autoWidth
-          label="Select a Safe Account"
+          label="Select a Safe account"
           sx={({ spacing }) => ({
             width: '311px',
             minHeight: '56px',
@@ -152,7 +153,7 @@ const AppActions = ({ wallet, onConnectWallet, chain, appUrl, app }: Props): Rea
           fontWeight: 700,
         }}
       >
-        Use the App with your Safe Account
+        Use the App with your Safe account
       </Typography>
       {body}
       {button}
@@ -165,10 +166,10 @@ export { AppActions }
 const getCompatibleSafes = (
   ownedSafes: { [chainId: string]: string[] },
   compatibleChains: string[],
-  chainsData: ChainInfo[],
+  chainsData: Chain[],
 ): CompatibleSafesType[] => {
   return compatibleChains.reduce<CompatibleSafesType[]>((safes, chainId) => {
-    const chainData = chainsData.find((chain: ChainInfo) => chain.chainId === chainId)
+    const chainData = chainsData.find((chain: Chain) => chain.chainId === chainId)
 
     return [
       ...safes,

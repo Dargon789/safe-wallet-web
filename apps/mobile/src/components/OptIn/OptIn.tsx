@@ -1,5 +1,6 @@
 import React from 'react'
-import { ColorSchemeName, ImageSourcePropType, StyleSheet } from 'react-native'
+import { ImageSourcePropType, Platform, StyleSheet } from 'react-native'
+import { ColorScheme } from '@/src/types/theme'
 import { H2, Image, Text, getTokenValue, View } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { WINDOW_HEIGHT } from '@/src/store/constants'
@@ -23,7 +24,7 @@ interface OptInProps {
   testID?: string
   isVisible?: boolean
   isLoading?: boolean
-  colorScheme: ColorSchemeName
+  colorScheme: ColorScheme
   infoMessage?: string
 }
 
@@ -48,7 +49,7 @@ export const OptIn: React.FC<OptInProps> = React.memo(
     return (
       <View testID={testID} style={[styles.wrapper]} paddingTop={'$10'}>
         <View flex={1} justifyContent="space-between" alignItems="center">
-          <View gap={'$4'}>
+          <View gap={'$4'} paddingHorizontal={'$4'}>
             {kicker && (
               <Text textAlign="center" fontWeight={700} fontSize="$4" lineHeight="$6">
                 {kicker}
@@ -77,11 +78,12 @@ export const OptIn: React.FC<OptInProps> = React.memo(
               </Container>
             )}
           </View>
-          {image && <Image style={styles.image} source={image} />}
+          {/* @ts-expect-error Tamagui v2 types src as string but require() returns number - works at runtime */}
+          {image && <Image style={styles.image} src={image} />}
         </View>
 
-        <View testID="notifications-opt-in-cta-buttons" flexDirection="column">
-          <SafeButton onPress={ctaButton.onPress} marginBottom={'$3'} testID={'opt-in-primary-button'}>
+        <View testID="notifications-opt-in-cta-buttons" flexDirection="column" paddingHorizontal={'$4'} gap="$4">
+          <SafeButton onPress={ctaButton.onPress} marginBottom={'$3'} testID={'opt-in-primary-button'} size="$xl">
             {!isLoading ? (
               ctaButton.label
             ) : (
@@ -96,7 +98,7 @@ export const OptIn: React.FC<OptInProps> = React.memo(
             )}
           </SafeButton>
           {secondaryButton && (
-            <SafeButton text onPress={secondaryButton.onPress} testID={'opt-in-secondary-button'}>
+            <SafeButton text onPress={secondaryButton.onPress} testID={'opt-in-secondary-button'} size="$xl">
               {secondaryButton.label}
             </SafeButton>
           )}
@@ -111,11 +113,12 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: getTokenValue('$4', 'space'),
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingBottom: getTokenValue(Platform.OS === 'ios' ? '$0' : '$4'),
   },
   image: {
     width: '100%',
     height: Math.abs(WINDOW_HEIGHT * 0.42),
+    marginBottom: 40,
   },
 })
 

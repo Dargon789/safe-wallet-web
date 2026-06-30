@@ -1,6 +1,6 @@
 import ExternalLink from '@/components/common/ExternalLink'
 import LoadingSpinner, { SpinnerStatus } from '@/components/new-safe/create/steps/StatusStep/LoadingSpinner'
-import { SafeCreationEvent } from '@/features/counterfactual/services/safeCreationEvents'
+import { SafeCreationEvent } from '@/features/counterfactual/services'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { Box, Typography } from '@mui/material'
@@ -33,12 +33,12 @@ const getStep = (status: SafeCreationEvent) => {
       }
     case SafeCreationEvent.SUCCESS:
       return {
-        description: 'Your Safe Account is being indexed..',
+        description: 'Your Safe account is being indexed..',
         instruction: 'The account will be ready for use shortly. Please do not leave this page.',
       }
     case SafeCreationEvent.INDEXED:
       return {
-        description: 'Your Safe Account was successfully created!',
+        description: 'Your Safe account was successfully created!',
         instruction: '',
       }
   }

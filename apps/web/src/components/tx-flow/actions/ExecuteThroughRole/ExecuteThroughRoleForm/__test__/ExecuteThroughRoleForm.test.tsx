@@ -1,8 +1,9 @@
 import { createMockSafeTransaction } from '@/tests/transactions'
-import { OperationType } from '@safe-global/safe-core-sdk-types'
+import { OperationType } from '@safe-global/types-kit'
 import { type ReactElement } from 'react'
 import * as zodiacRoles from 'zodiac-roles-deployments'
 import { fireEvent, render, waitFor, mockWeb3Provider } from '@/tests/test-utils'
+import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
@@ -11,12 +12,17 @@ import * as onboardHooks from '@/hooks/wallets/useOnboard'
 import * as txSender from '@/services/tx/tx-sender/dispatch'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { type OnboardAPI } from '@web3-onboard/core'
-import { AbiCoder, ZeroAddress, encodeBytes32String } from 'ethers'
+import { AbiCoder, encodeBytes32String } from 'ethers'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import ExecuteThroughRoleForm from '../index'
 import * as hooksModule from '../hooks'
 import { chainBuilder } from '@/tests/builders/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+
+const renderWithSafeShield = (ui: ReactElement) => {
+  return render(<SafeShieldProvider>{ui}</SafeShieldProvider>)
+}
 
 // Mock fetch
 Object.defineProperty(window, 'fetch', {
@@ -38,7 +44,6 @@ jest.mock('@/components/common/CheckWallet', () => ({
 }))
 
 const mockChain = chainBuilder()
-  // @ts-expect-error - we are using a local FEATURES enum
   .with({ features: [FEATURES.ZODIAC_ROLES, FEATURES.EIP1559] })
   .with({ chainId: '1' })
   .with({ shortName: 'eth' })
@@ -55,12 +60,20 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 
 jest.mock('@/hooks/useChainId', () => ({
-  useChainId: jest.fn().mockReturnValue(() => '1'),
+  __esModule: true,
+  default: jest.fn().mockReturnValue('1'),
+  useChainId: jest.fn().mockReturnValue('1'),
 }))
 
 // mock getModuleTransactionId
 jest.mock('@/services/transactions', () => ({
   getModuleTransactionId: jest.fn(() => 'i1234567890'),
+}))
+
+// Mock useIsPinnedSafe to return true (Safe is trusted)
+jest.mock('@/hooks/useIsPinnedSafe', () => ({
+  __esModule: true,
+  default: jest.fn(() => true),
 }))
 
 // Mock useGasPrice
@@ -135,20 +148,22 @@ describe('ExecuteThroughRoleForm', () => {
     mockConnectedWalletAddress(MEMBER_ADDRESS)
 
     const safeTx = createMockSafeTransaction({
-      to: ZeroAddress,
+      to: ZERO_ADDRESS,
       data: '0xd0e30db0', // deposit()
       value: AbiCoder.defaultAbiCoder().encode(['uint256'], [123]),
       operation: OperationType.Call,
     })
 
-    const { findByText, getByText } = render(
+    const { findByTestId, getByText } = renderWithSafeShield(
       <ExecuteThroughRoleForm
-        txId="0x0123412"
         safeTx={safeTx}
         role={{ ...TEST_ROLE_OK, status: zodiacRoles.Status.TargetAddressNotAllowed }}
+        options={SLOT_OPTIONS}
+        onChange={jest.fn()}
+        slotId="executeThroughRole"
       />,
     )
-    expect(await findByText('Execute')).toBeDisabled()
+    expect(await findByTestId('combo-submit-executeThroughRole')).toBeDisabled()
 
     expect(
       getByText(
@@ -169,13 +184,20 @@ describe('ExecuteThroughRoleForm', () => {
       operation: OperationType.Call,
     })
 
-    const onSubmit = jest.fn()
+    const onSubmitSuccess = jest.fn()
 
-    const { findByText } = render(
-      <ExecuteThroughRoleForm txId="0x01323" safeTx={safeTx} role={TEST_ROLE_OK} onSubmit={onSubmit} />,
+    const { findByTestId } = renderWithSafeShield(
+      <ExecuteThroughRoleForm
+        safeTx={safeTx}
+        role={TEST_ROLE_OK}
+        onSubmitSuccess={onSubmitSuccess}
+        options={SLOT_OPTIONS}
+        onChange={jest.fn()}
+        slotId="executeThroughRole"
+      />,
     )
 
-    fireEvent.click(await findByText('Execute'))
+    fireEvent.click(await findByTestId('combo-submit-executeThroughRole'))
 
     await waitFor(() => {
       expect(executeSpy).toHaveBeenCalledWith(
@@ -186,17 +208,19 @@ describe('ExecuteThroughRoleForm', () => {
           value: '0',
         }),
         undefined,
-        expect.anything(),
+        expect.anything(), // chainId
+        expect.anything(), // safeAddress
       )
     })
 
-    // calls provided onSubmit callback
+    // calls provided onSubmitSuccess callback
     await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalled()
+      expect(onSubmitSuccess).toHaveBeenCalled()
     })
   })
 })
 
+const SLOT_OPTIONS = [{ id: 'executeThroughRole', label: 'Execute through role' }]
 const ROLES_MOD_ADDRESS = '0x1234567890000000000000000000000000000000'
 const MEMBER_ADDRESS = '0x1111111110000000000000000000000000000000'
 const ROLE_KEY = encodeBytes32String('eth_wrapping')

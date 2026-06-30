@@ -4,23 +4,21 @@ import { useState } from 'react'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import CheckIcon from '@mui/icons-material/Check'
 import SpaceCard from '../SpaceCard'
-import InitialsAvatar from '../InitialsAvatar'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
 
 import css from './styles.module.css'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-import SpaceCreationModal from '../SpaceCreationModal'
-import { useCurrentSpaceId } from 'src/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '@/features/spaces'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { SPACE_LABELS } from '@/services/analytics/events/spaces'
+import { SPACE_LABELS, SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 import { getNonDeclinedSpaces } from '@/features/spaces/utils'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 
 const SpaceSidebarSelector = () => {
-  const [isCreationModalOpen, setIsCreationModalOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const router = useRouter()
   const open = Boolean(anchorEl)
@@ -28,7 +26,7 @@ const SpaceSidebarSelector = () => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
-  const selectedSpace = spaces?.find((space) => space.id === Number(spaceId))
+  const selectedSpace = spaces?.find((space) => space.uuid === spaceId)
 
   const nonDeclinedSpaces = getNonDeclinedSpaces(currentUser, spaces || [])
 
@@ -43,7 +41,7 @@ const SpaceSidebarSelector = () => {
   const handleSelectSpace = (space: GetSpaceResponse) => {
     router.push({
       pathname: router.pathname,
-      query: { ...router.query, spaceId: space.id.toString() },
+      query: { ...router.query, spaceId: space.uuid },
     })
 
     handleClose()
@@ -86,21 +84,20 @@ const SpaceSidebarSelector = () => {
 
         <Menu
           data-testid="space-selector-menu"
-          id="space-selector-menu"
           anchorEl={anchorEl}
           open={open}
           onClose={handleClose}
           sx={{ '& .MuiPaper-root': { minWidth: '260px !important' } }}
         >
-          <SpaceCard space={selectedSpace} isCompact isLink={false} />
+          <SpaceCard space={selectedSpace} isCompact isLink={false} currentUserId={currentUser?.id} />
 
           <Divider sx={{ mb: 1 }} />
 
           {nonDeclinedSpaces.map((space) => (
             <MenuItem
-              key={space.id}
+              key={space.uuid}
               onClick={() => handleSelectSpace(space)}
-              selected={space.id === selectedSpace.id}
+              selected={space.uuid === selectedSpace.uuid}
               sx={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -111,7 +108,7 @@ const SpaceSidebarSelector = () => {
                 <InitialsAvatar name={space.name} size="small" />
                 <Typography variant="body2">{space.name}</Typography>
               </Box>
-              {space.id === selectedSpace.id && <CheckIcon fontSize="small" color="primary" />}
+              {space.uuid === selectedSpace.uuid && <CheckIcon fontSize="small" color="primary" />}
             </MenuItem>
           ))}
 
@@ -120,12 +117,12 @@ const SpaceSidebarSelector = () => {
           <MenuItem
             onClick={() => {
               handleClose()
-              setIsCreationModalOpen(true)
-              trackEvent({ ...SPACE_EVENTS.CREATE_SPACE_MODAL, label: SPACE_LABELS.space_selector })
+              trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.SIDEBAR })
+              router.push(AppRoutes.spaces.createSpace)
             }}
             sx={{ fontWeight: 700 }}
           >
-            Create space
+            Create workspace
           </MenuItem>
 
           <MenuItem
@@ -136,12 +133,10 @@ const SpaceSidebarSelector = () => {
             }}
             sx={{ fontWeight: 700 }}
           >
-            View spaces
+            View workspaces
           </MenuItem>
         </Menu>
       </Box>
-
-      {isCreationModalOpen && <SpaceCreationModal onClose={() => setIsCreationModalOpen(false)} />}
     </>
   )
 }

@@ -1,10 +1,7 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Container } from '@/src/components/Container'
-import { View, YStack, Text, Button, H3 } from 'tamagui'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { View, YStack, Text, H3 } from 'tamagui'
 import { Logo } from '@/src/components/Logo'
-import { EthAddress } from '@/src/components/EthAddress'
-import { Identicon } from '@/src/components/Identicon'
 import { TransactionHeader } from '../../TransactionHeader'
 import {
   MultisigExecutionDetails,
@@ -17,21 +14,41 @@ import { RootState } from '@/src/store'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { Address } from '@/src/types/address'
 import { TokenAmount } from '@/src/components/TokenAmount'
-import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
+import { ParametersButton } from '@/src/components/ParametersButton'
+import { HashDisplay } from '@/src/components/HashDisplay'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { useFeesBreakdown } from '@/src/features/ConfirmTx/components/TransactionInfo/useFeesBreakdown'
+import { isERC20Transfer } from '@/src/utils/transaction-guards'
+
 interface TokenTransferProps {
+  txId: string
   txInfo: TransferTransactionInfo
   executionInfo: MultisigExecutionDetails
   executedAt: number
 }
 
-export function TokenTransfer({ txInfo, executionInfo, executedAt }: TokenTransferProps) {
+export function TokenTransfer({ txId, txInfo, executionInfo, executedAt }: TokenTransferProps) {
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const { value, tokenSymbol, logoUri, decimals } = useTokenDetails(txInfo)
 
   const recipientAddress = txInfo.recipient.value as Address
 
-  const viewOnExplorer = useOpenExplorer(recipientAddress)
+  const breakdown = useFeesBreakdown({ detailedExecutionInfo: executionInfo })
+
+  // Show the Safe-paid fee in the header only when the Safe funds the fee in a token that differs
+  // from the one being sent (otherwise it's already implied by the transfer amount).
+  const safePaidFee = useMemo(() => {
+    if (!breakdown?.paidFromSafe) {
+      return undefined
+    }
+    const transferTokenAddress = isERC20Transfer(txInfo.transferInfo) ? txInfo.transferInfo.tokenAddress : ZERO_ADDRESS
+    if (sameAddress(breakdown.maxGasFee.address, transferTokenAddress)) {
+      return undefined
+    }
+    return breakdown.maxGasFee
+  }, [breakdown, txInfo])
 
   return (
     <>
@@ -41,15 +58,31 @@ export function TokenTransfer({ txInfo, executionInfo, executedAt }: TokenTransf
         badgeThemeName="badge_error"
         badgeColor="$error"
         title={
-          <H3 fontWeight={600}>
-            <TokenAmount
-              value={value}
-              decimals={decimals}
-              tokenSymbol={tokenSymbol}
-              direction={txInfo.direction}
-              preciseAmount
-            />
-          </H3>
+          <YStack alignItems="center" gap="$1">
+            <Text color="$textSecondaryLight" fontSize="$4">
+              Sending
+            </Text>
+            <H3 fontWeight={600} textAlign="center" paddingHorizontal="$4">
+              <TokenAmount
+                value={value}
+                decimals={decimals}
+                tokenSymbol={tokenSymbol}
+                direction={txInfo.direction}
+                preciseAmount
+              />
+            </H3>
+            {safePaidFee && (
+              <H3 fontWeight={600} textAlign="center" paddingHorizontal="$4">
+                <TokenAmount
+                  value={safePaidFee.amount}
+                  decimals={safePaidFee.decimals}
+                  tokenSymbol={safePaidFee.symbol}
+                  direction={txInfo.direction}
+                  preciseAmount
+                />
+              </H3>
+            )}
+          </YStack>
         }
         submittedAt={executionInfo?.submittedAt || executedAt}
       />
@@ -60,24 +93,8 @@ export function TokenTransfer({ txInfo, executionInfo, executedAt }: TokenTransf
             <View alignItems="center" flexDirection="row" justifyContent="space-between">
               <Text color="$textSecondaryLight">To</Text>
 
-              <View flexDirection="row" alignItems="center">
-                <View flexDirection="row" alignItems="center" gap="$2">
-                  <Identicon address={recipientAddress} size={24} />
-                  <EthAddress
-                    address={recipientAddress}
-                    copy
-                    copyProps={{ color: '$textSecondaryLight', size: 18 }}
-                    textProps={{ fontSize: '$4' }}
-                  />
-                </View>
-                <Button
-                  onPress={viewOnExplorer}
-                  height={18}
-                  style={{ marginLeft: -12 }}
-                  pressStyle={{ backgroundColor: 'transparent' }}
-                >
-                  <SafeFontIcon name="external-link" color="$textSecondaryLight" size={16} />
-                </Button>
+              <View flexDirection="row" alignItems="center" gap="$2">
+                <HashDisplay value={recipientAddress} />
               </View>
             </View>
 
@@ -89,6 +106,8 @@ export function TokenTransfer({ txInfo, executionInfo, executedAt }: TokenTransf
                 <Text fontSize="$4">{activeChain?.chainName}</Text>
               </View>
             </View>
+
+            <ParametersButton txId={txId} />
           </Container>
         </YStack>
       </View>

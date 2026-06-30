@@ -1,4 +1,5 @@
-import { _validateSpendingLimit } from '../CreateSpendingLimit'
+// eslint-disable-next-line no-restricted-imports -- test-only export; re-exporting it from the barrel would eagerly pull the heavy CreateSpendingLimit component graph into all barrel consumers
+import { _validateSpendingLimit } from '@/features/spending-limits/components/CreateSpendingLimit'
 
 describe('CreateSpendingLimit', () => {
   describe('validateSpendingLimit', () => {
