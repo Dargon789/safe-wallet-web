@@ -9,7 +9,6 @@ import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GE
 import SpaceAddressBookActions from './SpaceAddressBookActions'
 import LocalContactActions from './LocalContactActions'
 import { useIsMobile } from '@/hooks/use-mobile'
-import { cn } from '@/utils/cn'
 import { formatDate } from '@/features/spaces/utils'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
@@ -95,17 +94,20 @@ function SpaceAddressBookTable({
       emphasis: 'strong',
       sortValue: (e) => e.name,
       cell: (entry) => (
-        <div className={cn('flex items-center gap-1.5 overflow-hidden', entry.isDuplicate && 'line-through')}>
+        <div className="flex items-center gap-1.5 overflow-hidden">
           {entry.isLocal && <HardDrive className="text-muted-foreground size-4 flex-shrink-0" />}
-          <span className="min-w-0 truncate">{entry.name}</span>
+          <Tooltip>
+            <TooltipTrigger className="min-w-0 truncate text-left">{entry.name}</TooltipTrigger>
+            <TooltipContent>{entry.name}</TooltipContent>
+          </Tooltip>
         </div>
       ),
     },
     {
       id: 'address',
       header: 'Address',
-      width: '30%',
-      minWidth: 200,
+      width: '40%',
+      minWidth: 360,
       sortValue: (e) => e.address,
       cell: (entry) => (
         <div className="text-[0.8em] font-mono">
