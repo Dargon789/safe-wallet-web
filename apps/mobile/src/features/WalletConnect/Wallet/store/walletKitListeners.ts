@@ -6,13 +6,14 @@ import { stripEip155Prefix } from '@safe-global/utils/features/walletconnect/uti
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { AppDispatch, AppStartListening, RootState } from '@/src/store'
 import { selectActiveSafe, setActiveSafe, switchActiveChain, clearActiveSafe } from '@/src/store/activeSafeSlice'
-import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { selectChainById } from '@/src/store/chains'
+import { selectSafeSigners } from '@/src/store/signersSlice'
 import { showToast } from '@/src/store/toastSlice'
 import { getWalletKit } from '../walletKit'
 import { logWalletKitError } from '../utils/errors'
 import { routeSessionRequest, isDeferredResponse, NO_SIGNER_ERROR_CODE } from '../services/methodRouter'
 import { REJECTED_SIGNING_METHODS } from '../services/constants'
+import { makeSwitchActiveChainByCaip2, makeGetCallsStatus, navigateToCallsStatus } from './sessionRequestActions'
 import {
   clearOutstandingRequest,
   markOutstandingProposing,
@@ -46,7 +47,7 @@ const respondRejected = async (topic: string, id: number) => {
     const walletKit = await getWalletKit()
     await walletKit.respondSessionRequest({
       topic,
-      response: formatJsonRpcError(id, getSdkError('USER_REJECTED').message),
+      response: formatJsonRpcError(id, getSdkError('USER_REJECTED')),
     })
   } catch (e) {
     logWalletKitError('respondSessionRequest USER_REJECTED failed', e)
@@ -163,7 +164,11 @@ export const walletKitListeners = (startListening: AppStartListening) => {
       const state = api.getState() as RootState
       const activeSafe = selectActiveSafe(state)
       const activeChain = activeSafe ? (selectChainById(state, activeSafe.chainId) ?? null) : null
-      const hasSigner = activeSafe ? !!selectActiveSigner(state, activeSafe.address) : false
+      const hasSigner = activeSafe ? selectSafeSigners(state, activeSafe).length > 0 : false
+      const deployedChainIds = activeSafe ? Object.keys(state.safes[activeSafe.address] ?? {}) : []
+
+      const switchActiveChainByCaip2 = makeSwitchActiveChainByCaip2(api.getState as () => RootState, api.dispatch)
+      const getCallsStatus = makeGetCallsStatus(api.getState as () => RootState, api.dispatch)
 
       const response = await routeSessionRequest({
         request,
@@ -172,6 +177,10 @@ export const walletKitListeners = (startListening: AppStartListening) => {
         activeChain,
         activeSafeAddress: activeSafe?.address ?? null,
         hasSigner,
+        deployedChainIds,
+        switchActiveChainByCaip2,
+        getCallsStatus,
+        navigateToCallsStatus,
       })
 
       if (isDeferredResponse(response)) {
