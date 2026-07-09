@@ -64,7 +64,7 @@ const fetchAppManifest = async (appUrl: string, timeout = 5000): Promise<unknown
   const normalizedUrl = trimTrailingSlash(baseUrl)
 
   // Validate the normalized URL against the allowlist
-  const isTrustedUrl = trustedBaseUrls.some((trustedUrl) => normalizedUrl.startsWith(trustedUrl))
+  const isTrustedUrl = trustedBaseUrls.some((trustedUrl) => normalizedUrl === trustedUrl || normalizedUrl.startsWith(trustedUrl + '/'))
   if (!isTrustedUrl) {
     throw new Error(`Untrusted app URL: ${normalizedUrl}`)
   }
