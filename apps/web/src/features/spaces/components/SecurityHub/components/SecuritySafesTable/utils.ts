@@ -1,6 +1,7 @@
 import type { GradeSummary, SafeGrade, ScanResult } from '@/features/security/types'
 import type { SecurityGrade } from '@/features/security/types'
 import { SAFE_GRADE_RANK, SEVERITY_RANK, type SecurityContract } from '@/features/security'
+import { AppRoutes } from '@/config/routes'
 import { DASH } from './constants'
 import type { SpaceSafeEntry } from '../../types'
 
@@ -25,57 +26,48 @@ export type GetSafeSecurityHref = (
   chainId: string,
 ) => { pathname: string; query: { safe: string } } | undefined
 
-/** Tally of non-passing checks for the Checks column. */
-export type CheckCounts = { failed: number; warnings: number }
-
 /**
- * Count failed (`issue`) and warning (`partial`) checks in a single Safe's scan
- * results. Mirrors the status→severity mapping used by WorkspaceHealthCard so the
- * column stays consistent with the header badges.
+ * Build the link target for a Safe's name in the Security Hub: that Safe's security settings page.
+ * Routing here (rather than /home) means browser-back from the settings page returns to the
+ * Workspace Security Hub. Returns undefined when the chain has no known short name, so the name
+ * renders as plain text instead of a broken link.
  */
-export const countChecks = (results: Record<string, ScanResult> | undefined): CheckCounts => {
-  let failed = 0
-  let warnings = 0
-  if (results) {
-    for (const result of Object.values(results)) {
-      if (result.status === 'issue') failed++
-      else if (result.status === 'partial') warnings++
-    }
-  }
-  return { failed, warnings }
+export const buildSafeSecurityHref = (
+  chainShortNames: Record<string, string>,
+  address: string,
+  chainId: string,
+): { pathname: string; query: { safe: string } } | undefined => {
+  const shortName = chainShortNames[chainId]
+  if (!shortName) return undefined
+  return { pathname: AppRoutes.settings.security, query: { safe: `${shortName}:${address}` } }
 }
 
-/** Sum the failed/warning checks across all of a multichain Safe's chain entries. */
-export const getAggregateCheckCounts = (
+/**
+ * Total non-passing applicable checks for a single Safe's scan results — the same
+ * count the panel header uses (`applicableCount − passing`), so the column and panel
+ * reconcile by construction. Excludes `not_applicable` and `inconclusive` checks.
+ */
+export const getNonPassingCount = (results: Record<string, ScanResult> | undefined): number => {
+  if (!results) return 0
+  let count = 0
+  for (const result of Object.values(results)) {
+    if (result.status === 'not_applicable' || result.status === 'inconclusive') continue
+    if (result.status !== 'clear') count++
+  }
+  return count
+}
+
+/** Sum non-passing checks across all of a multichain Safe's chain entries. */
+export const getAggregateNonPassingCount = (
   safe: SpaceSafeEntry,
   scanResults: Record<string, Record<string, ScanResult>>,
   scanKey: SecurityContract['scanKey'],
-): CheckCounts => {
-  let failed = 0
-  let warnings = 0
+): number => {
+  let total = 0
   for (const chain of safe.chainEntries) {
-    const counts = countChecks(scanResults[scanKey(safe.address, chain.chainId)])
-    failed += counts.failed
-    warnings += counts.warnings
+    total += getNonPassingCount(scanResults[scanKey(safe.address, chain.chainId)])
   }
-  return { failed, warnings }
-}
-
-/**
- * Number of checks driving a Safe's grade — shown beside the grade in the Status column.
- * `at_risk`/`critical` count failing checks, `needs_attention` counts warnings, and
- * `passing` has no count (the chip just reads "Healthy").
- */
-export const getStatusCount = (grade: SafeGrade | null, counts: CheckCounts): number | undefined => {
-  switch (grade) {
-    case 'critical':
-    case 'at_risk':
-      return counts.failed
-    case 'needs_attention':
-      return counts.warnings
-    default:
-      return undefined
-  }
+  return total
 }
 
 /**

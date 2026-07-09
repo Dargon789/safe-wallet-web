@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { ReactElement } from 'react'
 import { GitMerge } from 'lucide-react'
 
-import { NestedSafesPopover } from '@/components/sidebar/NestedSafesPopover'
+import { NestedSafesPopover } from '@/components/nested-safes/NestedSafesPopover'
 import { useOwnersGetSafesByOwnerV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -48,7 +48,7 @@ function SpaceNestedSafesButton(): ReactElement | null {
 
   return (
     <>
-      <div className="flex self-stretch items-stretch sm:order-1 rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+      <div className="flex self-stretch items-stretch order-1 rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
         <Tooltip>
           <TooltipTrigger
             render={
