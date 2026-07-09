@@ -17,9 +17,10 @@ const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
       dialogTitle="Add contact"
       successMessage="Added contact"
       successGroupKey="add-contact-success"
+      validateCharset
       submit={(item, sid) =>
         upsertAddressBook({
-          spaceId: Number(sid),
+          spaceId: sid,
           upsertAddressBookItemsDto: { items: [item] },
         })
       }

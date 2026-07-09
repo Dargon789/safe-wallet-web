@@ -1,16 +1,18 @@
 import type { SafeItem } from '@/hooks/safes'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Checkbox } from '@/components/ui/checkbox'
-import { AccountItem } from '@/features/myAccounts/components/AccountItem'
+import { AccountItem } from '@/features/myAccounts'
 import Identicon from '@/components/common/Identicon'
+import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
 import { Badge } from '@/components/ui/badge'
 import { TriangleAlert } from 'lucide-react'
+import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import { cn } from '@/utils/cn'
 import FiatBalance from './FiatBalance'
 import ThresholdBadge from './ThresholdBadge'
 
 interface SafeCardLayoutProps {
-  ref?: React.Ref<HTMLButtonElement>
+  ref?: React.Ref<HTMLDivElement>
   checked: boolean
   onToggle: () => void
   onCheckedChange?: (checked: boolean) => void
@@ -23,6 +25,7 @@ interface SafeCardLayoutProps {
   isSimilar?: boolean
   isUndeployed?: boolean
   isActivating?: boolean
+  disabled?: boolean
 }
 
 export const SafeCardLayout = ({
@@ -39,15 +42,16 @@ export const SafeCardLayout = ({
   isSimilar,
   isUndeployed = false,
   isActivating = false,
+  disabled = false,
 }: SafeCardLayoutProps) => (
-  <button
+  <div
     ref={ref}
-    type="button"
-    role="checkbox"
-    aria-checked={checked}
-    onClick={onToggle}
+    data-testid="safe-card"
+    onClick={disabled ? undefined : onToggle}
+    data-disabled={disabled || undefined}
     className={cn(
-      'box-border flex w-full min-w-0 max-w-full cursor-pointer items-center gap-1.5 rounded-3xl border-2 py-4 pl-2 pr-3 text-left transition-colors disabled:opacity-60 sm:gap-2 sm:pr-6',
+      'box-border flex w-full min-w-0 max-w-full items-center gap-1.5 rounded-3xl border-2 py-4 pl-2 pr-3 text-left transition-colors sm:gap-2 sm:pr-6',
+      disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
       checked
         ? 'border-[var(--color-secondary-light)] bg-[var(--color-secondary-background)]'
         : 'border-card bg-card hover:bg-muted/50',
@@ -56,8 +60,10 @@ export const SafeCardLayout = ({
     <div className="flex shrink-0 items-center px-2">
       <Checkbox
         checked={checked}
+        disabled={disabled}
         onCheckedChange={onCheckedChange ?? (() => onToggle())}
         onClick={(e) => e.stopPropagation()}
+        aria-label={`Select ${name || shortenAddress(address)}`}
       />
     </div>
 
@@ -76,23 +82,32 @@ export const SafeCardLayout = ({
         <div className="flex min-w-0 items-center gap-2">
           <span className="truncate text-base font-medium text-foreground">{name || shortenAddress(address)}</span>
         </div>
-        <span className="block min-w-0 break-all text-xs text-muted-foreground">
-          {isSimilar ? (
-            <>
-              {address.slice(0, 2)}
-              <b>{address.slice(2, 6)}</b>
-              {address.slice(6, -4)}
-              <b>{address.slice(-4)}</b>
-            </>
-          ) : (
-            shortenAddress(address)
-          )}
-        </span>
+        <div className="flex min-w-0 items-center gap-1.5">
+          <span className="block min-w-0 break-all text-xs text-muted-foreground">
+            {isSimilar ? (
+              <>
+                {address.slice(0, 2)}
+                <b>{address.slice(2, 6)}</b>
+                {address.slice(6, -4)}
+                <b>{address.slice(-4)}</b>
+              </>
+            ) : (
+              shortenAddress(address)
+            )}
+          </span>
+          <CopyAddressIconButton address={address} />
+        </div>
       </div>
     </div>
 
     <div className="ml-auto flex shrink-0 items-center justify-end gap-1.5 pl-1 sm:gap-2 sm:pl-2">
-      {isUndeployed && <AccountItem.StatusChip undeployedSafe isActivating={isActivating} />}
+      {isUndeployed && (
+        <NotActivatedBadge
+          isActivating={isActivating}
+          data-testid="onboarding-not-activated-icon"
+          onClick={(e) => e.stopPropagation()}
+        />
+      )}
       <AccountItem.ChainBadge safes={safes} className="justify-end" />
     </div>
 
@@ -100,5 +115,5 @@ export const SafeCardLayout = ({
       {!isUndeployed && <FiatBalance value={fiatValue} />}
       {threshold > 0 && <ThresholdBadge threshold={threshold} owners={ownersCount} />}
     </div>
-  </button>
+  </div>
 )

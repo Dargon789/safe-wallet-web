@@ -1,11 +1,18 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
-import ClassicViewLink from '@/features/spaces/components/ClassicViewLink'
+import ClassicViewLink from './'
 import { disableClassicView, useIsClassicViewOptedIn } from '@/hooks/useClassicView'
 import { AppRoutes } from '@/config/routes'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { renderHook } from '@testing-library/react'
+
+const mockTrackEvent = jest.fn()
+jest.mock('@/services/analytics', () => ({
+  trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
+}))
 
 describe('ClassicViewLink', () => {
   beforeEach(() => {
+    jest.clearAllMocks()
     sessionStorage.clear()
     localStorage.clear()
   })
@@ -14,7 +21,7 @@ describe('ClassicViewLink', () => {
     disableClassicView()
   })
 
-  it('renders the "Use the old UI" copy with a trailing arrow icon', () => {
+  it('renders the "Use the old UI" copy with a leading history icon', () => {
     render(<ClassicViewLink />, { routerProps: { query: {} } })
 
     const link = screen.getByTestId('classic-view-link')
@@ -30,6 +37,14 @@ describe('ClassicViewLink', () => {
 
     expect(replace).toHaveBeenCalledWith({ pathname: AppRoutes.welcome.accounts })
     expect(renderHook(() => useIsClassicViewOptedIn()).result.current).toBe(true)
+  })
+
+  it('tracks the USE_OLD_UI event when clicked', () => {
+    render(<ClassicViewLink />, { routerProps: { replace: jest.fn(), query: {} } })
+
+    fireEvent.click(screen.getByTestId('classic-view-link'))
+
+    expect(mockTrackEvent).toHaveBeenCalledWith(SPACE_EVENTS.USE_OLD_UI)
   })
 
   it('honours a sanitised ?next= URL when present', () => {

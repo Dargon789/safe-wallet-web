@@ -62,6 +62,8 @@ const rootReducer = combineReducers({
   [slices.calendlySlice.name]: slices.calendlySlice.reducer,
   [slices.globalSearchSlice.name]: slices.globalSearchSlice.reducer,
   [slices.safeActionsModalSlice.name]: slices.safeActionsModalSlice.reducer,
+  [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
+  [slices.gtfPaymentSourcePreferenceSlice.name]: slices.gtfPaymentSourcePreferenceSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,
@@ -88,6 +90,7 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
   slices.orderByPreferenceSlice.name,
   slices.authSlice.name,
   slices.hnStateSlice.name,
+  slices.gtfPaymentSourcePreferenceSlice.name,
 ]
 
 export const getPersistedState = () => {
@@ -139,6 +142,16 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
     // Migrate batchSlice txDetails to txData
     if (nextState[slices.batchSlice.name]) {
       nextState[slices.batchSlice.name] = migrateBatchTxs(nextState[slices.batchSlice.name])
+    }
+
+    // One-time reset to the new default order (WA-2567 made "Name" / A→Z the default).
+    // Guarded on the slice being present so it only touches a real store, not synthetic state.
+    const orderByState = nextState[slices.orderByPreferenceSlice.name]
+    if (orderByState && orderByState.resetVersion !== slices.ORDER_BY_RESET_VERSION) {
+      nextState[slices.orderByPreferenceSlice.name] = {
+        orderBy: slices.OrderByOption.NAME,
+        resetVersion: slices.ORDER_BY_RESET_VERSION,
+      }
     }
 
     // Mark the store as hydrated so guards wait for persisted auth state.
