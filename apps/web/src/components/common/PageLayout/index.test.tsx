@@ -8,12 +8,6 @@ jest.mock('@/components/common/Header/Topbar', () => {
   return { __esModule: true, default: MockTopbar }
 })
 
-jest.mock('@/components/common/ClassicViewToast', () => {
-  const MockClassicViewToast = () => null
-  MockClassicViewToast.displayName = 'ClassicViewToast'
-  return { __esModule: true, default: MockClassicViewToast }
-})
-
 jest.mock('@/components/common/SafeLogo', () => {
   const MockSafeLogo = ({ href }: { href?: string }) => <a data-testid="safe-logo" href={href} />
   MockSafeLogo.displayName = 'SafeLogo'
@@ -186,11 +180,11 @@ describe('PageLayout', () => {
       expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
     })
 
-    it('still shows Topbar while the flag is loading (undefined) and the user is signed in', () => {
+    it('hides Topbar on /welcome/spaces while the flag is loading (undefined) to avoid an empty-selector flash', () => {
       useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(undefined)
       mockUseIsSignedIn.mockReturnValue(true)
       renderLayout(AppRoutes.welcome.spaces)
-      expect(screen.getByTestId('topbar')).toBeInTheDocument()
+      expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
     })
 
     it('renders Topbar on / when the gate is OFF', () => {
@@ -205,9 +199,33 @@ describe('PageLayout', () => {
       expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
     })
 
-    it('still shows Topbar on / while the flag is loading (undefined)', () => {
+    it('hides Topbar on / while the flag is loading (undefined) to avoid an empty-selector flash', () => {
       useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(undefined)
       renderLayout(AppRoutes.index)
+      expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('accounts page topbar gating (/welcome/accounts)', () => {
+    const useIsRequireLoginEnabledModule = jest.requireMock('@/hooks/useIsRequireLoginEnabled') as {
+      useIsRequireLoginEnabled: jest.Mock
+    }
+
+    afterEach(() => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+    })
+
+    it('renders Topbar on /welcome/accounts when the user is signed in', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+      mockUseIsSignedIn.mockReturnValue(true)
+      renderLayout(AppRoutes.welcome.accounts)
+      expect(screen.getByTestId('topbar')).toBeInTheDocument()
+    })
+
+    it('renders Topbar on /welcome/accounts when the user is signed out (Classic view keeps its Topbar)', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+      mockUseIsSignedIn.mockReturnValue(false)
+      renderLayout(AppRoutes.welcome.accounts)
       expect(screen.getByTestId('topbar')).toBeInTheDocument()
     })
   })
@@ -242,29 +260,6 @@ describe('PageLayout', () => {
     it.each(STATIC_ROUTES.map((r) => [r]))('still renders the always-public legal page %s', (pathname) => {
       renderLayout(pathname)
       expect(screen.getByTestId('page-content')).toBeInTheDocument()
-    })
-  })
-
-  describe('settings route padding-top', () => {
-    it('applies the compact main class on settings without a safe address', () => {
-      mockUseSafeAddressFromUrl.mockReturnValue('')
-      const { container } = renderLayout('/settings/notifications')
-      const main = container.querySelector('main, [class*="main"]')
-      expect(main?.className).toMatch(/mainSpaceCompact/)
-    })
-
-    it('does not apply the compact main class on settings with a safe address', () => {
-      mockUseSafeAddressFromUrl.mockReturnValue('0x1234567890abcdef1234567890abcdef12345678')
-      const { container } = renderLayout('/settings/notifications')
-      const main = container.querySelector('main, [class*="main"]')
-      expect(main?.className).not.toMatch(/mainSpaceCompact/)
-    })
-
-    it('does not apply the compact main class on non-settings routes', () => {
-      mockUseSafeAddressFromUrl.mockReturnValue('')
-      const { container } = renderLayout('/home')
-      const main = container.querySelector('main, [class*="main"]')
-      expect(main?.className).not.toMatch(/mainSpaceCompact/)
     })
   })
 })

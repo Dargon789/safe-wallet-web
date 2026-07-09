@@ -1,6 +1,5 @@
-import { useMemo, useState, type ReactElement } from 'react'
+import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
-import { useRouter } from 'next/router'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Typography } from '@/components/ui/typography'
@@ -13,20 +12,22 @@ import {
   SafeAppMockup,
   deriveSidePanelAccountsFromSpace,
   useSafeNameLookup,
-} from '@/features/spaces/components/OnboardingLayout'
+} from '../OnboardingLayout'
 import { useIsCheckingAccess } from '@/hooks/useRouterGuard'
 import { flattenSafeItems } from '@/hooks/safes'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
-import { AppRoutes } from '@/config/routes'
+import { useSpaceSafes } from '../../hooks/useSpaceSafes'
+import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import useExistingSpace from './hooks/useExistingSpace'
 import useSpaceSubmit from './hooks/useSpaceSubmit'
+import useOnboardingExit from './hooks/useOnboardingExit'
+import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
+import { NAME_MIN_LENGTH, sanitizeName, validateName } from '@safe-global/utils/validation/names'
 
 const ONBOARDING_STEP = 1
-const TOTAL_STEPS = 4
 const FORM_ID = 'create-space-form'
 
 const CreateSpaceOnboarding = (): ReactElement => {
-  const router = useRouter()
+  const totalSteps = useOnboardingStepCount()
   const isCheckingAccess = useIsCheckingAccess() ?? true
 
   const {
@@ -35,9 +36,11 @@ const CreateSpaceOnboarding = (): ReactElement => {
     control,
     formState: { isValid, errors },
     setValue,
+    setFocus,
   } = useForm<{ name: string }>({ mode: 'onChange', defaultValues: { name: '' } })
 
   const { spaceId, isEditMode, isSpaceLoading, existingSpace } = useExistingSpace(setValue)
+  const { onExit, hasNoSpaces } = useOnboardingExit(isEditMode)
   const { error, isSubmitting, onSubmit } = useSpaceSubmit(handleSubmit, spaceId, isEditMode)
   const watchedName = useWatch({ control, name: 'name' }) ?? ''
 
@@ -49,10 +52,19 @@ const CreateSpaceOnboarding = (): ReactElement => {
   const [hasUserEdited, setHasUserEdited] = useState(false)
   const nameReg = register('name', {
     required: true,
-    maxLength: { value: 30, message: 'Workspace name must be 30 characters or less' },
-    pattern: { value: /^[a-zA-Z0-9 ]+$/, message: 'Workspace name must not contain special characters' },
-    validate: (value) => value?.trim() !== '',
+    validate: (value) => {
+      const sanitized = sanitizeName(value ?? '')
+      if (sanitized === '') return 'Required'
+      return validateName(sanitized, { minLength: NAME_MIN_LENGTH, maxLength: SPACE_NAME_MAX_LENGTH }) ?? true
+    },
   })
+
+  const isInputDisabled = isCheckingAccess || isSpaceLoading
+  useEffect(() => {
+    if (!isEditMode && !isInputDisabled) {
+      setFocus('name')
+    }
+  }, [isEditMode, isInputDisabled, setFocus])
 
   // spaceId gate avoids leaking lastUsedSpace's safes into a fresh "create" landing.
   const { allSafes } = useSpaceSafes()
@@ -69,7 +81,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
 
   const main = (
     <>
-      <StepCounter currentStep={ONBOARDING_STEP} totalSteps={TOTAL_STEPS} />
+      <StepCounter currentStep={ONBOARDING_STEP} totalSteps={totalSteps} />
 
       <div className="flex flex-col gap-2">
         <Typography variant="h2">Create a Workspace</Typography>
@@ -88,8 +100,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
             data-testid="space-name-input"
             placeholder="e.g. Treasury Ops, DeFi Team"
             autoComplete="off"
-            autoFocus={!isEditMode}
-            disabled={isCheckingAccess || isSpaceLoading}
+            disabled={isInputDisabled}
             className="mt-2 h-11 rounded-sm bg-card px-4"
             {...nameReg}
             onChange={(e) => {
@@ -99,7 +110,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
             error={errors.name?.message}
             onBlur={(e) => {
               nameReg.onBlur(e)
-              setValue('name', e.target.value.trim(), { shouldValidate: true })
+              setValue('name', sanitizeName(e.target.value), { shouldValidate: true })
             }}
           />
           {isSpaceLoading && (
@@ -123,7 +134,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
       <Button
         type="button"
         variant="ghost"
-        onClick={() => router.push(AppRoutes.welcome.spaces)}
+        onClick={onExit}
         disabled={isSubmitting}
         className="w-full h-12 rounded-lg bg-muted hover:bg-border xl:flex-1"
       >
@@ -153,6 +164,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
     <OnboardingLayout
       main={main}
       footer={footer}
+      onLogoClick={hasNoSpaces ? onExit : undefined}
       sidePanel={
         <SafeAppMockup
           name={displayName}
