@@ -2,6 +2,7 @@ import type * as ReactHookForm from 'react-hook-form'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { setLastUsedSpace } from '@/store/authSlice'
 import SpaceCreationModal from './index'
 
 const mockPush = jest.fn()
@@ -14,7 +15,7 @@ jest.mock('@/services/analytics', () => ({
 
 jest.mock('@/services/analytics/events/spaces', () => ({
   SPACE_EVENTS: {
-    CREATE_SPACE: { action: 'Submit space creation', category: 'spaces' },
+    WORKSPACE_CREATED: { action: 'Workspace created', category: 'spaces' },
   },
   SPACE_LABELS: {},
 }))
@@ -32,7 +33,7 @@ jest.mock('@/store/notificationsSlice', () => ({
 }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
-  useSpacesCreateWithUserV1Mutation: () => [mockCreateSpaceWithUser],
+  useSpacesCreateV1Mutation: () => [mockCreateSpaceWithUser],
 }))
 
 jest.mock('@/components/common/NameInput', () => ({
@@ -63,8 +64,10 @@ describe('SpaceCreationModal tracking', () => {
     jest.clearAllMocks()
   })
 
-  it('tracks CREATE_SPACE with spaceId sent to both GA (label) and Mixpanel (additionalParameters) after successful creation', async () => {
-    mockCreateSpaceWithUser.mockResolvedValue({ data: { id: 99, name: 'My Space' } })
+  it('tracks WORKSPACE_CREATED with spaceId sent to both GA (label) and Mixpanel (additionalParameters) after successful creation', async () => {
+    mockCreateSpaceWithUser.mockResolvedValue({
+      data: { id: 99, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
+    })
 
     render(<SpaceCreationModal onClose={jest.fn()} />)
 
@@ -78,13 +81,52 @@ describe('SpaceCreationModal tracking', () => {
 
     await waitFor(() => {
       expect(trackEvent).toHaveBeenCalledWith(
-        { ...SPACE_EVENTS.CREATE_SPACE, label: '99' }, // GA receives spaceId as label
-        { spaceId: '99' }, // Mixpanel receives spaceId as additionalParameters
+        { ...SPACE_EVENTS.WORKSPACE_CREATED, label: '11111111-1111-1111-1111-111111111111' },
+        { workspace_id: '11111111-1111-1111-1111-111111111111' },
       )
     })
   })
 
-  it('does not track CREATE_SPACE when the API returns an error', async () => {
+  it('persists the new space uuid as lastUsedSpace after successful creation', async () => {
+    mockCreateSpaceWithUser.mockResolvedValue({
+      data: { id: 99, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
+    })
+
+    render(<SpaceCreationModal onClose={jest.fn()} />)
+
+    fireEvent.change(screen.getByTestId('space-name-input'), { target: { value: 'My Space' } })
+
+    const submitButton = screen.getByTestId('create-space-modal-button')
+    await waitFor(() => {
+      expect(submitButton).not.toBeDisabled()
+    })
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith(setLastUsedSpace('11111111-1111-1111-1111-111111111111'))
+    })
+  })
+
+  it('does not persist lastUsedSpace when the API returns an error', async () => {
+    mockCreateSpaceWithUser.mockResolvedValue({ error: { status: 500 } })
+
+    render(<SpaceCreationModal onClose={jest.fn()} />)
+
+    fireEvent.change(screen.getByTestId('space-name-input'), { target: { value: 'My Space' } })
+
+    const submitButton = screen.getByTestId('create-space-modal-button')
+    await waitFor(() => {
+      expect(submitButton).not.toBeDisabled()
+    })
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(mockCreateSpaceWithUser).toHaveBeenCalled()
+    })
+    expect(mockDispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: setLastUsedSpace.type }))
+  })
+
+  it('does not track WORKSPACE_CREATED when the API returns an error', async () => {
     mockCreateSpaceWithUser.mockResolvedValue({ error: { status: 500 } })
 
     render(<SpaceCreationModal onClose={jest.fn()} />)
@@ -99,7 +141,7 @@ describe('SpaceCreationModal tracking', () => {
 
     await waitFor(() => {
       expect(trackEvent).not.toHaveBeenCalledWith(
-        expect.objectContaining({ action: SPACE_EVENTS.CREATE_SPACE.action }),
+        expect.objectContaining({ action: SPACE_EVENTS.WORKSPACE_CREATED.action }),
         expect.anything(),
       )
     })

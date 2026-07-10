@@ -31,7 +31,7 @@ import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import RecipientRow from './RecipientRow'
 import { SafeAppsName } from '@/config/constants'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
@@ -59,7 +59,12 @@ export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balanc
       gap: 1,
     }}
   >
-    <TokenIcon logoUri={item.tokenInfo.logoUri} key={item.tokenInfo.address} tokenSymbol={item.tokenInfo.symbol} />
+    <TokenIcon
+      logoUri={item.tokenInfo.logoUri}
+      key={item.tokenInfo.address}
+      tokenSymbol={item.tokenInfo.symbol}
+      size={32}
+    />
 
     <Grid item xs data-testid="token-item">
       <Typography

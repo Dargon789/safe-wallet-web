@@ -11,6 +11,10 @@
   border-bottom: none !important;
 }
 
+.tableBody tr:last-child td {
+  border-bottom: none;
+}
+
 .actions {
   display: flex;
   justify-content: flex-end;
@@ -29,6 +33,10 @@
 
 .compactTable tbody tr:hover {
   background: none !important;
+}
+
+.fixedLayout {
+  table-layout: fixed;
 }
 
 .mobileLabel {

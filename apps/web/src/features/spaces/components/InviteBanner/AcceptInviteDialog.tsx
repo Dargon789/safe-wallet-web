@@ -16,6 +16,9 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { showNotification } from '@/store/notificationsSlice'
 import ExternalLink from '@/components/common/ExternalLink'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
 function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClose: () => void }): ReactElement {
   const [error, setError] = useState<string>()
@@ -33,34 +36,40 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
-    trackEvent({ ...SPACE_EVENTS.ACCEPT_INVITE_SUBMIT, label: String(space.id) }, { spaceId: String(space.id) })
 
     try {
       setIsSubmitting(true)
-      const response = await acceptInvite({ spaceId: space.id, acceptInviteDto: { name: data.name } })
+      const response = await acceptInvite({ spaceId: space.uuid, acceptInviteDto: { name: data.name } })
 
       if (response.error) {
-        throw response.error
+        setError(getRtkQueryErrorMessage(response.error as FetchBaseQueryError | SerializedError))
+        return
       }
-
-      if (router.pathname === AppRoutes.welcome.spaces) {
-        router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: space.id } })
-      }
-
-      onClose()
-
-      dispatch(
-        showNotification({
-          message: `Accepted invite to ${space.name}`,
-          variant: 'success',
-          groupKey: 'accept-invite-success',
-        }),
-      )
     } catch (e) {
-      setError('Failed accepting the invite. Please try again.')
+      setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
+      return
     } finally {
       setIsSubmitting(false)
     }
+
+    trackEvent(
+      { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_ACCEPTED, label: space.uuid },
+      { workspace_id: space.uuid, user_id: currentUser?.id },
+    )
+
+    if (router.pathname === AppRoutes.welcome.spaces) {
+      router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: space.uuid } })
+    }
+
+    onClose()
+
+    dispatch(
+      showNotification({
+        message: `Accepted invite to ${space.name}`,
+        variant: 'success',
+        groupKey: 'accept-invite-success',
+      }),
+    )
   })
 
   return (

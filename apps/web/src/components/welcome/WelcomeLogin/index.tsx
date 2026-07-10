@@ -28,13 +28,19 @@ const WelcomeLogin = () => {
 
         <Typography mb={2} textAlign="center" className={css.loginDescription}>
           {wallet
-            ? 'Open your existing Safe Accounts or create a new one'
-            : 'Connect your wallet to create a Safe Account or watch an existing one'}
+            ? 'Open your existing Safe accounts or create a new one'
+            : 'Connect your wallet to create a Safe account or watch an existing one'}
         </Typography>
 
         <Box className={css.fullWidth}>
           <Track {...OVERVIEW_EVENTS.OPEN_ONBOARD} label={OVERVIEW_LABELS.welcome_page}>
-            <WalletLogin onLogin={performAuth} onContinue={performAuth} fullWidth isLoading={loading} />
+            <WalletLogin
+              onLogin={performAuth}
+              onContinue={performAuth}
+              fullWidth
+              isLoading={loading}
+              buttonStyle="walletBtnStatic"
+            />
           </Track>
         </Box>
 

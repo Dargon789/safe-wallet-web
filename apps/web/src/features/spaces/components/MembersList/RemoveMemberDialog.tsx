@@ -8,6 +8,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
+import { useCurrentMemberProfile } from '../../hooks/useSpaceMembers'
 
 const RemoveMemberDialog = ({
   userId,
@@ -24,16 +25,22 @@ const RemoveMemberDialog = ({
   const dispatch = useAppDispatch()
   const [deleteMember] = useMembersRemoveUserV1Mutation()
   const [errorMessage, setErrorMessage] = useState<string>('')
+  const { membership } = useCurrentMemberProfile()
 
   const handleConfirm = async () => {
     setErrorMessage('')
     trackEvent({ ...SPACE_EVENTS.REMOVE_MEMBER, label: isInvite ? SPACE_LABELS.invite_list : SPACE_LABELS.member_list })
     try {
-      const { error } = await deleteMember({ spaceId: Number(spaceId), userId })
+      const { error } = await deleteMember({ spaceId: spaceId ?? '', userId })
 
       if (error) {
         throw error
       }
+
+      trackEvent(
+        { ...SPACE_EVENTS.WORKSPACE_MEMBER_REMOVED, label: spaceId ?? undefined },
+        { workspace_id: spaceId, removed_by_role: membership?.role.toLowerCase() },
+      )
 
       dispatch(
         showNotification({

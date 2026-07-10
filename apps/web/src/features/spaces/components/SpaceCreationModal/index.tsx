@@ -1,4 +1,4 @@
-import { useSpacesCreateWithUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useSpacesCreateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useRouter } from 'next/router'
 import { type ReactElement, useState } from 'react'
 import { Alert, Box, Button, CircularProgress, DialogActions, DialogContent, SvgIcon, Typography } from '@mui/material'
@@ -10,6 +10,7 @@ import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
+import { setLastUsedSpace } from '@/store/authSlice'
 import { useAppDispatch } from '@/store'
 import ExternalLink from '@/components/common/ExternalLink'
 
@@ -19,7 +20,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
   const router = useRouter()
   const dispatch = useAppDispatch()
   const methods = useForm<{ name: string }>({ mode: 'onChange' })
-  const [createSpaceWithUser] = useSpacesCreateWithUserV1Mutation()
+  const [createSpaceWithUser] = useSpacesCreateV1Mutation()
   const { handleSubmit, formState } = methods
 
   const onSubmit = handleSubmit(async (data) => {
@@ -30,14 +31,15 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
       const response = await createSpaceWithUser({ createSpaceDto: { name: data.name } })
 
       if (response.data) {
-        const spaceId = response.data.id.toString()
-        trackEvent({ ...SPACE_EVENTS.CREATE_SPACE, label: spaceId }, { spaceId })
+        const spaceId = response.data.uuid
+        trackEvent({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: spaceId }, { workspace_id: spaceId })
+        dispatch(setLastUsedSpace(spaceId))
         router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
         onClose()
 
         dispatch(
           showNotification({
-            message: `Created space with name ${data.name}.`,
+            message: `Created workspace with name ${data.name}.`,
             variant: 'success',
             groupKey: 'create-space-success',
           }),
@@ -49,7 +51,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
       }
     } catch (error) {
       // @ts-ignore
-      const errorMessage = error?.data?.message || 'Failed creating the space. Please try again.'
+      const errorMessage = error?.data?.message || 'Failed creating the workspace. Please try again.'
       setError(errorMessage)
     } finally {
       setIsSubmitting(false)
@@ -63,7 +65,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
       dialogTitle={
         <>
           <SvgIcon component={SpaceIcon} inheritViewBox sx={{ fill: 'none', mr: 1 }} />
-          Create space
+          Create workspace
         </>
       }
       hideChainIndicator
@@ -97,7 +99,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
               disableElevation
               sx={{ minWidth: '200px' }}
             >
-              {isSubmitting ? <CircularProgress size={20} /> : 'Create space'}
+              {isSubmitting ? <CircularProgress size={20} /> : 'Create workspace'}
             </Button>
           </DialogActions>
         </form>

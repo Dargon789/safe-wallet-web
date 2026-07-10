@@ -1,12 +1,12 @@
 import { Interface } from 'ethers'
 import { getSafeSingletonDeployment } from '@safe-global/safe-deployments'
-import { SENTINEL_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
 import { OperationType } from '@safe-global/types-kit'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getModuleInstance, KnownContracts } from '@gnosis.pm/zodiac'
 import type { MetaTransactionData } from '@safe-global/types-kit'
 import { type SafeState, type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from './recovery-state'
 import type { Provider } from 'ethers'
 
 export function getRecoveryProposalTransactions({

@@ -4,7 +4,7 @@ import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDet
 import { isCustomTxInfo, isMultiSendTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import type { SafeTransactionData } from '@safe-global/types-kit'
 import { dateString } from '@safe-global/utils/utils/formatters'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { Receipt } from '@/components/tx/ConfirmTxDetails/Receipt'
 import DecodedData from '../TxData/DecodedData'
 import ColorCodedTxAccordion from '@/components/tx/ColorCodedTxAccordion'
@@ -13,6 +13,8 @@ import DecoderLinks from './DecoderLinks'
 import isEqual from 'lodash/isEqual'
 import Multisend from '../TxData/DecodedData/Multisend'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
+import { useLoadFeature } from '@/features/__core__'
+import { GTFFeature, useHistoryFeesBreakdown } from '@/features/gtf'
 
 interface Props {
   safeTxData?: SafeTransactionData
@@ -21,6 +23,16 @@ interface Props {
   txDetails?: TransactionDetails
   showMultisend?: boolean
   showDecodedData?: boolean
+  showAuditLogFields?: boolean
+}
+
+const HistoryFees = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement | null => {
+  const { HistoryFeesAccordion } = useLoadFeature(GTFFeature)
+  const feesData = useHistoryFeesBreakdown(txDetails)
+
+  if (!feesData) return null
+
+  return <HistoryFeesAccordion data={feesData} txInfo={txDetails.txInfo} />
 }
 
 const Summary = ({
@@ -30,6 +42,7 @@ const Summary = ({
   txDetails,
   showMultisend = true,
   showDecodedData = true,
+  showAuditLogFields = true,
 }: Props): ReactElement => {
   const { txHash, executedAt } = txDetails ?? {}
   const customTxInfo = txInfo && isCustomTxInfo(txInfo) ? txInfo : undefined
@@ -64,13 +77,13 @@ const Summary = ({
         <Multisend txData={transactionData} isExecuted={!!txDetails?.executedAt} compact />
       )}
 
-      {txHash && (
+      {showAuditLogFields && txHash && (
         <TxDataRow datatestid="tx-hash" title="Transaction hash">
           {generateDataRowValue(txHash, 'hash', true)}{' '}
         </TxDataRow>
       )}
 
-      {submittedAt && (
+      {showAuditLogFields && submittedAt && (
         <TxDataRow datatestid="tx-created-at" title="Created">
           <Typography variant="body2" component="div">
             {dateString(submittedAt)}
@@ -78,7 +91,7 @@ const Summary = ({
         </TxDataRow>
       )}
 
-      {executedAt && (
+      {showAuditLogFields && executedAt && (
         <TxDataRow datatestid="tx-executed-at" title="Executed">
           <Typography variant="body2" component="div">
             {dateString(executedAt)}
@@ -86,30 +99,39 @@ const Summary = ({
         </TxDataRow>
       )}
 
-      {showDetails && (
-        <Box mt={2}>
-          <ColorCodedTxAccordion txInfo={txInfo} txData={txData}>
-            <Stack gap={1} divider={<Divider sx={{ mx: -2, my: 1 }} />}>
-              {showDecodedData && <DecodedData txData={txData} toInfo={toInfo} />}
+      {/* Fees + Advanced details stack with shared borders (margin-bottom: -1px on Fees) */}
+      {(txDetails?.executedAt || showDetails) && (
+        <Box
+          mt={2}
+          sx={{
+            '& > .MuiAccordion-root:not(:first-of-type)': {
+              borderTopLeftRadius: 0,
+              borderTopRightRadius: 0,
+            },
+          }}
+        >
+          {txDetails?.executedAt && <HistoryFees txDetails={txDetails} />}
 
-              <Box>
-                <Typography variant="subtitle2" fontWeight={700} mb={2}>
-                  Advanced details
-                </Typography>
+          {showDetails && (
+            <ColorCodedTxAccordion txInfo={txInfo} txData={txData}>
+              <Stack gap={1} divider={<Divider sx={{ mx: -2, my: 1 }} />}>
+                {showDecodedData && <DecodedData txData={txData} toInfo={toInfo} />}
 
-                <DecoderLinks />
+                <Box>
+                  <DecoderLinks />
 
-                <Receipt
-                  safeTxData={safeTxData}
-                  txData={txData}
-                  txDetails={txDetails}
-                  txInfo={txInfo}
-                  withSignatures
-                  grid
-                />
-              </Box>
-            </Stack>
-          </ColorCodedTxAccordion>
+                  <Receipt
+                    safeTxData={safeTxData}
+                    txData={txData}
+                    txDetails={txDetails}
+                    txInfo={txInfo}
+                    withSignatures
+                    grid
+                  />
+                </Box>
+              </Stack>
+            </ColorCodedTxAccordion>
+          )}
         </Box>
       )}
     </>

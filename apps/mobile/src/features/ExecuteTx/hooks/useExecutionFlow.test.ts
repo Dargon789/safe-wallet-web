@@ -14,6 +14,7 @@ jest.mock('expo-router', () => ({
 }))
 
 import { useExecutionFlow } from './useExecutionFlow'
+import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 
 describe('useExecutionFlow', () => {
   const mockExecute = jest.fn()
@@ -29,6 +30,13 @@ describe('useExecutionFlow', () => {
     name: 'Ledger Signer',
     type: 'ledger',
     derivationPath: "m/44'/60'/0'/0/0",
+  }
+
+  const mockWalletConnectSigner: Signer = {
+    value: '0x789',
+    name: 'WC Signer',
+    type: 'walletconnect',
+    walletName: 'MetaMask',
   }
 
   const mockFeeParams: FeeParams = {
@@ -135,6 +143,50 @@ describe('useExecutionFlow', () => {
     })
   })
 
+  describe('WalletConnect flow', () => {
+    it('should execute directly without ledger or biometrics redirect', async () => {
+      const { result } = renderHook(() =>
+        useExecutionFlow({
+          ...defaultParams,
+          activeSigner: mockWalletConnectSigner,
+          executionMethod: ExecutionMethod.WITH_WC,
+        }),
+      )
+
+      await act(async () => {
+        await result.current.handleConfirmPress()
+      })
+
+      expect(mockExecute).toHaveBeenCalled()
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/execution-success',
+        params: { txId: 'tx123' },
+      })
+      expect(mockPush).not.toHaveBeenCalledWith(
+        expect.objectContaining({ pathname: '/execute-transaction/ledger-connect' }),
+      )
+      expect(mockPush).not.toHaveBeenCalledWith(expect.objectContaining({ pathname: '/biometrics-opt-in' }))
+    })
+
+    it('should skip biometrics even when biometrics is not enabled', async () => {
+      const { result } = renderHook(() =>
+        useExecutionFlow({
+          ...defaultParams,
+          activeSigner: mockWalletConnectSigner,
+          executionMethod: ExecutionMethod.WITH_WC,
+          isBiometricsEnabled: false,
+        }),
+      )
+
+      await act(async () => {
+        await result.current.handleConfirmPress()
+      })
+
+      expect(mockExecute).toHaveBeenCalled()
+      expect(mockPush).not.toHaveBeenCalledWith(expect.objectContaining({ pathname: '/biometrics-opt-in' }))
+    })
+  })
+
   describe('standard execution flow', () => {
     it('should execute and navigate to success on success', async () => {
       const { result } = renderHook(() => useExecutionFlow(defaultParams))
@@ -236,6 +288,90 @@ describe('useExecutionFlow', () => {
           resolveExecute()
         }
       })
+    })
+  })
+
+  describe('relay simulation errors', () => {
+    it('SIMULATION_FAILED is terminal => navigates to the error screen, no retry sheet', async () => {
+      mockExecute.mockRejectedValue(new RelaySimulationError('SIMULATION_FAILED', 'Insufficient gas-token balance'))
+
+      const { result } = renderHook(() =>
+        useExecutionFlow({ ...defaultParams, executionMethod: ExecutionMethod.WITH_RELAY }),
+      )
+
+      await act(async () => {
+        await result.current.handleConfirmPress()
+      })
+
+      // SIMULATION_FAILED surfaces the same explanatory copy as web, not the raw CGW message.
+      expect(mockPush).toHaveBeenCalledWith({
+        pathname: '/execution-error',
+        params: {
+          description:
+            "This transaction is expected to fail on-chain, so it can't be relayed. Review the transaction or reject it.",
+        },
+      })
+      expect(result.current.showIndeterminateSheet).toBe(false)
+    })
+
+    it('INDETERMINATE_SIMULATION shows the confirmation sheet instead of the error screen', async () => {
+      mockExecute.mockRejectedValue(new RelaySimulationError('INDETERMINATE_SIMULATION', 'Could not simulate'))
+
+      const { result } = renderHook(() =>
+        useExecutionFlow({ ...defaultParams, executionMethod: ExecutionMethod.WITH_RELAY }),
+      )
+
+      await act(async () => {
+        await result.current.handleConfirmPress()
+      })
+
+      expect(result.current.showIndeterminateSheet).toBe(true)
+      expect(mockPush).not.toHaveBeenCalledWith(expect.objectContaining({ pathname: '/execution-error' }))
+    })
+
+    it('confirmExecuteAnyway re-runs execution with acceptUnverifiedSimulation = true', async () => {
+      mockExecute
+        .mockRejectedValueOnce(new RelaySimulationError('INDETERMINATE_SIMULATION', 'Could not simulate'))
+        .mockResolvedValueOnce(undefined)
+
+      const { result } = renderHook(() =>
+        useExecutionFlow({ ...defaultParams, executionMethod: ExecutionMethod.WITH_RELAY }),
+      )
+
+      await act(async () => {
+        await result.current.handleConfirmPress()
+      })
+
+      await act(async () => {
+        await result.current.confirmExecuteAnyway()
+      })
+
+      expect(mockExecute).toHaveBeenNthCalledWith(1, undefined)
+      expect(mockExecute).toHaveBeenNthCalledWith(2, true)
+      expect(result.current.showIndeterminateSheet).toBe(false)
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/execution-success',
+        params: { txId: 'tx123' },
+      })
+    })
+
+    it('dismissIndeterminateSheet closes the sheet without executing', async () => {
+      mockExecute.mockRejectedValue(new RelaySimulationError('INDETERMINATE_SIMULATION', 'Could not simulate'))
+
+      const { result } = renderHook(() =>
+        useExecutionFlow({ ...defaultParams, executionMethod: ExecutionMethod.WITH_RELAY }),
+      )
+
+      await act(async () => {
+        await result.current.handleConfirmPress()
+      })
+
+      act(() => {
+        result.current.dismissIndeterminateSheet()
+      })
+
+      expect(result.current.showIndeterminateSheet).toBe(false)
+      expect(mockExecute).toHaveBeenCalledTimes(1)
     })
   })
 

@@ -1,22 +1,24 @@
 import { Controller, useFormContext } from 'react-hook-form'
 import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
-import type { AddAccountsFormValues } from '@/features/spaces/components/AddAccounts/index'
+import type { AddAccountsFormValues } from '../../../hooks/useSelectAll.types'
+import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
 
 import useSafeCardData from '../hooks/useSafeCardData'
 import { SafeCardLayout } from './SafeCardLayout'
 
 const getSafeId = (safeItem: SafeItem) => `${safeItem.chainId}:${safeItem.address}`
-const getMultiChainSafeId = (mcSafe: MultiChainSafeItem) => `multichain_${mcSafe.address}`
+const getMultiChainSafeId = (mcSafe: MultiChainSafeItem) => `${MULTICHAIN_SAFE_KEY_PREFIX}${mcSafe.address}`
 
 interface SafeCardProps {
   safe: SafeItem | MultiChainSafeItem
   isSimilar?: boolean
+  isAtLimit?: boolean
 }
 
-const SafeCard = ({ safe, isSimilar }: SafeCardProps) => {
+const SafeCard = ({ safe, isSimilar, isAtLimit = false }: SafeCardProps) => {
   const isMultiChain = isMultiChainSafeItem(safe)
   const { setValue, watch, control } = useFormContext<AddAccountsFormValues>()
-  const { name, fiatValue, threshold, ownersCount, elementRef } = useSafeCardData(safe)
+  const { name, fiatValue, threshold, ownersCount, elementRef, isUndeployed, isActivating } = useSafeCardData(safe)
   const safes = isMultiChain ? (safe as MultiChainSafeItem).safes : [safe as SafeItem]
 
   const subSafeIds = isMultiChain ? (safe as MultiChainSafeItem).safes.map(getSafeId) : []
@@ -25,6 +27,7 @@ const SafeCard = ({ safe, isSimilar }: SafeCardProps) => {
   const watchedSubSafeIds = subSafeIds.map((id) => `selectedSafes.${id}` as const)
   const subSafeValues = (isMultiChain ? watch(watchedSubSafeIds as readonly string[] as never) : []) as boolean[]
   const allSubSafesChecked = subSafeValues.every(Boolean) && subSafeValues.length > 0
+  const noSubSafesChecked = !subSafeValues.some(Boolean)
 
   const handleMultiChainToggle = () => {
     const newValue = !allSubSafesChecked
@@ -37,9 +40,10 @@ const SafeCard = ({ safe, isSimilar }: SafeCardProps) => {
   if (isMultiChain) {
     return (
       <SafeCardLayout
-        ref={elementRef as React.Ref<HTMLButtonElement>}
+        ref={elementRef as React.Ref<HTMLDivElement>}
         checked={allSubSafesChecked}
         onToggle={handleMultiChainToggle}
+        disabled={isAtLimit && noSubSafesChecked}
         name={name}
         address={safe.address}
         safes={safes}
@@ -47,6 +51,8 @@ const SafeCard = ({ safe, isSimilar }: SafeCardProps) => {
         threshold={threshold}
         ownersCount={ownersCount}
         isSimilar={isSimilar}
+        isUndeployed={isUndeployed}
+        isActivating={isActivating}
       />
     )
   }
@@ -57,10 +63,11 @@ const SafeCard = ({ safe, isSimilar }: SafeCardProps) => {
       control={control}
       render={({ field }) => (
         <SafeCardLayout
-          ref={elementRef as React.Ref<HTMLButtonElement>}
+          ref={elementRef as React.Ref<HTMLDivElement>}
           checked={Boolean(field.value)}
           onToggle={() => field.onChange(!field.value)}
           onCheckedChange={(checked) => field.onChange(checked)}
+          disabled={isAtLimit && !field.value}
           name={name}
           address={safe.address}
           safes={safes}
@@ -68,6 +75,8 @@ const SafeCard = ({ safe, isSimilar }: SafeCardProps) => {
           threshold={threshold}
           ownersCount={ownersCount}
           isSimilar={isSimilar}
+          isUndeployed={isUndeployed}
+          isActivating={isActivating}
         />
       )}
     />

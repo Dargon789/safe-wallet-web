@@ -31,6 +31,7 @@ type TokenAmountInputProps = {
   fieldArray?: { name: FieldArrayPath<FieldValues>; index: number }
   deps?: string[]
   defaultTokenAddress?: string
+  onMaxClick?: () => void
 }
 
 const TokenAmountInput = ({
@@ -41,6 +42,7 @@ const TokenAmountInput = ({
   fieldArray,
   deps,
   defaultTokenAddress,
+  onMaxClick,
 }: TokenAmountInputProps) => {
   const {
     formState: { errors, defaultValues },
@@ -100,8 +102,9 @@ const TokenAmountInput = ({
       shouldValidate: true,
     })
 
+    onMaxClick?.()
     trigger(deps)
-  }, [maxAmount, selectedToken, setValue, amountField, trigger, deps])
+  }, [maxAmount, selectedToken, setValue, amountField, trigger, deps, onMaxClick])
 
   const onChangeToken = useCallback(() => {
     const amountDefaultValue = get(
@@ -115,7 +118,7 @@ const TokenAmountInput = ({
   }, [resetField, amountField, trigger, deps, defaultValues, fieldArray])
 
   return (
-    <div>
+    <>
       <FormControl
         data-testid="token-amount-section"
         className={classNames(css.outline, { [css.error]: isAmountError })}
@@ -178,18 +181,12 @@ const TokenAmountInput = ({
           </TextField>
         </div>
       </FormControl>
-      <Typography
-        data-testid="fiat-display"
-        variant="caption"
-        color="text.secondary"
-        className={css.fiatDisplay}
-        sx={{
-          visibility: fiatValue != null ? 'visible' : 'hidden',
-        }}
-      >
-        <FiatValue value={fiatValue ?? 0} precise />
-      </Typography>
-    </div>
+      {fiatValue != null && (
+        <Typography data-testid="fiat-display" variant="caption" color="text.secondary" className={css.fiatDisplay}>
+          <FiatValue value={fiatValue} precise />
+        </Typography>
+      )}
+    </>
   )
 }
 

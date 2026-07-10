@@ -9,6 +9,9 @@
 .env
 .env.*
 
+# Turborepo cache
+**/.turbo/
+
 # Mobile
 apps/mobile/android
 apps/mobile/ios
@@ -27,6 +30,9 @@ apps/web/public
 apps/web/src/markdown/privacy/privacy.md
 apps/web/src/markdown/terms/terms.md
 apps/web/src/config/__generated__/
+
+# Web (TanStack)
+apps/web-tanstack/dist
 
 # Utils package
 packages/utils/src/types/contracts/**/*

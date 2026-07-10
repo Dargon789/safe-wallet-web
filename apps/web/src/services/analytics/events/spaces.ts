@@ -7,6 +7,14 @@ export const SPACE_EVENTS = {
     action: 'Open sign in message',
     category: SPACE_CATEGORY,
   },
+  EMAIL_SIGN_IN: {
+    action: 'Sign in with email',
+    category: SPACE_CATEGORY,
+  },
+  GOOGLE_SIGN_IN: {
+    action: 'Sign in with Google',
+    category: SPACE_CATEGORY,
+  },
   INFO_MODAL: {
     action: 'Open info dialog',
     category: SPACE_CATEGORY,
@@ -19,20 +27,28 @@ export const SPACE_EVENTS = {
     action: 'Open space dashboard',
     category: SPACE_CATEGORY,
   },
-  CREATE_SPACE_MODAL: {
-    action: 'Open create space dialog',
+  WORKSPACE_CREATE_STARTED: {
+    action: 'Workspace create started',
     category: SPACE_CATEGORY,
   },
-  CREATE_SPACE: {
-    action: 'Submit space creation',
+  WORKSPACE_CREATED: {
+    action: 'Workspace created',
     category: SPACE_CATEGORY,
   },
   ACCEPT_INVITE: {
     action: 'Open accept invitation dialog',
     category: SPACE_CATEGORY,
   },
-  ACCEPT_INVITE_SUBMIT: {
-    action: 'Submit accept invitation',
+  WORKSPACE_MEMBER_INVITE_ACCEPTED: {
+    action: 'Workspace member invite accepted',
+    category: SPACE_CATEGORY,
+  },
+  WORKSPACE_MEMBER_ROLE_CHANGED: {
+    action: 'Workspace member role changed',
+    category: SPACE_CATEGORY,
+  },
+  WORKSPACE_MEMBER_REMOVED: {
+    action: 'Workspace member removed',
     category: SPACE_CATEGORY,
   },
   DECLINE_INVITE: {
@@ -59,8 +75,12 @@ export const SPACE_EVENTS = {
     action: 'Submit remove member',
     category: SPACE_CATEGORY,
   },
-  ADD_MEMBER: {
-    action: 'Submit add member',
+  WORKSPACE_MEMBER_INVITE_SENT: {
+    action: 'Workspace member invite sent',
+    category: SPACE_CATEGORY,
+  },
+  WORKSPACE_MEMBER_INVITE_RENEWED: {
+    action: 'Workspace member invite renewed',
     category: SPACE_CATEGORY,
   },
   ADD_ACCOUNTS_MODAL: {
@@ -153,6 +173,10 @@ export const SPACE_EVENTS = {
     action: 'Submit add address',
     category: SPACE_CATEGORY,
   },
+  ADDRESS_BOOK_ENTRY_CREATED: {
+    action: 'Address book entry created',
+    category: SPACE_CATEGORY,
+  },
   REMOVE_ADDRESS: {
     action: 'Open remove address dialog',
     category: SPACE_CATEGORY,
@@ -177,16 +201,20 @@ export const SPACE_EVENTS = {
     action: 'Submit edit address',
     category: SPACE_CATEGORY,
   },
-  SPACES_ENTRY_VIEWED: {
-    action: 'Spaces entry viewed',
+  WORKSPACE_DASHBOARD_VIEWED: {
+    action: 'Workspace dashboard viewed',
     category: SPACE_CATEGORY,
   },
-  SPACES_SIWE_SUCCESS: {
-    action: 'Spaces SIWE success',
+  AUTH_LOGIN_SUCCEEDED: {
+    action: 'Auth (SIWE / Email) success',
     category: SPACE_CATEGORY,
   },
-  SPACES_SIWE_FAILURE: {
-    action: 'Spaces SIWE failure',
+  AUTH_LOGIN_FAILED: {
+    action: 'Auth (SIWE / Email) failure',
+    category: SPACE_CATEGORY,
+  },
+  AUTH_LOGGED_OUT: {
+    action: 'Auth logged out',
     category: SPACE_CATEGORY,
   },
   SAFE_SELECTED: {
@@ -197,12 +225,36 @@ export const SPACE_EVENTS = {
     action: 'Chain switched in space',
     category: SPACE_CATEGORY,
   },
+  WORKSPACE_SAFE_LINK_STARTED: {
+    action: 'Workspace safe link started',
+    category: SPACE_CATEGORY,
+  },
+  WORKSPACE_SAFE_LINKED: {
+    action: 'Workspace safe linked',
+    category: SPACE_CATEGORY,
+  },
+  WORKSPACE_SAFE_UNLINKED: {
+    action: 'Workspace safe unlinked',
+    category: SPACE_CATEGORY,
+  },
+  WORKSPACE_SWITCHED: {
+    action: 'Workspace switched',
+    category: SPACE_CATEGORY,
+  },
   ACCOUNTS_WIDGET_CLICKED: {
     action: 'Accounts widget clicked',
     category: SPACE_CATEGORY,
   },
   PENDING_TX_WIDGET_CLICKED: {
     action: 'Pending TX widget clicked',
+    category: SPACE_CATEGORY,
+  },
+  TRANSACTION_INITIATED: {
+    action: 'Transaction initiated',
+    category: SPACE_CATEGORY,
+  },
+  ONBOARDING_WIZARD: {
+    action: 'Onboarding wizard item clicked',
     category: SPACE_CATEGORY,
   },
   WALLET_SWITCHED: {
@@ -217,8 +269,6 @@ export const SPACE_EVENTS = {
 
 export enum SPACE_LABELS {
   space_list_page = 'space_list_page',
-  safe_dashboard_banner = 'safe_dashboard_banner',
-  info_modal = 'info_modal',
   space_selector = 'space_selector',
   accounts_page = 'accounts_page',
   preview_banner = 'preview_banner',
@@ -230,4 +280,5 @@ export enum SPACE_LABELS {
   space_settings = 'space_settings',
   space_context_menu = 'space_context_menu',
   space_breadcrumbs = 'space_breadcrumbs',
+  security_page = 'security_page',
 }

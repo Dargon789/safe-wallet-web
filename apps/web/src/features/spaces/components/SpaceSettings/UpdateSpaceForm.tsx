@@ -4,10 +4,11 @@ import ErrorAlert from './ErrorAlert'
 import { Button, TextField } from '@mui/material'
 import { type GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useIsAdmin } from '@/features/spaces'
+import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 
 const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const { handleUpdate, error } = useUpdateSpace(space)
-  const isAdmin = useIsAdmin(space?.id)
+  const isAdmin = useIsAdmin(space?.uuid)
 
   const formMethods = useForm<UpdateSpaceFormData>({
     mode: 'onChange',
@@ -33,10 +34,10 @@ const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => 
           render={({ field }) => (
             <TextField
               {...field}
-              label="Space name"
+              label="Workspace name"
               fullWidth
               value={field.value || ''}
-              slotProps={{ inputLabel: { shrink: true } }}
+              slotProps={{ inputLabel: { shrink: true }, htmlInput: { maxLength: SPACE_NAME_MAX_LENGTH } }}
               onKeyDown={(e) => e.stopPropagation()}
             />
           )}
