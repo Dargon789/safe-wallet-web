@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import isEqual from 'lodash/isEqual'
 import { StatusGroup, type ThreatAnalysisResults } from '../types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
@@ -12,6 +12,7 @@ import { buildHypernativeRequestData } from '@safe-global/utils/features/safe-sh
 import { useParsedOrigin } from './useParsedOrigin'
 import { isHypernativeAssessmentFailedResponse } from '@safe-global/store/hypernative/hypernativeApi.dto'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
+import { useThreatAnalysisHypernativeMessage } from './useThreatAnalysisHypernativeMessage'
 
 type UseThreatAnalysisHypernativeProps = {
   safeAddress: `0x${string}`
@@ -21,6 +22,7 @@ type UseThreatAnalysisHypernativeProps = {
   origin?: string
   safeVersion?: string
   authToken?: string
+  messageHash?: `0x${string}`
   skip?: boolean
 }
 
@@ -47,8 +49,11 @@ export function useThreatAnalysisHypernative({
   origin: originProp,
   safeVersion,
   authToken,
+  messageHash,
   skip = false,
 }: UseThreatAnalysisHypernativeProps): AsyncResult<ThreatAnalysisResults> {
+  const isMessageAnalysis = !isSafeTransaction(dataProp) && !!messageHash && !!dataProp
+
   const debouncedData = useDebounce(dataProp, 300)
   const [data, setData] = useState<SafeTransaction | TypedData | undefined>(dataProp)
   const [triggerAssessment, { data: hypernativeData, error, isLoading }] = hypernativeApi.useAssessTransactionMutation()
@@ -64,9 +69,8 @@ export function useThreatAnalysisHypernative({
   const origin = useParsedOrigin(originProp)
 
   // Build Hypernative request payload
-  // @TODO: Add support for TypedData
   const hypernativeRequest = useMemo(() => {
-    if (skip || !isSafeTransaction(data) || !safeVersion) {
+    if (skip || isMessageAnalysis || !isSafeTransaction(data) || !safeVersion) {
       return undefined
     }
 
@@ -78,16 +82,26 @@ export function useThreatAnalysisHypernative({
       safeVersion,
       origin,
     })
-  }, [data, safeAddress, chainId, walletAddress, origin, safeVersion, skip])
+  }, [data, safeAddress, chainId, walletAddress, origin, safeVersion, skip, isMessageAnalysis])
+
+  // RTK Query mutations don't dedup or cancel, `data` reflects the last settled call. Abort
+  // any in-flight request before triggering a new one so a slow stale response can't overwrite
+  // a fresh result
+  const inflightRef = useRef<{ abort?: () => void } | null>(null)
 
   useEffect(() => {
-    if (!skip && hypernativeRequest && authToken && walletAddress) {
-      triggerAssessment({
+    if (!skip && !isMessageAnalysis && hypernativeRequest && authToken && walletAddress) {
+      inflightRef.current?.abort?.()
+      const promise = triggerAssessment({
         ...hypernativeRequest,
         authToken,
       })
+      inflightRef.current = promise ?? null
+      return () => {
+        promise?.abort?.()
+      }
     }
-  }, [hypernativeRequest, authToken, triggerAssessment, skip, walletAddress])
+  }, [hypernativeRequest, authToken, triggerAssessment, skip, walletAddress, isMessageAnalysis])
 
   const fetchError = useMemo(() => {
     const errorMessage = isHypernativeAssessmentFailedResponse(error)
@@ -97,7 +111,7 @@ export function useThreatAnalysisHypernative({
   }, [error])
 
   const threatAnalysisResult = useMemo<ThreatAnalysisResults | undefined>(() => {
-    if (skip) {
+    if (skip || isMessageAnalysis) {
       return undefined
     }
 
@@ -110,10 +124,25 @@ export function useThreatAnalysisHypernative({
     }
 
     return mapHypernativeResponse(hypernativeData, safeAddress)
-  }, [hypernativeData, fetchError, skip, safeAddress])
+  }, [hypernativeData, fetchError, skip, safeAddress, isMessageAnalysis])
+
+  // Use message-specific assessment for EIP-712 typed messages
+  const messageAnalysisResult = useThreatAnalysisHypernativeMessage({
+    safeAddress,
+    chainId,
+    messageHash: messageHash ?? '0x',
+    typedData: isMessageAnalysis ? (dataProp as TypedData) : undefined,
+    origin: originProp,
+    authToken,
+    skip: skip || !isMessageAnalysis,
+  })
 
   if (!authToken && !skip) {
     return [undefined, new Error('authToken is required'), false]
+  }
+
+  if (isMessageAnalysis) {
+    return messageAnalysisResult
   }
 
   return [threatAnalysisResult, fetchError, isLoading]

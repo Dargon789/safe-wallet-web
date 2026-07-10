@@ -46,13 +46,13 @@ describe('safeContracts', () => {
       })
     })
     it('should throw if the Safe version is invalid', () => {
-      expect(() => _getValidatedGetContractProps('1.3.1')).toThrow('1.3.1 is not a valid Safe Account version')
+      expect(() => _getValidatedGetContractProps('1.3.1')).toThrow('1.3.1 is not a valid Safe account version')
 
-      expect(() => _getValidatedGetContractProps('1.4.0')).toThrow('1.4.0 is not a valid Safe Account version')
+      expect(() => _getValidatedGetContractProps('1.4.0')).toThrow('1.4.0 is not a valid Safe account version')
 
-      expect(() => _getValidatedGetContractProps('0.0.1')).toThrow('0.0.1 is not a valid Safe Account version')
+      expect(() => _getValidatedGetContractProps('0.0.1')).toThrow('0.0.1 is not a valid Safe account version')
 
-      expect(() => _getValidatedGetContractProps('')).toThrow(' is not a valid Safe Account version')
+      expect(() => _getValidatedGetContractProps('')).toThrow(' is not a valid Safe account version')
     })
   })
 
@@ -71,8 +71,8 @@ describe('safeContracts', () => {
   })
 
   describe('isMigrationToL2Possible', () => {
-    it('should not be possible to migrate Safes on chains without migration lib', () => {
-      expect(isMigrationToL2Possible(safeInfoBuilder().with({ nonce: 0, chainId: '69420' }).build())).toBeFalsy()
+    it('should be possible to migrate Safes on unregistered chains (chain-agnostic canonical fallback)', () => {
+      expect(isMigrationToL2Possible(safeInfoBuilder().with({ nonce: 0, chainId: '69420' }).build())).toBeTruthy()
     })
 
     it('should not be possible to migrate Safes with nonce > 0', () => {

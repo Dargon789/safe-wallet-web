@@ -1,16 +1,15 @@
 import { fireEvent, waitFor, screen, render as rtlRender } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { makeStore } from '@/store'
-import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
-import { ThemeProvider } from '@mui/material/styles'
-import type { Theme } from '@mui/material/styles'
 import UpdateSpaceForm from '../UpdateSpaceForm'
 
-// Import the real type
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { spaceBuilder } from '@/tests/builders/space'
+import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
-// Mock the hooks
-const mockUpdateSpace = jest.fn()
+const mockUnwrap = jest.fn()
+const mockUpdateSpace = jest.fn(() => ({ unwrap: mockUnwrap }))
 const mockUseIsAdmin = jest.fn()
 
 jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
@@ -21,27 +20,17 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesUpdateV1Mutation: jest.fn(() => [mockUpdateSpace]),
 }))
 
-// Helper to render with Redux store
+// Helper to render with a specific store instance for notification assertions
 const renderWithStore = (ui: React.ReactElement) => {
   const store = makeStore(undefined, { skipBroadcast: true })
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <Provider store={store}>
-      <SafeThemeProvider mode="light">
-        {(safeTheme: Theme) => <ThemeProvider theme={safeTheme}>{children}</ThemeProvider>}
-      </SafeThemeProvider>
-    </Provider>
-  )
-  const result = rtlRender(ui, { wrapper })
+  const result = rtlRender(ui, {
+    wrapper: ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>,
+  })
   return { ...result, store }
 }
 
 describe('UpdateSpaceForm', () => {
-  const mockSpace: GetSpaceResponse = {
-    id: 123,
-    name: 'Test Space',
-    members: [],
-    safeCount: 0,
-  }
+  const mockSpace = spaceBuilder().with({ uuid: MOCK_SPACE_UUID, name: 'Test Space', members: [] }).build()
 
   // Helper functions to reduce code duplication
   const setupForm = (space: GetSpaceResponse | undefined, isAdmin: boolean) => {
@@ -50,7 +39,7 @@ describe('UpdateSpaceForm', () => {
   }
 
   const getFormElements = () => ({
-    input: screen.getByLabelText('Space name') as HTMLInputElement,
+    input: screen.getByLabelText('Workspace name') as HTMLInputElement,
     saveButton: screen.getByTestId('space-save-button'),
   })
 
@@ -61,7 +50,7 @@ describe('UpdateSpaceForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUpdateSpace.mockReset()
+    mockUnwrap.mockReset()
     mockUseIsAdmin.mockReset()
   })
 
@@ -88,6 +77,13 @@ describe('UpdateSpaceForm', () => {
       const { input } = getFormElements()
       expect(input).toHaveValue('Updated Space Name')
     })
+  })
+
+  it('should cap the workspace name input length', () => {
+    setupForm(mockSpace, true)
+
+    const { input } = getFormElements()
+    expect(input).toHaveAttribute('maxlength', String(SPACE_NAME_MAX_LENGTH))
   })
 
   it('should disable save button when name is unchanged', () => {
@@ -118,7 +114,7 @@ describe('UpdateSpaceForm', () => {
   })
 
   it('should call updateSpace mutation on submit', async () => {
-    mockUpdateSpace.mockResolvedValue({})
+    mockUnwrap.mockResolvedValue({})
     setupForm(mockSpace, true)
 
     changeSpaceName('New Space Name')
@@ -128,14 +124,14 @@ describe('UpdateSpaceForm', () => {
 
     await waitFor(() => {
       expect(mockUpdateSpace).toHaveBeenCalledWith({
-        id: 123,
+        id: MOCK_SPACE_UUID,
         updateSpaceDto: { name: 'New Space Name' },
       })
     })
   })
 
   it('should show success notification on successful update', async () => {
-    mockUpdateSpace.mockResolvedValue({})
+    mockUnwrap.mockResolvedValue({})
     const { store } = setupForm(mockSpace, true)
 
     changeSpaceName('New Space Name')
@@ -148,14 +144,14 @@ describe('UpdateSpaceForm', () => {
       const notifications = state.notifications
       expect(notifications.length).toBeGreaterThan(0)
       const lastNotification = notifications[notifications.length - 1]
-      expect(lastNotification.message).toBe('Updated space name')
+      expect(lastNotification.message).toBe('Updated workspace name')
       expect(lastNotification.variant).toBe('success')
       expect(lastNotification.groupKey).toBe('space-update-name')
     })
   })
 
-  it('should display error message when update fails', async () => {
-    mockUpdateSpace.mockRejectedValue(new Error('Network error'))
+  it('should display the backend error message when update fails', async () => {
+    mockUnwrap.mockRejectedValue({ status: 422, data: { message: 'Name contains invalid characters' } })
     setupForm(mockSpace, true)
 
     changeSpaceName('New Space Name')
@@ -164,7 +160,7 @@ describe('UpdateSpaceForm', () => {
     fireEvent.click(saveButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Error updating the space. Please try again.')).toBeInTheDocument()
+      expect(screen.getByText('Name contains invalid characters')).toBeInTheDocument()
     })
   })
 
@@ -182,7 +178,9 @@ describe('UpdateSpaceForm', () => {
   })
 
   it('should clear error message when user retries after error', async () => {
-    mockUpdateSpace.mockRejectedValueOnce(new Error('Network error')).mockResolvedValueOnce({})
+    mockUnwrap
+      .mockRejectedValueOnce({ status: 422, data: { message: 'Name contains invalid characters' } })
+      .mockResolvedValueOnce({})
     setupForm(mockSpace, true)
 
     // First attempt fails
@@ -191,7 +189,7 @@ describe('UpdateSpaceForm', () => {
     fireEvent.click(saveButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Error updating the space. Please try again.')).toBeInTheDocument()
+      expect(screen.getByText('Name contains invalid characters')).toBeInTheDocument()
     })
 
     // Second attempt succeeds
@@ -199,7 +197,7 @@ describe('UpdateSpaceForm', () => {
     fireEvent.click(saveButton)
 
     await waitFor(() => {
-      expect(screen.queryByText('Error updating the space. Please try again.')).not.toBeInTheDocument()
+      expect(screen.queryByText('Name contains invalid characters')).not.toBeInTheDocument()
     })
   })
 })

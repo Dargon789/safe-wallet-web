@@ -1,3 +1,4 @@
+import '@/src/features/WalletConnect/shared/compat'
 import '@/src/platform/fetch'
 import '@/src/platform/crypto-shims'
 import '@/src/platform/intl-polyfills'
@@ -10,6 +11,7 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { isStorybookEnv, CONFIG_SERVICE_KEY } from '@/src/config/constants'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { PortalProvider } from '@tamagui/portal'
 import { NotificationsProvider } from '@/src/context/NotificationsContext'
@@ -34,6 +36,11 @@ import { useNotificationHandler } from '@/src/hooks/useNotificationHandler'
 import { usePendingTxsMonitor } from '../hooks/usePendingTxsMonitor'
 import { SigningMonitor } from '@/src/components/SigningMonitor'
 import { ExecutingMonitor } from '@/src/components/ExecutingMonitor'
+import { ToastMonitor } from '@/src/components/ToastMonitor'
+import { useDatadogConsent } from '@/src/hooks/useDatadogConsent'
+import { DatadogWrapper } from '@/src/providers/DatadogWrapper'
+import { AppKitInitializer } from '@/src/features/WalletConnect/Signer/components/AppKitInitializer'
+import { WalletKitController } from '@/src/features/WalletConnect/Wallet/WalletKitController'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 // Initialize all notification handlers
@@ -48,6 +55,7 @@ const HooksInitializer = () => {
   useInitWeb3()
   useInitSafeCoreSDK()
   useAnalytics() // Tracks activeSafe changes, but only once analytics is enabled in GetStarted screen
+  useDatadogConsent() // Restores DD tracking consent from persisted settings
   useNotificationHandler()
   usePendingTxsMonitor()
   return null
@@ -103,12 +111,16 @@ function NavigationStack() {
       <Stack.Screen name="signers" options={{ headerShown: false }} />
       <Stack.Screen name="import-signers" options={{ headerShown: false }} />
       <Stack.Screen name="(send)" options={{ headerShown: false }} />
+      <Stack.Screen name="wallet-connect-scan" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="wallet-connect-manual" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen name="connected-apps" options={{ headerShown: true, title: '' }} />
       <Stack.Screen name="safe-shield-details-sheet" options={transparentModalOptions} />
       <Stack.Screen name="import-data" options={{ headerShown: false }} />
       <Stack.Screen name="app-settings" options={{ headerShown: true, title: '' }} />
       <Stack.Screen name="conflict-transaction-sheet" options={transparentModalOptions} />
       <Stack.Screen name="accounts-sheet" options={transparentModalOptions} />
       <Stack.Screen name="networks-sheet" options={transparentModalOptions} />
+      <Stack.Screen name="supported-networks" options={transparentModalOptions} />
       <Stack.Screen name="confirmations-sheet" options={transparentModalOptions} />
       <Stack.Screen name="change-signer-sheet" options={transparentModalOptions} />
       <Stack.Screen name="change-estimated-fee-sheet" options={transparentModalOptions} />
@@ -136,39 +148,43 @@ function RootLayout() {
   useScreenTracking()
 
   return (
-    <GestureHandlerRootView>
-      <Provider store={store}>
-        <DataFetchProvider>
-          <NotificationsProvider>
-            <PortalProvider shouldAddRootHost>
-              <PersistGate loading={null} persistor={persistor}>
-                <SafeThemeProvider>
-                  <BottomSheetModalProvider>
-                    <SafeToastProvider>
-                      <NavigationGuardHOC>
-                        <HooksInitializer />
-                        <SigningMonitor />
-                        <ExecutingMonitor />
-                        <TestCtrls />
-                        <NavigationStack />
-                        <SafeStatusBar />
-                      </NavigationGuardHOC>
-                    </SafeToastProvider>
-                  </BottomSheetModalProvider>
-                </SafeThemeProvider>
-              </PersistGate>
-            </PortalProvider>
-          </NotificationsProvider>
-        </DataFetchProvider>
-      </Provider>
-    </GestureHandlerRootView>
+    <DatadogWrapper>
+      <GestureHandlerRootView>
+        <KeyboardProvider>
+          <Provider store={store}>
+            <DataFetchProvider>
+              <NotificationsProvider>
+                <PortalProvider shouldAddRootHost>
+                  <PersistGate loading={null} persistor={persistor}>
+                    <AppKitInitializer>
+                      <SafeThemeProvider>
+                        <BottomSheetModalProvider>
+                          <SafeToastProvider>
+                            <NavigationGuardHOC>
+                              <HooksInitializer />
+                              <SigningMonitor />
+                              <ExecutingMonitor />
+                              <ToastMonitor />
+                              <TestCtrls />
+                              <NavigationStack />
+                              <SafeStatusBar />
+                              <WalletKitController />
+                            </NavigationGuardHOC>
+                          </SafeToastProvider>
+                        </BottomSheetModalProvider>
+                      </SafeThemeProvider>
+                    </AppKitInitializer>
+                  </PersistGate>
+                </PortalProvider>
+              </NotificationsProvider>
+            </DataFetchProvider>
+          </Provider>
+        </KeyboardProvider>
+      </GestureHandlerRootView>
+    </DatadogWrapper>
   )
 }
 
-let AppEntryPoint = RootLayout
+import StorybookUI from '../../.storybook'
 
-if (isStorybookEnv) {
-  AppEntryPoint = require('../../.storybook').default
-}
-
-export default AppEntryPoint
+export default isStorybookEnv ? StorybookUI : RootLayout

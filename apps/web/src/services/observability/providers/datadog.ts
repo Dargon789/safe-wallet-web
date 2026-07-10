@@ -1,10 +1,13 @@
 import type { ILogger, IObservabilityProvider } from '../types'
-import { datadogLogs } from '@datadog/browser-logs'
-import { datadogRum } from '@datadog/browser-rum'
+import {
+  datadogRum,
+  type RumEvent,
+  type RumErrorEvent,
+  type RumEventDomainContext,
+  type RumErrorEventDomainContext,
+} from '@datadog/browser-rum'
 import {
   COMMIT_HASH,
-  DATADOG_CLIENT_TOKEN,
-  DATADOG_LOGS_SAMPLE_RATE,
   DATADOG_RUM_APPLICATION_ID,
   DATADOG_RUM_CLIENT_TOKEN,
   DATADOG_RUM_DEFAULT_PRIVACY_LEVEL,
@@ -30,57 +33,92 @@ type DatadogSite =
   | 'ddog-gov.com'
   | 'ap1.datadoghq.com'
 
-export const isDatadogLogsEnabled = Boolean(DATADOG_CLIENT_TOKEN)
-export const isDatadogRumEnabled = Boolean(DATADOG_RUM_APPLICATION_ID) && Boolean(DATADOG_RUM_CLIENT_TOKEN)
-export const isDatadogEnabled = isDatadogLogsEnabled || isDatadogRumEnabled
+export const isDatadogEnabled = Boolean(DATADOG_RUM_APPLICATION_ID) && Boolean(DATADOG_RUM_CLIENT_TOKEN)
+
+const EXTENSION_URL_PATTERNS = [
+  'chrome-extension://',
+  'moz-extension://',
+  'safari-extension://',
+  'safari-web-extension://',
+  'webkit-masked-url://',
+]
+
+const KNOWN_NOISE_PATTERNS = [
+  // Firefox fires this when ResizeObserver hits a benign infinite-loop guard
+  'ResizeObserver loop completed with undelivered notifications',
+  'ResizeObserver loop limit exceeded',
+  // Null/undefined promise rejections from injected 3rd-party scripts
+  'Non-Error promise rejection captured with value: null',
+  'Non-Error promise rejection captured with value: undefined',
+  // Safari Intelligent Tracking Prevention noise
+  'The operation is insecure',
+  // Generic script error surfaced when a cross-origin script fails — unactionable
+  'Script error.',
+]
+
+const originatesFromExtension = (stack: string | undefined): boolean => {
+  if (!stack) return false
+  return EXTENSION_URL_PATTERNS.some((pattern) => stack.includes(pattern))
+}
+
+const isKnownNoise = (message: string | undefined): boolean => {
+  if (!message) return false
+  return KNOWN_NOISE_PATTERNS.some((pattern) => message.includes(pattern))
+}
+
+const NON_USER_IMPACTING_SOURCES = new Set(['console', 'report'])
+
+/**
+ * Drop RUM error events that are demonstrably not caused by user-impacting
+ * failures so the Error-Free Views SLO reflects real breakage. Non-error events
+ * (views, actions, resources) pass through untouched.
+ *
+ * Sources we drop:
+ * - `console`: the RUM SDK auto-instruments `console.error` via
+ *   `trackConsoleError` (no init flag exists to disable it). The codebase has
+ *   many `console.error` catch blocks for non-blocking failures (clipboard
+ *   denial, RPC retries, third-party widget init, observability self-recovery
+ *   in `composite.ts`, etc.) that are not user-impacting.
+ * - `report`: Browser Reporting API events (CSP violations, deprecation,
+ *   intervention, permissions-policy). Useful as a security/policy signal but
+ *   not indicative of user-blocking failure; CSP visibility belongs on a
+ *   `report-uri`/`report-to` endpoint, not the SLO.
+ *
+ * Genuine user failures continue to flow through `trackError` /
+ * `captureException` (source: `custom`), unhandled exceptions (`source`), and
+ * network failures (`network`).
+ */
+export const filterRumEvent = (event: RumEvent, context: RumEventDomainContext): boolean => {
+  if (event.type !== 'error') return true
+
+  const errorEvent = event as RumErrorEvent
+  if (NON_USER_IMPACTING_SOURCES.has(errorEvent.error.source)) return false
+  if (isKnownNoise(errorEvent.error.message)) return false
+  if (originatesFromExtension(errorEvent.error.stack)) return false
+
+  // context.error is the raw value originally passed to addError/captureException
+  const { error: rawError } = context as RumErrorEventDomainContext
+  const rawStack = rawError instanceof Error ? rawError.stack : undefined
+  if (originatesFromExtension(rawStack)) return false
+
+  return true
+}
 
 export class DatadogProvider implements IObservabilityProvider {
   readonly name = 'Datadog'
-  private isLogsInitialized = false
-  private isRumInitialized = false
+  private isInitialized = false
 
   async init(): Promise<void> {
     const isClient = typeof window !== 'undefined'
-    if (!isClient) {
+    if (!isClient || !isDatadogEnabled || this.isInitialized) {
       return
     }
 
-    const hasLogsToInit = isDatadogLogsEnabled && !this.isLogsInitialized
-    const hasRumToInit = isDatadogRumEnabled && !this.isRumInitialized
-
-    if (!hasLogsToInit && !hasRumToInit) {
-      return
-    }
-
-    if (hasLogsToInit) {
-      this.initLogs()
-    }
-
-    if (hasRumToInit) {
-      this.initRum()
-    }
-  }
-
-  private initLogs(): void {
-    try {
-      datadogLogs.init({
-        clientToken: DATADOG_CLIENT_TOKEN,
-        site: DATADOG_RUM_SITE as DatadogSite,
-        forwardErrorsToLogs: true,
-        sessionSampleRate: DATADOG_LOGS_SAMPLE_RATE,
-      })
-      this.isLogsInitialized = true
-    } catch (error) {
-      console.warn('Failed to initialize Datadog Logs (might be already initialized):', error)
-    }
-  }
-
-  private initRum(): void {
     try {
       const getInitConfiguration = datadogRum.getInitConfiguration
       const isAlreadyInitialized = typeof getInitConfiguration === 'function' && Boolean(getInitConfiguration())
       if (isAlreadyInitialized) {
-        this.isRumInitialized = true
+        this.isInitialized = true
         return
       }
 
@@ -97,6 +135,7 @@ export class DatadogProvider implements IObservabilityProvider {
         trackResources: DATADOG_RUM_TRACK_RESOURCES,
         trackLongTasks: DATADOG_RUM_TRACK_LONG_TASKS,
         defaultPrivacyLevel: DATADOG_RUM_DEFAULT_PRIVACY_LEVEL,
+        beforeSend: filterRumEvent,
         ...(DATADOG_RUM_TRACING_ENABLED && {
           traceSampleRate: DATADOG_RUM_TRACE_SAMPLE_RATE,
           allowedTracingUrls: [
@@ -106,7 +145,7 @@ export class DatadogProvider implements IObservabilityProvider {
         }),
       })
 
-      this.isRumInitialized = true
+      this.isInitialized = true
     } catch (error) {
       console.warn('Failed to initialize Datadog RUM (might be already initialized):', error)
     }
@@ -115,30 +154,30 @@ export class DatadogProvider implements IObservabilityProvider {
   getLogger(): ILogger {
     return {
       info: (message: string, context?: Record<string, unknown>) => {
-        if (this.isLogsInitialized) {
-          datadogLogs.logger.info(message, context)
+        if (this.isInitialized) {
+          datadogRum.addAction(message, { level: 'info', ...context })
         }
       },
       warn: (message: string, context?: Record<string, unknown>) => {
-        if (this.isLogsInitialized) {
-          datadogLogs.logger.warn(message, context)
+        if (this.isInitialized) {
+          datadogRum.addAction(message, { level: 'warn', ...context })
         }
       },
       error: (message: string, context?: Record<string, unknown>) => {
-        if (this.isLogsInitialized) {
-          datadogLogs.logger.error(message, context)
+        if (this.isInitialized) {
+          datadogRum.addError(new Error(message), context)
         }
       },
       debug: (message: string, context?: Record<string, unknown>) => {
-        if (this.isLogsInitialized) {
-          datadogLogs.logger.debug(message, context)
+        if (this.isInitialized) {
+          datadogRum.addAction(message, { level: 'debug', ...context })
         }
       },
     }
   }
 
   captureException(error: Error, context?: Record<string, unknown>): void {
-    if (this.isRumInitialized) {
+    if (this.isInitialized) {
       datadogRum.addError(error, context)
     }
   }

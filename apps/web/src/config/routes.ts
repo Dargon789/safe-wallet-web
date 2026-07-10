@@ -4,7 +4,6 @@ export const AppRoutes = {
   wc: '/wc',
   userSettings: '/user-settings',
   terms: '/terms',
-  safeLabsTerms: '/safe-labs-terms',
   swap: '/swap',
   stake: '/stake',
   privacy: '/privacy',
@@ -56,10 +55,17 @@ export const AppRoutes = {
   },
   spaces: {
     settings: '/spaces/settings',
+    settingsGeneral: '/spaces/settings/general',
+    settingsAccount: '/spaces/settings/account',
+    settingsAbout: '/spaces/settings/about',
     safeAccounts: '/spaces/safe-accounts',
     members: '/spaces/members',
     index: '/spaces',
     addressBook: '/spaces/address-book',
+    createSpace: '/spaces/create-space',
+    transactions: '/spaces/transactions',
+    security: '/spaces/security',
+    activity: '/spaces/activity',
   },
   transactions: {
     tx: '/transactions/tx',
@@ -73,6 +79,12 @@ export const AppRoutes = {
     spaces: '/welcome/spaces',
     index: '/welcome',
     accounts: '/welcome/accounts',
+
+    // Onboarding routes
+    createSpace: '/welcome/create-space',
+    selectSafes: '/welcome/select-safes',
+    inviteMembers: '/welcome/invite-members',
+    survey: '/welcome/survey',
   },
 }
 

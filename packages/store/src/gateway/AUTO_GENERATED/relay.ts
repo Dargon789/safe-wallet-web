@@ -10,20 +10,36 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/chains/${queryArg.chainId}/relay`, method: 'POST', body: queryArg.relayDto }),
         invalidatesTags: ['relay'],
       }),
+      relayGetTaskStatusV1: build.query<RelayGetTaskStatusV1ApiResponse, RelayGetTaskStatusV1ApiArg>({
+        query: (queryArg) => ({ url: `/v1/chains/${queryArg.chainId}/relay/status/${queryArg.taskId}` }),
+        providesTags: ['relay'],
+      }),
       relayGetRelaysRemainingV1: build.query<RelayGetRelaysRemainingV1ApiResponse, RelayGetRelaysRemainingV1ApiArg>({
-        query: (queryArg) => ({ url: `/v1/chains/${queryArg.chainId}/relay/${queryArg.safeAddress}` }),
+        query: (queryArg) => ({
+          url: `/v1/chains/${queryArg.chainId}/relay/${queryArg.safeAddress}`,
+          params: {
+            safeTxHash: queryArg.safeTxHash,
+          },
+        }),
         providesTags: ['relay'],
       }),
     }),
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type RelayRelayV1ApiResponse = /** status 200 Transaction relayed successfully with transaction hash */ Relay
+export type RelayRelayV1ApiResponse = /** status 200 Transaction relayed successfully */ Relay
 export type RelayRelayV1ApiArg = {
   /** Chain ID where the Safe transaction will be executed */
   chainId: string
-  /** Transaction data to relay including Safe address, transaction details, and signatures */
+  /** Transaction data to relay. safeTxHash is required on relay-fee chains and must correspond to the to + data fields. Set acceptUnverifiedSimulation=true to retry a relay skipping the simulation which previously returned INDETERMINATE_SIMULATION. */
   relayDto: RelayDto
+}
+export type RelayGetTaskStatusV1ApiResponse = /** status 200 Task status retrieved successfully */ RelayTaskStatus
+export type RelayGetTaskStatusV1ApiArg = {
+  /** Chain ID associated with the relay task */
+  chainId: string
+  /** Task ID returned from the relay transaction */
+  taskId: string
 }
 export type RelayGetRelaysRemainingV1ApiResponse =
   /** status 200 Remaining relay quota retrieved successfully */ RelaysRemaining
@@ -32,22 +48,47 @@ export type RelayGetRelaysRemainingV1ApiArg = {
   chainId: string
   /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
+  /** Safe transaction hash (0x prefixed hex string). Required on relay-fee chains to check per-transaction eligibility with the fee service. Optional on daily-limit and no-fee-campaign chains. */
+  safeTxHash?: string
 }
 export type Relay = {
   taskId: string
+}
+export type RelayErrorResponse = {
+  /** Stable identifier of the error condition. The frontend MUST branch on this value (not on `message`, which is informational and may change). */
+  code: 'SIMULATION_FAILED' | 'INDETERMINATE_SIMULATION'
+  /** Human-readable description of the error. Informational only; do not parse. */
+  message: string
+  statusCode: number
 }
 export type RelayDto = {
   version: string
   to: string
   data: string
-  /** If specified, a gas buffer of 150k will be added on top of the expected gas usage for the transaction.
-          This is for the <a href="https://docs.gelato.network/developer-services/relay/quick-start/optional-parameters" target="_blank">
-          Gelato Relay execution overhead</a>, reducing the chance of the task cancelling before it is executed on-chain. */
+  /** Accepted for backward compatibility and validation; not forwarded to the relay provider (Gelato). */
   gasLimit?: string | null
+  /** Safe transaction hash for relay-fee eligibility check */
+  safeTxHash?: string
+  /** Set to true to proceed with the relay when a previous attempt returned INDETERMINATE_SIMULATION. The user has acknowledged the simulation could not be completed and accepts the risk. */
+  acceptUnverifiedSimulation?: boolean
+}
+export type RelayTaskStatusReceipt = {
+  transactionHash: string
+}
+export type RelayTaskStatus = {
+  /** Relay task status code: 100=Pending, 110=Submitted, 200=Included, 400=Rejected, 500=Reverted */
+  status: 100 | 110 | 200 | 400 | 500
+  /** On-chain receipt. Only present when status is 200 (Included) or 500 (Reverted) */
+  receipt?: RelayTaskStatusReceipt
 }
 export type RelaysRemaining = {
   remaining: number
   limit: number
 }
-export const { useRelayRelayV1Mutation, useRelayGetRelaysRemainingV1Query, useLazyRelayGetRelaysRemainingV1Query } =
-  injectedRtkApi
+export const {
+  useRelayRelayV1Mutation,
+  useRelayGetTaskStatusV1Query,
+  useLazyRelayGetTaskStatusV1Query,
+  useRelayGetRelaysRemainingV1Query,
+  useLazyRelayGetRelaysRemainingV1Query,
+} = injectedRtkApi

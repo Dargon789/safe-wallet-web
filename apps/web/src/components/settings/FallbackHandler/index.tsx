@@ -13,7 +13,7 @@ import { useCompatibilityFallbackHandlerDeployments } from '@/hooks/useCompatibi
 import { useHasUntrustedFallbackHandler } from '@/hooks/useHasUntrustedFallbackHandler'
 import css from '../TransactionGuards/styles.module.css'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import { useIsTWAPFallbackHandler } from '@/features/swap/hooks/useIsTWAPFallbackHandler'
+import { useIsTWAPFallbackHandler } from '@/features/swap'
 
 const FALLBACK_HANDLER_VERSION = '>=1.1.1'
 
@@ -96,7 +96,7 @@ export const FallbackHandler = (): ReactElement | null => {
         <Grid item xs>
           <Box>
             <Typography>
-              The fallback handler adds fallback logic for funtionality that may not be present in the Safe Account
+              The fallback handler adds fallback logic for funtionality that may not be present in the Safe account
               contract. Learn more about the fallback handler{' '}
               <ExternalLink href={HelpCenterArticle.FALLBACK_HANDLER}>here</ExternalLink>
             </Typography>

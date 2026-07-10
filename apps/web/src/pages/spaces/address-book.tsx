@@ -10,16 +10,16 @@ export default function SpaceAddressBookPage() {
   const spaces = useLoadFeature(SpacesFeature)
   useFeatureFlagRedirect()
 
-  if (!router.isReady || !spaceId || typeof spaceId !== 'string') return null
+  if (!router.isReady || !spaceId) return null
 
   return (
     <>
       <Head>
-        <title>{`${BRAND_NAME} – Space address book`}</title>
+        <title>{`${BRAND_NAME} – Workspace address book`}</title>
       </Head>
 
       <main>
-        <spaces.SpaceAddressBookPage spaceId={spaceId} />
+        <spaces.SpaceAddressBookPage spaceId={spaceId as string} />
       </main>
     </>
   )

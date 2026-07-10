@@ -2,7 +2,7 @@ import AddressInput from '@/components/common/AddressInput'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import ModalDialog from '@/components/common/ModalDialog'
 import networkSelectorCss from '@/components/common/NetworkSelector/styles.module.css'
-import chains from '@/config/chains'
+import chains from '@safe-global/utils/config/chains'
 import css from './styles.module.css'
 import useChains from '@/hooks/useChains'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -18,7 +18,13 @@ export type AddManuallyFormValues = {
   chainId: string
 }
 
-const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormValues) => void }) => {
+const AddManually = ({
+  handleAddSafe,
+  disabled = false,
+}: {
+  handleAddSafe: (data: AddManuallyFormValues) => void
+  disabled?: boolean
+}) => {
   const [addManuallyOpen, setAddManuallyOpen] = useState(false)
   const { configs } = useChains()
   const [triggerGetSafe] = useLazySafesGetSafeV1Query()
@@ -51,10 +57,10 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
     try {
       const result = await triggerGetSafe({ chainId, safeAddress: address }).unwrap()
       if (!result) {
-        return 'Address given is not a valid Safe Account address'
+        return 'Address given is not a valid Safe account address'
       }
     } catch (error) {
-      return 'Address given is not a valid Safe Account address'
+      return 'Address given is not a valid Safe account address'
     }
   }
 
@@ -82,7 +88,14 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
 
   return (
     <>
-      <Button data-testid="add-manually-button" size="medium" onClick={() => setAddManuallyOpen(true)}>
+      <Button
+        data-testid="add-manually-button"
+        size="medium"
+        fullWidth
+        disabled={disabled}
+        onClick={() => setAddManuallyOpen(true)}
+        sx={{ borderRadius: 'var(--radius-md)' }}
+      >
         + Add manually
       </Button>
       <ModalDialog
@@ -103,7 +116,7 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
               <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
                 <AddressInput
                   data-testid="add-address-input"
-                  label="Safe Account"
+                  label="Safe account"
                   chain={selectedChain}
                   validate={validateSafeAddress}
                   name="address"

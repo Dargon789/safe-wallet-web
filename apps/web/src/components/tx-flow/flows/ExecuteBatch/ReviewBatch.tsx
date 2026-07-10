@@ -3,7 +3,7 @@ import { CircularProgress, Typography, Button, CardActions, Divider, Alert } fro
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { encodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils/transactions/utils'
+import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import { useState, useMemo, useContext, useCallback } from 'react'
 import type { SyntheticEvent } from 'react'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -240,7 +240,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
               executionMethod={executionMethod}
               setExecutionMethod={setExecutionMethod}
               relays={relays}
-              tooltip="You can only relay multisend transactions containing executions from the same Safe Account."
+              tooltip="You can only relay multisend transactions containing executions from the same Safe account."
             />
           </>
         ) : null}

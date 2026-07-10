@@ -1,9 +1,10 @@
+import { format, isToday, isValid, isYesterday } from 'date-fns'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import type { UserWithWallets } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import type {
   GetSpaceResponse,
-  MemberDto,
+  SpaceMemberDto,
   SpaceAddressBookItemDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { MemberStatus, MemberRole } from './hooks/useSpaceMembers'
@@ -23,6 +24,11 @@ export const filterSpacesByStatus = (
     return space.members.some((member) => member.user.id === currentUser?.id && member.status === status)
   })
 }
+
+export const getInvitedByName = (
+  space: GetSpaceResponse | undefined,
+  currentUserId: number | undefined,
+): string | undefined => space?.members.find((member) => member.user.id === currentUserId)?.invitedByName
 
 export const getNonDeclinedSpaces = (currentUser: UserWithWallets | undefined, spaces: GetSpaceResponse[]) => {
   const pendingInvites = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.INVITED)
@@ -52,8 +58,29 @@ export const mapSpaceContactsToAddressBookState = (spaceContacts: SpaceAddressBo
  * @param members - Array of members from GetSpaceResponse
  * @param userId - The user ID to check
  */
-export const isUserActiveAdmin = (members: MemberDto[], userId: number | undefined): boolean => {
+export const isUserActiveAdmin = (members: SpaceMemberDto[], userId: number | undefined): boolean => {
   if (!userId) return false
   const membership = members.find((member) => member.user.id === userId)
   return !!membership && membership.role === MemberRole.ADMIN && membership.status === MemberStatus.ACTIVE
+}
+
+/**
+ * Formats an ISO date string as a relative day label with time,
+ * e.g. "Today at 9:41 AM", "Yesterday at 9:41 AM" or "Jun 11 at 9:41 AM".
+ * Returns an empty string for missing or unparsable input.
+ */
+export function formatDate(dateStr: string): string {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  if (!isValid(date)) return ''
+
+  const timeStr = format(date, 'p')
+
+  if (isToday(date)) {
+    return `Today at ${timeStr}`
+  }
+  if (isYesterday(date)) {
+    return `Yesterday at ${timeStr}`
+  }
+  return `${format(date, 'MMM d')} at ${timeStr}`
 }

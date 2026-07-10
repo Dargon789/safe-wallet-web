@@ -47,24 +47,28 @@ runs:
   steps:
     - uses: ./.github/actions/yarn
 
-    - name: Install Latest stable Chrome Version
-      shell: bash
-      run: |
-        curl -O 'https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb'
-        sudo apt-get install ./google-chrome-stable_current_amd64.deb
+    - name: Install Chrome
+      uses: browser-actions/setup-chrome@c785b87e244131f27c9f19c1a33e2ead956ab7ce # v1.7.3
+      with:
+        chrome-version: '134'
+      id: setup-chrome
 
     - uses: ./.github/actions/build
       with:
         secrets: ${{ inputs.secrets }}
       env:
         NODE_ENV: cypress
+        # `next build` overrides NODE_ENV to 'production' in client bundles, so
+        # APP_ENV-based IS_TEST_E2E doesn't survive. Forward an explicit
+        # NEXT_PUBLIC_ flag that does survive the build.
+        NEXT_PUBLIC_IS_TEST_E2E: 'true'
 
-    - uses: cypress-io/github-action@v6
+    - uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6.10.9
       with:
         spec: ${{ inputs.spec }}
         group: ${{ inputs.record == 'true' && inputs.group || '' }}
         parallel: ${{ inputs.record == 'true' && inputs.parallel == 'true' }}
-        browser: chrome
+        browser: ${{ steps.setup-chrome.outputs.chrome-path }}
         record: ${{ inputs.record == 'true' }}
         tag: ${{ inputs.record == 'true' && inputs.tag || '' }}
         config: baseUrl=http://localhost:8080

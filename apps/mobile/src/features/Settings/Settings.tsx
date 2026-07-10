@@ -2,9 +2,8 @@ import React, { useCallback } from 'react'
 import { H2, ScrollView, Text, Theme, View, XStack, YStack } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { SafeListItem } from '@/src/components/SafeListItem'
-import { Skeleton } from 'moti/skeleton'
+import { SafeSkeleton } from '@/src/components/SafeSkeleton'
 import { Pressable, TouchableOpacity } from 'react-native'
-import { useTheme } from '@/src/theme/hooks/useTheme'
 import { EthAddress } from '@/src/components/EthAddress'
 import { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { Address } from '@/src/types/address'
@@ -19,6 +18,7 @@ import { Alert } from '@/src/components/Alert'
 
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
+import { ConnectedDappsEntry } from '@/src/features/WalletConnect/Wallet/components/ConnectedDappsEntry'
 
 interface SettingsProps {
   data: SafeState
@@ -44,8 +44,6 @@ export const Settings = ({
   const activeSafe = useDefinedActiveSafe()
   const copy = useCopyAndDispatchToast()
   const { owners = [], threshold, implementation } = data
-  const { colorScheme } = useTheme()
-
   const onPressAddressCopy = useCallback(() => {
     copy(activeSafe.address)
   }, [activeSafe.address])
@@ -64,8 +62,8 @@ export const Settings = ({
           }}
         >
           <YStack flex={1} paddingTop={'$10'}>
-            <Skeleton.Group show={!owners.length}>
-              <YStack alignItems="center" space="$3" marginBottom="$6">
+            <SafeSkeleton.Group show={!owners.length}>
+              <YStack alignItems="center" gap="$3" marginBottom="$6">
                 <BadgeWrapper
                   badge={
                     <ThresholdBadge
@@ -105,11 +103,11 @@ export const Settings = ({
                   marginRight={'$2'}
                 >
                   <View width={30}>
-                    <Skeleton colorMode={colorScheme}>
+                    <SafeSkeleton>
                       <Text fontWeight="bold" textAlign="center" fontSize={'$4'}>
                         {owners.length}
                       </Text>
-                    </Skeleton>
+                    </SafeSkeleton>
                   </View>
                   <Text color="$colorHover" fontSize={'$3'}>
                     Signers
@@ -125,11 +123,11 @@ export const Settings = ({
                   width={80}
                 >
                   <View width={30}>
-                    <Skeleton colorMode={colorScheme}>
+                    <SafeSkeleton>
                       <Text fontWeight="bold" textAlign="center" fontSize={'$4'}>
                         {threshold}/{owners.length}
                       </Text>
-                    </Skeleton>
+                    </SafeSkeleton>
                   </View>
                   <Text color="$colorHover" fontSize={'$3'}>
                     Threshold
@@ -154,11 +152,11 @@ export const Settings = ({
                       leftNode={<SafeFontIcon name={'owners'} color={'$colorSecondary'} />}
                       rightNode={
                         <View flexDirection={'row'} alignItems={'center'} justifyContent={'center'}>
-                          <Skeleton colorMode={colorScheme} height={17}>
+                          <SafeSkeleton height={17}>
                             <Text minWidth={15} marginRight={'$3'} color={'$colorSecondary'}>
                               {owners.length}
                             </Text>
-                          </Skeleton>
+                          </SafeSkeleton>
                           <View>
                             <SafeFontIcon name={'chevron-right'} />
                           </View>
@@ -166,6 +164,7 @@ export const Settings = ({
                       }
                     />
                   </Pressable>
+                  <ConnectedDappsEntry />
                 </View>
 
                 <View backgroundColor="$backgroundDark" padding="$4" borderRadius="$3" gap={'$2'}>
@@ -206,7 +205,7 @@ export const Settings = ({
                   </View>
                 )}
               </YStack>
-            </Skeleton.Group>
+            </SafeSkeleton.Group>
 
             {/* Footer */}
             <Pressable
@@ -230,7 +229,7 @@ export const Settings = ({
               <View flex={1} padding="$5">
                 <Alert
                   type="warning"
-                  info="Your Safe Account's base contract is not supported. You should migrate it to a compatible
+                  info="Your Safe account's base contract is not supported. You should migrate it to a compatible
               version. Use the web app for this."
                   message="Base contract is not supported"
                 />

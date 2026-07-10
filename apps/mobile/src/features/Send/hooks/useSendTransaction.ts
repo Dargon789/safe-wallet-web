@@ -1,9 +1,9 @@
 import { useCallback, useRef, useState } from 'react'
 import { useRouter } from 'expo-router'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
-import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
-import { selectActiveSigner } from '@/src/store/activeSignerSlice'
-import { proposeSendTransaction } from '../services/proposeSendTransaction'
+import { useAppDispatch } from '@/src/store/hooks'
+import useSafeInfo from '@/src/hooks/useSafeInfo'
+import { prepareSendDraft } from '../services/prepareSendDraft'
 import logger from '@/src/utils/logger'
 
 interface UseSendTransactionArgs {
@@ -13,11 +13,11 @@ interface UseSendTransactionArgs {
   decimals: number
   isValid: boolean
   selectedNonce: number | undefined
+  hasSigner: boolean
 }
 
 interface UseSendTransactionResult {
   submitError: string | undefined
-  activeSigner: ReturnType<typeof selectActiveSigner>
   handleReview: () => Promise<void>
   isSubmitting: boolean
 }
@@ -29,11 +29,12 @@ export function useSendTransaction({
   decimals,
   isValid,
   selectedNonce,
+  hasSigner,
 }: UseSendTransactionArgs): UseSendTransactionResult {
   const router = useRouter()
   const activeSafe = useDefinedActiveSafe()
+  const { safe } = useSafeInfo()
   const dispatch = useAppDispatch()
-  const activeSigner = useAppSelector((state) => selectActiveSigner(state, activeSafe.address))
   const [isSubmitting, setIsSubmitting] = useState(false)
   const isSubmittingRef = useRef(false)
   const [submitError, setSubmitError] = useState<string>()
@@ -43,8 +44,7 @@ export function useSendTransaction({
       return
     }
 
-    const cannotSubmit = !isValid || isSubmitting || !activeSigner
-    if (cannotSubmit) {
+    if (!isValid || !hasSigner) {
       return
     }
     isSubmittingRef.current = true
@@ -52,25 +52,25 @@ export function useSendTransaction({
     setSubmitError(undefined)
 
     try {
-      const txId = await proposeSendTransaction({
-        recipient: recipientAddress ?? '',
-        tokenAddress: tokenAddress ?? '',
+      const safeTxHash = await prepareSendDraft({
+        recipient: recipientAddress,
+        tokenAddress: tokenAddress,
         amount: tokenAmount,
         decimals,
         chainId: activeSafe.chainId,
         safeAddress: activeSafe.address,
-        sender: activeSigner.value,
         dispatch,
         nonce: selectedNonce,
+        safe,
       })
 
       router.push({
         pathname: '/confirm-transaction',
-        params: { txId },
+        params: { txId: safeTxHash },
       })
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to create transaction'
-      logger.error('Send transaction proposal failed:', e)
+      logger.error('Send transaction preview failed:', e)
       setSubmitError(message)
     } finally {
       isSubmittingRef.current = false
@@ -78,17 +78,17 @@ export function useSendTransaction({
     }
   }, [
     isValid,
-    isSubmitting,
-    activeSigner,
+    hasSigner,
     recipientAddress,
     tokenAddress,
     tokenAmount,
     decimals,
     activeSafe,
+    safe,
     dispatch,
     router,
     selectedNonce,
   ])
 
-  return { submitError, activeSigner, handleReview, isSubmitting }
+  return { submitError, handleReview, isSubmitting }
 }

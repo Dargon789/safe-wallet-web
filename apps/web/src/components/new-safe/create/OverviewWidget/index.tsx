@@ -31,7 +31,7 @@ const OverviewWidget = ({ safeName, networks }: { safeName: string; networks: Ch
       <Card className={css.card}>
         <div className={css.header}>
           <SafeLogo alt="Safe logo" width={LOGO_DIMENSIONS} height={LOGO_DIMENSIONS} />
-          <Typography variant="h4">Your Safe Account preview</Typography>
+          <Typography variant="h4">Your Safe account preview</Typography>
         </div>
         {wallet ? (
           rows.map((row) => (
@@ -45,7 +45,7 @@ const OverviewWidget = ({ safeName, networks }: { safeName: string; networks: Ch
             <Typography variant="body2" color="border.main" textAlign="center" width={1} mb={1}>
               Connect your wallet to continue
             </Typography>
-            <ConnectWalletButton />
+            <ConnectWalletButton fullWidth />
           </Box>
         )}
       </Card>

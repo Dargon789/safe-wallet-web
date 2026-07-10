@@ -10,16 +10,16 @@ export default function SpaceMembersPage() {
   const spaces = useLoadFeature(SpacesFeature)
   useFeatureFlagRedirect()
 
-  if (!router.isReady || !spaceId || typeof spaceId !== 'string') return null
+  if (!router.isReady || !spaceId) return null
 
   return (
     <>
       <Head>
-        <title>{`${BRAND_NAME} – Space members`}</title>
+        <title>{`${BRAND_NAME} – Workspace members`}</title>
       </Head>
 
       <main>
-        <spaces.SpaceMembersPage spaceId={spaceId} />
+        <spaces.SpaceMembersPage spaceId={spaceId as string} />
       </main>
     </>
   )

@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 import { Box } from '@mui/material'
 import type {
   ContractAnalysisResults,
+  DeadlockAnalysisResults,
   ThreatAnalysisResults,
   RecipientAnalysisResults,
   Severity,
@@ -15,20 +16,17 @@ import UntrustedSafeWarning from '../UntrustedSafeWarning'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import {
-  analysisVisibilityDelay,
-  calculateAnalysisDelays,
-  useDelayedLoading,
-} from '@/features/safe-shield/hooks/useDelayedLoading'
+import { analysisVisibilityDelay, calculateAnalysisDelays, useDelayedLoading } from '../../hooks/useDelayedLoading'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hypernative'
 import { useLoadFeature } from '@/features/__core__'
-import { ThreatAnalysis } from '@/features/safe-shield/components/ThreatAnalysis'
+import { ThreatAnalysis } from '../ThreatAnalysis'
 
 export const SafeShieldContent = ({
   recipient,
   contract,
   threat,
+  deadlock,
   safeTx,
   overallStatus,
   hypernativeAuth,
@@ -40,6 +38,7 @@ export const SafeShieldContent = ({
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
   threat: AsyncResult<ThreatAnalysisResults>
+  deadlock: AsyncResult<DeadlockAnalysisResults>
   safeTx?: SafeTransaction
   overallStatus?: { severity: Severity; title: string }
   hypernativeAuth?: HypernativeAuthStatus
@@ -52,20 +51,22 @@ export const SafeShieldContent = ({
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
   const [contractResults = {}, _contractError, contractLoading = false] = contract
   const [threatResults = {}, _threatError, threatLoading = false] = threat
+  const [deadlockResults = {}, _deadlockError, deadlockLoading = false] = deadlock
 
   const highlightedSeverity = overallStatus?.severity
-  const loading = recipientLoading || contractLoading || threatLoading
+  const loading = recipientLoading || contractLoading || threatLoading || deadlockLoading
   const isLoadingVisible = useDelayedLoading(loading, analysisVisibilityDelay)
   const shouldShowContent = !isLoadingVisible
 
   const recipientEmpty = isEmpty(recipientResults)
   const contractEmpty = isEmpty(contractResults)
   const threatEmpty = isEmpty(threatResults) || isEmpty(threatResults?.THREAT)
-  const analysesEmpty = recipientEmpty && contractEmpty && threatEmpty
-  const allEmpty = recipientEmpty && contractEmpty && threatEmpty && !safeTx
+  const deadlockEmpty = isEmpty(deadlockResults)
+  const analysesEmpty = recipientEmpty && contractEmpty && threatEmpty && deadlockEmpty
+  const allEmpty = recipientEmpty && contractEmpty && threatEmpty && deadlockEmpty && !safeTx
 
-  const { recipientDelay, contractAnalysisDelay, threatAnalysisDelay, simulationAnalysisDelay } =
-    calculateAnalysisDelays(recipientEmpty, contractEmpty)
+  const { recipientDelay, contractAnalysisDelay, deadlockAnalysisDelay, threatAnalysisDelay, simulationAnalysisDelay } =
+    calculateAnalysisDelays(recipientEmpty, contractEmpty, deadlockEmpty)
 
   return (
     <Box padding="0px 4px 4px">
@@ -107,6 +108,14 @@ export const SafeShieldContent = ({
             highlightedSeverity={highlightedSeverity}
             analyticsEvent={SAFE_SHIELD_EVENTS.CONTRACT_DECODED}
             showImage
+          />
+
+          <AnalysisGroupCard
+            data-testid="deadlock-analysis-group-card"
+            data={deadlockResults}
+            delay={deadlockAnalysisDelay}
+            highlightedSeverity={highlightedSeverity}
+            analyticsEvent={SAFE_SHIELD_EVENTS.DEADLOCK_ANALYZED}
           />
 
           <ThreatAnalysis

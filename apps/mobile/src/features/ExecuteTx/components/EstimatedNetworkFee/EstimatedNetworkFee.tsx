@@ -1,8 +1,7 @@
 import React from 'react'
 import { Text, View } from 'tamagui'
 import { router } from 'expo-router'
-import { Skeleton } from 'moti/skeleton'
-import { useTheme } from '@/src/theme/hooks/useTheme'
+import { SafeSkeleton } from '@/src/components/SafeSkeleton'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveChain } from '@/src/store/chains'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
@@ -27,7 +26,6 @@ export const EstimatedNetworkFee = ({
   willFail,
 }: EstimatedNetworkFeeProps) => {
   const chain = useAppSelector(selectActiveChain)
-  const { colorScheme } = useTheme()
   const activeSafe = useDefinedActiveSafe()
 
   const { currentData: relaysRemaining, isLoading: isLoadingRelays } = useRelayGetRelaysRemainingV1Query({
@@ -43,11 +41,13 @@ export const EstimatedNetworkFee = ({
   }
 
   return (
-    <View flexDirection="row" justifyContent="space-between" gap="$2" alignItems="center">
-      <Text color="$textSecondaryLight">Est. network fee</Text>
+    <View flexDirection="row" justifyContent="space-between" gap="$2" alignItems="center" minHeight="$10">
+      <Text color="$textSecondaryLight" fontSize="$4">
+        Est. network fee
+      </Text>
 
       {isLoadingFees || isLoadingRelays ? (
-        <Skeleton colorMode={colorScheme} height={16} width={100} />
+        <SafeSkeleton height={16} width={100} />
       ) : executionMethod === ExecutionMethod.WITH_RELAY ? (
         <RelayFee
           willFail={willFail}

@@ -30,7 +30,7 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import type { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 
 import * as useIsPinnedSafeHook from '@/hooks/useIsPinnedSafe'
-import * as useTrustSafeHook from '@/features/myAccounts/hooks/useTrustSafe'
+import * as useTrustSafeHook from '@/features/myAccounts'
 
 const renderWithSafeShield = (ui: ReactElement) => {
   return render(<SafeShieldProvider>{ui}</SafeShieldProvider>)
@@ -450,7 +450,7 @@ describe('SignMessage', () => {
     )
 
     expect(
-      getByText("You are currently not a signer of this Safe Account and won't be able to confirm this message."),
+      getByText("You are currently not a signer of this Safe account and won't be able to confirm this message."),
     ).toBeInTheDocument()
 
     expect(getByText('Sign')).toBeDisabled()
@@ -725,6 +725,8 @@ describe('SignMessage', () => {
         setSafeTx: jest.fn(),
         safeMessage: undefined,
         setSafeMessage: mockSetSafeMessage,
+        safeMessageHash: undefined,
+        setSafeMessageHash: jest.fn(),
         safeTxError: undefined,
         setSafeTxError: jest.fn(),
         nonce: undefined,
@@ -736,6 +738,10 @@ describe('SignMessage', () => {
         txOrigin: undefined,
         setTxOrigin: jest.fn(),
         isReadOnly: false,
+        gtfPaymentMode: 'safe',
+        setGtfPaymentMode: jest.fn(),
+        gtfSelectedGasToken: undefined,
+        setGtfSelectedGasToken: jest.fn(),
       }
     })
 
@@ -766,7 +772,7 @@ describe('SignMessage', () => {
       expect(capturedSafeMessage).toEqual(EXAMPLE_EIP712_MESSAGE)
     })
 
-    it('does not set plain text messages in SafeTxContext (not EIP-712)', async () => {
+    it('clears SafeTxContext for plain text messages (not EIP-712)', async () => {
       const { getByText } = render(
         <SafeTxContext.Provider value={mockSafeTxContext}>
           <SafeShieldProvider>
@@ -779,7 +785,7 @@ describe('SignMessage', () => {
         expect(getByText('Hello world!')).toBeInTheDocument()
       })
 
-      expect(mockSetSafeMessage).not.toHaveBeenCalled()
+      expect(mockSetSafeMessage).toHaveBeenCalledWith(undefined)
     })
 
     it('disables Sign button when risk confirmation is needed but not confirmed', async () => {

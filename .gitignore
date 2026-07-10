@@ -20,6 +20,10 @@ report.json
 # production
 /build
 
+# tanstack migration experiment
+apps/web-tanstack/dist/
+.playwright-mcp/
+
 # misc
 .DS_Store
 *.pem
@@ -28,7 +32,8 @@ report.json
 # beads
 .beads/
 
-# Yarn v4
+# Yarn v4 / tooling cache (redirected inside workspace in container envs)
+.cache-tmp/
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
@@ -61,6 +66,10 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# turborepo
+.turbo/
+**/.turbo/
 
 # typescript
 *.tsbuildinfo
@@ -112,4 +121,15 @@ apps/tx-builder/vite.config.d.ts
 
 # claude-workflows
 todos/*
-docs/
+/docs/plans/
+/docs/todos/
+/docs/brainstorms/
+/docs/superpowers/
+/docs/migration/
+
+.codemod
+.serena
+
+# Claude Code worktrees
+.claude/worktrees/
+.claude/settings.local.json

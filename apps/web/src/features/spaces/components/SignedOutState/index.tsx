@@ -1,8 +1,17 @@
 import { Box, Typography } from '@mui/material'
 import css from '../Dashboard/styles.module.css'
-import SignInButton from '../SignInButton'
+import SignInOptions from '../SignInOptions'
+import { OidcAuthFeature } from '@/features/oidc-auth'
+import { useLoadFeature } from '@/features/__core__'
 
-const SignedOutState = () => {
+interface SignedOutStateProps {
+  afterSignIn?: () => void
+  redirectLoading?: boolean
+}
+
+const SignedOutState = ({ afterSignIn, redirectLoading = false }: SignedOutStateProps) => {
+  const { $isDisabled } = useLoadFeature(OidcAuthFeature)
+
   return (
     <Box className={css.content}>
       <Box textAlign="center" className={css.contentWrapper}>
@@ -12,11 +21,11 @@ const SignedOutState = () => {
           </Typography>
 
           <Typography color="text.secondary" mb={2}>
-            To view and interact with spaces, you need to sign in with the wallet, that is a member of the space. Sign
-            in to continue.
+            To view and interact with workspaces, you need to sign in with the wallet, that is a member of the workspace
+            {!$isDisabled && ', or sign in with email'}. Sign in to continue.
           </Typography>
 
-          <SignInButton />
+          <SignInOptions afterSignIn={afterSignIn ?? (() => {})} redirectLoading={redirectLoading} />
         </Box>
       </Box>
     </Box>

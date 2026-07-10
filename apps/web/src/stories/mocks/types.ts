@@ -35,6 +35,8 @@ export interface FeatureFlags {
   earn?: boolean
   /** SPACES - collaborative spaces (default: false) */
   spaces?: boolean
+  /** OIDC_AUTH - OIDC-based login for email and Google (default: false) */
+  oidcAuth?: boolean
 }
 
 /**
@@ -98,6 +100,12 @@ export interface MockStoryConfig {
    * @default '/home'
    */
   pathname?: string
+
+  /**
+   * Wrap with ShadcnProvider for shadcn component support
+   * @default false
+   */
+  shadcn?: boolean
 
   /**
    * Additional query parameters for router mock

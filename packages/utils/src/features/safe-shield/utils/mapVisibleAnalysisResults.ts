@@ -7,6 +7,7 @@ import {
   ThreatAnalysisResults,
   ContractAnalysisResults,
   RecipientAnalysisResults,
+  StatusGroup,
 } from '../types'
 import { getPrimaryResult, sortBySeverity } from './analysisUtils'
 import { mapConsolidatedAnalysisResults } from './mapConsolidatedAnalysisResults'
@@ -25,6 +26,7 @@ const METADATA_KEYS = ['name', 'logoUrl', 'request_id', 'BALANCE_CHANGE'] as con
 
 export const mapVisibleAnalysisResults = (
   addressesResultsMap: RecipientAnalysisResults | ContractAnalysisResults | ThreatAnalysisResults,
+  expandedGroups: StatusGroup[] = [],
 ): AnalysisResult[] => {
   // Filter out metadata fields that should not be treated as analysis result groups
   const addressResults: GroupedAnalysisResults[] = Object.entries(addressesResultsMap)
@@ -34,8 +36,14 @@ export const mapVisibleAnalysisResults = (
   if (addressResults.length === 1) {
     const results: AnalysisResult[] = []
 
-    for (const groupResults of Object.values(addressResults[0])) {
+    for (const [groupKey, groupResults] of Object.entries(addressResults[0])) {
       if (!Array.isArray(groupResults)) continue
+
+      if (expandedGroups.includes(groupKey as StatusGroup)) {
+        results.push(...sortBySeverity(groupResults as AnalysisResult[]))
+        continue
+      }
+
       const primaryGroupResult = getPrimaryResult<AnalysisResult>(groupResults)
       if (primaryGroupResult) {
         results.push(primaryGroupResult)
@@ -51,8 +59,15 @@ export const isAddressChange = (result: AnalysisResult): result is MasterCopyCha
   return result.type === ThreatStatus.MASTERCOPY_CHANGE
 }
 
-export const isThreatAnalysisResult = (result: any): result is ThreatAnalysisResult => {
-  if (result && 'severity' in result && 'type' in result && 'title' in result && 'description' in result) {
+export const isThreatAnalysisResult = (result: unknown): result is ThreatAnalysisResult => {
+  if (
+    typeof result === 'object' &&
+    result !== null &&
+    'severity' in result &&
+    'type' in result &&
+    'title' in result &&
+    'description' in result
+  ) {
     return true
   }
 

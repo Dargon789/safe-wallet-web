@@ -1,13 +1,19 @@
-import { useState, useRef, type ReactElement, type ReactNode } from 'react'
+import { useState, useRef, useEffect, type ReactElement, type ReactNode } from 'react'
 import { Card, Stack, Typography, Collapse, IconButton } from '@mui/material'
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded'
 
-import { SidebarListItemCounter } from '@/components/sidebar/SidebarList'
+import { SidebarListItemCounter } from '@/components/common/SidebarList'
 import { useWarningCount } from './useWarningCount'
 import css from './styles.module.css'
 
 export interface ActionRequiredPanelProps {
   children: ReactNode
+  /**
+   * Opens the panel once when this turns true (e.g. a critical item was detected).
+   * A manual user toggle always wins thereafter, so a late/again-true signal never
+   * re-opens a panel the user has collapsed.
+   */
+  defaultExpanded?: boolean
 }
 
 /**
@@ -29,12 +35,21 @@ export interface ActionRequiredPanelProps {
  * </ActionRequiredPanel>
  * ```
  */
-export const ActionRequiredPanel = ({ children }: ActionRequiredPanelProps): ReactElement => {
+export const ActionRequiredPanel = ({ children, defaultExpanded = false }: ActionRequiredPanelProps): ReactElement => {
   const [isExpanded, setIsExpanded] = useState(false)
+  const userToggledRef = useRef(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const warningCount = useWarningCount(containerRef)
 
+  // Open once when a critical item is detected, unless the user has already toggled the panel.
+  useEffect(() => {
+    if (defaultExpanded && !userToggledRef.current) {
+      setIsExpanded(true)
+    }
+  }, [defaultExpanded])
+
   const toggleExpanded = () => {
+    userToggledRef.current = true
     setIsExpanded((prev) => !prev)
   }
 
@@ -71,6 +86,7 @@ export const ActionRequiredPanel = ({ children }: ActionRequiredPanelProps): Rea
         tabIndex={0}
         aria-expanded={isExpanded}
         aria-label="Toggle action required panel"
+        data-testid="action-required-panel-toggle"
       >
         <Typography fontWeight={700} className={css.headerText}>
           Action required <SidebarListItemCounter count={warningCount.toString()} variant="subtle" />
@@ -92,7 +108,7 @@ export const ActionRequiredPanel = ({ children }: ActionRequiredPanelProps): Rea
       </Stack>
 
       <Collapse in={isExpanded}>
-        <div ref={containerRef} className={css.warningsContainer}>
+        <div ref={containerRef} className={css.warningsContainer} data-testid="action-required-panel-content">
           {children}
         </div>
       </Collapse>

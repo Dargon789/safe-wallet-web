@@ -24,7 +24,7 @@ import { cn } from '@/utils/cn'
  *
  * @remarks
  * Key Props:
- * - Alert: `variant` ('default' | 'destructive')
+ * - Alert: `variant` ('default' | 'destructive' | 'warning' | 'success')
  * - AlertAction: for action buttons (positioned top-right)
  */
 
@@ -36,6 +36,10 @@ const alertVariants = cva(
         default: 'bg-card text-card-foreground',
         destructive:
           'text-destructive bg-card *:data-[slot=alert-description]:text-destructive/90 *:[svg]:text-current',
+        warning:
+          'bg-yellow-50 text-yellow-800 border-transparent *:data-[slot=alert-description]:text-yellow-800 *:[svg]:text-current',
+        success:
+          'bg-success-subtle text-success-strong border-success-muted *:data-[slot=alert-description]:text-success-strong *:[svg]:text-current',
       },
     },
     defaultVariants: {
@@ -53,7 +57,7 @@ function AlertTitle({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="alert-title"
       className={cn(
-        'font-medium group-has-[>svg]/alert:col-start-2 [&_a]:hover:text-foreground [&_a]:underline [&_a]:underline-offset-3',
+        'font-semibold group-has-[>svg]/alert:col-start-2 [&_a]:hover:text-foreground [&_a]:underline [&_a]:underline-offset-3',
         className,
       )}
       {...props}

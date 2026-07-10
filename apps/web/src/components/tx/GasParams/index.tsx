@@ -14,6 +14,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import { useCurrentChain } from '@/hooks/useChains'
+import { getNativeTokenDisplay, NATIVE_TOKEN_DISPLAY_DEFAULT } from '@safe-global/utils/utils/chains'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { type AdvancedParameters } from '../AdvancedParams/types'
 import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
@@ -60,6 +61,11 @@ export const _GasParams = ({
   chain,
 }: GasParamsProps & { chain?: Chain }): ReactElement => {
   const { nonce, userNonce, safeTxGas, gasLimit, maxFeePerGas, maxPriorityFeePerGas } = params
+  const { showGasFeeEstimation } = chain?.features ? getNativeTokenDisplay(chain) : NATIVE_TOKEN_DISPLAY_DEFAULT
+
+  if (!showGasFeeEstimation) {
+    return <></>
+  }
 
   const onChangeExpand = (_: SyntheticEvent, expanded: boolean) => {
     trackEvent({ ...MODALS_EVENTS.ESTIMATION, label: expanded ? 'Open' : 'Close' })
@@ -164,7 +170,7 @@ export const _GasParams = ({
 
         <AccordionDetails>
           {nonce !== undefined && (
-            <GasDetail isLoading={false} name="Safe Account transaction nonce" value={nonce.toString()} />
+            <GasDetail isLoading={false} name="Safe account transaction nonce" value={nonce.toString()} />
           )}
 
           {safeTxGas !== undefined && <GasDetail isLoading={false} name="safeTxGas" value={safeTxGas.toString()} />}

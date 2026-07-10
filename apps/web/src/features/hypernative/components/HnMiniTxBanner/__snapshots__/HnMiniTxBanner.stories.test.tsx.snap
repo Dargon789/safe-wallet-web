@@ -8,7 +8,7 @@ exports[`./HnMiniTxBanner.stories Default 1`] = `
     data-track="hypernative: Guardian Form Viewed"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-1869usn-MuiPaper-root-MuiCard-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-8ckrck-MuiPaper-root-MuiCard-root"
       style="--Paper-shadow: none;"
     >
       <div
@@ -42,7 +42,7 @@ exports[`./HnMiniTxBanner.stories Default 1`] = `
       </div>
       <button
         aria-label="close"
-        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-le4ea9-MuiButtonBase-root-MuiIconButton-root"
         tabindex="0"
         type="button"
       >
