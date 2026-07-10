@@ -10,6 +10,7 @@ import * as navigation from './navigation.page.js'
 const orgList = '[data-testid="org-list"]'
 export const createSpaceBtn = '[data-testid="create-space-button"]'
 const sidebarLogo = '[data-testid="logo-container"]'
+const classicViewLink = '[data-testid="classic-view-link"]'
 
 // -- Space selector --
 const spaceSelectorBtn = '[data-testid="space-selector-button"]'
@@ -63,18 +64,19 @@ const safeSelectorThreshold = '[data-testid="safe-selector-threshold"]'
 const safeLevelNavigation = '[data-testid="safe-level-navigation"]'
 const spaceSafesNavigationBlock = '[data-testid="space-safes-navigation-block"]'
 const spaceChainNavigationButton = '[data-testid="space-chain-navigation-button"]'
-const backToSpaceBtn = '[aria-label="Back to workspace"]'
-const safeLevelNavigationBackToSpaceBtn = `${safeLevelNavigation} ${backToSpaceBtn}`
+
+// Back-to-space control now lives in the sidebar, not the safe-level navigation panel
+export const backToSpaceBtn = '[data-testid="back-to-space-button"]'
 
 // -- Space sidebar items --
 export const sidebarItemHome = '[data-testid="sidebar-item-home"]'
-export const sidebarItemAccounts = '[data-testid="sidebar-item-accounts"]'
+export const sidebarItemAccounts = '[data-testid="sidebar-item-safe-accounts"]'
 export const sidebarItemAddressBook = '[data-testid="sidebar-item-address-book"]'
 export const sidebarItemTeam = '[data-testid="sidebar-item-team"]'
 export const sidebarItemSettings = '[data-testid="sidebar-item-settings"]'
 
-// -- Safe Accounts page --
-const safeAccountsPageTitle = 'Safe Accounts'
+// -- Safe accounts page --
+const safeAccountsPageTitle = 'Safe accounts'
 const safeAccountsListItem = '[data-testid="safe-list-item"]'
 
 // -- Add account --
@@ -120,8 +122,8 @@ const onboardingSurveyPath = '/welcome/survey'
 
 // -- Empty dashboard --
 export const gettingStartedLabel = 'Getting started'
-export const addSafeAccountsLabel = 'Add your Safe Accounts'
-export const addAccountsModalLabel = 'Add Safe Accounts'
+export const addSafeAccountsLabel = 'Add your Safe accounts'
+export const addAccountsModalLabel = 'Add Safe accounts'
 export const importAddressBookBtn = '[aria-label="Import address book"]'
 export const importAddressBookLabel = 'Import address book'
 export const dashboardAddMemberBtn = '[data-testid="add-member-button"]'
@@ -185,6 +187,22 @@ const spaceDashboardWidgetSelectorByTitle = {
 
 export function clickOnSignInBtn() {
   cy.get(continueWithWalletBtn).click()
+}
+
+export function clickOnUseOldUiBtn() {
+  cy.get(classicViewLink, { timeout: 30000 }).should('be.visible').click()
+}
+
+// Seeds the same sessionStorage opt-in that "Use the old UI" sets, so the
+// /welcome/spaces sign-in gate is bypassed without clicking through it. Pass to
+// cy.visit as onBeforeLoad so the flag is present before the app boots, and
+// re-seed on every visit — sessionStorage is per-visit in the test runner.
+export function bypassSpacesLogin(win) {
+  win.sessionStorage.setItem(constants.sessionStorageKeys.SAFE_v2__classicViewEnabled, JSON.stringify(true))
+}
+
+export function visitClassicView(url) {
+  cy.visit(url, { onBeforeLoad: bypassSpacesLogin })
 }
 
 export function blockBeamer() {
@@ -434,13 +452,20 @@ export function verifySpaceSidebarItemsNotVisible() {
 }
 
 export function verifySafeLevelNavigationElements() {
-  cy.get(safeLevelNavigationBackToSpaceBtn).should('be.visible')
   cy.get(safeLevelNavigation).find(spaceSafesNavigationBlock).should('be.visible')
   cy.get(safeLevelNavigation).find(spaceChainNavigationButton).should('be.visible')
 }
 
+export function verifyBackToSpaceButtonVisible() {
+  cy.get(backToSpaceBtn).should('be.visible')
+}
+
+export function clickBackToSpaceButton() {
+  cy.get(backToSpaceBtn).should('be.visible').click()
+}
+
 // ===========================================
-// Safe Accounts page verify functions
+// Safe accounts page verify functions
 // ===========================================
 
 export function verifyViewAllAccountsPageOpened(expectedAccountsCount) {
