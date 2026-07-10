@@ -1,13 +1,23 @@
 // Be careful what you import here as it will increase the service worker bundle size
 
+import { get as getFromIndexedDb } from 'idb-keyval'
+import type { MessagePayload } from 'firebase/messaging'
+
 import { AppRoutes } from '@/config/routes' // Has no internal imports
 import { FIREBASE_IS_PRODUCTION } from '@/services/push-notifications/firebase'
+import {
+  getPushNotificationPrefsKey,
+  createPushNotificationPrefsIndexedDb,
+} from '@/services/push-notifications/preferences'
+import type { PushNotificationPreferences, PushNotificationPrefsKey } from '@/services/push-notifications/preferences'
 import { Notifications } from './notification-mapper'
 import { getChainsConfig, setBaseUrl } from './gateway-utils'
+import { isWebhookEvent } from './webhook-types'
 import type { WebhookEvent } from './webhook-types'
 
 const GATEWAY_URL_PRODUCTION = process.env.NEXT_PUBLIC_GATEWAY_URL_PRODUCTION || 'https://safe-client.safe.global'
 const GATEWAY_URL_STAGING = process.env.NEXT_PUBLIC_GATEWAY_URL_STAGING || 'https://safe-client.staging.5afe.dev'
+const CONFIG_SERVICE_KEY = process.env.NEXT_PUBLIC_CONFIG_SERVICE_KEY || 'WALLET_WEB'
 
 // localStorage cannot be accessed in service workers so we reference the flag from the environment
 const GATEWAY_URL = FIREBASE_IS_PRODUCTION ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
@@ -36,7 +46,7 @@ const getLink = (data: WebhookEvent, shortName?: string) => {
 export const _parseServiceWorkerWebhookPushNotification = async (
   data: WebhookEvent,
 ): Promise<{ title: string; body: string; link: string } | undefined> => {
-  const chain = await getChainsConfig()
+  const chain = await getChainsConfig(CONFIG_SERVICE_KEY)
     .then(({ results }) => results.find((chain) => chain.chainId === data.chainId))
     .catch(() => undefined)
 
@@ -49,4 +59,38 @@ export const _parseServiceWorkerWebhookPushNotification = async (
       link: getLink(data, chain?.shortName),
     }
   }
+}
+
+export const shouldShowServiceWorkerPushNotification = async (payload: MessagePayload): Promise<boolean> => {
+  if (!isWebhookEvent(payload.data)) {
+    return true
+  }
+
+  const { chainId, address, type } = payload.data
+
+  const key = getPushNotificationPrefsKey(chainId, address)
+  const store = createPushNotificationPrefsIndexedDb()
+
+  const preferencesStore = await getFromIndexedDb<PushNotificationPreferences[PushNotificationPrefsKey]>(
+    key,
+    store,
+  ).catch(() => null)
+
+  if (!preferencesStore) {
+    return false
+  }
+
+  return preferencesStore.preferences[type]
+}
+
+export const parseServiceWorkerPushNotification = async (
+  payload: MessagePayload,
+): Promise<({ title?: string; link?: string } & NotificationOptions) | undefined> => {
+  // Manually dispatched notifications from the Firebase admin panel; displayed as is
+  if (!isWebhookEvent(payload.data)) {
+    return payload.notification
+  }
+
+  // Transaction Service-dispatched notification
+  return _parseServiceWorkerWebhookPushNotification(payload.data)
 }

@@ -98,6 +98,8 @@ export type SingleRecipientAnalysisResultDto = {
   title: string
   /** Detailed description explaining the finding and its implications */
   description: string
+  /** Error message for failed analysis */
+  error?: string
 }
 export type SingleRecipientAnalysisDto = {
   /** Analysis results related to recipient interaction history. Shows whether this is a new or recurring recipient. */
@@ -124,6 +126,8 @@ export type RecipientResultDto = {
   title: string
   /** Detailed description explaining the finding and its implications */
   description: string
+  /** Error message for failed analysis */
+  error?: string
   /** Target chain ID for bridge operations. Only present for BridgeStatus. */
   targetChainId?: string
 }
@@ -155,6 +159,8 @@ export type ContractAnalysisResultDto = {
   title: string
   /** Detailed description explaining the finding and its implications */
   description: string
+  /** Error message for failed analysis */
+  error?: string
 }
 export type FallbackHandlerInfoDto = {
   /** Address of the fallback handler contract */
@@ -173,6 +179,8 @@ export type FallbackHandlerAnalysisResultDto = {
   title: string
   /** Detailed description explaining the finding and its implications */
   description: string
+  /** Error message for failed analysis */
+  error?: string
   /** Information about the fallback handler */
   fallbackHandler?: FallbackHandlerInfoDto
 }
@@ -190,6 +198,22 @@ export type ContractAnalysisDto = {
   /** Analysis results for setFallbackHandler operations. Identifies untrusted or unofficial fallback handlers in the transactions. */
   FALLBACK_HANDLER?: FallbackHandlerAnalysisResultDto[]
 }
+export type DeadlockAnalysisResultDto = {
+  /** Severity level indicating the importance and risk */
+  severity: 'OK' | 'INFO' | 'WARN' | 'CRITICAL'
+  /** Deadlock analysis status code */
+  type: 'DEADLOCK_DETECTED' | 'NESTED_SAFE_WARNING' | 'FAILED'
+  /** User-facing title of the finding */
+  title: string
+  /** Detailed description explaining the finding and its implications */
+  description: string
+  /** Error message for failed analysis */
+  error?: string
+}
+export type DeadlockAnalysisDto = {
+  /** Deadlock analysis findings. Identifies signing deadlock risks in nested Safe configurations. */
+  DEADLOCK?: DeadlockAnalysisResultDto[]
+}
 export type CounterpartyAnalysisDto = {
   /** Recipient analysis results mapped by address. Contains recipient interaction history and bridge analysis.type: Record<Address, RecipientAnalysisDto>. */
   recipient: {
@@ -198,6 +222,10 @@ export type CounterpartyAnalysisDto = {
   /** Contract analysis results mapped by address. Contains contract verification, interaction history, and delegatecall analysis.type: Record<Address, ContractAnalysisDto>. */
   contract: {
     [key: string]: ContractAnalysisDto
+  }
+  /** Deadlock analysis results mapped by Safe address. Contains signing deadlock risk findings for owner/threshold management transactions. */
+  deadlock: {
+    [key: string]: DeadlockAnalysisDto
   }
 }
 export type CounterpartyAnalysisRequestDto = {
@@ -214,11 +242,13 @@ export type ThreatAnalysisResultDto = {
   /** Severity level indicating the importance and risk */
   severity: 'OK' | 'INFO' | 'WARN' | 'CRITICAL'
   /** Threat status code */
-  type: 'NO_THREAT' | 'OWNERSHIP_CHANGE' | 'MODULE_CHANGE' | 'FAILED'
+  type: 'NO_THREAT' | 'OWNERSHIP_CHANGE' | 'MODULE_CHANGE'
   /** User-facing title of the finding */
   title: string
   /** Detailed description explaining the finding and its implications */
   description: string
+  /** Error message for failed analysis */
+  error?: string
 }
 export type MasterCopyChangeThreatAnalysisResultDto = {
   /** Severity level indicating the importance and risk */
@@ -229,6 +259,8 @@ export type MasterCopyChangeThreatAnalysisResultDto = {
   title: string
   /** Detailed description explaining the finding and its implications */
   description: string
+  /** Error message for failed analysis */
+  error?: string
   /** Address of the old master copy/implementation contract */
   before: string
   /** Address of the new master copy/implementation contract */
@@ -249,10 +281,24 @@ export type MaliciousOrModerateThreatAnalysisResultDto = {
   title: string
   /** Detailed description explaining the finding and its implications */
   description: string
+  /** Error message for failed analysis */
+  error?: string
   /** A partial record of specific issues identified during threat analysis, grouped by severity.Record<Severity, ThreatIssue[]> - keys should be one of the Severity enum (OK | INFO | WARN | CRITICAL) */
   issues?: {
     [key: string]: ThreatIssueDto[]
   }
+}
+export type FailedThreatAnalysisResultDto = {
+  /** Severity level indicating the importance and risk */
+  severity: 'OK' | 'INFO' | 'WARN' | 'CRITICAL'
+  /** Threat status code */
+  type: 'FAILED'
+  /** User-facing title of the finding */
+  title: string
+  /** Detailed description explaining the finding and its implications */
+  description: string
+  /** Error message for failed analysis */
+  error?: string
 }
 export type NativeAssetDetailsDto = {
   /** Token symbol (if available) */
@@ -294,6 +340,7 @@ export type ThreatAnalysisResponseDto = {
     | ThreatAnalysisResultDto
     | MasterCopyChangeThreatAnalysisResultDto
     | MaliciousOrModerateThreatAnalysisResultDto
+    | FailedThreatAnalysisResultDto
   )[]
   /** Balance changes resulting from the transaction. Shows incoming and outgoing transfers for various asset types. */
   BALANCE_CHANGE?: BalanceChangeDto[]

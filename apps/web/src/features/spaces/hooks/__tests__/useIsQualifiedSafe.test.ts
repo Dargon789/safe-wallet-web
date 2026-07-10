@@ -1,8 +1,11 @@
 import { renderHook } from '@testing-library/react'
 import useIsQualifiedSafe from '../useIsQualifiedSafe'
 import * as spacesQueries from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { spaceBuilder } from '@/tests/builders/space'
 
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
+
+jest.mock('../useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(),
 }))
 jest.mock('@/store', () => ({
@@ -26,12 +29,19 @@ jest.mock('next/router', () => ({
 }))
 jest.mock('@/config/routes', () => ({
   AppRoutes: {
+    apps: { index: '/apps' },
+    swap: '/swap',
+    stake: '/stake',
+    balances: { nfts: '/balances/nfts', positions: '/balances/positions' },
+    settings: { notifications: '/settings/notifications' },
+    bridge: '/bridge',
+    earn: '/earn',
     spaces: { index: '/spaces' },
     welcome: { spaces: '/welcome/spaces' },
   },
 }))
 
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '../useCurrentSpaceId'
 import { useAppSelector } from '@/store'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import useChainId from '@/hooks/useChainId'
@@ -43,14 +53,14 @@ const baseRouterPath = '/safes/1/0xSafe1'
 describe('useIsQualifiedSafe', () => {
   beforeEach(() => {
     jest.resetAllMocks()
-    ;(useCurrentSpaceId as jest.Mock).mockReturnValue('1')
+    ;(useCurrentSpaceId as jest.Mock).mockReturnValue(MOCK_SPACE_UUID)
     ;(useAppSelector as jest.Mock).mockReturnValue(true)
     ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('0xSafe1')
     ;(useChainId as jest.Mock).mockReturnValue('1')
     ;(useHasFeature as jest.Mock).mockReturnValue(true)
     ;(useRouter as jest.Mock).mockReturnValue({ pathname: baseRouterPath })
     jest.spyOn(spacesQueries, 'useSpacesGetOneV1Query').mockReturnValue({
-      currentData: { id: 1, name: 'My space' },
+      currentData: spaceBuilder().with({ uuid: MOCK_SPACE_UUID, name: 'My space' }).build(),
       refetch: jest.fn(),
     })
     jest.spyOn(spacesQueries, 'useSpaceSafesGetV1Query').mockReturnValue({

@@ -8,7 +8,7 @@ exports[`./index.stories BlockedAddress 1`] = `
     class="container"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1jhq0nx-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-15brele-MuiPaper-root"
       style="--Paper-shadow: none;"
     >
       <div
@@ -46,7 +46,7 @@ exports[`./index.stories BlockedAddress 1`] = `
         class="MuiBox-root mui-style-fbqrg1"
       >
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary mui-style-1xpify7-MuiButtonBase-root-MuiButton-root"
+          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary mui-style-ykbk5m-MuiButtonBase-root-MuiButton-root"
           tabindex="0"
           type="button"
         >
@@ -66,7 +66,7 @@ exports[`./index.stories LegalDisclaimer 1`] = `
     class="container"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1jhq0nx-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-15brele-MuiPaper-root"
       style="--Paper-shadow: none;"
     >
       <div
@@ -155,7 +155,7 @@ exports[`./index.stories LegalDisclaimer 1`] = `
         class="MuiBox-root mui-style-fbqrg1"
       >
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary mui-style-1xpify7-MuiButtonBase-root-MuiButton-root"
+          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary mui-style-ykbk5m-MuiButtonBase-root-MuiButton-root"
           tabindex="0"
           type="button"
         >

@@ -30,14 +30,15 @@ import RejectionTxInfo from '@/components/transactions/TxDetails/TxData/Rejectio
 import TransferTxInfo from '@/components/transactions/TxDetails/TxData/Transfer'
 import useChainId from '@/hooks/useChainId'
 import { MigrationToL2TxData } from './MigrationToL2TxData'
-import SwapOrder from '@/features/swap/components/SwapOrder'
 import { StakingTxDepositDetails, StakingTxExitDetails, StakingTxWithdrawDetails } from './Staking'
+import { SwapFeature } from '@/features/swap'
+import { useLoadFeature } from '@/features/__core__'
 import { OnChainConfirmation } from './NestedTransaction/OnChainConfirmation'
 import { ExecTransaction } from './NestedTransaction/ExecTransaction'
 import SafeUpdate from './SafeUpdate'
 import { VaultDepositTxDetails, VaultRedeemTxDetails } from '@/features/earn'
 import DecodedData from './DecodedData'
-import { ErrorBoundary } from '@sentry/react'
+import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import Multisend from './DecodedData/Multisend'
 import BridgeTransaction from '@/components/tx/confirmation-views/BridgeTransaction'
 import { LifiSwapTransaction } from '@/components/tx/confirmation-views/LifiSwapTransaction'
@@ -48,6 +49,7 @@ const TxData = ({
   txDetails,
   trusted,
   imitation,
+  executingSafeAddress,
   children,
 }: PropsWithChildren<{
   txInfo: TransactionDetails['txInfo']
@@ -55,8 +57,12 @@ const TxData = ({
   txDetails?: TransactionDetails
   trusted: boolean
   imitation: boolean
+  // Safe whose context the txData executes in. Only needed when it can't be derived from
+  // `txDetails.safeAddress` (e.g. ExecTransaction, which renders a preview without txDetails).
+  executingSafeAddress?: string
 }>): ReactElement => {
   const chainId = useChainId()
+  const { SwapOrder } = useLoadFeature(SwapFeature)
 
   if (isOrderTxInfo(txInfo)) {
     return <SwapOrder txData={txData} txInfo={txInfo} />
@@ -142,9 +148,13 @@ const TxData = ({
       <DecodedData txData={txData} toInfo={isCustomTxInfo(txInfo) ? txInfo.to : txData?.to} />
 
       {(isMultiSendTxInfo(txInfo) || isOrderTxInfo(txInfo)) && (
-        <ErrorBoundary fallback={<div>Error parsing data</div>}>
-          <Multisend txData={txData} isExecuted={!!txDetails?.executedAt} />
-        </ErrorBoundary>
+        <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
+          <Multisend
+            txData={txData}
+            isExecuted={!!txDetails?.executedAt}
+            executingSafeAddress={executingSafeAddress ?? txDetails?.safeAddress}
+          />
+        </ObservabilityErrorBoundary>
       )}
     </>
   )

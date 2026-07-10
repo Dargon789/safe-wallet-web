@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { Button, CircularProgress, DialogActions, DialogContent, TextField, Typography } from '@mui/material'
 import ModalDialog from '@/components/common/ModalDialog'
-import { useReportFalseResult } from '@/features/safe-shield/hooks/useReportFalseResult'
+import { useReportFalseResult } from '../../hooks/useReportFalseResult'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
 
@@ -34,13 +34,14 @@ export const ReportFalseResultModal = ({ open, onClose, requestId }: ReportFalse
   const handleSubmit = useCallback(async () => {
     if (!isFormValid) return
 
+    trackEvent(SAFE_SHIELD_EVENTS.REPORT_SUBMITTED)
+
     const success = await reportFalseResult({
       request_id: requestId,
       details: details.trim(),
     })
 
     if (success) {
-      trackEvent(SAFE_SHIELD_EVENTS.REPORT_SUBMITTED)
       onClose()
     }
   }, [isFormValid, requestId, details, reportFalseResult, onClose])

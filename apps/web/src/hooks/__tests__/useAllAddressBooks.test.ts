@@ -2,20 +2,31 @@ import { renderHook } from '@testing-library/react'
 import {
   useMergedAddressBooks,
   useAddressBookItem,
+  useSafeNameResolver,
   ContactSource,
   type ExtendedContact,
 } from '@/hooks/useAllAddressBooks'
-import * as spacesQueries from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import * as currentSpaceIdHook from '@/features/spaces/hooks/useCurrentSpaceId'
+import type { AddressBookSource } from '@/components/common/AddressBookSourceProvider'
 
 let signedIn = false
 let chainId = '1'
 let currentSpaceId = '123'
 let localAddressBook: Record<string, string> = {}
+// Real `selectAllAddressBooks` is keyed by chain (`{ [chainId]: { [address]: name } }`), unlike the
+// flat per-chain `selectAddressBookByChain`. `useSafeNameResolver` reads the former, so it gets its
+// own nested fixture; the per-chain selector keeps returning the flat `localAddressBook`.
+let localAddressBooksByChain: Record<string, Record<string, string>> = {}
 let remoteContacts: ExtendedContact[] = []
+let mockAddressBookSource: AddressBookSource = 'merged'
 
 jest.mock('@/store', () => ({
-  useAppSelector: (selector: (state: unknown) => unknown) => selector({}),
+  useAppSelector: (selector: (state: unknown) => unknown) =>
+    typeof selector === 'function' ? selector({}) : undefined,
+}))
+
+jest.mock('@/features/spaces', () => ({
+  useCurrentSpaceId: jest.fn(),
+  useGetSpaceAddressBook: jest.fn(),
 }))
 
 jest.mock('@/store/authSlice', () => ({
@@ -23,7 +34,7 @@ jest.mock('@/store/authSlice', () => ({
 }))
 
 jest.mock('@/store/addressBookSlice', () => ({
-  selectAllAddressBooks: jest.fn(() => localAddressBook),
+  selectAllAddressBooks: jest.fn(() => localAddressBooksByChain),
   selectAddressBookByChain: jest.fn(() => localAddressBook),
 }))
 
@@ -31,17 +42,18 @@ jest.mock('@/hooks/useAddressBook', () => () => localAddressBook)
 
 jest.mock('@/hooks/useChainId', () => () => chainId)
 
+jest.mock('@/components/common/AddressBookSourceProvider', () => ({
+  useAddressBookSource: () => mockAddressBookSource,
+}))
+
+// Import the mocked hooks
+import { useCurrentSpaceId, useGetSpaceAddressBook } from '@/features/spaces'
+
 describe('useAllAddressBooks', () => {
   describe('useAllMergedAddressBooks', () => {
     beforeEach(() => {
-      jest.spyOn(spacesQueries, 'useAddressBooksGetAddressBookItemsV1Query').mockImplementation(() => ({
-        currentData: {
-          data: remoteContacts,
-        },
-        refetch: jest.fn(),
-      }))
-
-      jest.spyOn(currentSpaceIdHook, 'useCurrentSpaceId').mockReturnValue(currentSpaceId)
+      ;(useCurrentSpaceId as jest.Mock).mockReturnValue(currentSpaceId)
+      ;(useGetSpaceAddressBook as jest.Mock).mockImplementation(() => remoteContacts)
     })
 
     afterEach(() => {
@@ -88,7 +100,11 @@ describe('useAllAddressBooks', () => {
           address: '0xA',
           chainIds: ['1'],
           createdBy: '',
+          createdByUserId: 0,
           lastUpdatedBy: '',
+          lastUpdatedByUserId: 0,
+          createdAt: '',
+          updatedAt: '',
           source: ContactSource.space,
         },
         {
@@ -96,7 +112,11 @@ describe('useAllAddressBooks', () => {
           address: '0xC',
           chainIds: ['1'],
           createdBy: '',
+          createdByUserId: 0,
           lastUpdatedBy: '',
+          lastUpdatedByUserId: 0,
+          createdAt: '',
+          updatedAt: '',
           source: ContactSource.space,
         },
       ]
@@ -117,10 +137,16 @@ describe('useAllAddressBooks', () => {
   })
 
   describe('useAddressBookItem', () => {
+    beforeEach(() => {
+      ;(useCurrentSpaceId as jest.Mock).mockReturnValue(currentSpaceId)
+      ;(useGetSpaceAddressBook as jest.Mock).mockImplementation(() => remoteContacts)
+    })
+
     afterEach(() => {
       remoteContacts = []
       localAddressBook = {}
       signedIn = false
+      jest.clearAllMocks()
     })
 
     it('returns the matching contact by address + chainId', () => {
@@ -132,7 +158,11 @@ describe('useAllAddressBooks', () => {
           address: '0xA',
           chainIds: ['1'],
           createdBy: '',
+          createdByUserId: 0,
           lastUpdatedBy: '',
+          lastUpdatedByUserId: 0,
+          createdAt: '',
+          updatedAt: '',
           source: ContactSource.space,
         },
       ]
@@ -150,6 +180,113 @@ describe('useAllAddressBooks', () => {
       const { result } = renderHook(() => useAddressBookItem('0xB', undefined))
 
       expect(result.current).toBeUndefined()
+    })
+  })
+
+  describe('useSafeNameResolver', () => {
+    const spaceContact = (name: string, address: string, chainIds = ['1']): ExtendedContact => ({
+      name,
+      address,
+      chainIds,
+      createdBy: '',
+      createdByUserId: 0,
+      lastUpdatedBy: '',
+      lastUpdatedByUserId: 0,
+      createdAt: '',
+      updatedAt: '',
+      source: ContactSource.space,
+    })
+
+    beforeEach(() => {
+      ;(useCurrentSpaceId as jest.Mock).mockReturnValue(currentSpaceId)
+      ;(useGetSpaceAddressBook as jest.Mock).mockImplementation(() => remoteContacts)
+      mockAddressBookSource = 'merged'
+    })
+
+    afterEach(() => {
+      remoteContacts = []
+      localAddressBook = {}
+      localAddressBooksByChain = {}
+      signedIn = false
+      mockAddressBookSource = 'merged'
+      jest.clearAllMocks()
+    })
+
+    it('returns the preferred name verbatim when provided', () => {
+      signedIn = true
+      remoteContacts = [spaceContact('Address Book Name', '0xA')]
+
+      const { result } = renderHook(() => useSafeNameResolver())
+      // Preferred name wins over the address book entry.
+      expect(result.current('0xA', '1', 'Preferred Name')).toBe('Preferred Name')
+    })
+
+    it('falls back to the address-book name when no preferred name is given', () => {
+      signedIn = true
+      remoteContacts = [spaceContact('Treasury', '0xA')]
+
+      const { result } = renderHook(() => useSafeNameResolver())
+      expect(result.current('0xA', '1')).toBe('Treasury')
+    })
+
+    it('matches the address book case-insensitively', () => {
+      signedIn = true
+      remoteContacts = [spaceContact('Treasury', '0xAbCdEf')]
+
+      const { result } = renderHook(() => useSafeNameResolver())
+      expect(result.current('0xabcdef', '1')).toBe('Treasury')
+    })
+
+    it('returns an empty string when nothing matches', () => {
+      const { result } = renderHook(() => useSafeNameResolver())
+      expect(result.current('0xUnknown', '1')).toBe('')
+    })
+
+    it('returns an empty string when no chainId is given', () => {
+      const { result } = renderHook(() => useSafeNameResolver())
+      expect(result.current('0xA', undefined, '')).toBe('')
+    })
+
+    it('ignores space names under the localOnly source', () => {
+      signedIn = true
+      remoteContacts = [spaceContact('Treasury', '0xA')]
+      mockAddressBookSource = 'localOnly'
+
+      const { result } = renderHook(() => useSafeNameResolver())
+      expect(result.current('0xA', '1')).toBe('')
+    })
+
+    it('returns the space-book name under the spaceOnly source', () => {
+      signedIn = true
+      remoteContacts = [spaceContact('Treasury', '0xA')]
+      mockAddressBookSource = 'spaceOnly'
+
+      const { result } = renderHook(() => useSafeNameResolver())
+      expect(result.current('0xA', '1')).toBe('Treasury')
+    })
+
+    it('resolves a local-only name on the current chain (merged source)', () => {
+      localAddressBooksByChain = { '1': { '0xlocal': 'Local Wallet' } }
+
+      const { result } = renderHook(() => useSafeNameResolver())
+      expect(result.current('0xLocal', '1')).toBe('Local Wallet')
+    })
+
+    it('resolves a local-only name on a NON-current chain (the cross-chain case)', () => {
+      // useChainId() is '1'; this entry lives on chain 137, which the merged map would miss.
+      localAddressBooksByChain = { '137': { '0xremotechain': 'Polygon Wallet' } }
+
+      const { result } = renderHook(() => useSafeNameResolver())
+      expect(result.current('0xRemoteChain', '137')).toBe('Polygon Wallet')
+    })
+
+    it('still resolves cross-chain local names under the localOnly source', () => {
+      remoteContacts = [spaceContact('Should Be Ignored', '0xRemoteChain', ['137'])]
+      localAddressBooksByChain = { '137': { '0xremotechain': 'Polygon Wallet' } }
+      mockAddressBookSource = 'localOnly'
+
+      const { result } = renderHook(() => useSafeNameResolver())
+      expect(result.current('0xRemoteChain', '137')).toBe('Polygon Wallet')
     })
   })
 })

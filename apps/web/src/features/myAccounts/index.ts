@@ -11,8 +11,13 @@
  * import { useLoadFeature } from '@/features/__core__'
  *
  * function MyComponent() {
- *   const myAccounts = useLoadFeature(MyAccountsFeature)
- *   return <myAccounts.AccountItem.Link ... />
+ *   const { AccountItemLink, AccountItemIcon, AccountItemInfo } = useLoadFeature(MyAccountsFeature)
+ *   return (
+ *     <AccountItemLink href={href}>
+ *       <AccountItemIcon address={address} chainId={chainId} />
+ *       <AccountItemInfo address={address} chainId={chainId} name={name} />
+ *     </AccountItemLink>
+ *   )
  * }
  *
  * // Shared Safe data hooks (moved to @/hooks/safes)
@@ -42,14 +47,25 @@ export { useMultiAccountItemData } from './hooks/useMultiAccountItemData'
 
 // Navigation and state
 export { useVisitedSafes } from './hooks/useVisitedSafes'
-export { default as useHasSafes } from './hooks/useHasSafes'
 export { useNetworksOfSafe } from './hooks/useNetworksOfSafe'
 
+// Space accounts data
+export { default as useSpaceAccountsData } from './hooks/useSpaceAccountsData'
+
+// Pin actions
+export { usePinActions } from './hooks/usePinActions'
+
 // Address safety hooks
-export { default as useSafeSelectionModal } from './hooks/useSafeSelectionModal'
 export { default as useNonPinnedSafeWarning } from './hooks/useNonPinnedSafeWarning'
 export { default as useSimilarAddressDetection } from './hooks/useSimilarAddressDetection'
 export { useTrustSafe } from './hooks/useTrustSafe'
+
+// ─────────────────────────────────────────────────────────────────
+// PUBLIC COMPONENTS
+// ─────────────────────────────────────────────────────────────────
+
+export { AccountItem } from './components/AccountItem'
+export { default as AddTrustedSafeDialog } from './components/NonPinnedWarning/AddTrustedSafeDialog'
 
 // Public types
 export type * from './types'

@@ -27,12 +27,7 @@ import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
 import css from './styles.module.css'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import { BannerType, useBannerVisibility, HnDashboardBannerWithNoBalanceCheck } from '@/features/hypernative'
-
-const calculateProgress = (items: boolean[]) => {
-  const totalNumberOfItems = items.length
-  const completedItems = items.filter((item) => item)
-  return Math.round((completedItems.length / totalNumberOfItems) * 100)
-}
+import { calculateProgress } from './utils'
 
 const StatusCard = ({
   badge,
@@ -154,13 +149,7 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
             }}
           >
             <Track {...OVERVIEW_EVENTS.ADD_FUNDS}>
-              <Button
-                data-testid="add-funds-btn"
-                onClick={toggleDialog}
-                variant="contained"
-                size="small"
-                sx={{ minHeight: '40px' }}
-              >
+              <Button data-testid="add-funds-btn" onClick={toggleDialog} variant="contained" size="medium">
                 Add funds
               </Button>
             </Track>
@@ -168,7 +157,7 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
           <ModalDialog
             open={open}
             onClose={toggleDialog}
-            dialogTitle="Add funds to your Safe Account"
+            dialogTitle="Add funds to your Safe account"
             hideChainIndicator
           >
             <Box
@@ -292,8 +281,8 @@ const FirstTransactionWidget = ({
                   data-testid="create-tx-btn"
                   onClick={() => setOpen(true)}
                   variant="outlined"
-                  size="small"
-                  sx={{ mt: 2, minHeight: '40px' }}
+                  size="medium"
+                  sx={{ mt: 2 }}
                   disabled={!isOk}
                 >
                   Create transaction
@@ -361,7 +350,7 @@ const AccountReadyWidget = () => {
           mt: 2,
         }}
       >
-        Safe Account is ready!
+        Safe account is ready!
       </Typography>
       <Typography>Continue to improve your account security and unlock more features</Typography>
     </Card>
@@ -447,7 +436,7 @@ const FirstSteps = () => {
                 mb: 1,
               }}
             >
-              {isActivating ? 'Account is being activated...' : 'Activate your Safe Account'}
+              {isActivating ? 'Account is being activated...' : 'Activate your Safe account'}
             </Typography>
 
             {isActivating ? (
@@ -459,7 +448,7 @@ const FirstSteps = () => {
                 <strong>
                   {stepsCompleted} of {completedItems.length} steps completed.
                 </strong>{' '}
-                Finish the next steps to start using all Safe Account features:
+                Finish the next steps to start using all Safe account features:
               </Typography>
             )}
           </Grid>

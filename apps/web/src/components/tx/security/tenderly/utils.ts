@@ -1,6 +1,5 @@
-import { generatePreValidatedSignature } from '@safe-global/protocol-kit/dist/src/utils/signatures'
-import EthSafeTransaction from '@safe-global/protocol-kit/dist/src/utils/transactions/SafeTransaction'
-import { encodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils/transactions/utils'
+import { generatePreValidatedSignature } from '@safe-global/protocol-kit'
+import { EthSafeTransaction, encodeMultiSendData } from '@safe-global/protocol-kit'
 
 import {
   getReadOnlyCurrentGnosisSafeContract,
@@ -64,7 +63,11 @@ export const _getMultiSendCallOnlyPayload = async (
   params: MultiSendTransactionSimulationParams,
 ): Promise<Pick<TenderlySimulatePayload, 'to' | 'input'>> => {
   const data = encodeMultiSendData(params.transactions) as `0x${string}`
-  const readOnlyMultiSendContract = await getReadOnlyMultiSendCallOnlyContract(params.safe.version)
+  const readOnlyMultiSendContract = await getReadOnlyMultiSendCallOnlyContract(
+    params.safe.version,
+    params.safe.chainId,
+    params.safe.implementation?.value,
+  )
 
   return {
     to: readOnlyMultiSendContract.getAddress(),

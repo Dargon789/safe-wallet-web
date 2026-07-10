@@ -8,7 +8,7 @@ const darkPalette: ColorPalette = {
   text: {
     primary: '#FFFFFF',
     secondary: '#636669',
-    disabled: '#636669',
+    disabled: 'rgba(255, 255, 255, 0.3)',
     contrast: '#000000',
   },
   primary: {
@@ -59,6 +59,10 @@ const darkPalette: ColorPalette = {
     main: '#4A3621',
     text: '#FFE4CB',
     contrastText: '#FF8C00',
+  },
+  review: {
+    main: '#D6A100',
+    background: '#2F2A18',
   },
   background: {
     default: '#121312',

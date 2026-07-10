@@ -17,6 +17,9 @@ export type Notification = {
   link?: { href: LinkProps['href']; title: string } | { onClick: () => void; title: string }
   icon?: ReactNode
   onClose?: () => void
+  // Override the variant's default auto-hide: a number sets the duration (ms),
+  // `null` keeps the toast open until the user dismisses it. Omit for default.
+  autoHideDuration?: number | null
 }
 
 export type NotificationState = Notification[]
@@ -54,7 +57,8 @@ export const notificationsSlice = createSlice({
   },
 })
 
-export const { closeNotification, deleteAllNotifications, readNotification } = notificationsSlice.actions
+export const { closeNotification, closeByGroupKey, deleteAllNotifications, readNotification } =
+  notificationsSlice.actions
 
 export const showNotification = (payload: Omit<Notification, 'id' | 'timestamp'>): AppThunk<string> => {
   return (dispatch) => {

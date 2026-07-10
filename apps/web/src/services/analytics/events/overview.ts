@@ -107,10 +107,6 @@ export const OVERVIEW_EVENTS = {
     action: 'Rename Safe from sidebar',
     category: OVERVIEW_CATEGORY,
   },
-  SAFE_TOKEN_WIDGET: {
-    action: 'Open Safe Governance App from widget',
-    category: OVERVIEW_CATEGORY,
-  },
   OPEN_MISSING_SIGNATURES: {
     action: 'Open transactions queue from missing signatures',
     category: OVERVIEW_CATEGORY,
@@ -135,7 +131,7 @@ export const OVERVIEW_EVENTS = {
     action: 'Click on SEP5 allocation button',
     category: OVERVIEW_CATEGORY,
   },
-  // Track clicks on links to Safe Accounts
+  // Track clicks on links to Safe accounts
   OPEN_SAFE: {
     action: 'Open Safe',
     category: OVERVIEW_CATEGORY,
@@ -145,7 +141,7 @@ export const OVERVIEW_EVENTS = {
     action: 'Toggle Safe pinned state',
     category: OVERVIEW_CATEGORY,
   },
-  // Track clicks on links to Safe Accounts
+  // Track clicks on links to Safe accounts
   EXPAND_MULTI_SAFE: {
     action: 'Expand multi Safe',
     category: OVERVIEW_CATEGORY,
@@ -172,6 +168,10 @@ export const OVERVIEW_EVENTS = {
   PROCEED_WITH_TX: {
     event: EventType.CLICK,
     action: 'Proceed with transaction',
+    category: OVERVIEW_CATEGORY,
+  },
+  SHOW_STAKING_BANNER: {
+    action: 'Show staking banner',
     category: OVERVIEW_CATEGORY,
   },
   OPEN_STAKING_WIDGET: {
@@ -276,4 +276,5 @@ export enum OVERVIEW_LABELS {
   settings = 'settings',
   space_list_page = 'space_list_page',
   space_page = 'space_page',
+  owned_safes_modal = 'owned_safes_modal',
 }

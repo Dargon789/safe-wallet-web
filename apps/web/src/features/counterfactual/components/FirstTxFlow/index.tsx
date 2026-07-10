@@ -1,6 +1,5 @@
 import { AppRoutes } from '@/config/routes'
-import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
-import useRecovery from '@/features/recovery/hooks/useRecovery'
+import { useIsRecoverySupported, useRecovery } from '@/features/recovery'
 import dynamic from 'next/dynamic'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import { useRouter } from 'next/router'
@@ -18,7 +17,7 @@ import RecoveryPlus from '@/public/images/common/recovery-plus.svg'
 import SwapIcon from '@/public/images/common/swap.svg'
 import SafeLogo from '@/public/images/logo-no-text.svg'
 import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined'
-import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
+import { useIsSwapFeatureEnabled } from '@/features/swap'
 
 const FirstTxFlow = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const txBuilder = useTxBuilderApp()
@@ -94,7 +93,7 @@ const FirstTxFlow = ({ open, onClose }: { open: boolean; onClose: () => void }) 
         <Grid item>
           <ChoiceButton
             title="Add another signer"
-            description="Improve the security of your Safe Account"
+            description="Improve the security of your Safe account"
             icon={SaveAddressIcon}
             onClick={() => handleClick(onAddSigner)}
           />

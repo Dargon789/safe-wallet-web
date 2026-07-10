@@ -1,13 +1,15 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import SpaceSafeContextMenu from '../SpaceSafeContextMenu'
 import { useAppSelector } from '@/store'
-import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
+import { useIsAdmin } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
 jest.mock('@/store')
-jest.mock('@/features/spaces/hooks/useSpaceMembers')
+jest.mock('@/features/spaces', () => ({
+  useIsAdmin: jest.fn(),
+}))
 jest.mock('@/services/analytics')
 jest.mock('@/hooks/safes', () => ({
   isMultiChainSafeItem: jest.fn(),
@@ -82,7 +84,7 @@ describe('SpaceSafeContextMenu', () => {
     })
   })
 
-  it('shows "Give name" when safe has no name', async () => {
+  it('shows "Rename" when safe has no name', async () => {
     ;(useAppSelector as jest.Mock).mockReturnValue({})
 
     render(<SpaceSafeContextMenu safeItem={mockSafeItem} />)
@@ -91,7 +93,7 @@ describe('SpaceSafeContextMenu', () => {
     fireEvent.click(menuButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Give name')).toBeInTheDocument()
+      expect(screen.getByText('Rename')).toBeInTheDocument()
     })
   })
 

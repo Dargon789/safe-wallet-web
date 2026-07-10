@@ -4,13 +4,16 @@ import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import CsvTxExportButton from '../index'
 import * as csvExportQueries from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
 
-jest.mock('@/services/analytics', () => ({
-  trackEvent: jest.fn(),
-}))
+jest.mock('@/services/analytics', () =>
+  (
+    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
+  ).createAnalyticsMock(),
+)
 
-jest.mock('@/components/common/OnlyOwner', () => {
-  return function MockOnlyOwner({ children }: { children: (isOk: boolean) => React.ReactNode }) {
-    return <>{children(true)}</>
+let mockIsOwnerOrProposer = true
+jest.mock('@/components/common/OnlyOwnerOrProposer', () => {
+  return function MockOnlyOwnerOrProposer({ children }: { children: (isOk: boolean) => React.ReactNode }) {
+    return <>{children(mockIsOwnerOrProposer)}</>
   }
 })
 
@@ -19,6 +22,7 @@ const mockTrackEvent = trackEvent as jest.MockedFunction<typeof trackEvent>
 describe('CsvTxExportButton', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockIsOwnerOrProposer = true
 
     jest.spyOn(csvExportQueries, 'useCsvExportGetExportStatusV1Query').mockImplementation(() => ({
       data: undefined,
@@ -60,5 +64,13 @@ describe('CsvTxExportButton', () => {
     fireEvent.click(exportButton)
 
     expect(screen.getByText("Transaction history filters won't apply here.")).toBeInTheDocument()
+  })
+
+  it('should disable export button when user is not owner or proposer', () => {
+    mockIsOwnerOrProposer = false
+
+    const { getByText } = render(<CsvTxExportButton hasActiveFilter={false} />)
+
+    expect(getByText('Export')).toBeDisabled()
   })
 })

@@ -29,6 +29,47 @@ const closeOutreachPopupBtn = 'button[aria-label="close outreach popup"]'
 
 export const noRelayAttemptsError = 'Not enough relay attempts remaining'
 
+/** Waits for the page to settle before Argos captures the screenshot. */
+export function awaitVisualStability() {
+  cy.wait(constants.VISUAL_SETTLE_TIME)
+}
+
+/**
+ * Intercepts the chains list endpoint to inject a feature flag for a specific chain,
+ * and optionally aliases the feature's data endpoint for use with cy.wait().
+ *
+ * Handles both list responses ({ results: [...] }) and single-chain responses ({ chainId, ... }).
+ *
+ * @param {object} options
+ * @param {string} options.chainId       - The chain to target (e.g. constants.networkKeys.polygon)
+ * @param {string} options.addFlag       - Feature flag to inject (e.g. constants.chainFeatures.positions)
+ * @param {string} [options.removeFlag]  - Optional legacy flag to remove before adding the new one
+ * @param {string} [options.dataEndpoint] - Optional data endpoint glob to alias
+ * @param {string} [options.dataAlias]   - Alias name for cy.wait() (required if dataEndpoint is set)
+ */
+export function injectChainFeature({ chainId, addFlag, removeFlag, dataEndpoint, dataAlias }) {
+  cy.intercept('GET', '**/v2/chains**', (req) => {
+    req.continue((res) => {
+      const applyFlags = (chain) => {
+        let features = chain.features || []
+        if (removeFlag) features = features.filter((f) => f !== removeFlag)
+        if (!features.includes(addFlag)) features.push(addFlag)
+        return { ...chain, features }
+      }
+
+      if (res.body?.results && Array.isArray(res.body.results)) {
+        res.body.results = res.body.results.map((chain) => (chain.chainId === chainId ? applyFlags(chain) : chain))
+      } else if (res.body?.chainId === chainId) {
+        res.body = applyFlags(res.body)
+      }
+    })
+  })
+
+  if (dataEndpoint && dataAlias) {
+    cy.intercept('GET', dataEndpoint).as(dataAlias)
+  }
+}
+
 export function checkElementBackgroundColor(element, color) {
   cy.get(element).should('have.css', 'background-color', color)
 }
@@ -304,6 +345,12 @@ export function generateRandomString(length) {
   return result
 }
 
+export function blockBeamer() {
+  // Block the Beamer widget script so its announcement popup never renders and
+  // covers onboarding buttons. Call before cy.visit().
+  cy.intercept('GET', 'https://*.getbeamer.com/**', { statusCode: 204, body: '' })
+}
+
 export function verifyElementsCount(element, count) {
   cy.get(element).should('have.length', count)
 }
@@ -447,6 +494,22 @@ export function getIframeBody(iframe) {
 
 export const checkButtonByTextExists = (buttonText) => {
   cy.get('button').contains(buttonText).should('exist')
+}
+
+/**
+ * Read a key from the AUT's localStorage (after cy.visit) and assert its parsed
+ * value deep-equals `expectedValue`. Uses `.should()` so Cypress retries until
+ * the value matches or the default command timeout elapses — needed for keys
+ * the app writes asynchronously after sync completes.
+ */
+export function verifyAppLocalStorageItemEquals(key, expectedValue) {
+  cy.window()
+    .its('localStorage')
+    .invoke('getItem', key)
+    .should((stored) => {
+      const parsed = stored ? JSON.parse(stored) : null
+      expect(parsed).to.deep.equal(expectedValue)
+    })
 }
 
 export function getAddedSafeAddressFromLocalStorage(chainId, index) {

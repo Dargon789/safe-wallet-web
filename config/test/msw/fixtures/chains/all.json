@@ -77,6 +77,7 @@
         "RISK_MITIGATION",
         "SAFE_APPS",
         "SAP_BANNER",
+        "SECURITY_HUB",
         "SPACES",
         "SPENDING_LIMIT",
         "STAKE_TEASER",
@@ -111,7 +112,8 @@
         "textColor": "#ffffff",
         "backgroundColor": "#627EEA"
       },
-      "recommendedMasterCopyVersion": "1.4.1"
+      "recommendedMasterCopyVersion": "1.4.1",
+      "relayer": null
     },
     {
       "chainId": "560048",
@@ -199,7 +201,8 @@
         "textColor": "#ffffff",
         "backgroundColor": "#000000"
       },
-      "recommendedMasterCopyVersion": "1.4.1"
+      "recommendedMasterCopyVersion": "1.4.1",
+      "relayer": null
     },
     {
       "chainId": "137",
@@ -274,6 +277,7 @@
         "RENEW_NOTIFICATIONS_TOKEN",
         "RISK_MITIGATION",
         "SAFE_APPS",
+        "SECURITY_HUB",
         "SPACES",
         "SPENDING_LIMIT",
         "TX_NOTES",
@@ -298,7 +302,8 @@
         "textColor": "#ffffff",
         "backgroundColor": "#8248E5"
       },
-      "recommendedMasterCopyVersion": "1.4.1"
+      "recommendedMasterCopyVersion": "1.4.1",
+      "relayer": null
     },
     {
       "chainId": "11155111",
@@ -371,6 +376,7 @@
         "RISK_MITIGATION",
         "SAFE_APPS",
         "SAP_BANNER",
+        "SECURITY_HUB",
         "SPACES",
         "SPEED_UP_TX",
         "SPENDING_LIMIT",
@@ -398,7 +404,8 @@
         "textColor": "#ffffff",
         "backgroundColor": "#B8AAD5"
       },
-      "recommendedMasterCopyVersion": "1.4.1"
+      "recommendedMasterCopyVersion": "1.4.1",
+      "relayer": null
     }
   ]
 }

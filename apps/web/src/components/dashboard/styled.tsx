@@ -1,3 +1,7 @@
+/**
+ * @usedBy features/positions/components/PositionsWidget/index.tsx (WidgetCard)
+ * @usedBy features/recovery/components/RecoveryHeader/index.tsx (WidgetContainer, WidgetBody)
+ */
 import type { ReactElement, ReactNode } from 'react'
 import styled from '@emotion/styled'
 import NextLink from 'next/link'
@@ -75,7 +79,7 @@ export const WidgetCard = ({
   const wrappedViewAllLink = viewAllWrapper && viewAllLink ? viewAllWrapper(viewAllLink) : viewAllLink
 
   return (
-    <MuiCard data-testid={testId} sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5 }}>
+    <MuiCard data-testid={testId} sx={{ border: 0, px: { xs: 3, lg: 1.5 }, pt: 2.5, pb: 1.5 }}>
       <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
         <Stack direction="row" alignItems="center" gap={1}>
           <Typography fontWeight={700}>{title}</Typography>

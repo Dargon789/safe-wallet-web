@@ -12,6 +12,7 @@ import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
 import { BRAND_NAME } from '@/config/constants'
 import { NestedSafesList } from '@/components/settings/NestedSafesList'
+import { FeeTokenPreference } from '@/components/settings/FeeTokenPreference'
 
 const Setup: NextPage = () => {
   const { safe, safeLoaded } = useSafeInfo()
@@ -35,10 +36,10 @@ const Setup: NextPage = () => {
               <Typography variant="h4" fontWeight={700}>
                 <Tooltip
                   placement="top"
-                  title="For security reasons, transactions made with a Safe Account need to be executed in order. The nonce shows you which transaction will be executed next. You can find the nonce for a transaction in the transaction details."
+                  title="For security reasons, transactions made with a Safe account need to be executed in order. The nonce shows you which transaction will be executed next. You can find the nonce for a transaction in the transaction details."
                 >
                   <span>
-                    Safe Account nonce
+                    Safe account nonce
                     <SvgIcon
                       component={InfoIcon}
                       inheritViewBox
@@ -84,6 +85,8 @@ const Setup: NextPage = () => {
         <SpendingLimitsSettings />
 
         <NestedSafesList />
+
+        <FeeTokenPreference />
       </main>
     </>
   )

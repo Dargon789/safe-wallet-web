@@ -1,4 +1,5 @@
 import { cgwClient } from '@safe-global/store/gateway/cgwClient'
+import { CONFIG_SERVICE_KEY } from '@/src/config/constants'
 import { sanitizePendingQueriesTransform } from '../index'
 
 interface TransformResult {
@@ -13,7 +14,7 @@ describe('sanitizePendingQueriesTransform', () => {
     it('passes state through unchanged', () => {
       const state = {
         queries: {
-          'getChainsConfig(undefined)': { status: 'pending', data: null },
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: { status: 'pending', data: null },
         },
         config: { online: true },
       }
@@ -28,7 +29,7 @@ describe('sanitizePendingQueriesTransform', () => {
     it('removes queries with pending status', () => {
       const state = {
         queries: {
-          'getChainsConfig(undefined)': { status: 'pending', startedTimeStamp: 123 },
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: { status: 'pending', startedTimeStamp: 123 },
         },
         config: { online: true },
       }
@@ -41,10 +42,55 @@ describe('sanitizePendingQueriesTransform', () => {
       })
     })
 
+    it('preserves data and rewrites a pending status to fulfilled', () => {
+      // A refetch interrupted by an app kill must keep its last successful data; RTK Query's
+      // rehydration matcher drops non-fulfilled/rejected entries, so the status is rewritten.
+      const data = { ids: ['1'], entities: { '1': { chainId: '1' } } }
+      const state = {
+        queries: {
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: { status: 'pending', data, fulfilledTimeStamp: 123 },
+        },
+        config: { online: true },
+      }
+
+      const result = transform.out(state, cgwClient.reducerPath)
+
+      expect(result).toEqual({
+        queries: {
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: { status: 'fulfilled', data, fulfilledTimeStamp: 123 },
+        },
+        config: { online: true },
+      })
+    })
+
+    it('drops a pending query whose data is null', () => {
+      const state = {
+        queries: {
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: { status: 'pending', data: null },
+        },
+      }
+
+      const result = transform.out(state, cgwClient.reducerPath)
+
+      expect(result).toEqual({ queries: {} })
+    })
+
+    it('drops a pending query whose entity data is empty (an empty chain list is not usable data)', () => {
+      const state = {
+        queries: {
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: { status: 'pending', data: { ids: [], entities: {} } },
+        },
+      }
+
+      const result = transform.out(state, cgwClient.reducerPath)
+
+      expect(result).toEqual({ queries: {} })
+    })
+
     it('preserves queries with fulfilled status', () => {
       const state = {
         queries: {
-          'getChainsConfig(undefined)': { status: 'fulfilled', data: { chains: [] } },
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: { status: 'fulfilled', data: { chains: [] } },
         },
         config: { online: true },
       }
@@ -57,7 +103,7 @@ describe('sanitizePendingQueriesTransform', () => {
     it('preserves queries with rejected status', () => {
       const state = {
         queries: {
-          'getChainsConfig(undefined)': { status: 'rejected', error: 'Network error' },
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: { status: 'rejected', error: 'Network error' },
         },
       }
 
@@ -69,7 +115,7 @@ describe('sanitizePendingQueriesTransform', () => {
     it('filters only pending queries when mixed statuses exist', () => {
       const state = {
         queries: {
-          'getChainsConfig(undefined)': { status: 'pending' },
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: { status: 'pending' },
           'getBalances("0x123")': { status: 'fulfilled', data: [] },
           'getSafeInfo("0x456")': { status: 'rejected', error: 'Error' },
         },
@@ -110,7 +156,7 @@ describe('sanitizePendingQueriesTransform', () => {
     it('handles queries with undefined entries', () => {
       const state = {
         queries: {
-          'getChainsConfig(undefined)': undefined,
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: undefined,
           'getBalances("0x123")': { status: 'fulfilled', data: [] },
         },
       }
@@ -119,7 +165,7 @@ describe('sanitizePendingQueriesTransform', () => {
 
       expect(result).toEqual({
         queries: {
-          'getChainsConfig(undefined)': undefined,
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: undefined,
           'getBalances("0x123")': { status: 'fulfilled', data: [] },
         },
       })

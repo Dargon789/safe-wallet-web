@@ -2,6 +2,8 @@ import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as owner from '../pages/owners.pages.js'
 import * as recovery from '../pages/recovery.pages.js'
+import * as spaces from '../pages/spaces.page.js'
+import * as dashboard from '../pages/dashboard.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as modules from '../pages/modules.page.js'
@@ -30,7 +32,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     cy.visit(constants.setupUrl + recoverySafes.SEP_RECOVERY_SAFE_1)
     cy.clearLocalStorage()
     main.acceptCookies()
-    main.verifyElementsCount(recovery.setupRecoveryModalBtn, 0)
+    main.verifyElementsCount(recovery.setupRecoveryBtn, 0)
   })
 
   it('Verify that non-owner can not edit and delete recovery set up on Security and Login', () => {
@@ -67,7 +69,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     cy.clearLocalStorage()
     wallet.connectSigner(guardian)
     main.acceptCookies()
-    recovery.verifyRecoveryProposalModalState(constants.elementExistanceStates.exist)
+    recovery.verifyRecoveryProposalDialog(constants.elementExistanceStates.exist)
     navigation.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()
   })
@@ -78,7 +80,8 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     wallet.connectSigner(guardian)
     main.acceptCookies()
     recovery.clickOnRecoverLaterBtn()
-    recovery.verifyRecoveryProposalModalState(constants.elementExistanceStates.exist, true)
+    dashboard.expandActionRequiredPanel()
+    recovery.verifyRecoveryProposalCard()
     navigation.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()
   })
@@ -91,7 +94,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     recovery.clickOnRecoverLaterBtn()
     cy.reload()
     owner.waitForConnectionStatus()
-    recovery.verifyRecoveryProposalModalState(constants.elementExistanceStates.not_exist)
+    recovery.verifyRecoveryProposalDialog(constants.elementExistanceStates.not_exist)
     navigation.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()
   })
@@ -101,7 +104,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     cy.clearLocalStorage()
     wallet.connectSigner(signer)
     main.acceptCookies()
-    recovery.verifyRecoveryProposalModalState(constants.elementExistanceStates.not_exist)
+    recovery.verifyRecoveryProposalDialog(constants.elementExistanceStates.not_exist)
     navigation.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()
   })
@@ -188,6 +191,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     main.acceptCookies()
     recovery.clickOnRecoverLaterBtn()
     cy.visit(constants.homeUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
+    dashboard.expandActionRequiredPanel()
     recovery.clickOnStartRecoveryBtn()
     recovery.enterRecovererAddress(getMockAddress())
     navigation.clickOnWalletExpandMoreIcon()
@@ -203,8 +207,8 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     ]
 
     safes.forEach((safe) => {
-      cy.visit(constants.prodbaseUrl + constants.securityUrl + safe)
-      recovery.getSetupRecoveryBtn()
+      spaces.visitClassicView(constants.prodbaseUrl + constants.securityUrl + safe)
+      recovery.getSetupRecoveryBtn().should('be.visible')
     })
   })
 
@@ -218,7 +222,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     ]
 
     safes.forEach((safe) => {
-      cy.visit(constants.prodbaseUrl + constants.securityUrl + safe)
+      spaces.visitClassicView(constants.prodbaseUrl + constants.securityUrl + safe)
       main.verifyElementsCount(recovery.setupRecoveryBtn, 0)
     })
   })

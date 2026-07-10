@@ -29,11 +29,16 @@ exports[`./HnSignupIntro.stories Default 1`] = `
             >
               powered by
             </p>
-            <img
-              alt="Hypernative"
-              class="logo"
-              src="/images/hypernative/hypernative-logo.svg"
-            />
+            <div
+              style="display: inline-flex;"
+            >
+              <mock-icon
+                aria-hidden=""
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1m5ygj6-MuiSvgIcon-root"
+                fill="#636669"
+                focusable="false"
+              />
+            </div>
           </div>
           <p
             class="MuiTypography-root MuiTypography-body2 subtitle mui-style-17vdyq3-MuiTypography-root"
@@ -133,15 +138,15 @@ exports[`./HnSignupIntro.stories Default 1`] = `
             data-track="hypernative: Guardian Form Started"
           >
             <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth primaryButton mui-style-18pnskn-MuiButtonBase-root-MuiButton-root"
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth primaryButton mui-style-1y9vpnt-MuiButtonBase-root-MuiButton-root"
               tabindex="0"
               type="button"
             >
-              See how it works
+              Get started
             </button>
           </span>
           <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-fullWidth secondaryButton mui-style-24caxx-MuiButtonBase-root-MuiButton-root"
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-fullWidth secondaryButton mui-style-13rqk14-MuiButtonBase-root-MuiButton-root"
             tabindex="0"
             type="button"
           >

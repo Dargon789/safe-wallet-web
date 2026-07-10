@@ -1,88 +1,73 @@
-import PlusIcon from '@/public/images/common/plus.svg'
-import { Button, Stack, Typography } from '@mui/material'
+import { Button as ShadcnButton } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import AddMemberModal from 'src/features/spaces/components/AddMemberModal'
-import { useEffect, useState } from 'react'
-import MembersList from '@/features/spaces/components/MembersList'
-import { useMembersSearch } from '@/features/spaces/hooks/useMembersSearch'
-import { useIsInvited, useSpaceMembersByStatus, useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { useState } from 'react'
+import MembersList from '../MembersList'
+import { useIsInvited, useSpaceMembersByStatus, useIsAdmin } from '@/features/spaces'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { trackEvent } from '@/services/analytics'
-import SearchInput from '../SearchInput'
 
 const SpaceMembers = () => {
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
   const { activeMembers, invitedMembers } = useSpaceMembersByStatus()
   const isAdmin = useIsAdmin()
   const isInvited = useIsInvited()
 
-  const filteredMembers = useMembersSearch(activeMembers, searchQuery)
-  const filteredInvites = useMembersSearch(invitedMembers, searchQuery)
-
-  useEffect(() => {
-    if (searchQuery) {
-      trackEvent({ ...SPACE_EVENTS.SEARCH_MEMBERS })
-    }
-  }, [searchQuery])
-
   return (
     <>
       {isInvited && <PreviewInvite />}
-      <Typography variant="h1" mb={3}>
-        Members
-      </Typography>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="flex-start"
-        mb={3}
-        flexWrap="nowrap"
-        gap={2}
-        flexDirection={{ xs: 'column-reverse', sm: 'row' }}
-      >
-        <SearchInput onSearch={setSearchQuery} />
-        {isAdmin && (
-          <Track {...SPACE_EVENTS.ADD_MEMBER_MODAL} label={SPACE_LABELS.members_page}>
-            <Button
-              data-testid="add-member-button"
-              variant="contained"
-              startIcon={<PlusIcon />}
-              onClick={() => setOpenAddMembersModal(true)}
-              sx={{ whiteSpace: 'nowrap' }}
-            >
-              Add member
-            </Button>
-          </Track>
-        )}
-      </Stack>
-      <>
-        {searchQuery && !filteredMembers.length && !filteredInvites.length && (
-          <Typography variant="h5" fontWeight="normal" mb={2} color="primary.light">
-            Found 0 results
-          </Typography>
-        )}
-        {filteredInvites.length > 0 && (
-          <>
-            <Typography variant="h5" fontWeight={700} mb={2}>
-              Pending invitations ({filteredInvites.length})
-            </Typography>
-            <MembersList members={filteredInvites} />
-          </>
-        )}
-        {filteredMembers.length > 0 && (
-          <>
-            <Typography variant="h5" fontWeight={700} mb={2} mt={1}>
-              All members ({filteredMembers.length})
-            </Typography>
-            <MembersList members={filteredMembers} />
-          </>
-        )}
-      </>
 
-      {openAddMembersModal && <AddMemberModal onClose={() => setOpenAddMembersModal(false)} />}
+      <div>
+        <div className="mb-6 flex flex-col gap-6">
+          <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
+            Team
+          </Typography>
+          {isAdmin && (
+            <Track {...SPACE_EVENTS.ADD_MEMBER_MODAL} label={SPACE_LABELS.members_page}>
+              <ShadcnButton
+                data-testid="add-member-button"
+                size="lg"
+                className="px-4 py-0"
+                onClick={() => setOpenAddMembersModal(true)}
+              >
+                <Plus className="size-4 mr-1 text-green-500" />
+                Add member
+              </ShadcnButton>
+            </Track>
+          )}
+        </div>
+
+        <Tabs defaultValue="members">
+          <TabsList variant="line" className="flex-wrap h-auto mb-4 sm:mb-0">
+            <TabsTrigger value="members" className="cursor-pointer" data-testid="members-tab">
+              Members ({activeMembers.length})
+            </TabsTrigger>
+            <TabsTrigger value="pending" className="cursor-pointer" data-testid="pending-members-tab">
+              Pending ({invitedMembers.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <div className="bg-card mt-6 rounded-lg p-4">
+            <TabsContent value="members">
+              <MembersList members={activeMembers} />
+            </TabsContent>
+
+            <TabsContent value="pending">
+              {invitedMembers.length === 0 ? (
+                <p className="text-muted-foreground text-sm">No pending members.</p>
+              ) : (
+                <MembersList members={invitedMembers} />
+              )}
+            </TabsContent>
+          </div>
+        </Tabs>
+
+        {openAddMembersModal && <AddMemberModal onClose={() => setOpenAddMembersModal(false)} />}
+      </div>
     </>
   )
 }

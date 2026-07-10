@@ -1,4 +1,4 @@
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useSpaceSafesGetV1Query, useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -19,9 +19,9 @@ const useIsQualifiedSafe = () => {
   const { pathname } = useRouter()
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn || !spaceId })
+  const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !isUserSignedIn || !spaceId })
   const { currentData: safes } = useSpaceSafesGetV1Query(
-    { spaceId: Number(spaceId) },
+    { spaceId: spaceId ?? '' },
     { skip: !isUserSignedIn || !spaceId },
   )
   const safeAddress = useSafeAddressFromUrl()

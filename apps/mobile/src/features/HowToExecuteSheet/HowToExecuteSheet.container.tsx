@@ -2,7 +2,6 @@ import { SafeBottomSheet } from '@/src/components/SafeBottomSheet'
 import React from 'react'
 import { Text, View, ScrollView } from 'tamagui'
 import { Container } from '@/src/components/Container'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard'
 import { Address } from 'blo'
@@ -25,30 +24,34 @@ import { getTotalFee } from '@safe-global/utils/hooks/useDefaultGasPrice'
 import { toBigInt } from 'ethers'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { ExecutionMethod } from './types'
-import { useRelayGetRelaysRemainingV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import { RelayAvailable } from './components/RelayAvailable/RelayAvailable'
 import { RelayUnavailable } from './components/RelayUnavailable/RelayUnavailable'
-import { hasFeature } from '@safe-global/utils/utils/chains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { RelayUnavailableSheet } from './components/RelayUnavailableSheet/RelayUnavailableSheet'
 import { useAppDispatch } from '@/src/store/hooks'
+import { SignerTypeBadge } from '@/src/components/SignerTypeBadge'
+import { useRequiresRelay } from '@/src/features/ExecuteTx/hooks/useRequiresRelay'
 
-const getActiveSignerRightNode = (
-  totalFee: bigint,
-  item: SignerInfo & { balance: string },
-  executionMethod: ExecutionMethod,
-  activeSigner?: SignerInfo,
-) => {
-  if (activeSigner?.value === item.value && executionMethod !== ExecutionMethod.WITH_RELAY) {
-    return <SafeFontIcon name="check" color="$color" />
-  }
-
+const getActiveSignerRightNode = (totalFee: bigint, item: SignerInfo & { balance: string }) => {
   return (
-    toBigInt(item.balance) < totalFee && (
-      <Container backgroundColor="$backgroundSecondary" paddingVertical="$1" paddingHorizontal="$3">
-        <Text color="$colorSecondary">Not enough gas</Text>
-      </Container>
-    )
+    <View flexDirection="row" alignItems="center" gap="$2">
+      {toBigInt(item.balance) < totalFee && (
+        <Container backgroundColor="$backgroundSecondary" paddingVertical="$1" paddingHorizontal="$3">
+          <Text color="$colorSecondary">Not enough gas</Text>
+        </Container>
+      )}
+      <SignerTypeBadge address={item.value as Address} testID={`signer-type-badge-${item.value}`} />
+    </View>
   )
+}
+
+const getSignerExecutionMethod = (signer: SignerInfo): ExecutionMethod => {
+  if (signer.type === 'ledger') {
+    return ExecutionMethod.WITH_LEDGER
+  }
+  if (signer.type === 'walletconnect') {
+    return ExecutionMethod.WITH_WC
+  }
+  return ExecutionMethod.WITH_PK
 }
 
 export const HowToExecuteSheetContainer = () => {
@@ -71,10 +74,8 @@ export const HowToExecuteSheetContainer = () => {
   const { estimatedFeeParams } = useGasFee(txDetails as TransactionDetails, manualParams)
   const totalFee = getTotalFee(estimatedFeeParams.maxFeePerGas ?? 0n, estimatedFeeParams.gasLimit ?? 0n)
 
-  const { data: relaysRemaining, isLoading: isLoadingRelays } = useRelayGetRelaysRemainingV1Query({
-    chainId: activeSafe.chainId,
-    safeAddress: activeSafe.address,
-  })
+  const { requiresRelay, isRelayEnabled, isRelayAvailable, isLoadingRelays, relaysRemaining } =
+    useRequiresRelay(txDetails)
 
   const handleExecutionMethodSelect = (selectedMethod: ExecutionMethod, signer?: SignerInfo) => {
     if (signer && activeSigner?.value !== signer.value) {
@@ -90,8 +91,16 @@ export const HowToExecuteSheetContainer = () => {
     })
   }
 
-  const isRelayAvailable = relaysRemaining?.remaining && relaysRemaining.remaining > 0
-  const isRelayEnabled = hasFeature(activeChain, FEATURES.RELAYING)
+  // Relay is the selected option when the user picked it, or implicitly for Safe-pays txs (which must
+  // relay). Derived for highlighting only — getExecutionMethod() is the source of truth at execution,
+  // so no Redux write is needed here.
+  const isRelaySelected = executionMethod === ExecutionMethod.WITH_RELAY || requiresRelay
+
+  // Safe-pays on a chain without relaying: terminal state, no signer fallback allowed. Surface a
+  // dedicated error sheet with a single CTA instead of navigating to review-and-execute.
+  if (requiresRelay && !isRelayEnabled) {
+    return <RelayUnavailableSheet onDismiss={() => router.back()} />
+  }
 
   return (
     <SafeBottomSheet title="Choose how to execute" snapPoints={['90%']} loading={loading || isLoadingTxDetails}>
@@ -102,11 +111,9 @@ export const HowToExecuteSheetContainer = () => {
             <>
               <Container
                 spaced={false}
-                backgroundColor={
-                  executionMethod === ExecutionMethod.WITH_RELAY ? '$backgroundSecondary' : 'transparent'
-                }
-                borderWidth={executionMethod === ExecutionMethod.WITH_RELAY ? 0 : 1}
-                borderColor={executionMethod !== ExecutionMethod.WITH_RELAY ? '$borderLight' : undefined}
+                backgroundColor={isRelaySelected ? '$backgroundSecondary' : 'transparent'}
+                borderWidth={isRelaySelected ? 0 : 1}
+                borderColor={!isRelaySelected ? '$borderLight' : undefined}
                 paddingVertical="$3"
                 paddingHorizontal="$4"
                 gap="$1"
@@ -116,47 +123,49 @@ export const HowToExecuteSheetContainer = () => {
                   <RelayAvailable
                     isLoadingRelays={isLoadingRelays}
                     relaysRemaining={relaysRemaining}
-                    executionMethod={executionMethod}
+                    executionMethod={isRelaySelected ? ExecutionMethod.WITH_RELAY : executionMethod}
                   />
                 ) : (
                   <RelayUnavailable />
                 )}
               </Container>
 
-              {/* Divider Text */}
-              <Text fontWeight="600" fontSize="$4" paddingHorizontal="$1" marginTop="$2">
-                Or use your signer:
-              </Text>
+              {/* Divider Text — hidden for Safe-pays: the signer route would double-charge */}
+              {!requiresRelay && (
+                <Text fontWeight="600" fontSize="$4" paddingHorizontal="$1" marginTop="$2">
+                  Or use your signer:
+                </Text>
+              )}
             </>
           )}
 
-          {/* Signers List */}
+          {/* Signers List — hidden for Safe-pays txs (relay is the only valid path) */}
           <View gap="$2">
-            {items.map((item) => {
-              return (
-                <View
-                  key={item.value}
-                  width="100%"
-                  borderRadius={'$4'}
-                  backgroundColor={
-                    executionMethod === ExecutionMethod.WITH_PK && activeSigner?.value === item.value
-                      ? '$backgroundSecondary'
-                      : 'transparent'
-                  }
-                >
-                  <SignersCard
-                    transparent
-                    onPress={() => handleExecutionMethodSelect(ExecutionMethod.WITH_PK, item)}
-                    name={<ContactDisplayNameContainer address={item.value as Address} />}
-                    address={item.value as Address}
-                    balance={`${item.balance ? formatVisualAmount(item.balance, activeChain.nativeCurrency.decimals) : '0'} ${
-                      activeChain.nativeCurrency.symbol
-                    }`}
-                    rightNode={getActiveSignerRightNode(totalFee, item, executionMethod, activeSigner)}
-                  />
-                </View>
-              )
-            })}
+            {!requiresRelay &&
+              items.map((item) => {
+                const signerMethod = getSignerExecutionMethod(item)
+                const isSelected = executionMethod === signerMethod && activeSigner?.value === item.value
+
+                return (
+                  <View
+                    key={item.value}
+                    width="100%"
+                    borderRadius={'$4'}
+                    backgroundColor={isSelected ? '$backgroundSecondary' : 'transparent'}
+                  >
+                    <SignersCard
+                      transparent
+                      onPress={() => handleExecutionMethodSelect(signerMethod, item)}
+                      name={<ContactDisplayNameContainer address={item.value as Address} />}
+                      address={item.value as Address}
+                      balance={`${item.balance ? formatVisualAmount(item.balance, activeChain.nativeCurrency.decimals) : '0'} ${
+                        activeChain.nativeCurrency.symbol
+                      }`}
+                      rightNode={getActiveSignerRightNode(totalFee, item)}
+                    />
+                  </View>
+                )
+              })}
           </View>
         </View>
       </ScrollView>

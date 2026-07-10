@@ -261,11 +261,63 @@ export const mockUser = {
 }
 
 /**
+ * Mock owned safes for the onboarding flow
+ */
+export const mockOwnedSafes = {
+  '1': ['0xA77DE01e157f9f57C7c4A326eeEaf0BDD2CFcD01', '0xB63F3D0a4a7eFd1d0c08A9ef17C5e5d3DbBDE867'],
+  '137': ['0xA77DE01e157f9f57C7c4A326eeEaf0BDD2CFcD01'],
+}
+
+/**
+ * Mock safe overviews for owned safes
+ */
+export const mockSafeOverviews = [
+  {
+    address: { value: '0xA77DE01e157f9f57C7c4A326eeEaf0BDD2CFcD01', name: null, logoUri: null },
+    chainId: '1',
+    threshold: 2,
+    owners: [
+      { value: '0x5eD8Cee6b63b1c6AFce3AD7c92f4fD7E1B8fAd9F', name: null, logoUri: null },
+      { value: '0x1De7F5cc55653C581d1c842AD155f88cE389E0B2', name: null, logoUri: null },
+      { value: '0x24BBC568dC89E4e57bAF23b759989F3D6113BBaA', name: null, logoUri: null },
+    ],
+    fiatTotal: '48250.75',
+    queued: 1,
+    awaitingConfirmation: null,
+  },
+  {
+    address: { value: '0xB63F3D0a4a7eFd1d0c08A9ef17C5e5d3DbBDE867', name: null, logoUri: null },
+    chainId: '1',
+    threshold: 1,
+    owners: [
+      { value: '0x5eD8Cee6b63b1c6AFce3AD7c92f4fD7E1B8fAd9F', name: null, logoUri: null },
+      { value: '0x26C3f6fD4f53a03eC8e54Aca0c356112cA3DDEc8', name: null, logoUri: null },
+    ],
+    fiatTotal: '12780.30',
+    queued: 0,
+    awaitingConfirmation: null,
+  },
+  {
+    address: { value: '0xA77DE01e157f9f57C7c4A326eeEaf0BDD2CFcD01', name: null, logoUri: null },
+    chainId: '137',
+    threshold: 2,
+    owners: [
+      { value: '0x5eD8Cee6b63b1c6AFce3AD7c92f4fD7E1B8fAd9F', name: null, logoUri: null },
+      { value: '0x1De7F5cc55653C581d1c842AD155f88cE389E0B2', name: null, logoUri: null },
+      { value: '0x24BBC568dC89E4e57bAF23b759989F3D6113BBaA', name: null, logoUri: null },
+    ],
+    fiatTotal: '5430.10',
+    queued: 0,
+    awaitingConfirmation: null,
+  },
+]
+
+/**
  * Mock space data for spaces feature
  */
-export function createMockSpace(spaceId: number = 1) {
+export function createMockSpace(spaceId: string = 'uuid-1') {
   return {
-    id: spaceId,
+    uuid: spaceId,
     name: 'Test Space',
     status: 'ACTIVE' as const,
     members: [
@@ -273,7 +325,7 @@ export function createMockSpace(spaceId: number = 1) {
         id: 1,
         role: 'ADMIN' as const,
         name: 'Admin User',
-        invitedBy: 'system',
+        invitedBy: null,
         status: 'ACTIVE' as const,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -294,16 +346,38 @@ export function spacesHandlers(): RequestHandler[] {
     // User with wallets endpoint
     http.get(/\/v1\/users$/, () => HttpResponse.json(mockUser)),
     // Get space by ID
-    http.get(/\/v1\/spaces\/\d+$/, ({ params }) => {
+    http.get(/\/v1\/spaces\/[^/]+$/, ({ params }) => {
       const url = new URL(params[0] as string, 'https://example.com')
       const pathParts = url.pathname.split('/')
-      const spaceId = parseInt(pathParts[pathParts.length - 1], 10) || 1
+      const spaceId = pathParts[pathParts.length - 1] || 'uuid-1'
       return HttpResponse.json(createMockSpace(spaceId))
     }),
     // List all spaces for user
-    http.get(/\/v1\/spaces$/, () => HttpResponse.json([createMockSpace(1)])),
+    http.get(/\/v1\/spaces$/, () => HttpResponse.json([createMockSpace('uuid-1')])),
     // Get space safes
-    http.get(/\/v1\/spaces\/\d+\/safes$/, () => HttpResponse.json({ safes: {} })),
+    http.get(/\/v1\/spaces\/[^/]+\/safes$/, () => HttpResponse.json({ safes: {} })),
+    // Get all safes owned by address (used by useOwnedSafesGrouped)
+    http.get(/\/v2\/owners\/0x[a-fA-F0-9]+\/safes$/, () => HttpResponse.json(mockOwnedSafes)),
+    // Safe overviews v1 (batch endpoint for safe card data)
+    http.get(/\/v1\/safes$/, () => HttpResponse.json(mockSafeOverviews)),
+    // Safe overviews v2 (batch endpoint for safe card data)
+    http.get(/\/v2\/safes$/, () => HttpResponse.json(mockSafeOverviews)),
+    // Add safes to space (mutation)
+    http.post(/\/v1\/spaces\/[^/]+\/safes$/, () => HttpResponse.json({ success: true })),
+    // Invite members to space (mutation)
+    http.post(/\/v1\/spaces\/[^/]+\/members\/invite$/, () => HttpResponse.json({ success: true })),
+    // Get space members
+    http.get(/\/v1\/spaces\/[^/]+\/members$/, () =>
+      HttpResponse.json([
+        {
+          id: 1,
+          role: 'ADMIN',
+          name: 'Admin User',
+          status: 'ACTIVE',
+          user: { id: mockUser.id, status: 'ACTIVE' },
+        },
+      ]),
+    ),
   ]
 }
 
@@ -636,6 +710,7 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     hypernative: features.hypernative ?? false,
     earn: features.earn ?? false,
     spaces: features.spaces ?? false,
+    oidcAuth: features.oidcAuth ?? false,
   }
 
   // Build handlers array

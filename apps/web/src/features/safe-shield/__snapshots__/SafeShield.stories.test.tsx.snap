@@ -5,7 +5,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -16,7 +16,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -64,7 +64,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -107,7 +107,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -142,7 +142,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -185,7 +185,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is verified as "Lido staking v2".
                                   </p>
@@ -220,7 +220,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -263,7 +263,24 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
+                                  >
+                                    Threat analysis found no issues
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="MuiBox-root mui-style-6io5aq"
+                            >
+                              <div
+                                class="MuiBox-root mui-style-1f9z19n"
+                              >
+                                <div
+                                  class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
+                                >
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Threat analysis found no issues
                                   </p>
@@ -285,7 +302,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6128275759-security-hub"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -311,7 +328,7 @@ exports[`./SafeShield.stories Empty 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -322,7 +339,7 @@ exports[`./SafeShield.stories Empty 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -361,7 +378,7 @@ exports[`./SafeShield.stories Empty 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6128275759-security-hub"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -387,7 +404,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -398,7 +415,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -446,7 +463,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -489,7 +506,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -524,7 +541,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -567,7 +584,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is verified as "Lido staking v2".
                                   </p>
@@ -602,7 +619,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -645,7 +662,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Threat analysis failed. Review before processing.
                                   </p>
@@ -667,7 +684,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6128275759-security-hub"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -693,7 +710,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -704,7 +721,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -752,7 +769,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -795,7 +812,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -830,7 +847,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -873,7 +890,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Threat analysis found no issues
                                   </p>
@@ -895,7 +912,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6128275759-security-hub"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -921,7 +938,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -932,7 +949,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -980,7 +997,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -1023,7 +1040,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -1058,7 +1075,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -1101,7 +1118,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Threat analysis found no issues
                                   </p>
@@ -1123,7 +1140,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6128275759-security-hub"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -1149,7 +1166,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -1160,7 +1177,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -1208,7 +1225,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -1251,7 +1268,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -1286,7 +1303,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -1329,7 +1346,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     The transaction {reason_phrase} {classification_phrase}
                                   </p>
@@ -1354,7 +1371,24 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                           </span>
                                           <span
                                             class="MuiBox-root mui-style-yjghm1"
-                                          />
+                                          >
+                                            <a
+                                              aria-label=""
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                              data-mui-internal-clone-element="true"
+                                              data-testid="explorer-btn"
+                                              href="https://etherscan.io/address/0x1234567890123456789012345678901234567890"
+                                              rel="noreferrer"
+                                              tabindex="0"
+                                              target="_blank"
+                                            >
+                                              <mock-icon
+                                                aria-hidden=""
+                                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                focusable="false"
+                                              />
+                                            </a>
+                                          </span>
                                         </p>
                                       </div>
                                       <div
@@ -1385,7 +1419,24 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                           </span>
                                           <span
                                             class="MuiBox-root mui-style-yjghm1"
-                                          />
+                                          >
+                                            <a
+                                              aria-label=""
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                              data-mui-internal-clone-element="true"
+                                              data-testid="explorer-btn"
+                                              href="https://etherscan.io/address/0x1234567890123456789012345678901234567890"
+                                              rel="noreferrer"
+                                              tabindex="0"
+                                              target="_blank"
+                                            >
+                                              <mock-icon
+                                                aria-hidden=""
+                                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                focusable="false"
+                                              />
+                                            </a>
+                                          </span>
                                         </p>
                                       </div>
                                       <div
@@ -1416,7 +1467,24 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                           </span>
                                           <span
                                             class="MuiBox-root mui-style-yjghm1"
-                                          />
+                                          >
+                                            <a
+                                              aria-label=""
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                              data-mui-internal-clone-element="true"
+                                              data-testid="explorer-btn"
+                                              href="https://etherscan.io/address/0x1234567890123456789012345678901234567890"
+                                              rel="noreferrer"
+                                              tabindex="0"
+                                              target="_blank"
+                                            >
+                                              <mock-icon
+                                                aria-hidden=""
+                                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                focusable="false"
+                                              />
+                                            </a>
+                                          </span>
                                         </p>
                                       </div>
                                       <div
@@ -1487,7 +1555,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6128275759-security-hub"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -1513,7 +1581,7 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -1524,7 +1592,7 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -1572,7 +1640,7 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -1615,7 +1683,7 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -1671,7 +1739,7 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6128275759-security-hub"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -1697,7 +1765,7 @@ exports[`./SafeShield.stories Loading 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -1708,7 +1776,7 @@ exports[`./SafeShield.stories Loading 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -1742,7 +1810,7 @@ exports[`./SafeShield.stories Loading 1`] = `
                   role="progressbar"
                 >
                   <span
-                    class="MuiLinearProgress-bar MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate mui-style-3vqet8-MuiLinearProgress-bar1"
+                    class="MuiLinearProgress-bar MuiLinearProgress-bar1 MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate mui-style-1qczc9n-MuiLinearProgress-bar1"
                     style="transform: translateX(-70%);"
                   />
                 </span>
@@ -1785,7 +1853,7 @@ exports[`./SafeShield.stories Loading 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6128275759-security-hub"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -1811,7 +1879,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -1822,7 +1890,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -1870,7 +1938,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -1913,7 +1981,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -1948,7 +2016,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -1991,7 +2059,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is verified as "Lido staking v2".
                                   </p>
@@ -2026,7 +2094,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -2069,7 +2137,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     The transaction {reason_phrase} {classification_phrase}
                                   </p>
@@ -2094,7 +2162,24 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                           </span>
                                           <span
                                             class="MuiBox-root mui-style-yjghm1"
-                                          />
+                                          >
+                                            <a
+                                              aria-label=""
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                              data-mui-internal-clone-element="true"
+                                              data-testid="explorer-btn"
+                                              href="https://etherscan.io/address/0x1234567890123456789012345678901234567890"
+                                              rel="noreferrer"
+                                              tabindex="0"
+                                              target="_blank"
+                                            >
+                                              <mock-icon
+                                                aria-hidden=""
+                                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                focusable="false"
+                                              />
+                                            </a>
+                                          </span>
                                         </p>
                                       </div>
                                       <div
@@ -2125,7 +2210,24 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                           </span>
                                           <span
                                             class="MuiBox-root mui-style-yjghm1"
-                                          />
+                                          >
+                                            <a
+                                              aria-label=""
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                              data-mui-internal-clone-element="true"
+                                              data-testid="explorer-btn"
+                                              href="https://etherscan.io/address/0x1234567890123456789012345678901234567890"
+                                              rel="noreferrer"
+                                              tabindex="0"
+                                              target="_blank"
+                                            >
+                                              <mock-icon
+                                                aria-hidden=""
+                                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                focusable="false"
+                                              />
+                                            </a>
+                                          </span>
                                         </p>
                                       </div>
                                       <div
@@ -2156,7 +2258,24 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                           </span>
                                           <span
                                             class="MuiBox-root mui-style-yjghm1"
-                                          />
+                                          >
+                                            <a
+                                              aria-label=""
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                              data-mui-internal-clone-element="true"
+                                              data-testid="explorer-btn"
+                                              href="https://etherscan.io/address/0x1234567890123456789012345678901234567890"
+                                              rel="noreferrer"
+                                              tabindex="0"
+                                              target="_blank"
+                                            >
+                                              <mock-icon
+                                                aria-hidden=""
+                                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                focusable="false"
+                                              />
+                                            </a>
+                                          </span>
                                         </p>
                                       </div>
                                       <div
@@ -2227,7 +2346,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6128275759-security-hub"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -2253,7 +2372,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -2264,7 +2383,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -2312,7 +2431,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -2355,7 +2474,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -2390,7 +2509,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -2433,7 +2552,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is verified as "Lido staking v2".
                                   </p>
@@ -2468,7 +2587,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -2511,7 +2630,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Verify this change as it may overwrite account ownership.
                                   </p>
@@ -2561,7 +2680,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6128275759-security-hub"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -2587,7 +2706,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -2598,7 +2717,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -2646,7 +2765,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -2689,7 +2808,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -2724,7 +2843,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -2767,7 +2886,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is verified as "Lido staking v2".
                                   </p>
@@ -2802,7 +2921,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -2845,7 +2964,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     The transaction {reason_phrase} {classification_phrase}. Cancel this transaction.
                                   </p>
@@ -2884,7 +3003,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6128275759-security-hub"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -2910,7 +3029,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -2921,7 +3040,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -2969,7 +3088,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -3012,7 +3131,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -3047,7 +3166,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -3090,7 +3209,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is verified as "Lido staking v2".
                                   </p>
@@ -3125,7 +3244,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -3168,7 +3287,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Verify this change before proceeding as it will change Safe modules.
                                   </p>
@@ -3190,7 +3309,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6128275759-security-hub"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -3216,7 +3335,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -3227,7 +3346,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -3275,7 +3394,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -3318,7 +3437,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     1 Safe account cannot be created on the destination chain. You will not be able to claim ownership of the same address. Funds sent may be inaccessible.
                                   </p>
@@ -3381,7 +3500,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -3403,7 +3539,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     1 address has few transactions.
                                   </p>
@@ -3466,7 +3602,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -3488,7 +3641,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     You are interacting with 2 addresses for the first time.
                                   </p>
@@ -3551,7 +3704,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -3573,7 +3743,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0x75a4a3378eb9be1d6cd40847aa7fac5d66b99cfe"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -3595,7 +3782,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     2 addresses are in your address book or a Safe you own.
                                   </p>
@@ -3658,7 +3845,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -3680,7 +3884,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0x9648b1e4ad3eecbae513afb45e7ea8b2918e91ff"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -3720,7 +3941,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -3763,12 +3984,12 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Verify the 
                                     <a
                                       class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-ioipc8-MuiTypography-root-MuiLink-root"
-                                      href="https://help.safe.global/en/articles/40838-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
+                                      href="https://help.safe.global/articles/9256158266-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
                                       rel="noreferrer noopener"
                                       target="_blank"
                                     >
@@ -3859,7 +4080,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0xfafa1beaddbcd913f4de0ed3557a1f3d026de0a6"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -3890,7 +4128,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0xfafa1beaddbcd913f4de0ed3557a1f3d026de0a6"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -3912,12 +4167,12 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This transaction calls a smart contract that will be able to modify your Safe account. 
                                     <a
                                       class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-                                      href="https://help.safe.global/en/articles/40794-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
+                                      href="https://help.safe.global/articles/4308960633-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
                                       rel="noreferrer noopener"
                                       target="_blank"
                                     >
@@ -3997,7 +4252,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0x53bbddda3398c3facefe325073bc424fcb946d7a"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -4029,7 +4301,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0xcf00af6ed21dbbd45c8f46ca1c9be8f6ebb0a4a2"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -4051,7 +4340,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     All these contracts are verified.
                                   </p>
@@ -4124,7 +4413,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0x53bbddda3398c3facefe325073bc424fcb946d7a"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -4156,7 +4462,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0xcf00af6ed21dbbd45c8f46ca1c9be8f6ebb0a4a2"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -4178,7 +4501,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     You have interacted with all these contracts before.
                                   </p>
@@ -4251,7 +4574,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0x53bbddda3398c3facefe325073bc424fcb946d7a"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -4283,7 +4623,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0xcf00af6ed21dbbd45c8f46ca1c9be8f6ebb0a4a2"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -4323,7 +4680,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -4366,7 +4723,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     The transaction {reason_phrase} {classification_phrase}. Cancel this transaction.
                                   </p>
@@ -4405,7 +4762,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6128275759-security-hub"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -4431,7 +4788,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -4442,7 +4799,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -4490,7 +4847,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -4533,7 +4890,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This Safe account cannot be created on the destination chain. You will not be able to claim ownership of the same address. Funds sent may be inaccessible.
                                   </p>
@@ -4550,7 +4907,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address has few transactions.
                                   </p>
@@ -4567,7 +4924,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     You are interacting with this address for the first time.
                                   </p>
@@ -4584,7 +4941,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -4619,7 +4976,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -4662,12 +5019,12 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Verify the 
                                     <a
                                       class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-ioipc8-MuiTypography-root-MuiLink-root"
-                                      href="https://help.safe.global/en/articles/40838-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
+                                      href="https://help.safe.global/articles/9256158266-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
                                       rel="noreferrer noopener"
                                       target="_blank"
                                     >
@@ -4703,12 +5060,12 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This transaction calls a smart contract that will be able to modify your Safe account. 
                                     <a
                                       class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-                                      href="https://help.safe.global/en/articles/40794-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
+                                      href="https://help.safe.global/articles/4308960633-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
                                       rel="noreferrer noopener"
                                       target="_blank"
                                     >
@@ -4732,7 +5089,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is not verified.
                                   </p>
@@ -4749,7 +5106,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     You have interacted with this contract 43 times.
                                   </p>
@@ -4784,7 +5141,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -4827,7 +5184,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Verify this change before proceeding as it will change Safe modules.
                                   </p>
@@ -4849,7 +5206,242 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6128275759-security-hub"
+            rel="noreferrer noopener"
+            target="_blank"
+          >
+            <span
+              class="MuiBox-root mui-style-u9xrjn"
+            >
+              <mock-icon
+                aria-hidden=""
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-6s60fs-MuiSvgIcon-root"
+                focusable="false"
+              />
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./SafeShield.stories OverflowFindings 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiBox-root mui-style-1hjq20a"
+    >
+      <div
+        class="MuiStack-root mui-style-hwnj0i-MuiStack-root"
+        data-testid="safe-shield-widget"
+      >
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: none;"
+        >
+          <div
+            class="MuiBox-root mui-style-2w7gpf"
+          >
+            <div
+              class="MuiStack-root mui-style-la659o-MuiStack-root"
+              data-testid="safe-shield-status"
+            >
+              <span
+                class="MuiTypography-root MuiTypography-overline mui-style-1v2h5v4-MuiTypography-root"
+              >
+                Issues found
+              </span>
+            </div>
+          </div>
+          <div
+            class="MuiBox-root mui-style-1hpqev5"
+          >
+            <div
+              class="MuiBox-root mui-style-1l5zt4q"
+            >
+              <div
+                class="MuiBox-root mui-style-xhak29"
+              >
+                <div
+                  class="MuiBox-root mui-style-7yf5bk"
+                  data-testid="threat-analysis-group-card"
+                >
+                  <div
+                    class="MuiStack-root mui-style-es2900-MuiStack-root"
+                  >
+                    <div
+                      class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
+                    >
+                      <mock-icon
+                        aria-hidden=""
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1nx0ljk-MuiSvgIcon-root"
+                        focusable="false"
+                      />
+                      <p
+                        class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                      >
+                        Moderate threat 1
+                      </p>
+                    </div>
+                    <button
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
+                      tabindex="0"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-118obxm-MuiSvgIcon-root"
+                        data-testid="KeyboardArrowDownIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <div
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-hidden mui-style-cwrbtg-MuiCollapse-root"
+                    style="min-height: 0px;"
+                  >
+                    <div
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    >
+                      <div
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                      >
+                        <div
+                          class="MuiBox-root mui-style-v1dotw"
+                        >
+                          <div
+                            class="MuiStack-root mui-style-hwnj0i-MuiStack-root"
+                          >
+                            <div
+                              class="MuiBox-root mui-style-6io5aq"
+                            >
+                              <div
+                                class="MuiBox-root mui-style-jgusbz"
+                              >
+                                <div
+                                  class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
+                                >
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
+                                  >
+                                    First moderate threat.
+                                  </p>
+                                  <div
+                                    class="MuiBox-root mui-style-1821gv5"
+                                  >
+                                    <div
+                                      class="MuiBox-root mui-style-1ygviyr"
+                                    >
+                                      <div
+                                        class="MuiBox-root mui-style-jnhdwv"
+                                      >
+                                        <p
+                                          class="MuiTypography-root MuiTypography-body2 mui-style-1lbkc8c-MuiTypography-root"
+                                        >
+                                          Bulleted list from validation.features, grouped by Malicious first, then Warnings.
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="MuiBox-root mui-style-6io5aq"
+                            >
+                              <div
+                                class="MuiBox-root mui-style-1f9z19n"
+                              >
+                                <div
+                                  class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
+                                >
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
+                                  >
+                                    Second moderate threat.
+                                  </p>
+                                  <div
+                                    class="MuiBox-root mui-style-1821gv5"
+                                  >
+                                    <div
+                                      class="MuiBox-root mui-style-1ygviyr"
+                                    >
+                                      <div
+                                        class="MuiBox-root mui-style-jnhdwv"
+                                      >
+                                        <p
+                                          class="MuiTypography-root MuiTypography-body2 mui-style-1lbkc8c-MuiTypography-root"
+                                        >
+                                          Bulleted list from validation.features, grouped by Malicious first, then Warnings.
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="MuiBox-root mui-style-6io5aq"
+                            >
+                              <div
+                                class="MuiBox-root mui-style-1f9z19n"
+                              >
+                                <div
+                                  class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
+                                >
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
+                                  >
+                                    Third moderate threat.
+                                  </p>
+                                  <div
+                                    class="MuiBox-root mui-style-1821gv5"
+                                  >
+                                    <div
+                                      class="MuiBox-root mui-style-1ygviyr"
+                                    >
+                                      <div
+                                        class="MuiBox-root mui-style-jnhdwv"
+                                      >
+                                        <p
+                                          class="MuiTypography-root MuiTypography-body2 mui-style-1lbkc8c-MuiTypography-root"
+                                        >
+                                          Bulleted list from validation.features, grouped by Malicious first, then Warnings.
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiStack-root mui-style-10778a5-MuiStack-root"
+        >
+          <a
+            class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
+            href="https://help.safe.global/articles/6128275759-security-hub"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -4875,7 +5467,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -4886,7 +5478,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -4934,7 +5526,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -4977,7 +5569,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -5012,7 +5604,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -5055,7 +5647,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is verified as "Lido staking v2".
                                   </p>
@@ -5090,7 +5682,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -5133,7 +5725,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Verify this change before proceeding as it will change the Safe's ownership
                                   </p>
@@ -5155,7 +5747,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6128275759-security-hub"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -5181,7 +5773,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -5192,7 +5784,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -5240,7 +5832,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -5283,7 +5875,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -5318,7 +5910,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -5361,12 +5953,12 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Verify the 
                                     <a
                                       class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-ioipc8-MuiTypography-root-MuiLink-root"
-                                      href="https://help.safe.global/en/articles/40838-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
+                                      href="https://help.safe.global/articles/9256158266-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
                                       rel="noreferrer noopener"
                                       target="_blank"
                                     >
@@ -5402,12 +5994,12 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This transaction calls a smart contract that will be able to modify your Safe account. 
                                     <a
                                       class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-                                      href="https://help.safe.global/en/articles/40794-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
+                                      href="https://help.safe.global/articles/4308960633-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
                                       rel="noreferrer noopener"
                                       target="_blank"
                                     >
@@ -5431,7 +6023,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is verified as "Lido staking v2".
                                   </p>
@@ -5448,7 +6040,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     You have interacted with this contract 43 times.
                                   </p>
@@ -5483,7 +6075,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -5526,7 +6118,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Threat analysis failed. Review before processing.
                                   </p>
@@ -5599,7 +6191,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6128275759-security-hub"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -5625,7 +6217,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -5636,7 +6228,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -5684,7 +6276,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -5727,7 +6319,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -5762,7 +6354,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -5805,7 +6397,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Contract verification is currently unavailable.
                                   </p>
@@ -5840,7 +6432,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -5883,7 +6475,24 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
+                                  >
+                                    Threat analysis found no issues
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="MuiBox-root mui-style-6io5aq"
+                            >
+                              <div
+                                class="MuiBox-root mui-style-1f9z19n"
+                              >
+                                <div
+                                  class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
+                                >
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Threat analysis found no issues
                                   </p>
@@ -5905,7 +6514,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6128275759-security-hub"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -5931,7 +6540,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -5942,7 +6551,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -5990,7 +6599,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -6033,7 +6642,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Contract verification is currently unavailable.
                                   </p>
@@ -6050,12 +6659,12 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Verify the 
                                     <a
                                       class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-ioipc8-MuiTypography-root-MuiLink-root"
-                                      href="https://help.safe.global/en/articles/40838-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
+                                      href="https://help.safe.global/articles/9256158266-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
                                       rel="noreferrer noopener"
                                       target="_blank"
                                     >
@@ -6109,7 +6718,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -6152,7 +6761,24 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
+                                  >
+                                    Threat analysis found no issues
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="MuiBox-root mui-style-6io5aq"
+                            >
+                              <div
+                                class="MuiBox-root mui-style-1f9z19n"
+                              >
+                                <div
+                                  class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
+                                >
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Threat analysis found no issues
                                   </p>
@@ -6174,7 +6800,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6128275759-security-hub"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -6200,7 +6826,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -6211,7 +6837,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -6259,7 +6885,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -6302,7 +6928,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -6337,7 +6963,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -6380,7 +7006,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is not verified.
                                   </p>
@@ -6402,7 +7028,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6128275759-security-hub"
             rel="noreferrer noopener"
             target="_blank"
           >

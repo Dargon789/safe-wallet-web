@@ -1,17 +1,33 @@
-.header {
-  position: fixed;
-  left: 0;
-  top: 0;
+@reference '../../../styles/shadcn.css';
+
+/* The topbar lives in normal flow as the first child of .main, so it pushes the
+   page content down by its own height — no fixed reservation to keep in sync,
+   so it can wrap onto extra rows on narrow viewports without clipping content.
+   .main owns the sidebar offset (padding-left), so the topbar inherits it.
+   It scrolls away with the page (not sticky) so a page's own sticky sub-header
+   — e.g. the Assets tabs — can pin to the top cleanly without overlapping it. */
+.topbar {
+  position: relative;
+  z-index: 2;
   width: 100%;
-  z-index: 1201;
-  background: var(--color-background-paper);
-  padding-top: env(safe-area-inset-top);
+}
+
+/* Elevated above a modal backdrop (e.g. tx flow). Raised above page sub-headers
+   and pinned to the viewport top so it fills the strip the tx dialog leaves
+   uncovered (top: var(--topbar-height)) even when the page was scrolled before
+   the modal opened — e.g. spending limits in Settings → Setup, where the pinned
+   settings tabs showed through instead (WA-2552). Sticky keeps its flow space,
+   so nothing shifts when the class toggles on open/close. */
+.topbarElevated {
+  position: sticky;
+  top: 0;
+  z-index: 99;
 }
 
 .main {
   background-color: var(--color-background-main);
   padding-left: 230px;
-  padding-top: calc(var(--header-height) + env(safe-area-inset-top));
+  padding-top: 0;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -25,6 +41,16 @@
   padding-left: 0;
 }
 
+/* Spaces: use black background in dark mode (matches shadcn --background) */
+[data-theme='dark'] .mainSpace {
+  background-color: var(--background);
+}
+
+/* Spaces: reduce left padding when the sidebar is collapsed to icon mode */
+.mainSpaceCollapsed {
+  padding-left: 4rem;
+}
+
 .mainNoHeader {
   padding-top: 0;
 }
@@ -35,6 +61,17 @@
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
+  min-width: 0;
+}
+
+/* Onboarding flows: prevent flex descendants from forcing horizontal overflow on narrow viewports */
+.onboardingMotion {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .content main {

@@ -9,7 +9,11 @@ import { useHypernativeOAuth } from '../../hooks/useHypernativeOAuth'
 import { useAssessmentUrl } from '../../hooks/useAssessmentUrl'
 import { useHnAssessmentSeverity } from '../../hooks/useHnAssessmentSeverity'
 import LockIcon from '@/public/images/common/lock-small.svg'
+// eslint-disable-next-line no-restricted-imports -- routing SeverityIcon through the safe-shield barrel closes a hypernative<->safe-shield module-init cycle (TDZ)
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
+import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 
 interface HnQueueAssessmentBannerProps {
   safeTxHash: string
@@ -46,6 +50,9 @@ export const HnQueueAssessmentBanner = ({
     const handleLogin = (e: React.MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault()
       e.stopPropagation()
+      trackEvent(HYPERNATIVE_EVENTS.HYPERNATIVE_LOGIN_CLICKED, {
+        [MixpanelEventParams.SOURCE]: HYPERNATIVE_SOURCE.Queue,
+      })
       initiateLogin()
     }
 
@@ -86,7 +93,10 @@ export const HnQueueAssessmentBanner = ({
       <Stack gap={1}>
         <Typography variant="body2">{message}</Typography>
         <ExternalLink
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation()
+            trackEvent(HYPERNATIVE_EVENTS.SECURITY_REPORT_CLICKED)
+          }}
           href={assessmentUrl}
           sx={{
             textDecoration: 'underline',

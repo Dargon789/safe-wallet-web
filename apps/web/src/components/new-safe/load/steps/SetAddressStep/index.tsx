@@ -69,16 +69,16 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
 
   const validateSafeAddress = async (address: string) => {
     if (addedSafes && Object.keys(addedSafes).includes(address)) {
-      return 'Safe Account is already added'
+      return 'Safe account is already added'
     }
 
     try {
       const result = await triggerGetSafe({ chainId: currentChainId, safeAddress: address }).unwrap()
       if (!result) {
-        return 'Address given is not a valid Safe Account address'
+        return 'Address given is not a valid Safe account address'
       }
     } catch (error) {
-      return 'Address given is not a valid Safe Account address'
+      return 'Address given is not a valid Safe account address'
     }
   }
 
@@ -152,7 +152,7 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
 
           <AddressInput
             data-testid="address-section"
-            label="Safe Account"
+            label="Safe account"
             validate={validateSafeAddress}
             name={Field.address}
           />
@@ -185,16 +185,10 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
               gap: 3,
             }}
           >
-            <Button variant="outlined" size="small" onClick={handleBack} startIcon={<ArrowBackIcon fontSize="small" />}>
+            <Button variant="outlined" size="large" onClick={handleBack} startIcon={<ArrowBackIcon fontSize="small" />}>
               Back
             </Button>
-            <Button
-              data-testid="load-safe-next-btn"
-              type="submit"
-              variant="contained"
-              size="stretched"
-              disabled={!isValid}
-            >
+            <Button data-testid="load-safe-next-btn" type="submit" variant="contained" size="large" disabled={!isValid}>
               Next
             </Button>
           </Box>

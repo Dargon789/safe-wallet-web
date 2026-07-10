@@ -40,7 +40,7 @@ export const uniqueAddress =
 export const addressIsNotCurrentSafe =
   (safeAddress: string, message?: string) =>
   (address: string): string | undefined => {
-    const SIGNER_ADDRESS_IS_SAFE_ADDRESS_ERROR = message || 'Cannot use Safe Account itself as signer.'
+    const SIGNER_ADDRESS_IS_SAFE_ADDRESS_ERROR = message || 'Cannot use Safe account itself as signer.'
     return sameAddress(safeAddress, address) ? SIGNER_ADDRESS_IS_SAFE_ADDRESS_ERROR : undefined
   }
 
@@ -99,7 +99,7 @@ export const isValidURL = (url: string, protocolsAllowed = ['https:']): boolean 
     const urlInfo = new URL(url)
 
     return protocolsAllowed.includes(urlInfo.protocol) || urlInfo.hostname.split('.').pop() === 'localhost'
-  } catch (error) {
+  } catch {
     return false
   }
 }

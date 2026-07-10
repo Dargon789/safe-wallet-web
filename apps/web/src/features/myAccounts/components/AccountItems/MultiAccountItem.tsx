@@ -1,8 +1,9 @@
 import type { SafeListProps } from '../SafesList'
-import SpaceSafeContextMenu from '@/features/spaces/components/SafeAccounts/SpaceSafeContextMenu'
 import { AccountItem } from '../AccountItem'
 import { useSafeItemData } from '../../hooks/useSafeItemData'
 import { useMultiAccountItemData } from '../../hooks/useMultiAccountItemData'
+import { SpacesFeature } from '@/features/spaces'
+import { useLoadFeature } from '@/features/__core__'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useState } from 'react'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Divider } from '@mui/material'
@@ -12,7 +13,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import classnames from 'classnames'
 import { type MultiChainSafeItem, type SafeItem } from '@/hooks/safes'
 import { AddNetworkButton } from '../AddNetworkButton'
-import MultiAccountContextMenu from '@/components/sidebar/SafeListContextMenu/MultiAccountContextMenu'
+import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
 
 function MultiChainSubItem({
@@ -77,6 +78,7 @@ type MultiAccountItemProps = {
 }
 
 const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = false }: MultiAccountItemProps) => {
+  const spaces = useLoadFeature(SpacesFeature)
   const {
     address,
     name,
@@ -148,7 +150,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
               {isSpaceSafe ? (
                 <>
                   <Box width="40px" />
-                  <SpaceSafeContextMenu safeItem={multiSafeAccountItem} />
+                  <spaces.SpaceSafeContextMenu safeItem={multiSafeAccountItem} />
                 </>
               ) : (
                 <MultiAccountContextMenu

@@ -9,6 +9,7 @@ import layoutCss from '@/components/new-safe/create/styles.module.css'
 import NameInput from '@/components/common/NameInput'
 import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
+import { getNewSafeReturnUrl } from '@/components/new-safe/getReturnUrl'
 import MUILink from '@mui/material/Link'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -90,7 +91,7 @@ function SetNameStep({
 
   const onCancel = () => {
     trackEvent(CREATE_SAFE_EVENTS.CANCEL_CREATE_SAFE_FORM)
-    router.push(AppRoutes.welcome.index)
+    router.push(getNewSafeReturnUrl(router.query.next))
   }
 
   // whenever the chain switches we need to update the latest Safe version and selected chain
@@ -154,10 +155,10 @@ function SetNameStep({
         <Divider />
         <Box className={layoutCss.row}>
           <Box display="flex" flexDirection="row" justifyContent="space-between" gap={3}>
-            <Button data-testid="cancel-btn" variant="outlined" onClick={onCancel} size="small">
+            <Button data-testid="cancel-btn" variant="outlined" onClick={onCancel} size="large">
               Cancel
             </Button>
-            <Button data-testid="next-btn" type="submit" variant="contained" size="stretched" disabled={isDisabled}>
+            <Button data-testid="next-btn" type="submit" variant="contained" size="large" disabled={isDisabled}>
               Next
             </Button>
           </Box>

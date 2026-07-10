@@ -1,15 +1,13 @@
-import { Grid } from '@mui/material'
 import { useEffect, useState } from 'react'
 import type { ReactElement } from 'react'
 
-import { useRecoveryQueue } from '@/features/recovery/hooks/useRecoveryQueue'
-import { useIsRecoverer } from '@/features/recovery/hooks/useIsRecoverer'
+import { useRecoveryQueue } from '../../hooks/useRecoveryQueue'
+import { useIsRecoverer } from '../../hooks/useIsRecoverer'
 import madProps from '@/utils/mad-props'
-import { RecoveryProposalCard } from '@/features/recovery/components/RecoveryCards/RecoveryProposalCard'
-import { RecoveryInProgressCard } from '@/features/recovery/components/RecoveryCards/RecoveryInProgressCard'
-import { WidgetContainer, WidgetBody } from '@/components/dashboard/styled'
-import { RecoveryEvent, RecoveryTxType, recoverySubscribe } from '@/features/recovery/services/recoveryEvents'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import { RecoveryProposalCard } from '../RecoveryCards/RecoveryProposalCard'
+import { RecoveryInProgressCard } from '../RecoveryCards/RecoveryInProgressCard'
+import { RecoveryEvent, RecoveryTxType, recoverySubscribe } from '../../services/recoveryEvents'
+import type { RecoveryQueueItem } from '../../services/recovery-state'
 
 function InternalRecoveryHeader({
   isProposalInProgress,
@@ -22,21 +20,16 @@ function InternalRecoveryHeader({
 }): ReactElement | null {
   const next = queue[0]
 
-  const modal = next ? (
-    <RecoveryInProgressCard orientation="horizontal" recovery={next} />
-  ) : isRecoverer && !isProposalInProgress ? (
-    <RecoveryProposalCard orientation="horizontal" />
-  ) : null
-
-  if (modal) {
-    return (
-      <Grid item xs={12}>
-        <WidgetContainer>
-          <WidgetBody>{modal}</WidgetBody>
-        </WidgetContainer>
-      </Grid>
-    )
+  // Return the recovery card directly without wrappers so it's counted
+  // as a direct child in the ActionRequiredPanel
+  if (next) {
+    return <RecoveryInProgressCard orientation="horizontal" recovery={next} />
   }
+
+  if (isRecoverer && !isProposalInProgress) {
+    return <RecoveryProposalCard orientation="horizontal" />
+  }
+
   return null
 }
 
