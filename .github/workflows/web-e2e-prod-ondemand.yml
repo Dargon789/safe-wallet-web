@@ -24,7 +24,7 @@ jobs:
 
       - uses: ./.github/actions/cypress
         with:
-          secrets: ${{ toJSON(secrets) }}
+          secrets: '{}'
           spec: |
             cypress/e2e/prodhealthcheck/*.cy.js
           group: 'Production health check tests'
