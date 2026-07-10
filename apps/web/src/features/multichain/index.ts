@@ -4,7 +4,8 @@ export type { SafeSetup, SafeOrMultichainSafe, CreateSafeOnNewChainForm } from '
 
 export { MIN_SAFE_VERSION_FOR_MULTICHAIN } from './constants'
 
-export { useIsMultichainSafe, useSafeCreationData } from './hooks'
+export { useIsMultichainSafe, useSafeCreationData, useAddNetworkState } from './hooks'
+export type { AddNetworkState, AddNetworkUnavailableReason, AvailableNetwork } from './hooks'
 
 export {
   isMultiChainSafeItem,
@@ -26,6 +27,8 @@ const CreateSafeOnSpecificChain = dynamic(() =>
 )
 
 const NetworkLogosList = dynamic(() => import('./components/NetworkLogosList'))
+
+const NetworkLogosTooltip = dynamic(() => import('./components/NetworkLogosTooltip'))
 
 const SafeCreationNetworkInput = dynamic(() => import('./components/SafeCreationNetworkInput'))
 
@@ -63,6 +66,7 @@ export {
   CreateSafeOnNewChain,
   CreateSafeOnSpecificChain,
   NetworkLogosList,
+  NetworkLogosTooltip,
   SafeCreationNetworkInput,
   ChangeSignerSetupWarning,
   InconsistentSignerSetupWarning,

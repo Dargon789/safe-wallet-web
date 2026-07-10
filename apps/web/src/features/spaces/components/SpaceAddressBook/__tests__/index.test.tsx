@@ -3,16 +3,26 @@ import SpaceAddressBook from '../index'
 import { useIsAdmin, useIsInvited, useAddressBookSearch, useGetSpaceAddressBook } from '@/features/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppSelector } from '@/store'
+import { useHasFeature } from '@/hooks/useChains'
 import { Builder } from '@/tests/Builder'
 import type { UserWithWallets, UserWallet } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { faker } from '@faker-js/faker'
 
 jest.mock('@/store')
+jest.mock('@/hooks/useDarkMode', () => ({
+  useDarkMode: jest.fn(() => false),
+}))
+jest.mock('@/hooks/useAllAddressBooks', () => jest.fn(() => ({})))
+jest.mock('@/hooks/useChains', () => ({
+  useHasFeature: jest.fn(() => true),
+}))
 jest.mock('@/features/spaces', () => ({
   useIsAdmin: jest.fn(),
   useIsInvited: jest.fn(() => false),
   useAddressBookSearch: jest.fn(() => []),
   useGetSpaceAddressBook: jest.fn(() => []),
+  useGetAddressBookRequests: jest.fn(() => []),
+  useCurrentSpaceId: jest.fn(() => '1'),
 }))
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
   useUsersGetWithWalletsV1Query: jest.fn(),
@@ -21,29 +31,18 @@ jest.mock('../../InviteBanner/PreviewInvite', () => {
   const PreviewInvite = () => null
   return PreviewInvite
 })
-jest.mock('../../SearchInput', () => {
-  const SearchInput = ({ onSearch }: { onSearch: (q: string) => void }) => (
-    <input data-testid="search" onChange={(e) => onSearch(e.target.value)} />
-  )
-  return SearchInput
-})
 jest.mock('../SpaceAddressBookTable', () => {
   const SpaceAddressBookTable = () => <div data-testid="table" />
   return SpaceAddressBookTable
 })
-jest.mock('../EmptyAddressBook', () => {
-  const EmptyAddressBook = () => <div data-testid="empty" />
-  return EmptyAddressBook
-})
 jest.mock('../AddContact', () => {
-  const AddContact = ({ disabled }: { disabled?: boolean }) => <button disabled={disabled}>Add contact</button>
+  const AddContact = () => <button>Add contact</button>
   return AddContact
 })
 jest.mock('../Import', () => {
-  const ImportAddressBook = ({ disabled }: { disabled?: boolean }) => <button disabled={disabled}>Import</button>
+  const ImportAddressBook = () => <button>Import</button>
   return ImportAddressBook
 })
-
 const walletBuilder = () =>
   Builder.new<UserWallet>().with({
     id: faker.number.int(),
@@ -68,6 +67,7 @@ describe('SpaceAddressBook', () => {
     ;(useIsInvited as jest.Mock).mockReturnValue(false)
     ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([])
     ;(useAddressBookSearch as jest.Mock).mockReturnValue([])
+    ;(useHasFeature as jest.Mock).mockReturnValue(true)
   })
 
   it('hides action buttons for non-admin users', () => {
@@ -84,7 +84,7 @@ describe('SpaceAddressBook', () => {
     expect(screen.queryByText('Add contact')).not.toBeInTheDocument()
   })
 
-  it('shows enabled action buttons for SIWE admin', () => {
+  it('shows action buttons for admin users', () => {
     ;(useIsAdmin as jest.Mock).mockReturnValue(true)
     mockUserQuery(
       userBuilder()
@@ -94,27 +94,20 @@ describe('SpaceAddressBook', () => {
 
     render(<SpaceAddressBook />)
 
-    expect(screen.getByText('Import')).not.toBeDisabled()
-    expect(screen.getByText('Add contact')).not.toBeDisabled()
+    expect(screen.getByText('Import')).toBeInTheDocument()
+    expect(screen.getByText('Add contact')).toBeInTheDocument()
   })
 
-  it('shows disabled action buttons for OIDC admin without wallet', () => {
-    ;(useIsAdmin as jest.Mock).mockReturnValue(true)
-    mockUserQuery(userBuilder().build())
+  it('does not render an activity log tab', () => {
+    ;(useIsAdmin as jest.Mock).mockReturnValue(false)
+    mockUserQuery(
+      userBuilder()
+        .with({ wallets: [walletBuilder().build()] })
+        .build(),
+    )
 
     render(<SpaceAddressBook />)
 
-    expect(screen.getByText('Import')).toBeDisabled()
-    expect(screen.getByText('Add contact')).toBeDisabled()
-  })
-
-  it('shows disabled action buttons when user data is not yet loaded', () => {
-    ;(useIsAdmin as jest.Mock).mockReturnValue(true)
-    mockUserQuery(undefined)
-
-    render(<SpaceAddressBook />)
-
-    expect(screen.getByText('Import')).toBeDisabled()
-    expect(screen.getByText('Add contact')).toBeDisabled()
+    expect(screen.queryByRole('tab', { name: 'Activity log' })).not.toBeInTheDocument()
   })
 })

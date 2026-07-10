@@ -72,6 +72,7 @@
     "RISK_MITIGATION",
     "SAFE_APPS",
     "SAP_BANNER",
+    "SECURITY_HUB",
     "SPACES",
     "SPENDING_LIMIT",
     "STAKE_TEASER",
@@ -106,5 +107,6 @@
     "textColor": "#ffffff",
     "backgroundColor": "#627EEA"
   },
-  "recommendedMasterCopyVersion": "1.4.1"
+  "recommendedMasterCopyVersion": "1.4.1",
+  "relayer": null
 }
