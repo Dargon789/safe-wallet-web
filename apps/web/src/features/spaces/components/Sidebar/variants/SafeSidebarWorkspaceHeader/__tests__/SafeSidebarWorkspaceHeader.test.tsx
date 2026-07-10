@@ -3,14 +3,9 @@ import type { CSSProperties, ReactNode } from 'react'
 import { getDeterministicColor } from '@/utils/colors'
 import { SafeSidebarWorkspaceHeader } from '../SafeSidebarWorkspaceHeader'
 import type { SafeWorkspaceHeaderBackToSpace, SafeWorkspaceHeaderAddToWorkspace } from '../../../types'
+import { AppRoutes } from '@/config/routes'
 
 const spaceSelectorDropdownMock = jest.fn()
-
-const mockHandleBackToSpace = jest.fn()
-
-jest.mock('@/components/common/SpaceSafeBar/hooks/useSpaceBackLink', () => ({
-  useSpaceBackLink: () => ({ handleBackToSpace: mockHandleBackToSpace }),
-}))
 
 jest.mock('@/components/ui/dialog', () => ({
   Dialog: ({ children }: { children: ReactNode }) => <div data-testid="dialog-root">{children}</div>,
@@ -235,7 +230,7 @@ describe('SafeSidebarWorkspaceHeader', () => {
       expect(screen.getByText('U')).toBeInTheDocument()
     })
 
-    it('delegates back navigation to useSpaceBackLink when the back button is clicked', () => {
+    it('navigates to the correct Space when back button is clicked', () => {
       render(
         <SafeSidebarWorkspaceHeader
           workspaceHeader={createBackHeader({
@@ -248,7 +243,10 @@ describe('SafeSidebarWorkspaceHeader', () => {
 
       screen.getByTestId('back-to-space-button').click()
 
-      expect(mockHandleBackToSpace).toHaveBeenCalledTimes(1)
+      expect(mockRouterPush).toHaveBeenCalledWith({
+        pathname: AppRoutes.spaces.index,
+        query: { spaceId: '42' },
+      })
     })
 
     it('does not render add-to-workspace or dialog UI', () => {

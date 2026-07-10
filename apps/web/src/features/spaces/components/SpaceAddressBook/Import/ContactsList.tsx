@@ -4,7 +4,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { Controller, useFormContext, useWatch } from 'react-hook-form'
 import type { ImportContactsFormValues } from './ImportAddressBookDialog'
-import { getSelectedAddresses, getContactId, validateContactName, getRenameContactTooltip } from '../utils'
+import { getSelectedAddresses, getContactId } from '../utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useGetSpaceAddressBook } from '@/features/spaces'
 import { cn } from '@/utils/cn'
@@ -37,8 +37,7 @@ const ContactsList = ({ contactItems }: { contactItems: ContactItem[] }) => {
             render={({ field }) => {
               const isSelected = Boolean(field.value)
               const isSameAddressSelected = selectedAddresses.has(contactItem.address) && !isSelected
-              const nameError = validateContactName(contactItem.name)
-              const disabled = alreadyAdded || isSameAddressSelected || !!nameError
+              const disabled = alreadyAdded || isSameAddressSelected
 
               const setSelected = (next: boolean) => field.onChange(next ? contactItem.name : false)
 
@@ -93,11 +92,9 @@ const ContactsList = ({ contactItems }: { contactItems: ContactItem[] }) => {
                         {row}
                       </TooltipTrigger>
                       <TooltipContent>
-                        {nameError
-                          ? getRenameContactTooltip(nameError)
-                          : alreadyAdded
-                            ? 'You already added a contact with this address.'
-                            : 'You already selected a contact with this address.'}
+                        {alreadyAdded
+                          ? 'You already added a contact with this address.'
+                          : 'You already selected a contact with this address.'}
                       </TooltipContent>
                     </Tooltip>
                   ) : (

@@ -3,7 +3,6 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 import { createTx } from '@/services/tx/tx-sender'
 import { gatewayApi } from '@/store/api/gateway'
-import { toSupportedFiatCode } from '@/store/api/gateway/gtfFeePreview'
 import type { AppDispatch } from '@/store'
 import { GELATO_FEE_COLLECTORS } from '../constants'
 import { trackError, Errors } from '@/services/exceptions'
@@ -14,7 +13,6 @@ export type ResolveFeeParamsArgs = {
   safeTx: SafeTransaction
   gasToken: string
   numberSignatures: number
-  currency?: string
   dispatch: AppDispatch
 }
 
@@ -29,7 +27,6 @@ export const resolveFeeParams = async ({
   safeTx,
   gasToken,
   numberSignatures,
-  currency,
   dispatch,
 }: ResolveFeeParamsArgs): Promise<SafeTransaction> => {
   const { to, value, data, operation, nonce } = safeTx.data
@@ -39,16 +36,7 @@ export const resolveFeeParams = async ({
       {
         chainId,
         safeAddress,
-        tx: {
-          to,
-          value,
-          data,
-          operation,
-          gasToken,
-          numberSignatures,
-          nonce,
-          fiatCode: toSupportedFiatCode(currency),
-        },
+        tx: { to, value, data, operation, gasToken, numberSignatures, fiatCode: 'USD' },
       },
       { forceRefetch: true },
     ),
