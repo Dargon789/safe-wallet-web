@@ -17,14 +17,14 @@ const useSafeAppUrl = (): string | undefined => {
     if (!router.isReady) return
     const url = router.query.appUrl?.toString()
     const sanitizedUrl = sanitizeUrl(url)
-    if (sanitizedUrl && AUTHORIZED_URLS.some(trusted => sanitizedUrl === trusted || sanitizedUrl.startsWith(trusted + '/'))) {
+    if (sanitizedUrl && AUTHORIZED_URLS.includes(sanitizedUrl)) {
       setAppUrl(sanitizedUrl)
     } else {
       setAppUrl(undefined)
     }
   }, [router.isReady, router.query.appUrl])
 
-  return appUrl
+  return useMemo(() => appUrl, [appUrl])
 }
 
 export { useSafeAppUrl }

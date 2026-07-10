@@ -73,10 +73,12 @@ const MultiChainSafeItemRow = ({ item }: MultiChainSafeItemRowProps) => {
                 className="flex items-center gap-3 rounded-md px-3 py-2 cursor-pointer data-[state=checked]:bg-muted hover:bg-muted/30 [&>span.absolute]:hidden"
               >
                 <ChainLogo chainId={chain.chainId} />
-                <Typography variant="paragraph-small-medium" className="min-w-0 flex-1 truncate">
-                  {chain.chainName}
-                </Typography>
-                <StatusBadge chain={chain} />
+                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <Typography variant="paragraph-small-medium" className="truncate">
+                    {chain.chainName}
+                  </Typography>
+                  <StatusBadge chain={chain} />
+                </div>
                 {hasQueued && (
                   <Badge variant="secondary" className="text-xs whitespace-nowrap">
                     {chain.queued} pending

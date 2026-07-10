@@ -5,7 +5,6 @@ import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { type GetSpaceResponse, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import { sanitizeName } from '@safe-global/utils/validation/names'
 
 export type UpdateSpaceFormData = {
   name: string
@@ -24,7 +23,7 @@ export const useUpdateSpace = (space: GetSpaceResponse | undefined) => {
     }
 
     try {
-      await updateSpace({ id: space.uuid, updateSpaceDto: { name: sanitizeName(data.name) } }).unwrap()
+      await updateSpace({ id: space.uuid, updateSpaceDto: { name: data.name } }).unwrap()
 
       dispatch(
         showNotification({

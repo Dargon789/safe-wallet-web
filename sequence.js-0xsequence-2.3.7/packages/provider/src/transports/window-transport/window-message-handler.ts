@@ -142,7 +142,7 @@ export class WindowMessageHandler extends BaseWalletTransport {
       return
     }
 
-    // always require an explicit target origin to avoid leaking messages cross-origin
+    // Always require a concrete target origin; never broadcast with '*'
     if (this.appOrigin && this.appOrigin.length > 4) {
       // just above '.com'
       this.parentWindow.postMessage(message, this.appOrigin)
