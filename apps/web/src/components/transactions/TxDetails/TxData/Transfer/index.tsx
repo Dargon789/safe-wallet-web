@@ -1,47 +1,60 @@
+import type { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { TransferDirection } from '@safe-global/store/gateway/types'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import { TransferTx } from '@/components/transactions/TxInfo'
 import { isTxQueued } from '@/utils/transaction-guards'
-import type { TransactionStatus, Transfer } from '@safe-global/safe-gateway-typescript-sdk'
-import { TransferDirection } from '@safe-global/safe-gateway-typescript-sdk'
 import { Box, Stack, Typography } from '@mui/material'
-import React from 'react'
 
 import TransferActions from '@/components/transactions/TxDetails/TxData/Transfer/TransferActions'
 import MaliciousTxWarning from '@/components/transactions/MaliciousTxWarning'
 import { ImitationTransactionWarning } from '@/components/transactions/ImitationTransactionWarning'
 import TokenAmount from '@/components/common/TokenAmount'
 import { type NativeToken, type Erc20Token } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import FiatValue from '@/components/common/FiatValue'
+import useTransferFiatValue from './useTransferFiatValue'
 
 type TransferTxInfoProps = {
-  txInfo: Transfer
-  txStatus: TransactionStatus
+  txInfo: TransferTransactionInfo
+  txStatus: Transaction['txStatus']
   trusted: boolean
   imitation: boolean
 }
 
 const TransferTxInfoMain = ({ txInfo, txStatus, trusted, imitation }: TransferTxInfoProps) => {
   const { direction } = txInfo
+  const isQueued = isTxQueued(txStatus)
+  const fiatValue = useTransferFiatValue(txInfo.transferInfo, isQueued)
 
   return (
-    <Box display="flex" flexDirection="row" alignItems="center" gap={1}>
-      {direction === TransferDirection.INCOMING ? 'Received' : isTxQueued(txStatus) ? 'Send' : 'Sent'}{' '}
-      <b>
-        <TransferTx info={txInfo} omitSign preciseAmount />
-      </b>
-      {direction === TransferDirection.INCOMING ? ' from' : ' to'}
+    <Box display="flex" flexDirection="row" alignItems="center" gap={1} sx={{ '& b': { fontWeight: 'normal' } }}>
+      <Typography variant="body2" fontWeight={700} sx={{ minWidth: 40 }}>
+        {direction === TransferDirection.INCOMING ? 'Received' : isQueued ? 'Send' : 'Sent'}
+      </Typography>
+      <TransferTx info={txInfo} omitSign preciseAmount iconSize={32} />
+      {fiatValue != null && (
+        <Typography variant="body2" color="text.secondary" component="span">
+          (<FiatValue value={fiatValue} />)
+        </Typography>
+      )}
       {!trusted && !imitation && <MaliciousTxWarning />}
     </Box>
   )
 }
 
 const TransferTxInfo = ({ txInfo, txStatus, trusted, imitation }: TransferTxInfoProps) => {
-  const address = txInfo.direction.toUpperCase() === TransferDirection.INCOMING ? txInfo.sender : txInfo.recipient
+  const { direction } = txInfo
+  const address = direction.toUpperCase() === TransferDirection.INCOMING ? txInfo.sender : txInfo.recipient
+  const directionLabel = direction === TransferDirection.INCOMING ? 'From' : 'To'
 
   return (
     <Box display="flex" flexDirection="column" gap={1}>
       <TransferTxInfoMain txInfo={txInfo} txStatus={txStatus} trusted={trusted} imitation={imitation} />
 
-      <Box display="flex" alignItems="center" width="100%">
+      <Box display="flex" alignItems="center" gap={1} width="100%" sx={{ '& .ethHashInfo-name': { fontWeight: 700 } }}>
+        <Typography variant="body2" fontWeight={700} sx={{ minWidth: 40, whiteSpace: 'nowrap' }}>
+          {directionLabel}
+        </Typography>
         <NamedAddressInfo
           address={address.value}
           name={address.name}
@@ -49,6 +62,8 @@ const TransferTxInfo = ({ txInfo, txStatus, trusted, imitation }: TransferTxInfo
           shortAddress={false}
           hasExplorer
           showCopyButton
+          showPrefix={false}
+          avatarSize={32}
           trusted={trusted && !imitation}
         >
           <TransferActions address={address.value} txInfo={txInfo} trusted={trusted} />

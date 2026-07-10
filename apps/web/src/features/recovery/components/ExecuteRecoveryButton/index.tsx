@@ -3,14 +3,14 @@ import { useContext } from 'react'
 import type { SyntheticEvent, ReactElement } from 'react'
 
 import CheckWallet from '@/components/common/CheckWallet'
-import { useRecoveryTxState } from '@/features/recovery/hooks/useRecoveryTxState'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
+import type { RecoveryQueueItem } from '../../services/recovery-state'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useCurrentChain } from '@/hooks/useChains'
 import { TxModalContext } from '@/components/tx-flow'
 import { RecoveryAttemptFlow } from '@/components/tx-flow/flows'
 
-export function ExecuteRecoveryButton({
+export default function ExecuteRecoveryButton({
   recovery,
   compact = false,
 }: {
@@ -51,8 +51,8 @@ export function ExecuteRecoveryButton({
                 onClick={onClick}
                 variant="contained"
                 disabled={!isOk || isDisabled}
-                sx={{ minWidth: '106.5px', py: compact ? 0.8 : undefined }}
-                size={compact ? 'small' : 'stretched'}
+                sx={{ minWidth: '106.5px' }}
+                size={compact ? 'small' : 'large'}
               >
                 Execute
               </Button>

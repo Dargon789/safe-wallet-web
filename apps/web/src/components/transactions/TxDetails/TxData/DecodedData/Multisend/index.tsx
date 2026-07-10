@@ -1,5 +1,5 @@
-import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
-import type { TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { Operation } from '@safe-global/store/gateway/types'
 import { useState, useEffect } from 'react'
 import type { Dispatch, ReactElement, SetStateAction } from 'react'
 import type { AccordionProps } from '@mui/material/Accordion/Accordion'
@@ -7,10 +7,17 @@ import SingleTxDecoded from '@/components/transactions/TxDetails/TxData/DecodedD
 import { Button, Divider, Stack } from '@mui/material'
 import css from './styles.module.css'
 import classnames from 'classnames'
+import useSafeAddress from '@/hooks/useSafeAddress'
+import useChainId from '@/hooks/useChainId'
+import { multiSendDefaultsToSelf, resolveMultiSendToAddress } from '@safe-global/utils/utils/multiSend'
 
 type MultisendProps = {
-  txData?: TransactionData
+  txData?: TransactionData | null
   compact?: boolean
+  isExecuted?: boolean
+  // The Safe executing the batch, i.e. MultiSend's `address(this)`. Defaults to the connected Safe;
+  // pass explicitly when rendering a nested Safe's batch where it is not the connected Safe.
+  executingSafeAddress?: string
 }
 
 export const MultisendActionsHeader = ({
@@ -43,16 +50,27 @@ export const MultisendActionsHeader = ({
   )
 }
 
-export const Multisend = ({ txData, compact = false }: MultisendProps): ReactElement | null => {
+const Multisend = ({
+  txData,
+  compact = false,
+  isExecuted = false,
+  executingSafeAddress,
+}: MultisendProps): ReactElement | null => {
   const [openMap, setOpenMap] = useState<Record<number, boolean>>()
   const isOpenMapUndefined = openMap == null
+  const connectedSafeAddress = useSafeAddress()
+  const safeAddress = executingSafeAddress || connectedSafeAddress
+  const chainId = useChainId()
+  // Only MultiSend v1.5.0+ defaults a zero-address sub-transaction `to` to the executing Safe.
+  const multiSendAddress = txData?.to?.value
+  const defaultsToSelf = !!multiSendAddress && multiSendDefaultsToSelf(multiSendAddress, chainId)
 
   // multiSend method receives one parameter `transactions`
   const multiSendTransactions = txData?.dataDecoded?.parameters?.[0].valueDecoded
 
   useEffect(() => {
     // Initialise whether each transaction should be expanded or not
-    if (isOpenMapUndefined && multiSendTransactions) {
+    if (isOpenMapUndefined && Array.isArray(multiSendTransactions)) {
       setOpenMap(multiSendTransactions.map(({ operation }) => operation === Operation.DELEGATE))
     }
   }, [multiSendTransactions, isOpenMapUndefined])
@@ -61,35 +79,43 @@ export const Multisend = ({ txData, compact = false }: MultisendProps): ReactEle
 
   return (
     <>
-      <MultisendActionsHeader setOpen={setOpenMap} amount={multiSendTransactions.length} compact={compact} />
+      <MultisendActionsHeader
+        setOpen={setOpenMap}
+        amount={Array.isArray(multiSendTransactions) ? multiSendTransactions.length : 0}
+        compact={compact}
+      />
 
       <div className={compact ? css.compact : ''}>
-        {multiSendTransactions.map(({ dataDecoded, data, value, to, operation }, index) => {
-          const onChange: AccordionProps['onChange'] = (_, expanded) => {
-            setOpenMap((prev) => ({
-              ...prev,
-              [index]: expanded,
-            }))
-          }
+        {Array.isArray(multiSendTransactions) &&
+          multiSendTransactions.map(({ dataDecoded, data, value, to: rawTo, operation }, index) => {
+            const to = defaultsToSelf ? resolveMultiSendToAddress(rawTo, safeAddress) : rawTo
 
-          return (
-            <SingleTxDecoded
-              key={`${data ?? to}-${index}`}
-              tx={{
-                dataDecoded,
-                data,
-                value,
-                to,
-                operation,
-              }}
-              txData={txData}
-              actionTitle={`${index + 1}`}
-              variant={compact ? 'outlined' : 'elevation'}
-              expanded={openMap?.[index] ?? false}
-              onChange={onChange}
-            />
-          )
-        })}
+            const onChange: AccordionProps['onChange'] = (_, expanded) => {
+              setOpenMap((prev) => ({
+                ...prev,
+                [index]: expanded,
+              }))
+            }
+
+            return (
+              <SingleTxDecoded
+                key={`${data ?? to}-${index}`}
+                tx={{
+                  dataDecoded,
+                  data,
+                  value,
+                  to,
+                  operation,
+                }}
+                txData={txData}
+                actionTitle={`${index + 1}`}
+                variant={compact ? 'outlined' : 'elevation'}
+                expanded={openMap?.[index] ?? false}
+                onChange={onChange}
+                isExecuted={isExecuted}
+              />
+            )
+          })}
       </div>
     </>
   )

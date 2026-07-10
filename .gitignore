@@ -7,6 +7,8 @@
 # testing
 /coverage
 /packages/utils/coverage
+/reports
+report.json
 
 # generated types
 /packages/utils/src/types/contracts
@@ -18,12 +20,20 @@
 # production
 /build
 
+# tanstack migration experiment
+apps/web-tanstack/dist/
+.playwright-mcp/
+
 # misc
 .DS_Store
 *.pem
 .idea
 
-# Yarn v4
+# beads
+.beads/
+
+# Yarn v4 / tooling cache (redirected inside workspace in container envs)
+.cache-tmp/
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
@@ -57,6 +67,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# turborepo
+.turbo/
+**/.turbo/
+
 # typescript
 *.tsbuildinfo
 
@@ -65,7 +79,13 @@ yarn-error.log*
 yalc.lock
 
 certificates
+
+# storybook
+**/storybook-static/
 *storybook.log
+
+# visual regression (baselines stored on separate branches)
+**/__visual_snapshots__/
 
 # os
 THUMBS_DB
@@ -74,7 +94,11 @@ thumbs.db
 # web
 apps/web/.next/*
 apps/web/out/*
-apps/web/public/*.js
+apps/web/public/work*.js
+apps/web/public/sw.js
+apps/web/public/firebase*.js
+apps/web/public/fallback*.js
+
 apps/web/src/types/
 apps/web/tsconfig.tsbuildinfo
 node_modules/*
@@ -85,3 +109,27 @@ apps/web/node_modules/*
 apps/web/public/fallback-development.js
 apps/web/.env
 apps/web/src/types/contracts/*
+
+# expo-plugins/notifications-service-ios
+/expo-plugins/notification-service-ios/dist/*
+
+
+# tx-builder
+apps/tx-builder/build/*
+apps/tx-builder/vite.config.js
+apps/tx-builder/vite.config.d.ts
+
+# claude-workflows
+todos/*
+/docs/plans/
+/docs/todos/
+/docs/brainstorms/
+/docs/superpowers/
+/docs/migration/
+
+.codemod
+.serena
+
+# Claude Code worktrees
+.claude/worktrees/
+.claude/settings.local.json

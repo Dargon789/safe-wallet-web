@@ -1,11 +1,11 @@
 import { useContext, type SyntheticEvent } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { useTxActions } from '@/components/tx/SignOrExecuteForm/hooks'
+import { useTxActions } from '@/components/tx/shared/hooks'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { isDelegateCall as checkIsDelegateCall } from '@/services/tx/tx-sender/sdk'
 import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowContext } from '../../TxFlowProvider'
-import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
+import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { Errors, logError } from '@/services/exceptions'
@@ -14,6 +14,10 @@ import { BATCH_EVENTS, trackEvent } from '@/services/analytics'
 import { TxCardActions } from '../../common/TxCard'
 import { Box, Divider } from '@mui/material'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
+import { isMultiSendCalldata } from '@/utils/transaction-calldata'
+import { SafeAppsName } from '@/config/constants'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const Batching = ({
   onSubmit,
@@ -80,19 +84,23 @@ const Batching = ({
 
 const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
-  const { isBatch, isProposing, willExecuteThroughRole, isCreation, isBatchable } = useContext(TxFlowContext)
+  const { isBatch, isProposing, willExecuteThroughRole, isCreation, isBatchable, data } = useContext(TxFlowContext)
   const isOwner = useIsSafeOwner()
   const { safeTx } = useContext(SafeTxContext)
   const isDelegateCall = safeTx ? checkIsDelegateCall(safeTx) : false
+  const isMultiSend = Boolean(safeTx && isMultiSendCalldata(safeTx?.data.data))
+  const isFromTxBuilder = data?.app?.name === SafeAppsName.TRANSACTION_BUILDER
+  const isBatchingEnabled = useHasFeature(FEATURES.BATCHING) === true
 
   return (
+    isBatchingEnabled &&
     isOwner &&
     isCreation &&
     !isBatch &&
     !isCounterfactualSafe &&
     !willExecuteThroughRole &&
     !isProposing &&
-    !isDelegateCall &&
+    (!isDelegateCall || (isMultiSend && isFromTxBuilder)) &&
     isBatchable
   )
 }

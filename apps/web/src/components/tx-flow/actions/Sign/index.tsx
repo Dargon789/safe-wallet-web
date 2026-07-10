@@ -2,10 +2,10 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
 import SignForm from './SignForm'
-import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
+import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
 import type { SubmitCallback } from '../../TxFlow'
-import { useAlreadySigned } from '@/components/tx/SignOrExecuteForm/hooks'
+import { useAlreadySigned } from '@/components/tx/shared/hooks'
 import useSafeInfo from '@/hooks/useSafeInfo'
 
 export const Sign = ({

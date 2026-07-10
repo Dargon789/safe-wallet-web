@@ -4,7 +4,7 @@ import type {
   NativeDiff,
 } from '@safe-global/utils/services/security/modules/BlockaidModule/types'
 import { useBalances } from '@/src/hooks/useBalances'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { TokenType } from '@safe-global/store/gateway/types'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { Text, View, XStack } from 'tamagui'
 import { Logo } from '@/src/components/Logo'
@@ -32,7 +32,7 @@ export const FungibleBalanceChange = ({
 
   return (
     <XStack alignItems="center" gap="$2">
-      <Logo size={'$5'} logoUri={logoUri} />
+      <Logo size={'$5'} logoUri={logoUri} imageBackground="$background" />
       <Text fontSize={14} fontWeight="700" marginLeft="$1">
         {asset.symbol}
       </Text>

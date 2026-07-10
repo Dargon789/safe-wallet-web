@@ -2,11 +2,11 @@ import { faker } from '@faker-js/faker'
 
 import { InternalRecoveryHeader, useIsProposalInProgress } from '.'
 import { render, renderHook, waitFor } from '@/tests/test-utils'
-import store from '@/features/recovery/components/RecoveryContext'
-import { RecoveryEvent, recoveryDispatch, RecoveryTxType } from '@/features/recovery/services/recoveryEvents'
-import { useRecoveryQueue } from '@/features/recovery/hooks/useRecoveryQueue'
+import store from '../RecoveryContext'
+import { RecoveryEvent, recoveryDispatch, RecoveryTxType } from '../../services/recoveryEvents'
+import { useRecoveryQueue } from '../../hooks/useRecoveryQueue'
 
-jest.mock('@/features/recovery/hooks/useRecoveryQueue')
+jest.mock('../../hooks/useRecoveryQueue')
 
 const mockUseRecoveryQueue = useRecoveryQueue as jest.MockedFunction<typeof useRecoveryQueue>
 
@@ -21,7 +21,7 @@ describe('RecoveryHeader', () => {
 
     const { queryByText } = render(<InternalRecoveryHeader isProposalInProgress={false} isRecoverer queue={queue} />)
 
-    expect(queryByText('Account recovery in progress')).toBeTruthy()
+    expect(queryByText(/Account recovery in progress/)).toBeTruthy()
   })
 
   it('should render the proposal widget when there is no queue for recoverers', () => {
@@ -30,7 +30,7 @@ describe('RecoveryHeader', () => {
 
     const { queryByText } = render(<InternalRecoveryHeader isProposalInProgress={false} isRecoverer queue={queue} />)
 
-    expect(queryByText('Recover this Account')).toBeTruthy()
+    expect(queryByText(/Recover this account\./)).toBeTruthy()
   })
 
   it('should not render the proposal widget when there is no queue for recoverers and proposal is in progress', () => {

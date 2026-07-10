@@ -2,16 +2,16 @@ import { type SyntheticEvent, useContext, useCallback, useEffect } from 'react'
 import { CircularProgress, CardActions, Button, Typography, Stack, Divider } from '@mui/material'
 import CheckWallet from '@/components/common/CheckWallet'
 import { Errors, trackError } from '@/services/exceptions'
-import { dispatchRecoveryExecution } from '@/features/recovery/services/recovery-sender'
+import { dispatchRecoveryExecution } from '@/features/recovery/services'
 import useWallet from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import TxCard from '@/components/tx-flow/common/TxCard'
 import { TxModalContext } from '@/components/tx-flow'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
-import { RecoveryValidationErrors } from '@/features/recovery/components/RecoveryValidationErrors'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
-import { RecoveryDescription } from '@/features/recovery/components/RecoveryDescription'
+import { RecoveryFeature } from '@/features/recovery'
+import type { RecoveryQueueItem } from '@/features/recovery'
+import { useLoadFeature } from '@/features/__core__'
 import { useAsyncCallback } from '@safe-global/utils/hooks/useAsync'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -25,6 +25,7 @@ type RecoveryAttemptReviewProps = {
 }
 
 const RecoveryAttemptReview = ({ item }: RecoveryAttemptReviewProps) => {
+  const { RecoveryDescription, RecoveryValidationErrors } = useLoadFeature(RecoveryFeature)
   const { asyncCallback, isLoading, error } = useAsyncCallback(dispatchRecoveryExecution)
   const wallet = useWallet()
   const { safe } = useSafeInfo()

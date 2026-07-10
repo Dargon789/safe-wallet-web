@@ -1,8 +1,8 @@
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
-import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
+import type { SpendingLimitState } from '@/features/spending-limits'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction } from '@safe-global/types-kit'
 
 export enum Role {
   Owner = 'Owner',

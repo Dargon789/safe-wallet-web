@@ -1,20 +1,16 @@
-import { Alert, Button, TextField } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
-import { showNotification } from '@/store/notificationsSlice'
-import { type GetSpaceResponse, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useAppDispatch } from '@/store'
-import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
-import { useState } from 'react'
-
-type UpdateSpaceFormData = {
-  name: string
-}
+import { useUpdateSpace, type UpdateSpaceFormData } from './useUpdateSpace'
+import ErrorAlert from './ErrorAlert'
+import { Button } from '@mui/material'
+import { type GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useIsAdmin } from '@/features/spaces'
+import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
+import NameInput from '@/components/common/NameInput'
+import { NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 
 const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => {
-  const [error, setError] = useState<string>()
-  const dispatch = useAppDispatch()
-  const [updateSpace] = useSpacesUpdateV1Mutation()
-  const isAdmin = useIsAdmin(space?.id)
+  const { handleUpdate, error } = useUpdateSpace(space)
+  const isAdmin = useIsAdmin(space?.uuid)
 
   const formMethods = useForm<UpdateSpaceFormData>({
     mode: 'onChange',
@@ -23,56 +19,30 @@ const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => 
     },
   })
 
-  const { register, handleSubmit, watch } = formMethods
+  const { handleSubmit, watch, formState } = formMethods
 
   const formName = watch('name')
-  const isNameChanged = formName !== space?.name
+  const isNameChanged = sanitizeName(formName ?? '') !== (space?.name ?? '')
+  const hasNameError = Boolean(formState.errors.name)
+  const canSubmit = isNameChanged && isAdmin && !hasNameError && !formState.isSubmitting
 
-  const onSubmit = handleSubmit(async (data) => {
-    setError(undefined)
-
-    if (!space) return
-
-    try {
-      await updateSpace({ id: space.id, updateSpaceDto: { name: data.name } })
-
-      dispatch(
-        showNotification({
-          variant: 'success',
-          message: 'Updated space name',
-          groupKey: 'space-update-name',
-        }),
-      )
-    } catch (e) {
-      console.error(e)
-      setError('Error updating the space. Please try again.')
-    }
-  })
+  const onSubmit = handleSubmit(handleUpdate)
 
   return (
     <FormProvider {...formMethods}>
       <form onSubmit={onSubmit}>
-        <TextField
-          {...register('name')}
-          label="Space name"
-          fullWidth
-          slotProps={{ inputLabel: { shrink: true } }}
-          onKeyDown={(e) => e.stopPropagation()}
+        <NameInput
+          name="name"
+          label="Workspace name"
+          required
+          validateCharset
+          minLength={NAME_MIN_LENGTH}
+          maxLength={SPACE_NAME_MAX_LENGTH}
         />
 
-        {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {error}
-          </Alert>
-        )}
+        <ErrorAlert error={error} />
 
-        <Button
-          data-testid="space-save-button"
-          variant="contained"
-          type="submit"
-          sx={{ mt: 2 }}
-          disabled={!isNameChanged || !isAdmin}
-        >
+        <Button data-testid="space-save-button" variant="contained" type="submit" sx={{ mt: 2 }} disabled={!canSubmit}>
           Save
         </Button>
       </form>

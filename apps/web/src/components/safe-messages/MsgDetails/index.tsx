@@ -4,13 +4,13 @@ import { Accordion, AccordionSummary, Typography, AccordionDetails, Box } from '
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import CodeIcon from '@mui/icons-material/Code'
 import classNames from 'classnames'
-import { ErrorBoundary } from '@sentry/react'
+import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 
 import { formatDateTime } from '@safe-global/utils/utils/date'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { InfoDetails } from '@/components/transactions/InfoDetails'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
-import MsgSigners from '@/components/safe-messages/MsgSigners'
+import MsgAuditLog from '@/components/safe-messages/MsgAuditLog'
 import useWallet from '@/hooks/wallets/useWallet'
 import SignMsgButton from '@/components/safe-messages/SignMsgButton'
 import { generateSafeMessageMessage, isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
@@ -70,9 +70,9 @@ const MsgDetails = ({ msg }: { msg: MessageItem }): ReactElement => {
               </>
             }
           >
-            <ErrorBoundary fallback={<div>Error decoding message</div>}>
+            <ObservabilityErrorBoundary fallback={<div>Error decoding message</div>}>
               <DecodedMsg message={msg.message} />
-            </ErrorBoundary>
+            </ObservabilityErrorBoundary>
           </InfoDetails>
         </div>
 
@@ -123,7 +123,7 @@ const MsgDetails = ({ msg }: { msg: MessageItem }): ReactElement => {
         </div>
       </div>
       <div className={txDetailsCss.txSigners}>
-        <MsgSigners msg={msg} />
+        <MsgAuditLog msg={msg} />
         {wallet && !isConfirmed && (
           <Box display="flex" alignItems="center" justifyContent="center" gap={1} mt={2}>
             <SignMsgButton msg={msg} />

@@ -29,6 +29,25 @@
   justify-content: center;
 }
 
+.widgetItem {
+  iframe {
+    display: none !important;
+  }
+}
+
+.widgetItemLabel {
+  @apply flex items-center truncate;
+  font-weight: 600;
+
+  & > div {
+    font-weight: 600;
+  }
+}
+
+.iconBGBlue {
+  background-color: var(--color-info-background);
+}
+
 .image {
   max-width: 100%;
   height: auto;

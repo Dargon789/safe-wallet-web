@@ -1,6 +1,8 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as sideBar from '../pages/sidebar.pages.js'
+import * as safeNav from '../pages/safe_navigation.pages.js'
+import * as ls from '../../support/localstorage_data.js'
 import * as nsafes from '../pages/nestedsafes.pages.js'
 import * as txs from '../pages/transactions.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
@@ -23,11 +25,15 @@ describe('Nested safes happy path tests', () => {
     const safe = 'Created safe'
 
     cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_39)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.nestedParentSafe39)
+    cy.reload()
     wallet.connectSigner(signer)
     cy.wait(5000)
     createTx.deleteAllTx()
 
-    sideBar.clickOnOpenNestedSafeListBtn()
+    safeNav.clickOnNestedSafesBtn()
+    // Handle intro screen if present (select valid safes)
+    nsafes.completeIntroScreenSelectValid()
     nsafes.clickOnAddNestedSafeBtn()
     createTx.hasNonce()
     createTx.changeNonce(3)
@@ -36,9 +42,8 @@ describe('Nested safes happy path tests', () => {
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.exceedChars)
     nsafes.typeName(safe)
     nsafes.clickOnAddNextBtn()
-    txs.selectExecuteLater()
     createTx.clickOnContinueSignTransactionBtn()
-    createTx.clickOnAcknowledgement()
+    createTx.selectComboButtonOption('sign')
     createTx.clickOnSignTransactionBtn()
     createTx.clickViewTransaction()
     main.verifyValuesExist(createTx.transactionItem, [
@@ -46,7 +51,7 @@ describe('Nested safes happy path tests', () => {
       nsafes.nonfundAssetsActions[0],
       nsafes.nonfundAssetsActions[1],
     ])
-    sideBar.clickOnOpenNestedSafeListBtn()
+    safeNav.clickOnNestedSafesBtn()
     sideBar.checkSafesCountInPopverList(1)
     sideBar.clickOnSafeInPopover(nestedSafe1Short)
   })

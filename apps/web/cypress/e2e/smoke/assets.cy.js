@@ -25,7 +25,7 @@ describe('[SMOKE] Assets tests', () => {
     assets.verifyTokensTabIsSelected('true')
   })
 
-  it('[SMOKE] Verify that Token list dropdown shows options "Default tokens" and "All tokens"', () => {
+  it('[SMOKE] Verify token list filter and dust filter functionality', () => {
     let spamTokens = [
       assets.currencyAave,
       assets.currencyTestTokenA,
@@ -35,12 +35,22 @@ describe('[SMOKE] Assets tests', () => {
       assets.currencyDaiCap,
     ]
 
-    assets.selectTokenList(assets.tokenListOptions.default)
-    main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther])
-    main.verifyValuesDoNotExist(assets.tokenListTable, spamTokens)
+    // Disable dust filter to see tokens with no fiat value
+    assets.toggleHideDust(false)
 
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    // On chains without portfolio support, trusted filtering is disabled.
+    // "Default tokens" therefore behaves like "all tokens".
+    assets.toggleShowAllTokens(false)
+    main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther, ...spamTokens])
+
+    // Verify toggling "Show all tokens" still keeps the full list visible
+    assets.toggleShowAllTokens(true)
     spamTokens.push(constants.tokenNames.sepoliaEther)
     main.verifyValuesExist(assets.tokenListTable, spamTokens)
+
+    // Verify dust filter hides tokens with no value
+    assets.toggleHideDust(true)
+    main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther])
+    main.verifyValuesDoNotExist(assets.tokenListTable, [assets.currencyAave])
   })
 })

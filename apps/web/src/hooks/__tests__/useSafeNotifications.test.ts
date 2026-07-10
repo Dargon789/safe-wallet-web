@@ -53,14 +53,14 @@ describe('useSafeNotifications', () => {
       expect(result.current).toBeUndefined()
       expect(showNotification).toHaveBeenCalledWith({
         variant: 'warning',
-        message: `Your Safe Account version 1.1.1 is out of date. Please update it.`,
+        message: `Your Safe account version 1.1.1 is out of date. Please update it.`,
         groupKey: 'safe-outdated-version',
         link: {
           href: {
             pathname: '/settings/setup',
             query: { safe: 'eth:0x123' },
           },
-          title: 'Update Safe Account',
+          title: 'Update Safe account',
         },
         onClose: expect.anything(),
       })
@@ -85,7 +85,7 @@ describe('useSafeNotifications', () => {
       expect(result.current).toBeUndefined()
       expect(showNotification).toHaveBeenCalledWith({
         variant: 'warning',
-        message: `Safe Account version 0.0.1 is not supported by this web app anymore. You can update your Safe Account via the CLI.`,
+        message: `Safe account version 0.0.1 is not supported by this web app anymore. You can update your Safe account via the CLI.`,
         groupKey: 'safe-outdated-version',
         link: {
           href: 'https://github.com/5afe/safe-cli',
@@ -111,81 +111,6 @@ describe('useSafeNotifications', () => {
       // check that the notification was shown
       expect(result.current).toBeUndefined()
       expect(showNotification).not.toHaveBeenCalled()
-    })
-  })
-
-  describe('Invalid mastercopy', () => {
-    it('should show a notification when the mastercopy is invalid', () => {
-      ;(useSafeInfo as jest.Mock).mockReturnValue({
-        safe: {
-          implementation: { value: '0x234' },
-          implementationVersionState: 'UNKNOWN',
-          version: '1.3.0',
-          address: { value: '0x123' },
-        },
-      })
-
-      // render the hook
-      const { result } = renderHook(() => useSafeNotifications())
-
-      // check that the notification was shown
-      expect(result.current).toBeUndefined()
-      expect(showNotification).toHaveBeenCalledWith({
-        variant: 'warning',
-        message: `This Safe Account was created with an unsupported base contract.
-           The web interface might not work correctly.
-           We recommend using the command line interface instead.`,
-        groupKey: 'invalid-mastercopy',
-        link: {
-          href: 'https://github.com/5afe/safe-cli',
-          title: 'Get CLI',
-        },
-      })
-    })
-    it('should not show a notification when the mastercopy is valid', async () => {
-      ;(useSafeInfo as jest.Mock).mockReturnValue({
-        safe: {
-          implementation: { value: '0x456' },
-          implementationVersionState: 'UP_TO_DATE',
-          version: '1.3.0',
-          address: { value: '0x123' },
-        },
-      })
-
-      // render the hook
-      const { result } = renderHook(() => useSafeNotifications())
-
-      // check that the notification was shown
-      expect(result.current).toBeUndefined()
-      expect(showNotification).not.toHaveBeenCalled()
-    })
-
-    it('should show a notification when the mastercopy is invalid but can be migrated', () => {
-      ;(useSafeInfo as jest.Mock).mockReturnValue({
-        safe: {
-          implementation: { value: '0x123' },
-          implementationVersionState: 'UNKNOWN',
-          version: '1.3.0',
-          nonce: 0,
-          address: {
-            value: '0x1',
-          },
-          chainId: '10',
-        },
-      })
-
-      // render the hook
-      const { result } = renderHook(() => useSafeNotifications())
-
-      // check that the notification was shown
-      expect(result.current).toBeUndefined()
-      expect(showNotification).toHaveBeenCalledWith({
-        variant: 'info',
-        message: `This Safe Account was created with an unsupported base contract.
-           It is possible to migrate it to a compatible base contract. You can migrate it to a compatible contract on the Home screen.`,
-        groupKey: 'invalid-mastercopy',
-        link: undefined,
-      })
     })
   })
 })

@@ -2,10 +2,6 @@
 
 import type { MessagePayload } from 'firebase/messaging'
 
-export const isWebhookEvent = (data: MessagePayload['data']): data is WebhookEvent => {
-  return Object.values(WebhookType).some((type) => type === data?.type)
-}
-
 export enum WebhookType {
   EXECUTED_MULTISIG_TRANSACTION = 'EXECUTED_MULTISIG_TRANSACTION',
   INCOMING_ETHER = 'INCOMING_ETHER',
@@ -112,3 +108,7 @@ export type WebhookEvent =
   | ModuleTransactionEvent
   | ConfirmationRequestEvent
   | SafeCreatedEvent
+
+export const isWebhookEvent = (data: MessagePayload['data']): data is WebhookEvent => {
+  return Object.values(WebhookType).some((type) => type === data?.type)
+}

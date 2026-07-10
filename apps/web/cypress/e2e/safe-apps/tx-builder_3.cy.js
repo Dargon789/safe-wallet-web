@@ -1,9 +1,8 @@
-import 'cypress-file-upload'
 import * as constants from '../../support/constants.js'
 import * as safeapps from '../pages/safeapps.pages.js'
 import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-
+import { txAccordionDetails } from '../pages/create_tx.pages'
 let staticSafes = []
 let iframeSelector
 
@@ -14,7 +13,7 @@ describe('Transaction Builder 3 tests', { defaultCommandTimeout: 20000 }, () => 
 
   beforeEach(() => {
     const appUrl = constants.TX_Builder_url
-    iframeSelector = `iframe[id="iframe-${appUrl}"]`
+    iframeSelector = `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
     const visitUrl = `/apps/open?safe=${staticSafes.SEP_STATIC_SAFE_43}&appUrl=${encodeURIComponent(appUrl)}`
     cy.visit(visitUrl)
   })
@@ -32,7 +31,8 @@ describe('Transaction Builder 3 tests', { defaultCommandTimeout: 20000 }, () => 
       getBody().findByText(safeapps.sendBatchStr).click()
     })
     safeapps.clickOnAdvancedDetails()
-    main.verifyElementsIsVisible([safeapps.cowFallBackHandlerTitle])
+    //Commented for now because decoder service doesn't index contracts if the "to" is the safe
+    //main.verifyElementsIsVisible([`${txAccordionDetails} ${safeapps.cowFallBackHandlerTitle}`])
     safeapps.verifyUntrustedHandllerWarningDoesNotExist()
   })
 })

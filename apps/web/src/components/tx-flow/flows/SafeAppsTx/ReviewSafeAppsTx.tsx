@@ -1,6 +1,6 @@
 import { useContext, useEffect } from 'react'
 import type { ReactElement } from 'react'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction } from '@safe-global/types-kit'
 import type { SafeAppsTxParams } from '.'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import useHighlightHiddenTab from '@/hooks/useHighlightHiddenTab'
@@ -9,6 +9,7 @@ import { isTxValid } from '@/components/safe-apps/utils'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import { type ReviewTransactionContentProps } from '@/components/tx/ReviewTransactionV2/ReviewTransactionContent'
+import { getTxOrigin } from '@/utils/transactions'
 
 type ReviewSafeAppsTxProps = {
   safeAppsTx: SafeAppsTxParams
@@ -16,12 +17,12 @@ type ReviewSafeAppsTxProps = {
 } & ReviewTransactionContentProps
 
 const ReviewSafeAppsTx = ({
-  safeAppsTx: { txs, params },
+  safeAppsTx: { txs, params, app },
   onSubmit,
   children,
   ...props
 }: ReviewSafeAppsTxProps): ReactElement => {
-  const { setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, safeTxError, setSafeTxError, setTxOrigin } = useContext(SafeTxContext)
 
   useHighlightHiddenTab()
 
@@ -30,17 +31,20 @@ const ReviewSafeAppsTx = ({
       const isMultiSend = txs.length > 1
       const tx = isMultiSend ? await createMultiSendCallOnlyTx(txs) : await createTx(txs[0])
 
-      if (params?.safeTxGas !== undefined) {
-        // FIXME: do it properly via the Core SDK
-        // @ts-expect-error safeTxGas readonly
-        tx.data.safeTxGas = params.safeTxGas
+      if (params?.safeTxGas !== undefined && !Number.isNaN(params.safeTxGas)) {
+        tx.data.safeTxGas = String(params.safeTxGas)
       }
 
       return tx
     }
 
-    createSafeTx().then(setSafeTx).catch(setSafeTxError)
-  }, [txs, setSafeTx, setSafeTxError, params])
+    createSafeTx()
+      .then((tx) => {
+        setSafeTx(tx)
+        setTxOrigin(getTxOrigin(app))
+      })
+      .catch(setSafeTxError)
+  }, [txs, setSafeTx, setSafeTxError, setTxOrigin, app, params?.safeTxGas])
 
   const error = !isTxValid(txs)
 

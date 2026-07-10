@@ -1,3 +1,6 @@
+import { UseSimulationReturn } from './useSimulation'
+import { SimulationStatus } from './utils'
+
 export enum FETCH_STATUS {
   NOT_ASKED = 'NOT_ASKED',
   LOADING = 'LOADING',
@@ -12,6 +15,11 @@ export type StateObject = {
   balance?: string
   code?: string
   storage?: Record<string, string>
+}
+
+export type NestedTxStatus = {
+  simulation: UseSimulationReturn
+  status: SimulationStatus
 }
 
 type ContractObject = {
@@ -556,8 +564,8 @@ interface LogRaw {
 
 interface StateDiff {
   soltype: SoltypeElement | null
-  original: string | Record<string, any>
-  dirty: string | Record<string, any>
+  original: string | Record<string, unknown>
+  dirty: string | Record<string, unknown>
   raw: RawElement[]
 }
 

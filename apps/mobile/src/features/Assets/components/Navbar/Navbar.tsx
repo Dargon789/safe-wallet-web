@@ -1,41 +1,95 @@
 import React from 'react'
-import { View, Pressable } from 'react-native'
-import { Theme, XStack, getTokenValue } from 'tamagui'
+import { Pressable } from 'react-native'
+import { Circle, Theme, View, XStack, Text, getTokenValue } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { IdenticonWithBadge } from '@/src/features/Settings/components/IdenticonWithBadge'
+import { Identicon } from '@/src/components/Identicon'
+import { BadgeWrapper } from '@/src/components/BadgeWrapper'
+import { ThresholdBadge } from '@/src/components/ThresholdBadge'
+import { DropdownLabel } from '@/src/components/Dropdown'
+import { Image } from 'expo-image'
 
 import { shortenAddress } from '@/src/utils/formatters'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useAppSelector } from '@/src/store/hooks'
-import { Link, useRouter } from 'expo-router'
-import { DropdownLabel } from '@/src/components/Dropdown/DropdownLabel'
-import { selectAppNotificationStatus } from '@/src/store/notificationsSlice'
+import { useRouter } from 'expo-router'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
 import { selectSafeInfo } from '@/src/store/safesSlice'
 import { RootState } from '@/src/store'
+import { useTheme } from '@/src/theme/hooks/useTheme'
+import { selectChainById } from '@/src/store/chains'
+import usePendingTxs from '@/src/hooks/usePendingTxs'
+import { HeaderQrButton } from '@/src/features/WalletConnect/Wallet/components/HeaderQrButton'
 
-const dropdownLabelProps = {
+const nameLabelProps = {
   fontSize: '$5',
   fontWeight: 600,
 } as const
+
+function PendingTxBadge({ amount, onPress }: { amount: number; onPress: () => void }) {
+  if (amount <= 0) {
+    return null
+  }
+
+  return (
+    <Pressable onPress={onPress} testID="navbar-pending-tx-badge">
+      <Circle size={40} backgroundColor="$backgroundSkeleton">
+        <View
+          position="absolute"
+          top={0}
+          right={0}
+          width={8}
+          height={8}
+          borderRadius={4}
+          backgroundColor="$warning"
+          zIndex={1}
+        />
+        <Text fontSize="$5" fontWeight={700} color="$color">
+          {amount > 99 ? '99+' : amount}
+        </Text>
+      </Circle>
+    </Pressable>
+  )
+}
+
+function NetworkSelector({
+  chainLogoUri,
+  chainName,
+  onPress,
+}: {
+  chainLogoUri: string | null | undefined
+  chainName: string | null | undefined
+  onPress: () => void
+}) {
+  return (
+    <Pressable onPress={onPress} testID="navbar-network-selector">
+      <Circle size={40} backgroundColor="$backgroundSkeleton">
+        {chainLogoUri && (
+          <Image
+            source={chainLogoUri}
+            style={{ width: 32, height: 32, borderRadius: 4 }}
+            accessibilityLabel={chainName ?? undefined}
+          />
+        )}
+      </Circle>
+    </Pressable>
+  )
+}
 
 export const Navbar = () => {
   const insets = useSafeAreaInsets()
   const router = useRouter()
   const activeSafe = useDefinedActiveSafe()
   const contact = useAppSelector(selectContactByAddress(activeSafe.address))
-  const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
-
-  const handleNotificationAccess = () => {
-    if (!isAppNotificationEnabled) {
-      router.navigate('/notifications-opt-in')
-    } else {
-      router.navigate('/notifications-center')
-    }
-  }
+  const { isDark } = useTheme()
 
   const activeSafeInfo = useAppSelector((state: RootState) => selectSafeInfo(state, activeSafe.address))
+  const chainSafe = activeSafeInfo ? activeSafeInfo[activeSafe.chainId] : undefined
+
+  const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
+
+  const { amount } = usePendingTxs()
+
+  const safeName = contact ? contact.name : shortenAddress(activeSafe.address)
 
   return (
     <Theme name="navbar">
@@ -45,43 +99,42 @@ export const Navbar = () => {
         paddingHorizontal={16}
         alignItems={'center'}
         paddingBottom={'$2'}
-        backgroundColor={'$background'}
+        backgroundColor={isDark ? '$background' : '$backgroundFocus'}
       >
         <DropdownLabel
-          label={contact ? contact.name : shortenAddress(activeSafe.address)}
-          labelProps={dropdownLabelProps}
+          label={safeName}
+          labelProps={nameLabelProps}
+          onPress={() => router.push('/accounts-sheet')}
+          hitSlop={4}
           leftNode={
-            <IdenticonWithBadge
-              testID="threshold-info-badge"
-              variant="sm"
-              size={40}
-              fontSize={10}
-              address={activeSafe.address}
-              badgeContent={`${activeSafeInfo?.SafeInfo.threshold}/${activeSafeInfo?.SafeInfo.owners.length}`}
-            />
+            <BadgeWrapper
+              badge={
+                <ThresholdBadge
+                  threshold={chainSafe?.threshold ?? 0}
+                  ownersCount={chainSafe?.owners.length ?? 0}
+                  size={18}
+                  fontSize={8}
+                  isLoading={!chainSafe}
+                  testID="threshold-info-badge"
+                />
+              }
+              testID="threshold-info-badge-wrapper"
+            >
+              <Identicon address={activeSafe.address} size={30} />
+            </BadgeWrapper>
           }
-          // leftNode={<Identicon address={activeSafe.address} size={30} />}
-          onPress={() => {
-            router.push('/accounts-sheet')
-          }}
+          subtitle={shortenAddress(activeSafe.address)}
         />
-        <View
-          style={{
-            flexDirection: 'row',
-            gap: 12,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Link href={'/share'} asChild>
-            <Pressable hitSlop={{ top: 20, bottom: 20, left: 20 }}>
-              <SafeFontIcon name="qr-code-1" size={16} />
-            </Pressable>
-          </Link>
-          <Pressable onPressIn={handleNotificationAccess} hitSlop={{ top: 20, bottom: 20, right: 20 }}>
-            <SafeFontIcon name="bell" size={20} />
-          </Pressable>
-        </View>
+
+        <XStack gap="$2" alignItems="center">
+          <PendingTxBadge amount={amount} onPress={() => router.push('/pending-transactions')} />
+          <HeaderQrButton />
+          <NetworkSelector
+            chainLogoUri={activeChain?.chainLogoUri}
+            chainName={activeChain?.chainName}
+            onPress={() => router.push('/networks-sheet')}
+          />
+        </XStack>
       </XStack>
     </Theme>
   )

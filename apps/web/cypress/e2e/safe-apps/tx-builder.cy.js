@@ -1,4 +1,3 @@
-import 'cypress-file-upload'
 import * as constants from '../../support/constants.js'
 import * as safeapps from '../pages/safeapps.pages.js'
 import * as navigation from '../pages/navigation.page.js'
@@ -15,9 +14,10 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
 
   beforeEach(() => {
     const appUrl = constants.TX_Builder_url
-    iframeSelector = `iframe[id="iframe-${appUrl}"]`
+    iframeSelector = `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
     const visitUrl = `/apps/open?safe=${safeAppSafes.SEP_SAFEAPP_SAFE_1}&appUrl=${encodeURIComponent(appUrl)}`
     cy.visit(visitUrl)
+    cy.get(iframeSelector, { timeout: 30000 }).should('be.visible')
   })
 
   it('Verify a simple batch can be created', () => {

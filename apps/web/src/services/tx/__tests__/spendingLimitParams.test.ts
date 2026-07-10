@@ -1,12 +1,14 @@
-import type { NewSpendingLimitFlowProps } from '@/components/tx-flow/flows/NewSpendingLimit'
+import type { NewSpendingLimitFlowProps } from '@/features/spending-limits'
 import { chainBuilder } from '@/tests/builders/chains'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import * as safeCoreSDK from '@/hooks/coreSDK/safeCoreSDK'
 import * as txSender from '@/services/tx/tx-sender/create'
-import * as spendingLimitParams from '@/services/tx/spendingLimitParams'
+// eslint-disable-next-line no-restricted-imports -- spy must target the source module so the internal call in createNewSpendingLimitTx is intercepted
+import * as spendingLimitParams from '@/features/spending-limits/services/spendingLimitParams'
 import type Safe from '@safe-global/protocol-kit'
-import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
-import { createNewSpendingLimitTx } from '@/services/tx/tx-sender'
+import type { SpendingLimitState } from '@/features/spending-limits'
+// eslint-disable-next-line no-restricted-imports -- execution is excluded from the services barrel to avoid an import cycle via the tx-sender graph
+import { createNewSpendingLimitTx } from '@/features/spending-limits/services/spendingLimitExecution'
 
 const mockData: NewSpendingLimitFlowProps = {
   beneficiary: ZERO_ADDRESS,

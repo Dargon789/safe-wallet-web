@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
 import { H1, H2, View, XStack } from 'tamagui'
 import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
+import { splitCurrencyParts } from '@/src/utils/formatters'
 
 interface FiatProps {
   value: string
@@ -18,16 +19,15 @@ export const Fiat = ({ value, currency, maxLength, precise }: FiatProps) => {
     return formatCurrencyPrecise(value, currency)
   }, [value, currency])
 
-  const [symbol, whole, decimals, endCurrency] = useMemo(() => {
-    const match = (preciseFiat ?? '').match(/(\D+)?(.+)(\D\d+)(\D+)?$/)
-    return match ? match.slice(1) : ['', '', preciseFiat, '', '']
+  const { symbol, whole, decimals, endCurrency } = useMemo(() => {
+    return splitCurrencyParts(preciseFiat ?? '')
   }, [preciseFiat])
 
   return (
     <View flexDirection="row" alignItems="center" testID={'fiat-balance-display'}>
       {precise ? (
         <XStack>
-          <H2 fontWeight={'600'} alignSelf={'flex-end'} marginBottom={'$2'} fontSize={27}>
+          <H2 fontWeight={'600'} alignSelf={'flex-end'} marginBottom={'$2'} fontSize={27} testID="fiat-balance-symbol">
             {symbol}
           </H2>
           <H1 fontWeight="600">{whole}</H1>

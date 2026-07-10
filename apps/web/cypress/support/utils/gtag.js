@@ -1,12 +1,11 @@
 export function getEvents() {
-  cy.window().then((win) => {
-    cy.wrap(win.dataLayer)
-      .as('dataLayer')
-      .then((dataLayer) => {
-        console.log('DataLayer:', dataLayer)
-        cy.task('log', JSON.stringify(dataLayer, null, 2))
-      })
-  })
+  cy.window()
+    .its('dataLayer')
+    .then((dataLayer) => {
+      cy.wrap(dataLayer).as('dataLayer')
+      console.log('DataLayer:', dataLayer)
+      cy.task('log', JSON.stringify(dataLayer, null, 2))
+    })
 }
 
 export const checkDataLayerEvents = (expectedEvents) => {
@@ -62,7 +61,7 @@ export const events = {
   txCreatedTxBuilder: {
     category: 'transactions',
     action: 'Confirm transaction',
-    eventLabel: 'https://safe-apps.dev.5afe.dev/tx-builder',
+    eventLabel: 'https://tx-builder.staging.5afe.dev',
     eventType: 'tx_created',
     event: 'tx_created',
   },
@@ -70,15 +69,9 @@ export const events = {
   txConfirmedTxBuilder: {
     category: 'transactions',
     action: 'Confirm transaction',
-    eventLabel: 'https://safe-apps.dev.5afe.dev/tx-builder',
+    eventLabel: 'https://tx-builder.staging.5afe.dev',
     eventType: 'tx_confirmed',
     event: 'tx_confirmed',
-  },
-
-  txOpenShareBlock: {
-    action: 'Open share block',
-    event: 'customClick',
-    category: 'tx-list',
   },
 
   txCopyShareBlockLink: {

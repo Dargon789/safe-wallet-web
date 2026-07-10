@@ -7,6 +7,8 @@ import HomeIcon from '@/public/images/sidebar/home.svg'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
 import MembersIcon from '@/public/images/sidebar/members.svg'
 import AccountsIcon from '@/public/images/sidebar/wallet.svg'
+import SecurityIcon from '@mui/icons-material/ShieldOutlined'
+import ActivityIcon from '@mui/icons-material/HistoryOutlined'
 import { SvgIcon } from '@mui/material'
 
 export type DynamicNavItem = {
@@ -15,7 +17,7 @@ export type DynamicNavItem = {
   href: string
   tag?: ReactElement
   disabled?: boolean
-  adminOnly?: boolean
+  activeMemberOnly?: boolean
 }
 
 export const navItems: DynamicNavItem[] = [
@@ -25,7 +27,7 @@ export const navItems: DynamicNavItem[] = [
     href: AppRoutes.spaces.index,
   },
   {
-    label: 'Safe Accounts',
+    label: 'Safe accounts',
     icon: <SvgIcon component={AccountsIcon} inheritViewBox />,
     href: AppRoutes.spaces.safeAccounts,
   },
@@ -44,14 +46,24 @@ export const navItems: DynamicNavItem[] = [
   {
     label: 'Address book',
     icon: <SvgIcon component={ABIcon} inheritViewBox />,
-    href: '', // TODO: Replace with empty page
-    disabled: true,
-    tag: <Chip label="Soon" sx={{ backgroundColor: 'background.main', color: 'primary.light' }} />,
+    href: AppRoutes.spaces.addressBook,
+  },
+  {
+    label: 'Activity',
+    icon: <ActivityIcon />,
+    href: AppRoutes.spaces.activity,
+    activeMemberOnly: true,
+  },
+  {
+    label: 'Security',
+    icon: <SecurityIcon />,
+    href: AppRoutes.spaces.security,
+    activeMemberOnly: true,
   },
   {
     label: 'Settings',
     icon: <SvgIcon component={SettingsIcon} inheritViewBox />,
     href: AppRoutes.spaces.settings,
-    adminOnly: true,
+    activeMemberOnly: true,
   },
 ]

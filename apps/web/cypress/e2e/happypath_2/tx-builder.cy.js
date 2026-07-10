@@ -1,4 +1,3 @@
-import 'cypress-file-upload'
 import * as constants from '../../support/constants.js'
 import * as safeapps from '../pages/safeapps.pages.js'
 import * as createtx from '../pages/create_tx.pages.js'
@@ -42,7 +41,7 @@ describe('Transaction Builder happy path tests', { defaultCommandTimeout: 20000 
       ]
 
       const appUrl = constants.TX_Builder_url
-      iframeSelector = `iframe[id="iframe-${appUrl}"]`
+      iframeSelector = `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
       const visitUrl = `/apps/open?safe=${safeAppSafes.SEP_SAFEAPP_SAFE_1}&appUrl=${encodeURIComponent(appUrl)}`
 
       cy.visit(constants.transactionQueueUrl + safeAppSafes.SEP_SAFEAPP_SAFE_1)
@@ -64,7 +63,6 @@ describe('Transaction Builder happy path tests', { defaultCommandTimeout: 20000 
       })
 
       createtx.clickOnContinueSignTransactionBtn()
-      createtx.clickOnAcknowledgement()
       createtx.clickOnSignTransactionBtn()
       createtx.clickViewTransaction()
       navigation.clickOnWalletExpandMoreIcon()
@@ -73,9 +71,8 @@ describe('Transaction Builder happy path tests', { defaultCommandTimeout: 20000 
       wallet.connectSigner(signer2)
       navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
       createtx.clickOnConfirmTransactionBtn()
-      createtx.clickOnNoLaterOption()
       createtx.clickOnContinueSignTransactionBtn()
-      createtx.clickOnAcknowledgement()
+      createtx.selectComboButtonOption('sign')
       createtx.clickOnSignTransactionBtn()
       navigation.clickOnWalletExpandMoreIcon()
       navigation.clickOnDisconnectBtn()

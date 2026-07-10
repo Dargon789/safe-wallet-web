@@ -19,15 +19,18 @@ describe('Assets tests', () => {
   })
 
   it('Verify that "Hide token" button is present and opens the "Hide tokens menu"', () => {
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
-    assets.openHideTokenMenu()
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
+    assets.openHiddenTokensFromManageMenu()
     assets.verifyEachRowHasCheckbox()
   })
 
   it('Verify that clicking the button with an owner opens the Send funds form', () => {
     wallet.connectSigner(signer)
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
-    assets.clickOnSendBtn(0)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
+    cy.wait(2000)
+    assets.clickOnSendBtnAssetsTable(0)
   })
 
   it('Verify that Token list dropdown shows options "Default tokens" and "All tokens"', () => {
@@ -40,11 +43,16 @@ describe('Assets tests', () => {
       assets.currencyDaiCap,
     ]
 
-    assets.selectTokenList(assets.tokenListOptions.default)
-    main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther])
-    main.verifyValuesDoNotExist(assets.tokenListTable, spamTokens)
+    assets.toggleHideDust(false)
 
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    // On chains without portfolio support (Sepolia), trusted filtering is disabled, so
+    // "Default tokens" behaves like "All tokens". Asserting the two modes show different
+    // lists requires a portfolio-supported chain (e.g. mainnet).
+    // Mirrors the same assertions in smoke/assets.cy.js.
+    assets.toggleShowAllTokens(false)
+    main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther, ...spamTokens])
+
+    assets.toggleShowAllTokens(true)
     spamTokens.push(constants.tokenNames.sepoliaEther)
     main.verifyValuesExist(assets.tokenListTable, spamTokens)
   })

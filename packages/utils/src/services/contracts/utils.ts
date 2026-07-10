@@ -1,5 +1,5 @@
 import semverSatisfies from 'semver/functions/satisfies'
-import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
+import type { SafeVersion } from '@safe-global/types-kit'
 import { invariant } from '@safe-global/utils/utils/helpers'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
@@ -14,5 +14,5 @@ export const isValidSafeVersion = (safeVersion?: SafeState['version']): safeVers
 
 // `assert` does not work with arrow functions
 export function assertValidSafeVersion<T extends SafeState['version']>(safeVersion?: T): asserts safeVersion {
-  return invariant(isValidSafeVersion(safeVersion), `${safeVersion} is not a valid Safe Account version`)
+  return invariant(isValidSafeVersion(safeVersion), `${safeVersion} is not a valid Safe account version`)
 }

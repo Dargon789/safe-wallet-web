@@ -1,89 +1,106 @@
 import FirstSteps from '@/components/dashboard/FirstSteps'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { type ReactElement } from 'react'
+import { type ReactElement, useMemo } from 'react'
 import dynamic from 'next/dynamic'
-import { Grid } from '@mui/material'
+import { Stack } from '@mui/material'
 import PendingTxsList from '@/components/dashboard/PendingTxs/PendingTxsList'
 import AssetsWidget from '@/components/dashboard/Assets'
 import Overview from '@/components/dashboard/Overview/Overview'
-import SafeAppsDashboardSection from '@/components/dashboard/SafeAppsDashboardSection/SafeAppsDashboardSection'
-import GovernanceSection from '@/components/dashboard/GovernanceSection/GovernanceSection'
-import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
-import StakingBanner from '@/components/dashboard/StakingBanner'
+import ExplorePossibleWidget from '@/components/dashboard/ExplorePossibleWidget'
+import { useIsRecoverySupported } from '@/features/recovery'
 import { useHasFeature } from '@/hooks/useChains'
 import css from './styles.module.css'
-import { InconsistentSignerSetupWarning } from '@/features/multichain/components/SignerSetupWarning/InconsistentSignerSetupWarning'
-import useIsStakingBannerEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
-import { UnsupportedMastercopyWarning } from '@/features/multichain/components/UnsupportedMastercopyWarning/UnsupportedMasterCopyWarning'
-import SpacesDashboardWidget from 'src/features/spaces/components/SpacesDashboardWidget'
+import {
+  InconsistentSignerSetupWarning,
+  OutdatedMastercopyWarning,
+  UnsupportedMastercopyWarning,
+} from '@/features/multichain'
+import { MyAccountsFeature } from '@/features/myAccounts'
+import { ActionRequiredPanel } from './ActionRequiredPanel'
+import { VulnerableModuleWarning } from './ActionRequiredPanel/VulnerableModuleWarning'
+import { useVulnerableSafe } from '@/features/security'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import AddFundsToGetStarted from '@/components/dashboard/AddFundsBanner'
+import { useIsPositionsFeatureEnabled } from '@/features/positions'
+import { useBannerVisibility, BannerType, HnBannerForCarousel, HypernativeFeature } from '@/features/hypernative'
+import { useLoadFeature } from '@/features/__core__'
+import { StakeFeature, useIsStakingPromoBannerVisible, STAKING_PROMO_BANNER_HIDE_KEY } from '@/features/stake'
+import useLocalStorage from '@/services/local-storage/useLocalStorage'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
+const PositionsWidget = dynamic(() => import('@/features/positions/components/PositionsWidget'))
 
 const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()
+  const hn = useLoadFeature(HypernativeFeature)
+  const { NonPinnedWarning } = useLoadFeature(MyAccountsFeature)
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
-  const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
-  const isStakingBannerEnabled = useIsStakingBannerEnabled()
   const supportsRecovery = useIsRecoverySupported()
+  const isVulnerableSafe = useVulnerableSafe()
+
+  const { balances, loaded: balancesLoaded } = useVisibleBalances()
+  const items = useMemo(() => {
+    return balances.items.filter((item) => item.balance !== '0')
+  }, [balances.items])
+
+  const isPositionsFeatureEnabled = useIsPositionsFeatureEnabled()
+  const { showBanner: showHnBanner } = useBannerVisibility(BannerType.Promo)
+  const { StakingPromoBanner } = useLoadFeature(StakeFeature)
+  const isStakingPromoBannerVisible = useIsStakingPromoBannerVisible()
+  const [, setHideStakingPromoBanner] = useLocalStorage<boolean>(STAKING_PROMO_BANNER_HIDE_KEY)
+
+  const noAssets = balancesLoaded && items.length === 0
 
   return (
     <>
-      <Grid container spacing={3}>
-        {supportsRecovery && <RecoveryHeader />}
-
-        <Grid item xs={12} className={css.hideIfEmpty}>
-          <InconsistentSignerSetupWarning />
-        </Grid>
-
-        {isSpacesFeatureEnabled && (
-          <Grid item xs={12} className={css.hideIfEmpty}>
-            <SpacesDashboardWidget />
-          </Grid>
-        )}
-
-        <Grid item xs={12} className={css.hideIfEmpty}>
-          <UnsupportedMastercopyWarning />
-        </Grid>
-
-        <Grid item xs={12}>
+      <div className={css.dashboardGrid}>
+        <div className={css.leftCol}>
           <Overview />
-        </Grid>
 
-        <Grid item xs={12} className={css.hideIfEmpty}>
-          <FirstSteps />
-        </Grid>
+          {isStakingPromoBannerVisible && <StakingPromoBanner onDismiss={() => setHideStakingPromoBanner(true)} />}
 
-        {safe.deployed && (
-          <>
-            {isStakingBannerEnabled && (
-              <Grid item xs={12} className={css.hideIfEmpty}>
-                <StakingBanner hideLocalStorageKey="hideStakingBannerDashboard" large />
-              </Grid>
-            )}
+          {noAssets && (
+            <Stack spacing={1}>
+              {showHnBanner && <HnBannerForCarousel onDismiss={() => {}} />}
+              {!showHnBanner && <AddFundsToGetStarted />}
+            </Stack>
+          )}
 
-            <Grid item xs={12} />
+          <div className={css.hideIfEmpty}>
+            <FirstSteps />
+          </div>
 
-            <Grid item xs={12} lg={6}>
+          {safe.deployed && (
+            <>
               <AssetsWidget />
-            </Grid>
 
-            <Grid item xs={12} lg={6}>
-              <PendingTxsList />
-            </Grid>
+              {isPositionsFeatureEnabled && (
+                <div className={css.hideIfEmpty}>
+                  <PositionsWidget />
+                </div>
+              )}
 
-            {showSafeApps && (
-              <Grid item xs={12}>
-                <SafeAppsDashboardSection />
-              </Grid>
-            )}
+              {showSafeApps && <ExplorePossibleWidget />}
+            </>
+          )}
+        </div>
 
-            <Grid item xs={12} className={css.hideIfEmpty}>
-              <GovernanceSection />
-            </Grid>
-          </>
-        )}
-      </Grid>
+        <div className={css.rightCol}>
+          <ActionRequiredPanel defaultExpanded={isVulnerableSafe}>
+            <VulnerableModuleWarning isVulnerable={isVulnerableSafe} />
+            {supportsRecovery && <RecoveryHeader />}
+            <InconsistentSignerSetupWarning />
+            <OutdatedMastercopyWarning />
+            <UnsupportedMastercopyWarning />
+            <NonPinnedWarning />
+          </ActionRequiredPanel>
+
+          {safe.deployed && <PendingTxsList />}
+
+          <hn.HnPendingBanner />
+        </div>
+      </div>
     </>
   )
 }

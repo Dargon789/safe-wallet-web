@@ -4,7 +4,7 @@ type Listener = () => void
 type Undefinable<T> = T | undefined
 
 // Singleton with getter/setter whose hook triggers a re-render
-class ExternalStore<T extends unknown> {
+class ExternalStore<T> {
   private store: T | undefined
   private listeners: Set<Listener> = new Set()
 
@@ -31,6 +31,7 @@ class ExternalStore<T extends unknown> {
   }
 
   public readonly useStore = () => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     return useSyncExternalStore(this.subscribe, this.getStore, this.getStore)
   }
 }

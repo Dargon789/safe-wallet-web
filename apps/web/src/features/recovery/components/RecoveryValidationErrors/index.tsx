@@ -2,14 +2,11 @@ import { useContext } from 'react'
 import type { ReactElement } from 'react'
 
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import {
-  useIsValidRecoveryExecuteNextTx,
-  useIsValidRecoverySkipExpired,
-} from '@/features/recovery/hooks/useIsValidRecoveryExecution'
+import { useIsValidRecoveryExecuteNextTx, useIsValidRecoverySkipExpired } from '../../hooks/useIsValidRecoveryExecution'
 import { RecoveryListItemContext } from '../RecoveryListItem/RecoveryListItemContext'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '../../services/recovery-state'
 
-export function RecoveryValidationErrors({ item }: { item: RecoveryQueueItem }): ReactElement | null {
+export default function RecoveryValidationErrors({ item }: { item: RecoveryQueueItem }): ReactElement | null {
   const { submitError } = useContext(RecoveryListItemContext)
   const [, executeNextTxError] = useIsValidRecoveryExecuteNextTx(item)
   const [, executeSkipExpiredError] = useIsValidRecoverySkipExpired(item)

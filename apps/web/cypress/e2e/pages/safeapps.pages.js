@@ -5,14 +5,13 @@ const searchAppInput = 'input[id="search-by-name"]'
 const appUrlInput = 'input[name="appUrl"]'
 const closePreviewWindowBtn = 'button[aria-label*="Close"][aria-label*="preview"]'
 export const contractMethodIndex = '[name="contractMethodIndex"]'
-export const saveToLibraryBtn = 'button[title="Save to Library"]'
-export const downloadBatchBtn = 'button[title="Download batch"]'
-export const deleteBatchBtn = 'button[title="Delete Batch"]'
-const appModal = '[data-testid="app-info-modal"]'
+export const saveToLibraryBtn = 'button[aria-label="Save to Library"]'
+export const downloadBatchBtn = 'button[aria-label="Download batch"]'
+export const deleteBatchBtn = 'button[aria-label="Delete Batch"]'
 export const safeAppsList = '[data-testid="apps-list"]'
 const openSafeAppBtn = '[data-testid="open-safe-app-btn"]'
 const appMessageInput = 'input[placeholder="Message"]'
-const txBuilderUntrustedFallbackAlert = '[data-testid="untrusted-fallback-handler-alert"]'
+const txBuilderUntrustedFallbackWarning = '[data-testid="untrusted-fallback-handler-warning"]'
 export const handlerInput = 'input[id="contract-field-handler"]'
 const decodedTxSummary = '[data-testid="decoded-tx-summary"]'
 export const cowFallBackHandlerTitle = 'div[title="CowSwapFallbackHandler"]'
@@ -25,8 +24,6 @@ const addCustomAppBtnStr = /add custom Safe App/i
 const openSafeAppBtnStr = /open Safe App/i
 const disclaimerTtle = /disclaimer/i
 const continueBtnStr = /continue/i
-const cameraCheckBoxStr = /camera/i
-const microfoneCheckBoxStr = /microphone/i
 const permissionRequestStr = /permissions request/i
 const accessToAddressBookStr = /access to your address book/i
 const acceptBtnStr = /accept/i
@@ -70,9 +67,9 @@ export const testBooleanValue3 = '3 testBooleanValue'
 export const transfer2AssetsStr = 'Transfer 2 assets'
 
 export const testTransfer1 = '1 transfer'
-export const testTransfer2 = '2 MetaMultiSigWallet: transfer'
-export const nativeTransfer2 = '2 native transfer'
-export const nativeTransfer1 = '1 native transfer'
+export const testTransfer2 = '2 transfer'
+export const nativeTransfer2 = /2 Send.*ETH to.*/
+export const nativeTransfer1 = /1 Send.*ETH to.*/
 
 export const testNativeTransfer = 'native transfer'
 
@@ -153,11 +150,11 @@ export const permissionCheckboxNames = {
 export const cowFallbackHandler = 'sep:0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5'
 
 export function verifyUntrustedHandllerWarningVisible() {
-  cy.get(txBuilderUntrustedFallbackAlert).should('be.visible')
+  cy.get(txBuilderUntrustedFallbackWarning).should('be.visible')
 }
 
 export function verifyUntrustedHandllerWarningDoesNotExist() {
-  cy.get(txBuilderUntrustedFallbackAlert).should('not.exist')
+  cy.get(txBuilderUntrustedFallbackWarning).should('not.exist')
 }
 
 export function clickOnAdvancedDetails() {
@@ -301,27 +298,6 @@ function verifyDisclaimerIsVisible() {
   cy.findByRole('heading', { name: disclaimerTtle }).should('be.visible')
 }
 
-export function clickOnContinueBtn() {
-  cy.get(appModal).should('exist')
-  return cy.findByRole('button', { name: continueBtnStr }).click().wait(1000)
-}
-
-export function checkLocalStorage() {
-  clickOnContinueBtn().should(() => {
-    const storedItem = window.localStorage.getItem(constants.BROWSER_PERMISSIONS_KEY)
-    expect(storedItem).to.include('"feature":"camera","status":"granted"')
-    expect(storedItem).to.include('"feature":"microphone","status":"denied"')
-  })
-}
-
-export function verifyCameraCheckBoxExists() {
-  cy.findByRole('checkbox', { name: cameraCheckBoxStr }).should('exist')
-}
-
-export function verifyMicrofoneCheckBoxExists() {
-  return cy.findByRole('checkbox', { name: microfoneCheckBoxStr }).should('exist')
-}
-
 export function verifyInfoModalAcceptance() {
   cy.waitForSelector(() => {
     return cy
@@ -365,8 +341,4 @@ export function uncheckAllPermissions(element) {
 
 export function checkAllPermissions(element) {
   cy.wrap(element).findByText(allowAllPermissions).click()
-}
-
-export function verifyPinnedApp(name) {
-  cy.get(`[aria-label="${name}"]`)
 }
