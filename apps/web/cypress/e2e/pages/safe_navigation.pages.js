@@ -14,11 +14,12 @@ const nestedSafesButton = '[data-testid="nested-safes-button"]'
 const dropdownContent = '[data-slot="select-content"]'
 const dropdownRow = '[data-slot="select-item"]'
 const multichainItemSummary = '[data-testid="multichain-item-summary"]'
-const notActivatedBadge = '[data-testid="not-activated-badge"]'
 const pendingActivationChip = '[data-testid="pending-activation-chip"]'
 const subAccountsContainer = '[data-testid="subacounts-container"]'
 
 const balanceRegex = /\d/
+
+export const undeployedSafeLabel = 'Not activated'
 export const multichainSafePolygonLabel = 'Multichain polygon'
 export const multichainSafeSepoliaLabel = 'Multichain Sepolia'
 
@@ -102,5 +103,5 @@ export function expandMultichainRowByAddress(address) {
 }
 
 export function clickNotActivatedSubAccount() {
-  cy.get(dropdownContent).find(dropdownRow).filter(`:has(${notActivatedBadge})`).first().click()
+  cy.get(dropdownContent).find(dropdownRow).contains(undeployedSafeLabel).click()
 }

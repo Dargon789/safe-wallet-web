@@ -345,12 +345,6 @@ export function generateRandomString(length) {
   return result
 }
 
-export function blockBeamer() {
-  // Block the Beamer widget script so its announcement popup never renders and
-  // covers onboarding buttons. Call before cy.visit().
-  cy.intercept('GET', 'https://*.getbeamer.com/**', { statusCode: 204, body: '' })
-}
-
 export function verifyElementsCount(element, count) {
   cy.get(element).should('have.length', count)
 }
