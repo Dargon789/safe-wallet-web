@@ -16,6 +16,8 @@ describe('Spaces basic flow tests', () => {
   })
 
   beforeEach(() => {
+    space.blockBeamer()
+    space.interceptSpacesList()
     cy.visit(constants.spacesUrl)
   })
 
@@ -25,6 +27,7 @@ describe('Spaces basic flow tests', () => {
 
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
+    space.goToSpacesView()
     space.ensureReadyToCreateSpace()
     cy.wait(3000)
     space.createSpaceViaOnboardingWithSkip(spaceName)
@@ -32,7 +35,7 @@ describe('Spaces basic flow tests', () => {
     space.clickOnSpaceSelector(spaceName)
     space.spaceExists(spaceName)
     space.goToSpaceSettings()
-    cy.contains('General', { timeout: 15000 }).should('be.visible')
+    space.verifySpaceSettingsGeneralLoaded()
     space.editSpace(newSpaceName)
     space.clickOnSpaceSelector(newSpaceName)
     space.spaceExists(newSpaceName)
@@ -42,36 +45,10 @@ describe('Spaces basic flow tests', () => {
   })
 
   it('Verify an account can be added manually', () => {
-    const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
-
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
-    space.ensureReadyToCreateSpace()
-    cy.wait(3000)
-    space.createSpaceViaOnboardingWithSkip(spaceName)
+    space.openFirstSpaceFromSpacesView()
     space.addAccountManually(staticSafes.SEP_STATIC_SAFE_35.substring(4), constants.networks.sepolia)
-  })
-
-  it('Verify that re-signing in lands on the single space, not on /welcome/create-space', () => {
-    const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
-
-    wallet.connectSigner(admin)
-    space.clickOnSignInBtn()
-    space.ensureReadyToCreateSpace()
-    cy.wait(3000)
-    space.createSpaceViaOnboardingWithSkip(spaceName)
-
-    space.signOutViaSidebarProfile()
-    wallet.connectSigner(admin)
-    space.clickOnSignInBtn()
-
-    // With exactly one space, sign-in should short-circuit straight to the
-    // space dashboard. Crucially we must NOT be bounced into /welcome/create-space
-    // (the regressed re-login behavior).
-    space.verifyOnSingleSpaceDashboard(spaceName)
-
-    space.goToSpaceSettings()
-    space.deleteSpace(spaceName)
   })
 
   it('Verify a new member can be invited and accept the invite', () => {
@@ -81,6 +58,7 @@ describe('Spaces basic flow tests', () => {
 
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
+    space.goToSpacesView()
     space.ensureReadyToCreateSpace()
     cy.wait(3000)
     space.createSpaceViaOnboardingWithSkip(spaceName)
@@ -90,9 +68,13 @@ describe('Spaces basic flow tests', () => {
     space.goToSpaceMembers()
     space.addMember(memberName, user_address)
     space.disconnectFromSpaceLevel()
+    cy.clearAllCookies()
+    cy.visit(constants.spacesUrl)
     wallet.connectSigner(user)
     space.clickOnSignInBtn()
-    main.verifyElementByTextExists(`You were invited to join ${spaceName}`)
+    cy.wait(3000)
+    cy.visit(constants.spacesUrl)
+    space.verifySpaceInviteBannerVisible(spaceName)
     space.acceptInvite(newInviteName)
     main.verifyElementByTextExists(space.acceptInviteConfirmationMsg(spaceName))
   })

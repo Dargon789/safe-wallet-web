@@ -11,24 +11,25 @@ import {
   SafeAppMockup,
   deriveSidePanelAccountsFromSpace,
   useSafeNameLookup,
-} from '@/features/spaces/components/OnboardingLayout'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+} from '../OnboardingLayout'
+import { useSpaceSafes } from '../../hooks/useSpaceSafes'
+import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import { flattenSafeItems } from '@/hooks/safes'
 import MemberInviteRow from './components/MemberInviteRow'
 import useInviteNavigation from './hooks/useInviteNavigation'
 import useInviteForm from './hooks/useInviteForm'
-import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
+import { MemberRole } from '../../hooks/useSpaceMembers'
 
 const ONBOARDING_STEP = 3
-const TOTAL_STEPS = 4
 const FORM_ID = 'invite-members-form'
 
 const InviteMembersOnboarding = (): ReactElement => {
+  const totalSteps = useOnboardingStepCount()
   const { spaceId, goBack, redirectToNextStep } = useInviteNavigation()
   const { control, formState, register, setValue, trigger, fields, append, remove, onSubmit, error, isSubmitting } =
     useInviteForm(spaceId, redirectToNextStep)
 
-  const { data: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !spaceId })
+  const { data: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !spaceId })
   const { allSafes: spaceSafes } = useSpaceSafes()
   const nameLookup = useSafeNameLookup()
   const sidePanelAccounts = useMemo(
@@ -39,7 +40,7 @@ const InviteMembersOnboarding = (): ReactElement => {
 
   const main = (
     <form id={FORM_ID} onSubmit={onSubmit} className="flex flex-col gap-6">
-      <StepCounter currentStep={ONBOARDING_STEP} totalSteps={TOTAL_STEPS} />
+      <StepCounter currentStep={ONBOARDING_STEP} totalSteps={totalSteps} />
 
       <div className="flex flex-col gap-2">
         <Typography variant="h2">Invite your team</Typography>
@@ -69,7 +70,7 @@ const InviteMembersOnboarding = (): ReactElement => {
 
       <button
         type="button"
-        onClick={() => append({ address: '', role: MemberRole.MEMBER })}
+        onClick={() => append({ identifier: '', role: MemberRole.MEMBER })}
         className="flex cursor-pointer items-center justify-center gap-2"
         data-testid="add-another-member"
       >

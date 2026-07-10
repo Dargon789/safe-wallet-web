@@ -16,8 +16,9 @@ import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import '@/styles/globals.css'
 import '@/styles/shadcn.css'
 import { BRAND_NAME } from '@/config/constants'
-import { makeStore, setStoreInstance, useHydrateStore, useInitStaticChains } from '@/store'
+import { makeStore, setStoreInstance, useHydrateStore, useInitChains } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
+import LaunchScreen from '@/components/common/LaunchScreen'
 import useLoadableStores from '@/hooks/useLoadableStores'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
 import useTxNotifications from '@/hooks/useTxNotifications'
@@ -37,11 +38,11 @@ import useAdjustUrl from '@/hooks/useAdjustUrl'
 import useSafeMessageNotifications from '@/hooks/messages/useSafeMessageNotifications'
 import useSafeMessagePendingStatuses from '@/hooks/messages/useSafeMessagePendingStatuses'
 import useChangedValue from '@/hooks/useChangedValue'
+import useUnlockBodyScroll from '@/hooks/useUnlockBodyScroll'
 import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import WalletProvider from '@/components/common/WalletProvider'
-import { CounterfactualFeature } from '@/features/counterfactual'
-import useCounterfactualSafeSync from '@/features/counterfactual/hooks/useCounterfactualSafeSync'
+import { CounterfactualFeature, useCounterfactualSafeSync } from '@/features/counterfactual'
 import { RecoveryFeature } from '@/features/recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
@@ -128,7 +129,7 @@ const SafeScopedSubscriptions = (): null => {
 
 const InitApp = (): ReactElement | null => {
   useHydrateStore(reduxStore)
-  useInitStaticChains()
+  useInitChains()
   useAdjustUrl()
   useGtm()
   useMixpanel()
@@ -141,6 +142,7 @@ const InitApp = (): ReactElement | null => {
   useOidcLoginCallback()
   useLogoutCallback()
   useSessionExpiryGuard()
+  useUnlockBodyScroll()
 
   const isGateBlocking = useIsAuthGateBlocking()
   return isGateBlocking ? null : <SafeScopedSubscriptions />
@@ -212,6 +214,8 @@ const SafeWalletApp = ({
             <InitApp />
 
             <LazyWeb3Init />
+
+            <LaunchScreen />
 
             <PageLayout pathname={router.pathname}>
               <Component {...pageProps} key={safeKey} />

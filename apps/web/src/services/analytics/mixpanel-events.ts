@@ -38,6 +38,7 @@ export enum MixpanelEvent {
   TRUSTED_SAFE_REMOVED = 'Trusted Safe Removed',
   HYPERNATIVE_LOGIN_CLICKED = 'Hypernative Login Clicked',
   HYPERNATIVE_CONNECTED = 'Hypernative Connected',
+  HYPERNATIVE_FULL_REPORT_CLICKED = 'Hypernative Full Report Clicked',
   FALSE_RESULT_REPORTED = 'False Result Reported',
   WORKSPACE_DASHBOARD_VIEWED = 'Workspace Dashboard Viewed',
   AUTH_LOGIN_SUCCEEDED = 'Auth Login Succeeded',
@@ -63,6 +64,7 @@ export enum MixpanelEvent {
   ADDRESS_BOOK_ENTRY_CREATED = 'Address Book Entry Created',
   WORKSPACE_TRANSACTION_INITIATED = 'Workspace Transaction Initiated',
   ONBOARDING_WIZARD = 'Onboarding Wizard',
+  USE_OLD_UI = 'Use Old UI',
 }
 
 export enum WorkspaceCreateEntryPoint {
@@ -116,6 +118,7 @@ export enum MixpanelEventParams {
   CHAIN_ID = 'Chain ID',
   TX_ID = 'TX ID',
   SAFE_SELECTOR_DROPDOWN = 'Safe Selector Dropdown',
+  GAS_PAYMENT_SOURCE = 'Gas Payment Source',
 }
 
 export enum AuthLoginMethod {

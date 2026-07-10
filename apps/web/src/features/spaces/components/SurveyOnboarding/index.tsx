@@ -17,8 +17,8 @@ import {
 import {
   useSurveysGetStateV1Query,
   useSurveysSubmitResponseV1Mutation,
-  type SurveyOption,
-} from '@safe-global/store/gateway/surveys'
+  type SurveyOptionDto,
+} from '@safe-global/store/gateway/AUTO_GENERATED/surveys'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
 import { Button } from '@/components/ui/button'
@@ -31,12 +31,16 @@ import {
   SafeAppMockup,
   deriveSidePanelAccountsFromSpace,
   useSafeNameLookup,
-} from '@/features/spaces/components/OnboardingLayout'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+} from '../OnboardingLayout'
+import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import { flattenSafeItems } from '@/hooks/safes'
 import SurveyOptionCard from './SurveyOptionCard'
 
 const ONBOARDING_STEP = 4
+// This step only renders when SPACE_ONBOARDING_SURVEY is on (the survey page
+// guards on the flag), so it is always the 4th of 4 steps. The earlier steps,
+// which render regardless of the flag, derive their total from
+// useOnboardingStepCount() instead.
 const TOTAL_STEPS = 4
 const SURVEY_SLUG = 'onboarding'
 
@@ -67,7 +71,7 @@ const SurveyOnboarding = (): ReactElement | null => {
     { spaceId: spaceId ?? '', slug: SURVEY_SLUG },
     { skip: !spaceId },
   )
-  const { data: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !spaceId })
+  const { data: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !spaceId })
   const { allSafes: spaceSafes } = useSpaceSafes()
   const nameLookup = useSafeNameLookup()
   const sidePanelAccounts = useMemo(
@@ -112,7 +116,7 @@ const SurveyOnboarding = (): ReactElement | null => {
     const selections = Array.from(selected).sort()
     try {
       await submit({
-        spaceId,
+        spaceId: spaceId ?? '',
         slug: SURVEY_SLUG,
         submitSurveyResponseDto: { selections: { [page.id]: selections } },
       }).unwrap()
@@ -145,7 +149,7 @@ const SurveyOnboarding = (): ReactElement | null => {
 
       {page?.options && (
         <div className="grid auto-rows-fr grid-cols-2 gap-3 xl:grid-cols-3">
-          {page.options.map((opt: SurveyOption) => (
+          {page.options.map((opt: SurveyOptionDto) => (
             <SurveyOptionCard
               key={opt.key}
               option={opt}
