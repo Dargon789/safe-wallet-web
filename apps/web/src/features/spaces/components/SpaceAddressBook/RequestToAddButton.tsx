@@ -1,26 +1,27 @@
 import { useState } from 'react'
 import {
+  Alert,
   Box,
   Button as MuiButton,
   CircularProgress,
   DialogActions,
   DialogContent,
   Stack,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { Button } from '@/components/ui/button'
-import InvalidContactNameTooltip from './InvalidContactNameTooltip'
 import { Badge } from '@/components/ui/badge'
 import ModalDialog from '@/components/common/ModalDialog'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { NetworkLogosTooltip } from '@/features/multichain'
+import ChainIndicator from '@/components/common/ChainIndicator'
+import { NetworkLogosList } from '@/features/multichain'
 import { useAddressBookRequestsCreateRequestV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import useChains from '@/hooks/useChains'
 import { validateContactName } from './utils'
-import { sanitizeName } from '@safe-global/utils/validation/names'
 
 type RequestToAddButtonProps = {
   address: string
@@ -57,7 +58,7 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
 
       const result = await createRequest({
         spaceId,
-        createAddressBookRequestDto: { address, name: sanitizeName(name), chainIds },
+        createAddressBookRequestDto: { address, name: name.trim(), chainIds },
       })
 
       if (result.error) {
@@ -103,15 +104,11 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
     return <Badge variant="secondary">Requested</Badge>
   }
 
-  const trigger = (
-    <Button variant="outline" size="sm" onClick={() => setOpen(true)} disabled={!!nameError}>
-      Request to add
-    </Button>
-  )
-
   return (
     <>
-      {nameError ? <InvalidContactNameTooltip nameError={nameError}>{trigger}</InvalidContactNameTooltip> : trigger}
+      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+        Request to add
+      </Button>
 
       <ModalDialog open={open} onClose={() => setOpen(false)} dialogTitle="Request to add contact" hideChainIndicator>
         <DialogContent sx={{ py: 2 }}>
@@ -141,13 +138,27 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
               {chains.configs.length === chainIds.length ? (
                 <Typography variant="body1">All networks</Typography>
               ) : (
-                <NetworkLogosTooltip
-                  networks={chainIds.map((chainId) => ({ chainId }))}
-                  maxVisible={6}
-                  triggerRender={<span className="inline-flex" />}
-                />
+                <Tooltip
+                  title={
+                    <Stack spacing={0.5}>
+                      {chainIds.map((chainId) => (
+                        <ChainIndicator key={chainId} chainId={chainId} />
+                      ))}
+                    </Stack>
+                  }
+                  placement="top"
+                  arrow
+                >
+                  <Box display="inline-flex">
+                    <NetworkLogosList networks={chainIds.map((chainId) => ({ chainId }))} showHasMore maxVisible={6} />
+                  </Box>
+                </Tooltip>
               )}
             </Box>
+
+            {nameError && (
+              <Alert severity="warning">Rename this contact to share it with the workspace. {nameError}.</Alert>
+            )}
           </Stack>
         </DialogContent>
 
@@ -160,7 +171,7 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
             type="submit"
             variant="contained"
             onClick={handleConfirm}
-            disabled={isSubmitting}
+            disabled={!!nameError || isSubmitting}
             disableElevation
           >
             {isSubmitting ? <CircularProgress size={20} /> : 'Request to add'}

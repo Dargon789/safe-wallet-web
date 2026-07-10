@@ -222,11 +222,11 @@ describe('PageLayout', () => {
       expect(screen.getByTestId('topbar')).toBeInTheDocument()
     })
 
-    it('renders Topbar on /welcome/accounts when the user is signed out (Classic view keeps its Topbar)', () => {
+    it('hides Topbar on /welcome/accounts when the user is signed out (mirrors /welcome/spaces)', () => {
       useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
       mockUseIsSignedIn.mockReturnValue(false)
       renderLayout(AppRoutes.welcome.accounts)
-      expect(screen.getByTestId('topbar')).toBeInTheDocument()
+      expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
     })
   })
 

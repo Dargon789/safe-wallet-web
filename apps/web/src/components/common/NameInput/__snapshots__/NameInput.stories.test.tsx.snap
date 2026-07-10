@@ -8,15 +8,13 @@ exports[`./NameInput.stories Default 1`] = `
     class="MuiBox-root mui-style-1v5z18m"
   >
     <div
-      class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input mui-style-1c1lfd8-MuiFormControl-root-MuiTextField-root"
-      data-mui-internal-clone-element="true"
-      title=""
+      class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input mui-style-cmpglg-MuiFormControl-root-MuiTextField-root"
     >
       <label
         class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
         data-shrink="false"
-        for="_r_2_"
-        id="_r_2_-label"
+        for="_r_1_"
+        id="_r_1_-label"
       >
         Owner name
       </label>
@@ -26,7 +24,7 @@ exports[`./NameInput.stories Default 1`] = `
         <input
           aria-invalid="false"
           class="MuiInputBase-input MuiOutlinedInput-input mui-style-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
-          id="_r_2_"
+          id="_r_1_"
           name="ownerName"
           type="text"
         />
@@ -56,15 +54,13 @@ exports[`./NameInput.stories Disabled 1`] = `
     class="MuiBox-root mui-style-1v5z18m"
   >
     <div
-      class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input mui-style-1c1lfd8-MuiFormControl-root-MuiTextField-root"
-      data-mui-internal-clone-element="true"
-      title=""
+      class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input mui-style-cmpglg-MuiFormControl-root-MuiTextField-root"
     >
       <label
         class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary Mui-disabled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
         data-shrink="false"
-        for="_r_5_"
-        id="_r_5_-label"
+        for="_r_3_"
+        id="_r_3_-label"
       >
         Owner name
       </label>
@@ -75,7 +71,7 @@ exports[`./NameInput.stories Disabled 1`] = `
           aria-invalid="false"
           class="MuiInputBase-input MuiOutlinedInput-input Mui-disabled mui-style-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
           disabled=""
-          id="_r_5_"
+          id="_r_3_"
           name="ownerName"
           type="text"
         />
@@ -105,15 +101,13 @@ exports[`./NameInput.stories Required 1`] = `
     class="MuiBox-root mui-style-1v5z18m"
   >
     <div
-      class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input mui-style-1c1lfd8-MuiFormControl-root-MuiTextField-root"
-      data-mui-internal-clone-element="true"
-      title=""
+      class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input mui-style-cmpglg-MuiFormControl-root-MuiTextField-root"
     >
       <label
         class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary Mui-required MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
         data-shrink="false"
-        for="_r_8_"
-        id="_r_8_-label"
+        for="_r_5_"
+        id="_r_5_-label"
       >
         Owner name
         <span
@@ -130,7 +124,7 @@ exports[`./NameInput.stories Required 1`] = `
         <input
           aria-invalid="false"
           class="MuiInputBase-input MuiOutlinedInput-input mui-style-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
-          id="_r_8_"
+          id="_r_5_"
           name="ownerName"
           required=""
           type="text"
@@ -163,15 +157,13 @@ exports[`./NameInput.stories WithPlaceholder 1`] = `
     class="MuiBox-root mui-style-1v5z18m"
   >
     <div
-      class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input mui-style-1c1lfd8-MuiFormControl-root-MuiTextField-root"
-      data-mui-internal-clone-element="true"
-      title=""
+      class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input mui-style-cmpglg-MuiFormControl-root-MuiTextField-root"
     >
       <label
         class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
         data-shrink="false"
-        for="_r_b_"
-        id="_r_b_-label"
+        for="_r_7_"
+        id="_r_7_-label"
       >
         Owner name
       </label>
@@ -181,7 +173,7 @@ exports[`./NameInput.stories WithPlaceholder 1`] = `
         <input
           aria-invalid="false"
           class="MuiInputBase-input MuiOutlinedInput-input mui-style-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
-          id="_r_b_"
+          id="_r_7_"
           name="ownerName"
           placeholder="Enter owner name"
           type="text"

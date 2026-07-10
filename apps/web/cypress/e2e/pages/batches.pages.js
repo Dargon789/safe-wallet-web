@@ -2,7 +2,7 @@ import * as constants from '../../support/constants'
 import * as main from './main.page'
 import { clickOnContinueSignTransactionBtn, selectComboButtonOption, tokenSelector } from './create_tx.pages'
 
-export const newTransactionBtn = '[data-testid="new-tx-btn"]'
+export const newTransactionBtnStr = 'New transaction'
 const sendTokensButn = 'Send tokens'
 export const addToBatchBtn = 'Add to batch'
 const confirmBatchBtn = 'Confirm batch'
@@ -112,7 +112,7 @@ export function verifyBatchIconCount(count) {
 }
 
 export function verifyNewTxButtonStatus(param) {
-  cy.get(newTransactionBtn).should(param)
+  cy.get('button').contains(newTransactionBtnStr).should(param)
 }
 
 export function isTxExpanded(index, option) {

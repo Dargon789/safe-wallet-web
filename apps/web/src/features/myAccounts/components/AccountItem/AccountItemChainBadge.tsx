@@ -1,5 +1,6 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
-import { NetworkLogosTooltip } from '@/features/multichain'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { NetworkLogosList } from '@/features/multichain'
 import type { SafeItem } from '@/hooks/safes'
 import { cn } from '@/utils/cn'
 
@@ -17,13 +18,21 @@ function AccountItemChainBadge({ chainId, safes, className, imageSize = 24 }: Ac
   if (safes && safes.length > 0) {
     return (
       <div className={cn('flex shrink-0 justify-end', className)}>
-        <NetworkLogosTooltip
-          networks={safes}
-          maxVisible={4}
-          contentImageSize={imageSize}
-          triggerRender={<span tabIndex={0} className="flex items-center" />}
-          contentTestId="multichain-tooltip"
-        />
+        <Tooltip>
+          <TooltipTrigger render={<span />} tabIndex={0} className="flex items-center">
+            <NetworkLogosList networks={safes} showHasMore />
+          </TooltipTrigger>
+          <TooltipContent>
+            <div data-testid="multichain-tooltip">
+              <p className="text-sm">Multichain account on:</p>
+              {safes.map((safeItem) => (
+                <div key={safeItem.chainId} className="py-1">
+                  <ChainIndicator imageSize={imageSize} chainId={safeItem.chainId} />
+                </div>
+              ))}
+            </div>
+          </TooltipContent>
+        </Tooltip>
       </div>
     )
   }

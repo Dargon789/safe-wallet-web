@@ -32,8 +32,7 @@ import { useLoadFeature } from '@/features/__core__'
 import { GTFFeature } from '@/features/gtf'
 import { mergeGtfFeeParams } from '@/features/gtf/services'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { useAppDispatch, useAppSelector } from '@/store'
-import { selectCurrency } from '@/store/settingsSlice'
+import { useAppDispatch } from '@/store'
 
 type TxActions = {
   addToBatch: (safeTx?: SafeTransaction, origin?: string) => Promise<string>
@@ -65,7 +64,6 @@ export const useTxActions = (): TxActions => {
   const dispatch = useAppDispatch()
   const gtfFeature = useLoadFeature(GTFFeature)
   const { gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
-  const currency = useAppSelector(selectCurrency)
 
   return useMemo<TxActions>(() => {
     const safeAddress = safe.address.value
@@ -81,7 +79,6 @@ export const useTxActions = (): TxActions => {
         chainId,
         safeAddress,
         numberSignatures: safe.threshold,
-        currency,
         dispatch,
       })
 
@@ -228,7 +225,6 @@ export const useTxActions = (): TxActions => {
     gtfFeature,
     gtfPaymentMode,
     gtfSelectedGasToken,
-    currency,
   ])
 }
 

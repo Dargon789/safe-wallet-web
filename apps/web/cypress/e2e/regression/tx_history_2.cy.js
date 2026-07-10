@@ -48,9 +48,8 @@ describe('Tx history tests 2', () => {
     createTx.clickOnTransactionItemByName(typeOnchainRejection.title)
     createTx.verifyExpandedDetails([typeOnchainRejection.description])
     createTx.verifyActionListExists([
-      typeSideActions.created,
-      typeSideActions.signedOneOfTwo,
-      typeSideActions.signedTwoOfTwo,
+      typeSideActions.rejectionCreated,
+      typeSideActions.confirmations,
       typeSideActions.executedBy,
     ])
   })
