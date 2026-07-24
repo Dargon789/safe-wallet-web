@@ -7,7 +7,6 @@ import ModalDialog from '@/components/common/ModalDialog'
 import { useState, type ReactNode } from 'react'
 import AddressInput from '@/components/common/AddressInput'
 import NameInput from '@/components/common/NameInput'
-import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 import useChains from '@/hooks/useChains'
@@ -41,7 +40,6 @@ type AddContactDialogProps = {
   submit: (item: AddContactItem, spaceId: string) => Promise<{ error?: unknown }>
   onSubmitStart?: () => void
   onSuccess?: () => void
-  validateCharset?: boolean
 }
 
 const AddContactDialog = ({
@@ -54,7 +52,6 @@ const AddContactDialog = ({
   submit,
   onSubmitStart,
   onSuccess,
-  validateCharset = false,
 }: AddContactDialogProps) => {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string>()
@@ -96,7 +93,7 @@ const AddContactDialog = ({
     setError(undefined)
 
     const item: AddContactItem = {
-      name: validateCharset ? sanitizeName(data.name) : data.name,
+      name: data.name,
       address: data.address,
       chainIds: data.networks.map((network) => network.chainId),
     }
@@ -147,14 +144,7 @@ const AddContactDialog = ({
               <div className="flex flex-col gap-6">
                 {intro && <p className="text-muted-foreground text-sm">{intro}</p>}
 
-                <NameInput
-                  name="name"
-                  label="Name"
-                  required
-                  validateCharset={validateCharset}
-                  minLength={validateCharset ? NAME_MIN_LENGTH : undefined}
-                  maxLength={validateCharset ? ADDRESS_BOOK_NAME_MAX_LENGTH : undefined}
-                />
+                <NameInput name="name" label="Name" required />
                 <AddressInput name="address" label="Address or ENS" required showPrefix={false} chain={ensChain} />
 
                 <div>

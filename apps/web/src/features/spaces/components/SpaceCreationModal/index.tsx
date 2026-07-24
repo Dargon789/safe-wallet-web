@@ -6,7 +6,6 @@ import { FormProvider, useForm } from 'react-hook-form'
 import SpaceIcon from '@/public/images/spaces/space.svg'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
-import { NAME_MIN_LENGTH, SPACE_NAME_MAX_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -14,9 +13,6 @@ import { showNotification } from '@/store/notificationsSlice'
 import { setLastUsedSpace } from '@/store/authSlice'
 import { useAppDispatch } from '@/store'
 import ExternalLink from '@/components/common/ExternalLink'
-import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
-import type { SerializedError } from '@reduxjs/toolkit'
 
 function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement {
   const [error, setError] = useState<string>()
@@ -29,11 +25,10 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
-    const name = sanitizeName(data.name)
 
     try {
       setIsSubmitting(true)
-      const response = await createSpaceWithUser({ createSpaceDto: { name } })
+      const response = await createSpaceWithUser({ createSpaceDto: { name: data.name } })
 
       if (response.data) {
         const spaceId = response.data.uuid
@@ -44,7 +39,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
 
         dispatch(
           showNotification({
-            message: `Created workspace with name ${name}.`,
+            message: `Created workspace with name ${data.name}.`,
             variant: 'success',
             groupKey: 'create-space-success',
           }),
@@ -55,7 +50,9 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
         throw response.error
       }
     } catch (error) {
-      setError(getRtkQueryErrorMessage(error as FetchBaseQueryError | SerializedError))
+      // @ts-ignore
+      const errorMessage = error?.data?.message || 'Failed creating the workspace. Please try again.'
+      setError(errorMessage)
     } finally {
       setIsSubmitting(false)
     }
@@ -77,16 +74,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
         <form onSubmit={onSubmit}>
           <DialogContent sx={{ py: 2 }}>
             <Box mb={2}>
-              <NameInput
-                data-testid="space-name-input"
-                label="Name"
-                autoFocus
-                name="name"
-                required
-                validateCharset
-                minLength={NAME_MIN_LENGTH}
-                maxLength={SPACE_NAME_MAX_LENGTH}
-              />
+              <NameInput data-testid="space-name-input" label="Name" autoFocus name="name" required />
             </Box>
             <Typography variant="body2" color="text.secondary">
               How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>

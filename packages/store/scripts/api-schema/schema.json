@@ -7571,36 +7571,6 @@
           "textColor"
         ]
       },
-      "Relayer": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "GTF",
-              "RELAY_FEE",
-              "DAILY_LIMIT",
-              "NO_FEE_CAMPAIGN"
-            ],
-            "nullable": true
-          },
-          "safeCreationSponsored": {
-            "type": "boolean"
-          },
-          "safeTransactionSponsored": {
-            "type": "boolean"
-          },
-          "enableTenderlySimulationBeforeRelay": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "type",
-          "safeCreationSponsored",
-          "safeTransactionSponsored",
-          "enableTenderlySimulationBeforeRelay"
-        ]
-      },
       "Chain": {
         "type": "object",
         "properties": {
@@ -7691,15 +7661,6 @@
           "recommendedMasterCopyVersion": {
             "type": "string",
             "nullable": true
-          },
-          "relayer": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Relayer"
-              }
-            ]
           }
         },
         "required": [
@@ -7721,8 +7682,7 @@
           "rpcUri",
           "safeAppsRpcUri",
           "shortName",
-          "theme",
-          "relayer"
+          "theme"
         ]
       },
       "ChainPage": {
@@ -8696,16 +8656,6 @@
           "results"
         ]
       },
-      "Origin": {
-        "type": "string",
-        "enum": [
-          "SAFE_APP",
-          "WALLET_CONNECT",
-          "TX_BUILDER",
-          "NATIVE"
-        ],
-        "description": "Transaction origin. Defaults to NATIVE when omitted."
-      },
       "FeePreviewTransactionDto": {
         "type": "object",
         "properties": {
@@ -8737,19 +8687,6 @@
             "example": 2,
             "minimum": 1
           },
-          "nonce": {
-            "type": "string",
-            "description": "Safe nonce the transaction will use (uint256 string)",
-            "example": "42"
-          },
-          "origin": {
-            "description": "Transaction origin. Defaults to NATIVE when omitted.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Origin"
-              }
-            ]
-          },
           "fiatCode": {
             "type": "string",
             "description": "Fiat currency code for relay cost conversion (e.g. EUR, GBP). Defaults to USD.",
@@ -8762,8 +8699,7 @@
           "data",
           "operation",
           "gasToken",
-          "numberSignatures",
-          "nonce"
+          "numberSignatures"
         ]
       },
       "FeePreviewTxData": {

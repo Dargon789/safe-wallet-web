@@ -45,7 +45,6 @@ export const AssetRowContent = ({
           <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
             {explorerLink ? (
               <Link
-                data-testid="token-name"
                 href={explorerLink.href}
                 target="_blank"
                 rel="noreferrer"
@@ -65,7 +64,7 @@ export const AssetRowContent = ({
                 {item.tokenInfo.name}
               </Link>
             ) : (
-              <Typography data-testid="token-name" component="span" variant="body1" fontWeight="bold">
+              <Typography component="span" variant="body1" fontWeight="bold">
                 {item.tokenInfo.name}
               </Typography>
             )}

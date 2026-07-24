@@ -69,11 +69,14 @@ describe('Tx history tests 1', () => {
 
   // Added to prod
   // Token send
-  it('Verify expanded details for token send', () => {
-    createTx.scrollToBottom()
+  it('Verify exapanded details for token send', () => {
     createTx.clickOnTransactionItemByName(typeSend.title, typeSend.summaryTxInfo)
-    createTx.verifyExpandedDetails([typeSend.sentTo])
-    createTx.verifyActionListExists([typeSideActions.created, typeSideActions.executedBy])
+    createTx.verifyExpandedDetails([typeSend.sentTo, typeSend.recipientAddress])
+    createTx.verifyActionListExists([
+      typeSideActions.created,
+      typeSideActions.confirmations,
+      typeSideActions.executedBy,
+    ])
   })
 
   // Added to prod

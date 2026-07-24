@@ -17,16 +17,19 @@ const SecurityBanner = ({ title, className }: SecurityBannerProps) => {
   return (
     <Alert
       variant="warning"
-      className={cn('mb-4 dark:bg-[var(--color-warning-background)] dark:text-[var(--color-text-primary)]', className)}
+      className={cn(
+        'mb-4 dark:bg-[var(--color-warning-background)] dark:text-[var(--color-warning1-contrast-text)]',
+        className,
+      )}
     >
-      <TriangleAlert className="dark:text-[var(--color-warning-main)]" />
+      <TriangleAlert />
       {title && <AlertTitle className="font-bold">{title}</AlertTitle>}
       <AlertDescription className="dark:text-current">
         Some Safe accounts may be malicious or impersonations. Only trust Safe accounts you can verify.{' '}
         <ExternalLink
           href={HelpCenterArticle.ADDRESS_POISONING}
           noIcon
-          sx={{ '& span': { textDecoration: 'underline' }, '.dark &': { color: 'inherit' } }}
+          sx={{ textDecoration: 'underline', '.dark &': { color: 'inherit' } }}
         >
           Learn more
         </ExternalLink>

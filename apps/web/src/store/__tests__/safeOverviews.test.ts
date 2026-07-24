@@ -1,6 +1,5 @@
-import { act, renderHook, waitFor } from '@/tests/test-utils'
-import { gatewayApi, useGetMultipleSafeOverviewsQuery, useGetSafeOverviewQuery } from '../api/gateway'
-import { useAppDispatch } from '@/store'
+import { renderHook, waitFor } from '@/tests/test-utils'
+import { useGetMultipleSafeOverviewsQuery, useGetSafeOverviewQuery } from '../api/gateway'
 import { faker } from '@faker-js/faker'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
@@ -135,16 +134,13 @@ describe('safeOverviews', () => {
         expect(result.current.data).toEqual(mockOverview)
       })
 
-      // Should call the store endpoint with the safe ID, forcing a fresh fetch
-      expect(mockedInitiate).toHaveBeenCalledWith(
-        {
-          safes: [`1:${fakeSafeAddress}`],
-          currency: 'usd',
-          trusted: false,
-          walletAddress: undefined,
-        },
-        { forceRefetch: true },
-      )
+      // Should call the store endpoint with the safe ID
+      expect(mockedInitiate).toHaveBeenCalledWith({
+        safes: [`1:${fakeSafeAddress}`],
+        currency: 'usd',
+        trusted: false,
+        walletAddress: undefined,
+      })
     })
   })
 
@@ -306,16 +302,13 @@ describe('safeOverviews', () => {
         expect(result.current.data).toEqual(allOverviews)
       })
 
-      // Should call the store endpoint once with all safes, forcing a fresh fetch
-      expect(mockedInitiate).toHaveBeenCalledWith(
-        {
-          safes: request.safes.map((safe) => `1:${safe.address}`),
-          currency: 'usd',
-          trusted: false,
-          walletAddress: undefined,
-        },
-        { forceRefetch: true },
-      )
+      // Should call the store endpoint once with all safes
+      expect(mockedInitiate).toHaveBeenCalledWith({
+        safes: request.safes.map((safe) => `1:${safe.address}`),
+        currency: 'usd',
+        trusted: false,
+        walletAddress: undefined,
+      })
     })
 
     it('should return only the safes that exist in the response (partial results)', async () => {
@@ -488,7 +481,6 @@ describe('safeOverviews', () => {
         expect.objectContaining({
           safes: expect.arrayContaining([`1:${request1.safeAddress}`, `1:${request2.safeAddress}`]),
         }),
-        { forceRefetch: true },
       )
     })
 
@@ -521,58 +513,6 @@ describe('safeOverviews', () => {
 
       await waitFor(() => {
         expect(mockedInitiate).toHaveBeenCalled()
-      })
-    })
-  })
-
-  describe('cache invalidation', () => {
-    it('refetches overviews when the SafeOverviews tag is invalidated', async () => {
-      const request = {
-        currency: 'usd',
-        safes: [
-          {
-            address: faker.finance.ethereumAddress(),
-            chainId: '1',
-            isReadOnly: false,
-            isPinned: false,
-            lastVisited: 0,
-            name: undefined,
-          },
-        ],
-      }
-
-      const staleOverview = {
-        address: { value: request.safes[0].address },
-        chainId: '1',
-        awaitingConfirmation: null,
-        fiatTotal: '100',
-        owners: [{ value: faker.finance.ethereumAddress() }],
-        threshold: 1,
-        queued: 0,
-      }
-      const freshOverview = { ...staleOverview, fiatTotal: '200' }
-
-      mockQueryAction({ data: [staleOverview] })
-
-      const { result } = renderHook(() => ({
-        dispatch: useAppDispatch(),
-        query: useGetMultipleSafeOverviewsQuery(request),
-      }))
-
-      await waitFor(() => {
-        expect(result.current.query.data).toEqual([staleOverview])
-      })
-      expect(mockedInitiate).toHaveBeenCalledTimes(1)
-
-      // A transaction invalidates the overview cache -> the query must re-run and fetch fresh data
-      mockQueryAction({ data: [freshOverview] })
-      act(() => {
-        result.current.dispatch(gatewayApi.util.invalidateTags(['SafeOverviews']))
-      })
-
-      await waitFor(() => {
-        expect(mockedInitiate).toHaveBeenCalledTimes(2)
-        expect(result.current.query.data).toEqual([freshOverview])
       })
     })
   })

@@ -30,10 +30,9 @@ export const payNowExecMethod = '[data-testid="pay-now-execution-method"]'
 export const addToBatchBtn = '[data-testid="combo-submit-batching"]'
 export const executeTxBtn = '[data-testid="execute-tx-btn"]'
 const accordionDetails = '[data-testid="accordion-details"]'
-const copyTxHashBtn = '[data-testid="copy-tx-hash-btn"]'
 export const copyIcon = '[data-testid="copy-btn-icon"]'
 export const explorerBtn = '[data-testid="explorer-btn"]'
-export const transactionSideList = '[data-testid="transaction-actions-list"]'
+const transactionSideList = '[data-testid="transaction-actions-list"]'
 const expandAllBtn = '[data-testid="expande-all-btn"]'
 const collapseAllBtn = '[data-testid="collapse-all-btn"]'
 export const txRowTitle = '[data-testid="tx-row-title"]'
@@ -43,6 +42,7 @@ const requiredConfirmation = '[data-testid="required-confirmations"]'
 export const txDate = '[data-testid="tx-date"]'
 export const txType = '[data-testid="tx-type"]'
 export const proposalStatus = '[data-testid="proposal-status"]'
+export const txSigner = '[data-testid="signer"]'
 const spamTokenWarningIcon = '[data-testid="warning"]'
 const untrustedTokenWarningModal = '[data-testid="untrusted-token-warning"]'
 const sendTokensBtn = '[data-testid="send-tokens-btn"]'
@@ -102,6 +102,7 @@ const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
 const QueueLabel = 'needs to be executed first'
 export const hashesText = 'Hashes'
+const TransactionSummary = 'Send '
 const transactionsPerHrStr = 'free transactions left today'
 const maxAmountBtnStr = 'Max'
 const nativeTokenTransferStr = 'ETH'
@@ -227,10 +228,6 @@ export function hoverOverRejectBtnBtn() {
 
 export function verifyRejectBtnDisabled() {
   getRejectButton().should('be.disabled')
-}
-
-export function verifyPayNowOptionIsDisabled() {
-  cy.get(payNowExecMethod).find('input').should('be.disabled')
 }
 
 export function verifyTxRejectModalVisible() {
@@ -477,7 +474,7 @@ export function clickOnTransactionItemByName(name, token) {
       if (token) {
         $elements = $elements.filter(':contains("' + token + '")')
       }
-      cy.wrap($elements.first()).scrollIntoView().click({ force: true })
+      cy.wrap($elements.first()).click({ force: true })
     })
 }
 
@@ -487,10 +484,6 @@ export function clickOnTransactionItemByIndex(index) {
     .then(($elements) => {
       cy.wrap($elements).click({ force: true })
     })
-}
-
-export function scrollToBottom() {
-  cy.scrollTo('bottom').wait(500)
 }
 
 export function verifyExpandedDetails(data, warning) {
@@ -553,15 +546,6 @@ export function clickOnCopyDataBtn(expectedData) {
 
   cy.get(txStack).find('button').click()
   cy.get('@clipboardWrite').should('have.been.calledWith', expectedData)
-}
-
-export function verifyTxHashCopied(expectedHash) {
-  cy.window().then((win) => {
-    cy.stub(win.navigator.clipboard, 'writeText').as('clipboardWrite')
-  })
-
-  cy.get(copyTxHashBtn).click()
-  cy.get('@clipboardWrite').should('have.been.calledWith', expectedHash)
 }
 
 export function switchToGridView() {
@@ -692,12 +676,7 @@ export function verifySummaryByName(name, token, data, alt, altToken) {
 
     // Verify token symbol (altToken parameter)
     if (altToken) {
-      cy.wait(3000)
-      cy.get(selector)
-        .first()
-        .then(($freshElement) => {
-          verifyTokenSymbol($freshElement, altToken)
-        })
+      verifyTokenSymbol($element, altToken)
     }
   })
 }
@@ -967,7 +946,7 @@ export function verifyQueueLabel() {
 }
 
 export function verifyTransactionSummary(sendValue) {
-  cy.get('[data-testid="tx-info"]').contains(`${sendValue} ${constants.tokenAbbreviation.sep}`).should('exist')
+  cy.contains(TransactionSummary + `${sendValue} ${constants.tokenAbbreviation.sep}`).should('exist')
 }
 
 export function verifyDateExists(date) {

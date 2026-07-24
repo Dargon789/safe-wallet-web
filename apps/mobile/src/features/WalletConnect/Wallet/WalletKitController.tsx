@@ -5,7 +5,7 @@ import { getSdkError } from '@walletconnect/utils'
 import { formatJsonRpcError } from '@walletconnect/jsonrpc-utils'
 import { useStore } from 'react-redux'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { extractWcUri } from '@safe-global/utils/features/walletconnect/utils'
+import { isPairingUri } from '@safe-global/utils/features/walletconnect/utils'
 import { useHasFeature } from '@/src/hooks/useHasFeature'
 import { useAppDispatch } from '@/src/store/hooks'
 import { type RootState } from '@/src/store'
@@ -123,12 +123,11 @@ export const WalletKitController: React.FC = () => {
     }
     let cancelled = false
     const handleUrl = async (url: string) => {
-      const uri = extractWcUri(url)
-      if (!uri) {
+      if (!isPairingUri(url)) {
         return
       }
       try {
-        await walletKit.pair({ uri })
+        await walletKit.pair({ uri: url })
       } catch (e) {
         logWalletKitError('deep-link pair failed', e)
       }

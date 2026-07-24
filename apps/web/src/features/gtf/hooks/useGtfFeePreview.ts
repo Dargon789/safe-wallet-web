@@ -40,7 +40,6 @@ export const useGtfFeePreview = ({ enabled, safeTx, chain, safeAddress, gasToken
             operation: safeTx.data.operation,
             gasToken,
             numberSignatures,
-            nonce: safeTx.data.nonce,
             fiatCode: toSupportedFiatCode(currency),
           },
         }

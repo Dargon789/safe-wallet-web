@@ -109,13 +109,12 @@ Safe Selector through Spaces empty dashboard: commented out; remove this block c
       space.verifySpaceDashboardAccountsWidgetRowCount(staticSpaces.dashboardWithSafes.accountsWidgetRowCount)
     })
 
-    it('Verify that the Back to Space button is visible in the sidebar and returns the user to Space Home', () => {
+    it('Verify that the Back to Space button is visible in the Safe selector and returns the user to Space Home', () => {
       space.verifySpaceDashboardWidgetVisible('Accounts')
       space.clickAccountItemByIndex(0)
       space.verifyUrlIncludesPath('/home')
 
-      space.verifyBackToSpaceButtonVisible()
-      space.clickBackToSpaceButton()
+      cy.get(space.backToSpaceBtn).should('be.visible').click()
       space.verifyUrlIncludesPath('/spaces')
     })
   })

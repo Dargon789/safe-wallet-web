@@ -33,7 +33,4 @@ tags:
     file: ./import-signer.yml
 
 - runFlow:
-    file: ./add-safe-and-import-signer.yml
-
-- runFlow:
     file: ./new-user-onboarding.yml

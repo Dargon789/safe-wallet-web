@@ -32,7 +32,7 @@ tags:
 # Tap "Add Signer" button (Import signer button)
 - tapOn:
     id: 'import-signer-button'
-- assertVisible: 'Add signer'
+- assertVisible: 'Import a signer'
 - tapOn:
     id: 'seed'
 
@@ -164,7 +164,4 @@ tags:
 # Verify we're back on signers screen
 - assertVisible:
     id: 'signers-screen'
-- assertVisible: 'Your signers'
-# Verify the imported signer shows the "Imported" badge
-- assertVisible: '.*0xaE03...1154.*'
-- assertVisible: '.*Imported.*'
+- assertVisible: 'My signers'

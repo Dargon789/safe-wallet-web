@@ -9,7 +9,6 @@ import { AppRoutes } from '@/config/routes'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { sanitizeNextUrl } from '@/utils/nextUrl'
-import { sanitizeName } from '@safe-global/utils/validation/names'
 import type { UseFormHandleSubmit } from 'react-hook-form'
 
 const useSpaceSubmit = (
@@ -26,7 +25,7 @@ const useSpaceSubmit = (
   const [updateSpace] = useSpacesUpdateV1Mutation()
 
   const editSpace = async (name: string) => {
-    const response = await updateSpace({ id: spaceId ?? '', updateSpaceDto: { name: sanitizeName(name) } })
+    const response = await updateSpace({ id: spaceId ?? '', updateSpaceDto: { name } })
 
     if (response.error) {
       throw new Error(getRtkQueryErrorMessage(response.error))
@@ -40,7 +39,7 @@ const useSpaceSubmit = (
   }
 
   const createSpace = async (name: string) => {
-    const response = await createSpaceWithUser({ createSpaceDto: { name: sanitizeName(name) } })
+    const response = await createSpaceWithUser({ createSpaceDto: { name } })
 
     if (response.data) {
       const newSpaceId = response.data.uuid

@@ -15,7 +15,6 @@ import { useAppSelector } from '@/src/store/hooks'
 import { selectEstimatedFee } from '@/src/store/estimatedFeeSlice'
 import { selectExecutionMethod } from '@/src/store/executionMethodSlice'
 import { selectActiveChain } from '@/src/store/chains'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import { getExecutionMethod } from './helpers'
 import { isMultisigDetailedExecutionInfo } from '@/src/utils/transaction-guards'
@@ -37,7 +36,6 @@ export function ReviewAndExecuteContainer() {
   const { isBiometricsEnabled } = useBiometrics()
 
   const { requiresRelay, isRelayEnabled, isRelayAvailable, isLoadingRelays } = useRequiresRelay(txDetails)
-  const isGtfEnabled = chain ? hasFeature(chain, FEATURES.GTF) : false
   // Clear estimated fee values when screen is mounted
   useClearEstimatedFeeOnMount()
 
@@ -143,7 +141,6 @@ export function ReviewAndExecuteContainer() {
           activeSigner={activeSigner}
           executionMethod={executionMethod}
           isPaidFromSafe={requiresRelay}
-          isGtfEnabled={isGtfEnabled}
           detailedExecutionInfo={
             isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)
               ? txDetails.detailedExecutionInfo

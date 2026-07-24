@@ -32,9 +32,7 @@ export type FeePreviewTransactionDto = {
   operation: OperationType
   gasToken: string
   numberSignatures: number
-  nonce: number
   fiatCode?: string
-  origin?: string
 }
 
 export type FeePreviewTxData = {
@@ -56,6 +54,12 @@ export type FeePreviewRelayCost = {
 export type FeePreviewResponse = {
   txData: FeePreviewTxData
   relayCost: FeePreviewRelayCost
+  pricingContextSnapshot: {
+    phase: number
+    priceSource: string
+    priceTimestamp: number
+    gasPriceVolatilityBuffer: number
+  }
 }
 
 export type FeePreviewArg = {
@@ -65,7 +69,11 @@ export type FeePreviewArg = {
 }
 
 const isFeePreviewResponse = (value: unknown): value is FeePreviewResponse =>
-  typeof value === 'object' && value !== null && 'txData' in value && 'relayCost' in value
+  typeof value === 'object' &&
+  value !== null &&
+  'txData' in value &&
+  'relayCost' in value &&
+  'pricingContextSnapshot' in value
 
 export const gtfFeePreviewEndpoints = (builder: GatewayEndpointBuilder) => ({
   getGtfFeePreview: builder.query<FeePreviewResponse, FeePreviewArg>({
@@ -74,7 +82,7 @@ export const gtfFeePreviewEndpoints = (builder: GatewayEndpointBuilder) => ({
         const response = await fetch(`${GATEWAY_URL}/v1/chains/${chainId}/fees/${safeAddress}/preview`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...tx, nonce: String(tx.nonce) }),
+          body: JSON.stringify(tx),
         })
 
         if (!response.ok) {

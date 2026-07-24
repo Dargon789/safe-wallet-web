@@ -64,8 +64,6 @@ export enum MixpanelEvent {
   ADDRESS_BOOK_ENTRY_CREATED = 'Address Book Entry Created',
   WORKSPACE_TRANSACTION_INITIATED = 'Workspace Transaction Initiated',
   ONBOARDING_WIZARD = 'Onboarding Wizard',
-  USE_OLD_UI = 'Use Old UI',
-  ERROR_SURFACED = 'Error Surfaced',
 }
 
 export enum WorkspaceCreateEntryPoint {
@@ -120,15 +118,6 @@ export enum MixpanelEventParams {
   TX_ID = 'TX ID',
   SAFE_SELECTOR_DROPDOWN = 'Safe Selector Dropdown',
   GAS_PAYMENT_SOURCE = 'Gas Payment Source',
-  ERROR_DOMAIN = 'Error Domain',
-  ERROR_TYPE = 'Error Type',
-  ERROR_LAYER = 'Error Layer',
-  ERROR_CODE = 'Error Code',
-  IS_USER_FACING = 'Is User Facing',
-  TARGET_CONTRACT_LABEL = 'Target Contract Label',
-  TX_HASH = 'Transaction Hash',
-  RPC_ENDPOINT_KIND = 'RPC Endpoint Kind',
-  RPC_HOST = 'RPC Host',
 }
 
 export enum AuthLoginMethod {

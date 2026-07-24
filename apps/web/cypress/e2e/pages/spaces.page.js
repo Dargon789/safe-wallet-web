@@ -10,7 +10,6 @@ import * as navigation from './navigation.page.js'
 const orgList = '[data-testid="org-list"]'
 export const createSpaceBtn = '[data-testid="create-space-button"]'
 const sidebarLogo = '[data-testid="logo-container"]'
-const classicViewLink = '[data-testid="classic-view-link"]'
 
 // -- Space selector --
 const spaceSelectorBtn = '[data-testid="space-selector-button"]'
@@ -23,30 +22,33 @@ const spaceSaveBtn = '[data-testid="space-save-button"]'
 const spaceDeleteBtn = '[data-testid="space-delete-button"]'
 const spaceConfirmDeleteBtn = '[data-testid="space-confirm-delete-button"]'
 const spaceConfirmNameInput = '[data-testid="space-confirm-name-input"]'
-// The welcome "Workspaces" list renders one SpaceRow per space (reworked from the old SpaceCard).
-const spaceCard = '[data-testid="space-row"]'
+const spaceCard = '[data-testid="space-card"]'
 const spaceCardName = '[data-testid="org-name"]'
 const spaceCardContextMenuBtn = '[data-testid="space-card-context-menu-button"]'
 const contectMenuRemoveBtn = '[data-testid="remove-button"]'
 
 // -- Dashboard widgets --
 const spaceDashboardAccountsWidget = '[data-testid="space-dashboard-accounts-widget"]'
-// The Accounts widget reuses the shared SafeAccountsTable, so rows carry the same testids as the
-// trusted/welcome account tables: one `account-table-row` per line (data-variant single|group|child).
-const spaceDashboardAccountsRowSelector = '[data-testid="account-table-row"]'
+const spaceDashboardAccountsRowSelector = '[data-testid^="space-dashboard-accounts-row-"]'
 const spaceDashboardTotalValue = '[data-testid="space-dashboard-total-value"]'
 const pendingTxWidget = '[data-testid="space-dashboard-pending-widget"]'
 const widgetItem = '[data-slot="widget-item"]'
 export const dashboardSafeList = '[data-testid="dashboard-safe-list"]'
 
-// -- Shared account row (SafeAccountTableRow — used by every account table, incl. the dashboard widget) --
-const accountRowLink = '[data-testid="account-row-link"]'
-const accountName = '[data-testid="account-cell-name"]'
-const accountAddress = '[data-testid="safe-item-address"]'
-const accountChainLogos = '[data-testid="account-cell-networks"]'
-const accountBalance = '[data-testid="account-cell-balance"]'
-const accountThreshold = '[data-testid="account-threshold"]'
-const subAccountRow = `${spaceDashboardAccountsRowSelector}[data-variant="child"]`
+// -- Single-chain account row (AccountWidgetItem) --
+const singleAccountName = '[data-testid="single-account-name"]'
+const singleAccountAddress = '[data-testid="single-account-address"]'
+const singleAccountIdenticon = '[data-testid="single-account-identicon"]'
+const singleAccountChainLogos = '[data-testid="single-account-chain-logos"]'
+const singleAccountBalance = '[data-testid="single-account-balance"]'
+const singleAccountThreshold = '[data-testid="single-account-threshold"]'
+
+// -- Multichain account row (ExpandableAccountItem / AccountItemContent) --
+const multichainAccountName = '[data-testid="multichain-account-name"]'
+const multichainAccountAddress = '[data-testid="multichain-account-address"]'
+const multichainAccountIdenticon = '[data-testid="multichain-account-identicon"]'
+const multichainAccountChainLogos = '[data-testid="multichain-account-chain-logos"]'
+const subAccountRow = '[data-testid="sub-account-row"]'
 
 // -- Shared --
 const chainIndicatorNetworkLogoImg = '[data-testid="chain-indicator-network-logo-img"]'
@@ -57,28 +59,23 @@ const safeSelectorTriggerIdenticon = '[data-testid="safe-icon"]'
 const safeSelectorTriggerName = '[data-testid="safe-selector-trigger-name"]'
 const safeSelectorTriggerAddress = '[data-testid="safe-selector-trigger-address"]'
 const safeSelectorBalance = '[data-testid="safe-selector-balance"]'
-// The header threshold is the shared ThresholdBadge (account-threshold), no longer a dedicated
-// safe-selector-threshold testid.
-const safeSelectorThreshold = '[data-testid="account-threshold"]'
+const safeSelectorThreshold = '[data-testid="safe-selector-threshold"]'
 const safeLevelNavigation = '[data-testid="safe-level-navigation"]'
 const spaceSafesNavigationBlock = '[data-testid="space-safes-navigation-block"]'
 const spaceChainNavigationButton = '[data-testid="space-chain-navigation-button"]'
-
-// Back-to-space control now lives in the sidebar, not the safe-level navigation panel
-export const backToSpaceBtn = '[data-testid="back-to-space-button"]'
+const backToSpaceBtn = '[aria-label="Back to workspace"]'
+const safeLevelNavigationBackToSpaceBtn = `${safeLevelNavigation} ${backToSpaceBtn}`
 
 // -- Space sidebar items --
-export const sidebarItemDashboard = '[data-testid="sidebar-item-dashboard"]'
-export const sidebarItemAccounts = '[data-testid="sidebar-item-safe-accounts"]'
+export const sidebarItemHome = '[data-testid="sidebar-item-home"]'
+export const sidebarItemAccounts = '[data-testid="sidebar-item-accounts"]'
 export const sidebarItemAddressBook = '[data-testid="sidebar-item-address-book"]'
 export const sidebarItemTeam = '[data-testid="sidebar-item-team"]'
 export const sidebarItemSettings = '[data-testid="sidebar-item-settings"]'
 
 // -- Safe accounts page --
 const safeAccountsPageTitle = 'Safe accounts'
-// The Safe accounts page now renders the shared SafeAccountsTable; count only top-level rows
-// (multichain children render only when a group is expanded).
-const safeAccountsTableRow = '[data-testid="account-table-row"]:not([data-variant="child"])'
+const safeAccountsListItem = '[data-testid="safe-list-item"]'
 
 // -- Add account --
 const openAddAccountsChooserBtn = '[data-testid="open-add-accounts-chooser-button"]'
@@ -104,24 +101,15 @@ const acceptInviteBtn = '[data-testid="accept-invite-button"]'
 const inviteNameInput = '[data-testid="invite-name-input"]'
 const confirmAcceptInviteBtn = '[data-testid="confirm-accept-invite-button"]'
 
-// -- Header account menu (sign-out) --
-const headerAccountMenuTrigger = '[data-testid="header-account-info"] button'
+// -- Sidebar profile (sign-out) --
+const sidebarProfileTrigger = '[data-testid="sidebar-profile-trigger"]'
 const sidebarProfilePopover = '[data-testid="sidebar-profile-popover"]'
 const sidebarProfileSignOutBtn = '[data-testid="sidebar-profile-sign-out"]'
 const continueWithWalletBtn = '[data-testid="continue-with-wallet-btn"]'
-// The signed-out /welcome/spaces keeps the Topbar, which renders its own generic "Connect Wallet"
-// button with the same data-testid as the sign-in card's button — so the card button is matched by
-// its "Continue with wallet" text instead of by index.
-const connectWalletBtn = '[data-testid="connect-wallet-btn"]'
-const workspaceWalletBtnText = 'Continue with wallet'
-const onboardV2 = 'onboard-v2'
-const pkInput = '[data-testid="private-key-input"]'
-const pkConnectBtn = '[data-testid="pk-connect-btn"]'
 
 // -- Onboarding --
 const orgSpaceInput = '[data-testid="space-name-input"]'
 const createSpaceOnboardingContinueBtn = '[data-testid="create-space-onboarding-continue-button"]'
-const selectSafesSkipLink = '[data-testid="select-safes-skip-link"]'
 const inviteMembersSkipBtn = '[data-testid="invite-members-skip-button"]'
 const surveyOptionCard = '[data-testid="survey-option-card"]'
 const surveyFinishBtn = '[data-testid="survey-finish-button"]'
@@ -146,9 +134,7 @@ export const exploreSpacesLabel = 'Introducing workspaces'
 // ===========================================
 
 const spaceDashboardTotalValueLabelText = 'Total value'
-// Both the Accounts and Pending widgets render a "View all" button with this testid, so scope it to
-// the Accounts widget container when clicking.
-const widgetViewAllBtn = '[data-testid="widget-view-all"]'
+const viewAllAccountsLabel = 'View all accounts'
 const updateSuccessMsg = 'Workspace name updated'
 const formattedSpaceTotalValuePattern = /^\$[\u200a\s]*[\d,]+\.\d{2}$/
 
@@ -165,20 +151,27 @@ export const acceptInviteConfirmationMsg = (spaceName) => `Accepted invite to ${
 // ===========================================
 
 function getAccountItem(index) {
-  return `${spaceDashboardAccountsWidget} ${spaceDashboardAccountsRowSelector}:eq(${index})`
+  return `${spaceDashboardAccountsWidget} [data-testid="space-dashboard-accounts-row-${index}"]`
 }
 
-// A single-chain (non-group) account row navigates via its name link.
-const singleChainAccountRow = `${spaceDashboardAccountsWidget} ${spaceDashboardAccountsRowSelector}[data-variant="single"] ${accountRowLink}`
+const singleChainAccountRow = `${spaceDashboardAccountsWidget} [data-testid^="space-dashboard-accounts-row-"]:has(${singleAccountName})`
 
-// Multi-chain groups expand inline: their per-chain safes render as sibling `child` rows in the same
-// table body, so the "expanded panel" is just the widget scoped to those child rows.
-function getAccountExpandedPanel() {
-  return spaceDashboardAccountsWidget
+function getAccountExpandedPanel(rowIndex) {
+  return `${spaceDashboardAccountsWidget} [data-testid="space-dashboard-accounts-expanded-${rowIndex}"]`
 }
 
 export function getPendingTxItem(index) {
   return `${pendingTxWidget} ${widgetItem}:eq(${index})`
+}
+
+function getSpaceId() {
+  return cy.url().then((url) => {
+    const match = url.match(/spaceId=([^&]+)/)
+    if (!match) {
+      throw new Error('spaceId not found in the URL')
+    }
+    return match[1]
+  })
 }
 
 const spaceDashboardWidgetSelectorByTitle = {
@@ -194,40 +187,6 @@ export function clickOnSignInBtn() {
   cy.get(continueWithWalletBtn).click()
 }
 
-// Full workspace sign-in from the signed-out /welcome/spaces card. Clicking the card's "Continue
-// with wallet" button opens onboard; after injecting the signer the card flips to a "Continue with
-// <wallet>" button that runs SIWE, which finishes signing into the workspace.
-export function signInWithWallet(signer) {
-  cy.contains(connectWalletBtn, workspaceWalletBtnText, { timeout: 30000 }).should('be.visible').click()
-  cy.get(onboardV2, { timeout: 30000 }).shadow().find('button').contains('Private key').click()
-  cy.get(pkInput, { timeout: 30000 })
-    .find('input')
-    .then(($input) => {
-      $input.val(signer)
-      cy.wrap($input).trigger('input').trigger('change')
-    })
-  cy.get(pkConnectBtn).click()
-  // The page renders more than one sign-in card (the workspace card plus the generic "Sign in to
-  // see content" gate), each with a continue-with-wallet-btn — click the visible one.
-  cy.get(continueWithWalletBtn, { timeout: 30000 }).filter(':visible').first().click()
-}
-
-export function clickOnUseOldUiBtn() {
-  cy.get(classicViewLink, { timeout: 30000 }).should('be.visible').click()
-}
-
-// Seeds the same sessionStorage opt-in that "Use the old UI" sets, so the
-// /welcome/spaces sign-in gate is bypassed without clicking through it. Pass to
-// cy.visit as onBeforeLoad so the flag is present before the app boots, and
-// re-seed on every visit — sessionStorage is per-visit in the test runner.
-export function bypassSpacesLogin(win) {
-  win.sessionStorage.setItem(constants.sessionStorageKeys.SAFE_v2__classicViewEnabled, JSON.stringify(true))
-}
-
-export function visitClassicView(url) {
-  cy.visit(url, { onBeforeLoad: bypassSpacesLogin })
-}
-
 export function blockBeamer() {
   // Block the Beamer widget script so its announcement popup never renders and
   // covers onboarding buttons. Call before cy.visit().
@@ -240,8 +199,8 @@ export function interceptSpacesList() {
   cy.intercept('GET', constants.spacesEndpoint).as('spacesList')
 }
 
-export function signOutViaAccountMenu() {
-  cy.get(headerAccountMenuTrigger, { timeout: 30000 }).should('be.visible').click()
+export function signOutViaSidebarProfile() {
+  cy.get(sidebarProfileTrigger, { timeout: 30000 }).should('be.visible').click()
   cy.get(sidebarProfilePopover).should('be.visible')
   cy.get(sidebarProfileSignOutBtn).should('be.visible').click()
   cy.url({ timeout: 60000 }).should('include', constants.spacesUrl)
@@ -280,13 +239,6 @@ export function goToSpacesView() {
   cy.get(`${orgList}, ${createSpaceBtn}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
 }
 
-export function openSpaceByName(name) {
-  // From the Spaces View list, open the space whose row carries this name (call goToSpacesView first
-  // if a single-space account may have auto-redirected into a dashboard).
-  cy.contains(spaceCard, name, { timeout: 30000 }).should('be.visible').click()
-  cy.url({ timeout: 30000 }).should('include', constants.spaceDashboardUrl).and('include', 'spaceId=')
-}
-
 export function clickOnSpaceSelector(spaceName) {
   cy.get(spaceSelectorBtn, { timeout: 15000 }).should('be.visible').click()
   if (spaceName) {
@@ -299,25 +251,17 @@ export function disconnectFromSpaceLevel() {
   navigation.clickOnDisconnectBtn()
 }
 
-// Navigate to a space section through the sidebar (client-side) rather than a full cy.visit reload.
-// Dismiss any open popover first (e.g. the space selector left open by clickOnSpaceSelector) so it
-// can't cover the nav item.
-function openSpaceSection(sidebarSelector, pathFragment) {
-  cy.get('body').type('{esc}')
-  cy.get(sidebarSelector, { timeout: 30000 }).should('be.visible').click()
-  cy.url({ timeout: 30000 }).should('include', pathFragment).and('include', 'spaceId=')
-}
-
 export function goToSpaceSettings() {
-  openSpaceSection(sidebarItemSettings, '/spaces/settings')
+  getSpaceId().then((spaceId) => {
+    cy.visit(constants.spaceUrl + spaceId)
+  })
 }
 
 export function goToSpaceMembers() {
-  openSpaceSection(sidebarItemTeam, '/spaces/members')
-}
-
-export function goToSpaceSafeAccounts() {
-  openSpaceSection(sidebarItemAccounts, '/spaces/safe-accounts')
+  cy.wait(1000)
+  getSpaceId().then((spaceId) => {
+    cy.visit(constants.spaceMembersUrl + spaceId)
+  })
 }
 
 // ===========================================
@@ -337,7 +281,7 @@ export function clickExpandedPanelSubAccountRow(rowIndex, subRowIndex) {
 }
 
 export function clickViewAllAccounts() {
-  cy.get(spaceDashboardAccountsWidget).find(widgetViewAllBtn).should('be.visible').click()
+  cy.contains(viewAllAccountsLabel).click()
 }
 
 export function verifySidebarItemNavigates(sidebarSelector, pathFragment) {
@@ -373,40 +317,57 @@ export function verifyPendingTxWidgetItemCount(expectedCount) {
   main.verifyElementsCount(`${pendingTxWidget} ${widgetItem}`, expectedCount)
 }
 
-// Single- and multi-chain rows now render through the same shared component, so `type` is kept only
-// for call-site readability — both resolve to the same row/cell testids.
+const accountRowSelectors = {
+  single: {
+    identicon: singleAccountIdenticon,
+    name: singleAccountName,
+    address: singleAccountAddress,
+    chainLogos: singleAccountChainLogos,
+    balance: singleAccountBalance,
+    threshold: singleAccountThreshold,
+  },
+  multichain: {
+    identicon: multichainAccountIdenticon,
+    name: multichainAccountName,
+    address: multichainAccountAddress,
+    chainLogos: multichainAccountChainLogos,
+  },
+}
+
 export function verifyAccountRowDetails(
   type,
   rowIndex,
   { name, address, balanceRegex, ownersThreshold, chainLogosCount },
 ) {
+  const sel = accountRowSelectors[type]
   const row = getAccountItem(rowIndex)
   cy.get(row)
     .should('be.visible')
     .within(() => {
-      cy.get(accountName).should('be.visible').and('contain.text', name)
-      // FullAddress renders the whole address in the DOM (the middle is only clipped visually).
-      cy.get(accountAddress).should('be.visible').and('contain.text', address)
-      if (chainLogosCount !== undefined) {
-        cy.get(accountChainLogos).find(chainIndicatorNetworkLogoImg).should('have.length', chainLogosCount)
-      } else {
-        cy.get(accountChainLogos).find(chainIndicatorNetworkLogoImg).should('be.visible')
+      cy.get(sel.identicon).should('be.visible')
+      cy.get(sel.name).should('be.visible').and('contain.text', name)
+      cy.get(sel.address).should('be.visible').and('contain.text', main.shortenAddress(address))
+      if (sel.chainLogos) {
+        cy.get(sel.chainLogos).find(chainIndicatorNetworkLogoImg).should('be.visible')
       }
-      if (balanceRegex !== undefined) {
-        cy.get(accountBalance).invoke('text').should('match', balanceRegex)
+      if (balanceRegex !== undefined && sel.balance) {
+        cy.get(sel.balance).invoke('text').should('match', balanceRegex)
       }
-      if (ownersThreshold !== undefined) {
-        cy.get(accountThreshold).should('be.visible').and('contain.text', ownersThreshold)
+      if (ownersThreshold !== undefined && sel.threshold) {
+        cy.get(sel.threshold).should('be.visible').and('contain.text', ownersThreshold)
+      }
+      if (chainLogosCount !== undefined && sel.chainLogos) {
+        cy.get(sel.chainLogos).find(chainIndicatorNetworkLogoImg).should('have.length', chainLogosCount)
       }
     })
 }
 
-export function verifyExpandedPanelSubAccountRowsCount(expectedCount) {
-  cy.get(getAccountExpandedPanel()).find(subAccountRow).should('have.length', expectedCount)
+export function verifyExpandedPanelSubAccountRowsCount(rowIndex, expectedCount) {
+  cy.get(getAccountExpandedPanel(rowIndex)).find(subAccountRow).should('have.length', expectedCount)
 }
 
-export function verifyAccountExpandedPanelVisible() {
-  cy.get(getAccountExpandedPanel()).should('be.visible')
+export function verifyAccountExpandedPanelVisible(rowIndex) {
+  cy.get(getAccountExpandedPanel(rowIndex)).should('be.visible')
 }
 
 // ===========================================
@@ -421,9 +382,8 @@ function verifySafeDashboardUrlSafeQuery(expectedSafeParam) {
 }
 
 function verifySafeSelectorNavigationPanel({ expectedName, fullAddress, balanceRegex, ownersThreshold }) {
-  // The header renders the full, unprefixed address via <FullAddress> on sm+ viewports (the test
-  // viewport is 1280px), no longer a shortened form.
-  const expectedLine = fullAddress
+  // The selector no longer shows the chain prefix; assert the (unprefixed) shortened address only.
+  const expectedLine = main.shortenAddress(fullAddress)
   cy.get(safeSelectorTriggerIdenticon, { timeout: 30000 }).should('be.visible')
   cy.get(safeSelectorTriggerName, { timeout: 30000 }).should('be.visible').and('contain.text', expectedName)
   cy.get(safeSelectorTriggerAddress).should('be.visible').and('contain.text', expectedLine)
@@ -474,16 +434,9 @@ export function verifySpaceSidebarItemsNotVisible() {
 }
 
 export function verifySafeLevelNavigationElements() {
+  cy.get(safeLevelNavigationBackToSpaceBtn).should('be.visible')
   cy.get(safeLevelNavigation).find(spaceSafesNavigationBlock).should('be.visible')
   cy.get(safeLevelNavigation).find(spaceChainNavigationButton).should('be.visible')
-}
-
-export function verifyBackToSpaceButtonVisible() {
-  cy.get(backToSpaceBtn).should('be.visible')
-}
-
-export function clickBackToSpaceButton() {
-  cy.get(backToSpaceBtn).should('be.visible').click()
 }
 
 // ===========================================
@@ -494,7 +447,7 @@ export function verifyViewAllAccountsPageOpened(expectedAccountsCount) {
   cy.url().should('include', '/spaces/safe-accounts').and('include', 'spaceId=')
   cy.contains(safeAccountsPageTitle, { timeout: 30000 }).should('be.visible')
   if (expectedAccountsCount !== undefined) {
-    main.verifyElementsCount(safeAccountsTableRow, expectedAccountsCount)
+    main.verifyElementsCount(safeAccountsListItem, expectedAccountsCount)
   }
 }
 
@@ -582,7 +535,7 @@ export function selectNetwork(network) {
 
 export function openAddAccountsToWorkspace() {
   cy.get(openAddAccountsChooserBtn, { timeout: 30000 }).should('be.visible').and('be.enabled').click({ force: true })
-  cy.contains('[role="dialog"]', 'Add Safe accounts', { timeout: 30000 })
+  cy.contains('[role="dialog"]', 'Manage Safe accounts', { timeout: 30000 })
     .should('be.visible')
     .within(() => {
       cy.get(addSpaceAccountToWorkspaceBtn, { timeout: 30000 }).should('be.visible')
@@ -599,8 +552,7 @@ export function addAccountManually(address, network) {
   cy.get(addAddressInput).find('input').should('have.value', address)
   cy.get(addSpaceAccountManuallyBtn).should('be.enabled').click()
   cy.get(addAccountsBtn).should('be.enabled').click()
-  // Added accounts land in the Safe accounts table; FullAddress keeps the whole address in the DOM.
-  cy.contains(accountAddress, address, { timeout: 30000 }).should('be.visible')
+  cy.get(dashboardSafeList).contains(main.shortenAddress(address)).should('be.visible')
 }
 
 // ===========================================
@@ -628,13 +580,11 @@ export function verifySpaceInviteBannerVisible(spaceName) {
     })
 }
 
-export function acceptInvite(spaceName, name) {
-  // Scope to this run's invite: the member may hold several pending invites, so click Accept inside
-  // the banner for the space under test rather than the first accept-invite-button on the page.
-  cy.contains(inviteBanner, spaceName).find(acceptInviteBtn).click()
+export function acceptInvite(name) {
+  cy.get(acceptInviteBtn).click()
   cy.get(inviteNameInput).find('input').clear().type(name)
   cy.get(confirmAcceptInviteBtn).click()
-  // Accepting navigates into the joined workspace; the caller verifies the success message.
+  cy.contains(name).should('be.visible')
 }
 
 // ===========================================
@@ -668,11 +618,12 @@ function submitSpaceName(name) {
 
 function skipSelectSafesStep() {
   cy.url({ timeout: 30000 }).should('include', onboardingSelectSafesPath).and('include', 'spaceId=')
-  // Click the on-page skip link (client-side router.push to invite-members) instead of a full
-  // cy.visit reload: the reload reboots the app and pays the per-navigation long task, so the
-  // invite-members skip button renders after the command times out.
-  cy.get(selectSafesSkipLink).should('be.visible').click()
-  cy.url({ timeout: 30000 }).should('include', onboardingInviteMembersPath).and('include', 'spaceId=')
+  cy.url().then((url) => {
+    const match = url.match(/spaceId=([^&]+)/)
+    if (!match) throw new Error('spaceId not found in URL')
+    const spaceId = match[1]
+    cy.visit(`${onboardingInviteMembersPath}?spaceId=${spaceId}`)
+  })
 }
 
 function skipInviteMembersStep() {
@@ -700,4 +651,23 @@ export function createSpaceViaOnboardingWithSkip(name) {
   skipInviteMembersStep()
   completeSurveyStep()
   verifySpaceDashboardLoaded()
+}
+
+function openFirstExistingSpace() {
+  cy.get(`${orgList} ${spaceCard}`, { timeout: 30000 }).first().should('be.visible').click()
+  cy.url({ timeout: 30000 }).should('include', constants.spaceDashboardUrl).and('include', 'spaceId=')
+}
+
+export function openFirstSpaceFromSpacesView() {
+  // After sign-in a single-space account auto-redirects into the space dashboard;
+  // click the logo to return to the Spaces View so a space card is always present.
+  cy.wait('@spacesList', { timeout: 60000 })
+  cy.url({ timeout: 30000 }).then((url) => {
+    if (url.includes(constants.spaceDashboardUrl)) {
+      cy.get(sidebarLogo).should('be.visible').click()
+      cy.url().should('include', constants.spacesUrl)
+    }
+  })
+  cy.get(`${orgList} ${spaceCard}`, { timeout: 30000 }).should('have.length.at.least', 1)
+  openFirstExistingSpace()
 }

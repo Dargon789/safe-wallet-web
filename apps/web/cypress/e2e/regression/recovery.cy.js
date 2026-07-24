@@ -2,7 +2,6 @@ import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as owner from '../pages/owners.pages.js'
 import * as recovery from '../pages/recovery.pages.js'
-import * as spaces from '../pages/spaces.page.js'
 import * as dashboard from '../pages/dashboard.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
@@ -207,8 +206,8 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     ]
 
     safes.forEach((safe) => {
-      spaces.visitClassicView(constants.prodbaseUrl + constants.securityUrl + safe)
-      recovery.getSetupRecoveryBtn().should('be.visible')
+      cy.visit(constants.prodbaseUrl + constants.securityUrl + safe)
+      recovery.getSetupRecoveryBtn()
     })
   })
 
@@ -222,7 +221,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     ]
 
     safes.forEach((safe) => {
-      spaces.visitClassicView(constants.prodbaseUrl + constants.securityUrl + safe)
+      cy.visit(constants.prodbaseUrl + constants.securityUrl + safe)
       main.verifyElementsCount(recovery.setupRecoveryBtn, 0)
     })
   })
