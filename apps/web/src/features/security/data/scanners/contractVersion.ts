@@ -3,7 +3,6 @@ import semverValid from 'semver/functions/valid'
 import { isValidMasterCopy, isMigrationToL2Possible } from '@safe-global/utils/services/contracts/safeContracts'
 import { getSafeSingletonDeployments, getSafeL2SingletonDeployments } from '@safe-global/safe-deployments'
 import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
-import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { SecurityScanner } from './types'
 import { KNOWN_SAFE_VERSIONS, getSeverityFromScore } from './constants'
 
@@ -38,7 +37,6 @@ export const contractVersionScanner: SecurityScanner = {
       version,
       latestVersion,
       masterCopyDeployer,
-      nonce,
       chainId,
       creationInfo,
     } = ctx
@@ -47,13 +45,7 @@ export const contractVersionScanner: SecurityScanner = {
 
     // Unsupported mastercopy — same check as UnsupportedMastercopyWarning
     if (!isValidMasterCopy(implementationVersionState)) {
-      // isMigrationToL2Possible only reads nonce, chainId, and implementationVersionState
-      // from SafeState. We cast to satisfy the type, but only these 3 fields are accessed.
-      const canMigrateL2 = isMigrationToL2Possible({
-        nonce,
-        chainId,
-        implementationVersionState,
-      } as Pick<SafeState, 'nonce' | 'chainId' | 'implementationVersionState'> as SafeState)
+      const canMigrateL2 = isMigrationToL2Possible({ version, chainId })
 
       const score = 10
       return {
@@ -63,7 +55,7 @@ export const contractVersionScanner: SecurityScanner = {
         evidence: [
           { label: 'Current version', value: versionLabel },
           { label: 'Status', value: 'Unsupported' },
-          { label: 'Implementation', value: `${implementationAddress.slice(0, 10)}...` },
+          { label: 'Implementation', value: implementationAddress },
         ],
         remediation: canMigrateL2
           ? 'This version may miss security fixes and improvements. You can migrate it to a compatible version.'
@@ -114,7 +106,7 @@ export const contractVersionScanner: SecurityScanner = {
         score,
         evidence: [
           { label: 'Current version', value: versionLabel },
-          { label: 'Implementation', value: `${implementationAddress.slice(0, 10)}...` },
+          { label: 'Implementation', value: implementationAddress },
           { label: 'Status', value: 'Unrecognized implementation' },
         ],
         remediation:
@@ -132,7 +124,7 @@ export const contractVersionScanner: SecurityScanner = {
         score,
         evidence: [
           { label: 'Current version', value: versionLabel },
-          { label: 'Original implementation', value: `${creationInfo.masterCopy.slice(0, 10)}...` },
+          { label: 'Original implementation', value: creationInfo.masterCopy },
           { label: 'Status', value: 'Deployed with unrecognized implementation' },
         ],
         remediation:

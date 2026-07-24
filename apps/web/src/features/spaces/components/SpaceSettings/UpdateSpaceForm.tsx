@@ -6,8 +6,8 @@ import { type GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED
 import { useIsAdmin } from '@/features/spaces'
 import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 
-const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => {
-  const { handleUpdate, error } = useUpdateSpace(space)
+const UpdateSpaceForm = ({ space, onClose }: { space: GetSpaceResponse | undefined; onClose?: () => void }) => {
+  const { handleUpdate, error } = useUpdateSpace(space, onClose)
   const isAdmin = useIsAdmin(space?.uuid)
 
   const formMethods = useForm<UpdateSpaceFormData>({
