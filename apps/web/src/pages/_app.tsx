@@ -90,7 +90,9 @@ import { useVisitedSafes } from '@/features/myAccounts'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
 import useInvalidateOverviewsOnTx from '@/hooks/useInvalidateOverviewsOnTx'
 import { GATEWAY_URL } from '@/config/gateway'
-import { captureException, initObservability } from '@/services/observability'
+import { captureError, initObservability } from '@/services/observability'
+import { DatadogProvider } from '@/services/observability/providers/datadog'
+import { MixpanelTracingProvider } from '@/services/observability/providers/mixpanel'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { CaptchaProvider } from '@/components/common/Captcha'
@@ -100,12 +102,13 @@ import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
-import { useIsAuthGateBlocking } from '@/hooks/useIsAuthGateBlocking'
 
 // Initialize observability before React rendering starts
 // This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration
 if (typeof window !== 'undefined') {
-  initObservability()
+  // Datadog RUM + Mixpanel "Error Surfaced" tracking (WA-2775) behind one service.
+  // DatadogProvider self-gates when its RUM tokens are absent.
+  initObservability([new DatadogProvider(), new MixpanelTracingProvider()])
 }
 
 const reduxStore = makeStore()
@@ -147,8 +150,7 @@ const InitApp = (): ReactElement | null => {
   useSessionExpiryGuard()
   useUnlockBodyScroll()
 
-  const isGateBlocking = useIsAuthGateBlocking()
-  return isGateBlocking ? null : <SafeScopedSubscriptions />
+  return <SafeScopedSubscriptions />
 }
 
 // Client-side cache, shared for the whole session of the user in the browser.
@@ -162,7 +164,7 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
   const themeMode = isDarkMode ? THEME_DARK : THEME_LIGHT
 
   const handleError = (error: Error, componentStack?: string) => {
-    captureException(error, { componentStack })
+    captureError({ error, isUserFacing: true, tags: { componentStack } })
   }
 
   const content = (
