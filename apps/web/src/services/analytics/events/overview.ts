@@ -170,6 +170,10 @@ export const OVERVIEW_EVENTS = {
     action: 'Proceed with transaction',
     category: OVERVIEW_CATEGORY,
   },
+  SHOW_STAKING_BANNER: {
+    action: 'Show staking banner',
+    category: OVERVIEW_CATEGORY,
+  },
   OPEN_STAKING_WIDGET: {
     action: 'Open staking widget from banner',
     category: OVERVIEW_CATEGORY,
@@ -267,10 +271,8 @@ export enum TRUSTED_SAFE_LABELS {
 export enum OVERVIEW_LABELS {
   sidebar = 'sidebar',
   top_bar = 'top_bar',
-  welcome_page = 'welcome_page',
   login_page = 'login_page',
   settings = 'settings',
   space_list_page = 'space_list_page',
   space_page = 'space_page',
-  owned_safes_modal = 'owned_safes_modal',
 }

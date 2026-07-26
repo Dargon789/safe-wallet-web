@@ -1,9 +1,9 @@
 import type { SafeTransaction } from '@safe-global/types-kit'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 import type { AppDispatch } from '@/store'
 import type { GTFContract } from '../contract'
+import { isGtfFeePreviewAvailable } from '../utils/isGtfFeePreviewAvailable'
 
 type GtfFeatureSurface = Pick<GTFContract, 'resolveFeeParams'> & { $isReady: boolean }
 
@@ -16,6 +16,7 @@ export type GtfMergeContext = {
   chainId: string
   safeAddress: string
   numberSignatures: number
+  currency?: string
   dispatch: AppDispatch
 }
 
@@ -32,10 +33,11 @@ export const mergeGtfFeeParams = async ({
   chainId,
   safeAddress,
   numberSignatures,
+  currency,
   dispatch,
 }: GtfMergeContext): Promise<SafeTransaction> => {
   if (safeTx.signatures.size > 0) return safeTx
-  if (!chain || !hasFeature(chain, FEATURES.GTF)) return safeTx
+  if (!isGtfFeePreviewAvailable(chain)) return safeTx
   if (gtfPaymentMode !== 'safe' || !gtfSelectedGasToken) return safeTx
   if (!gtfFeature.$isReady || !gtfFeature.resolveFeeParams) return safeTx
 
@@ -45,6 +47,7 @@ export const mergeGtfFeeParams = async ({
     safeTx,
     gasToken: gtfSelectedGasToken,
     numberSignatures,
+    currency,
     dispatch,
   })
 }
