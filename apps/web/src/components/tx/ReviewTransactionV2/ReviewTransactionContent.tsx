@@ -5,8 +5,7 @@ import madProps from '@/utils/mad-props'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ErrorMessage from '../ErrorMessage'
 import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
-import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/shared/ConfirmationTitle'
-import { ErrorBoundary } from '@sentry/react'
+import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import ApprovalEditor from '../ApprovalEditor'
 import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
@@ -15,7 +14,9 @@ import UnknownContractError from '@/components/tx/shared/errors/UnknownContractE
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { Slot, SlotName } from '@/components/tx-flow/slots'
 import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
-import { Button, CircularProgress, Divider } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Separator } from '@/components/ui/separator'
 import CheckWallet from '@/components/common/CheckWallet'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
@@ -39,8 +40,7 @@ export const ReviewTransactionContent = ({
   txDetails?: TransactionDetails
   txPreview?: TransactionPreview
 }): ReactElement => {
-  const { willExecute, isBatch, isCreation, isProposing, isRejection, isSubmitLoading, isSubmitDisabled, onlyExecute } =
-    useContext(TxFlowContext)
+  const { isBatch, isCreation, isRejection, isSubmitLoading, isSubmitDisabled, onlyExecute } = useContext(TxFlowContext)
   const { needsRiskConfirmation, isRiskConfirmed } = safeShield
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
@@ -65,26 +65,16 @@ export const ReviewTransactionContent = ({
           withDecodedData={withDecodedData}
         >
           {!isRejection && (
-            <ErrorBoundary fallback={<div>Error parsing data</div>}>
+            <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
               {isApproval && <ApprovalEditor safeTransaction={safeTx} />}
-            </ErrorBoundary>
+            </ObservabilityErrorBoundary>
           )}
         </ConfirmationView>
 
         <Slot name={SlotName.Main} />
 
-        <Divider sx={{ mt: 2, mx: -3 }} />
+        <Separator className="mt-4 -mx-6" />
 
-        <ConfirmationTitle
-          variant={
-            isProposing
-              ? ConfirmationTitleTypes.propose
-              : willExecute
-                ? ConfirmationTitleTypes.execute
-                : ConfirmationTitleTypes.sign
-          }
-          isCreation={isCreation}
-        />
         {safeTxError && (
           <ErrorMessage error={safeTxError}>
             This transaction will most likely fail. To save gas costs, avoid confirming the transaction.
@@ -95,20 +85,20 @@ export const ReviewTransactionContent = ({
         <NetworkWarning />
         <UnknownContractError txData={txDetails?.txData ?? txPreview?.txData} />
 
-        <TxCardActions>
+        <TxCardActions className="!mt-0">
           {/* Continue button */}
           <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!isSubmitDisabled}>
             {(isOk) => {
               return (
                 <Button
                   data-testid="continue-sign-btn"
-                  variant="contained"
                   type="submit"
+                  size="submit"
                   onClick={onContinueClick}
                   disabled={!isOk || isSubmitDisabled || (needsRiskConfirmation && !isRiskConfirmed)}
-                  sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
+                  className="order-1 w-full lg:w-auto"
                 >
-                  {isSubmitLoading ? <CircularProgress size={20} /> : 'Continue'}
+                  {isSubmitLoading ? <Spinner className="size-5" /> : 'Continue'}
                 </Button>
               )
             }}

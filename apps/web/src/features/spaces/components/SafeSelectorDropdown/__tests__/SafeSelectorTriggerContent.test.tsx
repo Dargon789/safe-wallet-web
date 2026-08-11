@@ -22,8 +22,8 @@ jest.mock('@/hooks/useSafeDisplayName', () => ({
 }))
 
 jest.mock('../components/SafeBalanceBlock', () => ({ __esModule: true, default: () => null }))
-jest.mock('../components/CopyAddressButton', () => ({ __esModule: true, default: () => null }))
-jest.mock('../components/ExplorerLinkButton', () => ({ __esModule: true, default: () => null }))
+jest.mock('@/components/common/AccountRow/CopyAddressButton', () => ({ __esModule: true, default: () => null }))
+jest.mock('@/components/common/AccountRow/ExplorerLinkButton', () => ({ __esModule: true, default: () => null }))
 jest.mock('@/components/settings/EnvironmentVariables/EnvHintButton', () => ({ __esModule: true, default: () => null }))
 
 const mockUseLoadFeature = coreFeatures.useLoadFeature as jest.Mock
@@ -66,7 +66,7 @@ describe('SafeSelectorTriggerContent', () => {
       <SafeSelectorTriggerContent selectedItem={selectedItem} selectedChainId={SELECTED_CHAIN_ID} />,
     )
 
-    expect(container.querySelector('[class*="MuiSvgIcon"]')).not.toBeNull()
+    expect(container.querySelector('[class*="shield-lines"]')).not.toBeNull()
   })
 
   it('does not render the Hypernative shield icon when the active Safe has no Hypernative guard', () => {
@@ -74,6 +74,6 @@ describe('SafeSelectorTriggerContent', () => {
       <SafeSelectorTriggerContent selectedItem={selectedItem} selectedChainId={SELECTED_CHAIN_ID} />,
     )
 
-    expect(container.querySelector('[class*="MuiSvgIcon"]')).toBeNull()
+    expect(container.querySelector('[class*="shield-lines"]')).toBeNull()
   })
 })

@@ -22,12 +22,15 @@ import {
   txQueueListener,
   authListener,
   counterfactualSyncListener,
+  addressBookListener,
 } from './slices'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
 import { ofacApi } from '@/store/api/ofac'
 import { safePassApi } from './api/safePass'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
+import { safenetCheckApi } from '@safe-global/store/safenet/safenetCheckApi'
+import { safenetCheckSlice } from '@safe-global/store/safenet/safenetCheckSlice'
 import { version as termsVersion } from '@/markdown/terms/version'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { GATEWAY_URL } from '@/config/gateway'
@@ -64,9 +67,12 @@ const rootReducer = combineReducers({
   [slices.safeActionsModalSlice.name]: slices.safeActionsModalSlice.reducer,
   [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
   [slices.gtfPaymentSourcePreferenceSlice.name]: slices.gtfPaymentSourcePreferenceSlice.reducer,
+  [slices.featureFlagOverridesSlice.name]: slices.featureFlagOverridesSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,
+  [safenetCheckSlice.name]: safenetCheckSlice.reducer,
+  [safenetCheckApi.reducerPath]: safenetCheckApi.reducer,
   [slices.gatewayApi.reducerPath]: slices.gatewayApi.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
   [slices.authSlice.reducerPath]: slices.authSlice.reducer,
@@ -91,6 +97,7 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
   slices.authSlice.name,
   slices.hnStateSlice.name,
   slices.gtfPaymentSourcePreferenceSlice.name,
+  slices.featureFlagOverridesSlice.name,
 ]
 
 export const getPersistedState = () => {
@@ -106,6 +113,7 @@ const middleware: Middleware<{}, RootState>[] = [
   ofacApi.middleware,
   safePassApi.middleware,
   hypernativeApi.middleware,
+  safenetCheckApi.middleware,
   slices.gatewayApi.middleware,
 ]
 
@@ -117,6 +125,7 @@ const listeners = [
   swapOrderStatusListener,
   authListener,
   counterfactualSyncListener,
+  addressBookListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {
@@ -151,6 +160,8 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
       nextState[slices.orderByPreferenceSlice.name] = {
         orderBy: slices.OrderByOption.NAME,
         resetVersion: slices.ORDER_BY_RESET_VERSION,
+        // Only the default sort direction is reset — the user's custom drag order is preserved.
+        manualOrder: orderByState.manualOrder ?? {},
       }
     }
 

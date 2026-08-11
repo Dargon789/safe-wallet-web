@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
-import { useRouter } from 'next/router'
-import { Link } from '@mui/material'
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
+import { ArrowRight } from 'lucide-react'
+import ExternalLink from '@/components/common/ExternalLink'
+import { Spinner } from '@/components/ui/spinner'
 import PromoBanner from '@/components/common/PromoBanner/PromoBanner'
-import { AppRoutes } from '@/config/routes'
+import { useOpenSafenetStakingApp } from '@/hooks/useOpenSafenetStakingApp'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import css from './styles.module.css'
 
@@ -11,14 +11,14 @@ const LEARN_MORE_LINK =
   'https://forum.safefoundation.org/t/sep-55-phase-2-fund-safenet-beta-for-safe-token-utility/6967'
 
 const StakingPromoBanner = ({ onDismiss }: { onDismiss: () => void }) => {
-  const router = useRouter()
+  const { openSafenetStakingApp, isNavigating } = useOpenSafenetStakingApp()
 
   useEffect(() => {
     trackEvent(OVERVIEW_EVENTS.SHOW_STAKING_BANNER)
   }, [])
 
   const onStake = () => {
-    router.push({ pathname: AppRoutes.stake, query: { safe: router.query.safe } })
+    openSafenetStakingApp()
   }
 
   const onLearnMore = () => {
@@ -28,25 +28,24 @@ const StakingPromoBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   return (
     <div className={css.stakingPromoBanner}>
       <PromoBanner
-        title="SAFE staking is now live"
+        title="Stake SAFE tokens and earn up to ~15% APR"
         description={
           <>
-            Stake SAFE tokens now and get rewards on deposit.{' '}
-            <Link
+            Earn by staking your SAFE tokens, currently rewarded up to 15%.{' '}
+            <ExternalLink
               href={LEARN_MORE_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
+              noIcon
               onClick={onLearnMore}
-              sx={{ color: 'inherit', textDecoration: 'underline', fontWeight: 'bold' }}
+              className="font-bold text-inherit [&>span]:underline"
             >
               Learn more
-            </Link>
+            </ExternalLink>
           </>
         }
         ctaLabel="Stake now"
         onCtaClick={onStake}
         ctaVariant="text"
-        endIcon={<ArrowForwardIcon fontSize="small" />}
+        endIcon={isNavigating ? <Spinner className="size-4" /> : <ArrowRight className="size-4" />}
         imageSrc="/images/common/staking-promo/safe-coin.svg"
         imageAlt="Safe token"
         trackingEvents={OVERVIEW_EVENTS.OPEN_STAKING_WIDGET}

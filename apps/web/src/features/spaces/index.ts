@@ -66,6 +66,7 @@ export { useAdminCount, useIsLastActiveAdmin } from './hooks/useIsLastActiveAdmi
 export { default as useIsQualifiedSafe } from './hooks/useIsQualifiedSafe'
 export { useMembersSearch } from './hooks/useMembersSearch'
 export { useInviteNotification } from './hooks/useInviteNotification'
+export { useWorkspaceAddressBookLabel } from './hooks/useWorkspaceAddressBookLabel'
 export { default as useTrackSpace } from './hooks/useTrackSpace'
 
 // Hooks from useSpaceMembers.tsx
@@ -79,6 +80,9 @@ export {
   isAdmin,
   isActiveAdmin,
   isInviteExpired,
+  getMemberDisplayName,
+  sanitizeMemberAlias,
+  MEMBER_ALIAS_MAX_LENGTH,
   MemberStatus,
   MemberRole,
 } from './hooks/useSpaceMembers'
@@ -104,14 +108,15 @@ export { mapSpaceContactsToAddressBookState } from './utils'
 
 // Components consumed from outside the feature
 export { HeaderNavigation } from './components/HeaderNavigation'
+export { default as HeaderAccountInfo } from './components/HeaderNavigation/HeaderAccountInfo'
 export { SpacesEnhancedSidebar } from './components/Sidebar/SpacesEnhancedSidebar'
 export { default as ConnectWalletHint } from './components/ConnectWalletHint'
 export { default as ChainSelectorBlock } from './components/SafeSelectorDropdown/components/ChainSelectorBlock'
 export type { ChainSelectorBlockProps } from './components/SafeSelectorDropdown/components/ChainSelectorBlock'
-export type { SafeItemData, SafeItemDataChain } from './components/SafeSelectorDropdown/types'
+export type { SafeItemData, SafeItemDataChain, SafeRenameTarget } from './components/SafeSelectorDropdown/types'
+export { matchesSafeSearch } from './components/SafeSelectorDropdown/utils'
 export { default as SafeSelectorDropdown } from './components/SafeSelectorDropdown'
 export { default as SafeWidget, WidgetItem } from './components/SafeWidget'
 export { default as SafeCardReadOnly } from './components/SafeAccounts/SafeCardReadOnly'
-export { default as FiatBalance } from './components/SelectSafesOnboarding/components/FiatBalance'
 export { DashboardHeader } from './components/Dashboard/DashboardHeader'
 export { default as SpacesLogin } from './components/SpacesLogin'
