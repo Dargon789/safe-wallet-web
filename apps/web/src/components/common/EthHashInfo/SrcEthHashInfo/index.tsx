@@ -1,10 +1,10 @@
 import classnames from 'classnames'
 import type { ReactElement, ReactNode, SyntheticEvent } from 'react'
 import { isAddress } from 'ethers'
-import { useTheme } from '@mui/material/styles'
-import { Box, Tooltip } from '@mui/material'
-import { Building2, HardDrive } from 'lucide-react'
-import useMediaQuery from '@mui/material/useMediaQuery'
+import { Cloud } from 'lucide-react'
+import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
+import { useIsBelowSm } from '@/hooks/useMediaQuery'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import Identicon from '../../Identicon'
 import CopyAddressButton from '../../CopyAddressButton'
 import ExplorerButton, { type ExplorerButtonProps } from '../../ExplorerButton'
@@ -22,7 +22,6 @@ export type EthHashInfoProps = {
   showCopyButton?: boolean
   prefix?: string
   showPrefix?: boolean
-  copyPrefix?: boolean
   shortAddress?: boolean
   copyAddress?: boolean
   customAvatar?: string | null
@@ -42,7 +41,6 @@ const SrcEthHashInfo = ({
   address,
   customAvatar,
   prefix = '',
-  copyPrefix = true,
   showPrefix = true,
   shortAddress = true,
   copyAddress = true,
@@ -60,10 +58,8 @@ const SrcEthHashInfo = ({
   badgeTooltip,
 }: EthHashInfoProps): ReactElement => {
   const shouldPrefix = isAddress(address)
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobile = useIsBelowSm()
   const identicon = <Identicon address={address} size={avatarSize} />
-  const shouldCopyPrefix = shouldPrefix && copyPrefix
 
   const accountStylesWithBadge = badgeTooltip
     ? {
@@ -107,71 +103,56 @@ const SrcEthHashInfo = ({
         </div>
       )}
 
-      <Box overflow="hidden" className={onlyName ? css.inline : undefined} gap={0.5}>
+      <div className={classnames('gap-1 overflow-hidden', { [css.inline]: onlyName })}>
         {!!name ? (
-          <Box
-            title={name}
-            className="ethHashInfo-name"
-            display="flex"
-            alignItems="center"
-            gap={0.5}
-            sx={accountStylesWithBadge}
-          >
-            <Box overflow="hidden" textOverflow="ellipsis">
-              {name}
-            </Box>
+          <div title={name} className="ethHashInfo-name flex items-center gap-1" style={accountStylesWithBadge}>
+            <div className="overflow-hidden text-ellipsis">{name}</div>
 
             {badgeTooltip
               ? badgeTooltip
               : !!addressBookNameSource && (
-                  <Tooltip
-                    title={`From your ${addressBookNameSource === ContactSource.space ? 'workspace' : 'local'} address book`}
-                    placement="top"
-                  >
-                    <span style={{ lineHeight: 0, color: 'var(--color-border-main)' }}>
+                  <Tooltip>
+                    <TooltipTrigger render={<span style={{ lineHeight: 0 }} />}>
                       {addressBookNameSource === ContactSource.local ? (
-                        <HardDrive size={16} />
+                        <AddressBookIcon className="size-5 text-[var(--color-border-main)]" />
                       ) : (
-                        <Building2 size={16} />
+                        <Cloud className="size-5 text-[var(--color-border-main)]" />
                       )}
-                    </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      From your {addressBookNameSource === ContactSource.space ? 'workspace' : 'local'} address book
+                    </TooltipContent>
                   </Tooltip>
                 )}
-          </Box>
+          </div>
         ) : (
-          badgeTooltip && (
-            <Box display="flex" alignItems="center" gap={0.5}>
-              {badgeTooltip}
-            </Box>
-          )
+          badgeTooltip && <div className="flex items-center gap-1">{badgeTooltip}</div>
         )}
 
         <div className={classnames(css.addressContainer, { [css.inline]: onlyName })}>
           {(!onlyName || !name) && (
-            <Box fontWeight="inherit" fontSize="inherit" overflow="hidden" textOverflow="ellipsis">
+            <div className="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]">
               {copyAddress ? (
-                <CopyAddressButton prefix={prefix} address={address} copyPrefix={shouldCopyPrefix} trusted={trusted}>
+                <CopyAddressButton address={address} trusted={trusted}>
                   {addressElement}
                 </CopyAddressButton>
               ) : (
                 addressElement
               )}
-            </Box>
+            </div>
           )}
 
-          {showCopyButton && (
-            <CopyAddressButton prefix={prefix} address={address} copyPrefix={shouldCopyPrefix} trusted={trusted} />
-          )}
+          {showCopyButton && <CopyAddressButton address={address} trusted={trusted} />}
 
           {hasExplorer && ExplorerButtonProps && (
-            <Box color="border.main">
+            <div className="text-[var(--color-border-main)]">
               <ExplorerButton {...ExplorerButtonProps} onClick={stopPropagation} />
-            </Box>
+            </div>
           )}
 
           {children}
         </div>
-      </Box>
+      </div>
     </div>
   )
 }

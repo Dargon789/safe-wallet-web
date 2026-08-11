@@ -240,6 +240,59 @@ describe('TxSigners (Audit Log)', () => {
     expect(screen.queryByText('Can be executed once the threshold is reached.')).not.toBeInTheDocument()
   })
 
+  it('shows the expired warning for a queued expired order', () => {
+    const { confirmations } = buildConfirmations(1, 2)
+    const txDetails = transactionDetailsBuilder()
+      .with({
+        detailedExecutionInfo: multisigExecutionDetailsBuilder()
+          .with({ confirmations, confirmationsRequired: 2, executor: null })
+          .build(),
+        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+      })
+      .build()
+    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+
+    render(
+      <TxSigners
+        txDetails={txDetails}
+        txSummary={txSummary}
+        isTxFromProposer={false}
+        proposer={ownerAddress}
+        isExpired
+      />,
+    )
+
+    expect(screen.getByText('This order has expired. Reject this transaction and try again.')).toBeInTheDocument()
+  })
+
+  it('hides the expired warning once the transaction has been executed', () => {
+    const executor = addressExBuilder().build()
+    const { confirmations } = buildConfirmations(2, 2)
+    const txDetails = transactionDetailsBuilder()
+      .with({
+        detailedExecutionInfo: multisigExecutionDetailsBuilder()
+          .with({ confirmations, confirmationsRequired: 2, executor })
+          .build(),
+        txStatus: TransactionStatus.SUCCESS,
+        executedAt: Date.now(),
+        txHash: faker.string.hexadecimal({ length: 64 }),
+      })
+      .build()
+    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
+
+    render(
+      <TxSigners
+        txDetails={txDetails}
+        txSummary={txSummary}
+        isTxFromProposer={false}
+        proposer={ownerAddress}
+        isExpired
+      />,
+    )
+
+    expect(screen.queryByText('This order has expired. Reject this transaction and try again.')).not.toBeInTheDocument()
+  })
+
   it('shows proposer banner even after threshold is reached but not executed', () => {
     const { confirmations } = buildConfirmations(2, 2)
     const txDetails = transactionDetailsBuilder()
@@ -391,6 +444,40 @@ describe('TxSigners (Audit Log)', () => {
     expect(screen.queryByTestId('copy-tx-hash-btn')).not.toBeInTheDocument()
   })
 
+  it('anchors the "Available after execution" tooltips on a wrapper, not on the disabled button', () => {
+    const { confirmations } = buildConfirmations(1, 2)
+    const txDetails = transactionDetailsBuilder()
+      .with({
+        detailedExecutionInfo: multisigExecutionDetailsBuilder()
+          .with({ confirmations, confirmationsRequired: 2 })
+          .build(),
+        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+        txHash: null,
+      })
+      .build()
+    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+
+    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+
+    const actionsList = screen.getByTestId('transaction-actions-list')
+
+    // A disabled control receives neither pointer nor focus events, so a tooltip anchored straight
+    // onto one can never open. jsdom does not reproduce that suppression, hence the structural check.
+    for (const trigger of actionsList.querySelectorAll('[data-slot="tooltip-trigger"]')) {
+      expect(trigger).not.toBeDisabled()
+    }
+
+    for (const label of ['Copy transaction hash', 'View on block explorer']) {
+      const button = within(actionsList).getByLabelText(label)
+      expect(button).toBeDisabled()
+
+      const trigger = button.closest<HTMLElement>('[data-slot="tooltip-trigger"]')
+      expect(trigger).not.toBe(button)
+      trigger?.focus()
+      expect(trigger).toHaveFocus()
+    }
+  })
+
   it('copies address to clipboard on click', async () => {
     const writeTextMock = jest.fn().mockResolvedValue(undefined)
     Object.assign(navigator, { clipboard: { writeText: writeTextMock } })
@@ -408,7 +495,7 @@ describe('TxSigners (Audit Log)', () => {
 
     render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
 
-    const copyButtons = screen.getAllByRole('button', { name: /click to copy address/i })
+    const copyButtons = screen.getAllByRole('button', { name: /^By / })
     fireEvent.click(copyButtons[0])
 
     await waitFor(() => {

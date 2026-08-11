@@ -8,8 +8,7 @@ const owner = walletCredentials.OWNER_1_PRIVATE_KEY
 
 describe('Spaces dashboard tests', () => {
   beforeEach(() => {
-    cy.visit(constants.spacesUrl)
-    wallet.connectSigner(owner)
+    wallet.connectSignerViaStorage(owner, constants.spacesUrl)
     space.clickOnSignInBtn()
     space.waitForSpacesWelcomeReady()
     space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.uuid)
@@ -63,7 +62,7 @@ describe('Spaces dashboard tests', () => {
       space.verifySidebarItemNavigates(space.sidebarItemAddressBook, '/spaces/address-book')
       space.verifySidebarItemNavigates(space.sidebarItemTeam, '/spaces/members')
       space.verifySidebarItemNavigates(space.sidebarItemSettings, '/spaces/settings')
-      space.verifySidebarItemNavigates(space.sidebarItemHome, '/spaces')
+      space.verifySidebarItemNavigates(space.sidebarItemDashboard, '/spaces')
     })
 
     it('Verify that the sidebar correctly switches from Space-level to Safe-level navigation when entering a Safe', () => {
@@ -109,12 +108,13 @@ Safe Selector through Spaces empty dashboard: commented out; remove this block c
       space.verifySpaceDashboardAccountsWidgetRowCount(staticSpaces.dashboardWithSafes.accountsWidgetRowCount)
     })
 
-    it('Verify that the Back to Space button is visible in the Safe selector and returns the user to Space Home', () => {
+    it('Verify that the Back to Space button is visible in the sidebar and returns the user to Space Home', () => {
       space.verifySpaceDashboardWidgetVisible('Accounts')
       space.clickAccountItemByIndex(0)
       space.verifyUrlIncludesPath('/home')
 
-      cy.get(space.backToSpaceBtn).should('be.visible').click()
+      space.verifyBackToSpaceButtonVisible()
+      space.clickBackToSpaceButton()
       space.verifyUrlIncludesPath('/spaces')
     })
   })
@@ -159,8 +159,7 @@ Safe Selector through Spaces empty dashboard: commented out; remove this block c
 
 describe('Spaces empty dashboard tests', () => {
   beforeEach(() => {
-    cy.visit(constants.spacesUrl)
-    wallet.connectSigner(owner)
+    wallet.connectSignerViaStorage(owner, constants.spacesUrl)
     space.clickOnSignInBtn()
     space.visitSpaceDashboard(staticSpaces.emptyGettingStarted.uuid)
   })

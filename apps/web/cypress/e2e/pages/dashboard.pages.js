@@ -2,7 +2,6 @@ import * as constants from '../../support/constants.js'
 import * as safeapps from './safeapps.pages.js'
 import * as main from './main.page.js'
 import * as createtx from './create_tx.pages.js'
-import staticSafes from '../../fixtures/safes/static.js'
 
 const transactionQueueStr = 'Pending transactions'
 const noTransactionStr = 'This Safe has no queued transactions'
@@ -43,7 +42,7 @@ export const unsupportedCliContent =
   'and may miss security fixes and improvements. You must use our CLI tool to migrate.'
 
 const migrateSafeSubtitle = 'Update Safe account base contract'
-export const nonPinnedWarningTitle = 'Not in your trusted list'
+export const nonPinnedWarningTitle = 'Not in your accounts'
 export const trustThisSafeButtonTestId = '[data-testid="trust-this-safe-button"]'
 const trustDialogTestId = '[data-testid="add-trusted-safe-dialog"]'
 
@@ -160,10 +159,7 @@ export function verifyTxQueueWidget() {
 
     cy.contains(`a[href^="/transactions/tx?id=multisig_0x"]`, '1/1').should('exist')
 
-    cy.contains(
-      `a[href="${constants.transactionQueueUrl}${encodeURIComponent(staticSafes.SEP_STATIC_SAFE_2)}"]`,
-      viewAllStr,
-    )
+    cy.contains(`a[data-testid="view-all-link"][href^="${constants.transactionQueueUrl}"]`, viewAllStr)
   })
 }
 
@@ -241,4 +237,13 @@ const differentSignersAcrossChainsMsg = 'different signers across different netw
 /** Verifies the "You have different signers across different networks" warning is displayed in action-required-panel. */
 export function checkInconsistentSignersMsgDisplayed() {
   cy.contains(differentSignersAcrossChainsMsg, { timeout: 30000 }).should('be.visible')
+}
+
+/**
+ * Verifies the Safe is present in the current URL, i.e. the router query has hydrated.
+ * Use as a precondition before clicking actions that navigate using the `safe` query param.
+ * @param {string} safe - Prefixed safe address expected in the URL
+ */
+export function verifySafeInUrl(safe) {
+  cy.url().should('include', safe)
 }

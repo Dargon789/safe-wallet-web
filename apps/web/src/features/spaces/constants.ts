@@ -9,10 +9,11 @@ const safeAccountsLimitRaw = Number.parseInt(process.env.NEXT_PUBLIC_SPACES_SAFE
  */
 export const SAFE_ACCOUNTS_LIMIT = !Number.isNaN(safeAccountsLimitRaw) ? safeAccountsLimitRaw : 40
 
+/** Maximum number of workspaces a user can have. A spaces domain rule — import it from here, not from sidebar config. */
 export const SPACES_LIMIT = 10
 
 /** Maximum length of a workspace name. Enforced on both create and rename. */
-export const SPACE_NAME_MAX_LENGTH = 30
+export { SPACE_NAME_MAX_LENGTH } from '@safe-global/utils/validation/names'
 
 /** Friendly notice shown when a workspace is already at the Safe accounts cap. */
 export const safeAccountsLimitReachedText = (limit: number = SAFE_ACCOUNTS_LIMIT) =>

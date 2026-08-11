@@ -19,8 +19,6 @@ const fileUploadSection = '[data-testid="file-upload-section"]'
 
 const exportFileSection = '[data-testid="export-file-section"]'
 
-export const prependChainPrefixStr = 'Prepend chain prefix to addresses'
-export const copyAddressStr = 'Copy addresses with chain prefix'
 export const darkModeStr = 'Dark mode'
 
 // Import messages for data_import.json
@@ -132,10 +130,8 @@ export function verifyAppsAreVisible(appNames) {
 }
 
 export function verifyPinnedApps(pinnedApps) {
+  cy.contains('h2', pinnedAppsStr).should('be.visible')
   pinnedApps.forEach((appName) => {
-    cy.get('p')
-      .contains(pinnedAppsStr)
-      .within(() => {})
     cy.get('li').contains(appName).should('be.visible')
   })
 }
@@ -147,7 +143,7 @@ export function clickOnSettingsBtn() {
 export function clickOnAppearenceBtn() {
   cy.contains(tab, appearenceTabStr).click()
   // Wait for appearance page content to render after Next.js client-side navigation
-  cy.contains('Chain-specific addresses').should('be.visible')
+  cy.contains('Theme').should('be.visible')
 }
 
 export function clickOnShowMoreTabsBtn() {
@@ -165,8 +161,9 @@ export function verifyCheckboxes(checkboxes, checked = false) {
   checkboxes.forEach((checkbox) => {
     cy.get('main')
       .contains('label', checkbox)
-      .find('input[type="checkbox"]')
-      .should(checked ? 'be.checked' : 'not.be.checked')
+      .closest('[data-slot="field"]')
+      .find('[role="switch"]')
+      .should('have.attr', 'aria-checked', String(checked))
   })
 }
 

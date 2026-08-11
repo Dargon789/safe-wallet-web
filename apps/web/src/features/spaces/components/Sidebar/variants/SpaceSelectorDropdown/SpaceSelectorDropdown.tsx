@@ -35,7 +35,7 @@ import { getDeterministicColor } from '@/utils/colors'
 
 export const SAFE_ALREADY_IN_WORKSPACE_TOOLTIP = 'Safe is already in this workspace'
 
-const MENU_ITEM_CLASS = 'gap-3 min-h-9 px-2 py-2'
+const MENU_ITEM_CLASS = 'cursor-pointer gap-3 min-h-9 px-2 py-2'
 
 interface SpaceSelectorDropdownProps {
   selectedSpace?: SpaceItem
@@ -186,7 +186,7 @@ export const SpaceSelectorDropdown = ({
               )}
               <span className={css.spaceSelectorSubtitle}>Workspace</span>
             </div>
-            <ChevronsUpDown className="ml-auto size-4 shrink-0" aria-hidden />
+            <ChevronsUpDown className="ml-auto size-4 shrink-0 group-data-[collapsible=icon]:hidden" aria-hidden />
           </>
         )}
       </DropdownMenuTrigger>
@@ -199,25 +199,6 @@ export const SpaceSelectorDropdown = ({
         data-testid="space-selector-menu"
       >
         <div className={cn(css.groupLabel, 'mb-1')}>Workspaces</div>
-        {selectedSpace && (
-          <div className="flex items-center gap-2 px-2 py-1.5">
-            <Avatar className={css.spaceSelectorAvatar}>
-              <AvatarFallback
-                className={css.spaceSelectorAvatarFallback}
-                style={{ backgroundColor: selectedSpaceColor }}
-              >
-                {initial}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <div className={css.textSmallBold}>{selectedSpace.name}</div>
-              <div className={css.textMini}>Workspace</div>
-            </div>
-          </div>
-        )}
-
-        {triggerVariant === 'default' ? <DropdownMenuSeparator /> : null}
-
         {spaces.map((space) => renderSpaceMenuItem(space))}
 
         <DropdownMenuSeparator className="my-1" />

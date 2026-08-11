@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
+import OnboardingFooter from '@/components/common/OnboardingFooter'
 import { Input } from '@/components/ui/input'
 import { Typography } from '@/components/ui/typography'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Spinner } from '@/components/ui/spinner'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import {
   OnboardingLayout,
   StepCounter,
@@ -21,6 +20,7 @@ import useExistingSpace from './hooks/useExistingSpace'
 import useSpaceSubmit from './hooks/useSpaceSubmit'
 import useOnboardingExit from './hooks/useOnboardingExit'
 import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
+import { NAME_MIN_LENGTH, sanitizeName, validateName } from '@safe-global/utils/validation/names'
 
 const ONBOARDING_STEP = 1
 const FORM_ID = 'create-space-form'
@@ -51,12 +51,11 @@ const CreateSpaceOnboarding = (): ReactElement => {
   const [hasUserEdited, setHasUserEdited] = useState(false)
   const nameReg = register('name', {
     required: true,
-    maxLength: {
-      value: SPACE_NAME_MAX_LENGTH,
-      message: `Workspace name must be ${SPACE_NAME_MAX_LENGTH} characters or less`,
+    validate: (value) => {
+      const sanitized = sanitizeName(value ?? '')
+      if (sanitized === '') return 'Required'
+      return validateName(sanitized, { minLength: NAME_MIN_LENGTH, maxLength: SPACE_NAME_MAX_LENGTH }) ?? true
     },
-    pattern: { value: /^[a-zA-Z0-9 ]+$/, message: 'Workspace name must not contain special characters' },
-    validate: (value) => value?.trim() !== '',
   })
 
   const isInputDisabled = isCheckingAccess || isSpaceLoading
@@ -101,7 +100,9 @@ const CreateSpaceOnboarding = (): ReactElement => {
             placeholder="e.g. Treasury Ops, DeFi Team"
             autoComplete="off"
             disabled={isInputDisabled}
-            className="mt-2 h-11 rounded-sm bg-card px-4"
+            variant="surface"
+            // eslint-disable-next-line no-restricted-syntax -- bespoke 44px onboarding field (h-11, rounded-sm, px-4); between the lg/xl tiers, no size fits
+            className="mt-2 h-11 rounded-sm px-4"
             {...nameReg}
             onChange={(e) => {
               setHasUserEdited(true)
@@ -110,7 +111,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
             error={errors.name?.message}
             onBlur={(e) => {
               nameReg.onBlur(e)
-              setValue('name', e.target.value.trim(), { shouldValidate: true })
+              setValue('name', sanitizeName(e.target.value), { shouldValidate: true })
             }}
           />
           {isSpaceLoading && (
@@ -130,34 +131,16 @@ const CreateSpaceOnboarding = (): ReactElement => {
   )
 
   const footer = (
-    <div className="flex flex-col-reverse gap-3 xl:flex-row xl:items-center">
-      <Button
-        type="button"
-        variant="ghost"
-        onClick={onExit}
-        disabled={isSubmitting}
-        className="w-full h-12 rounded-lg bg-muted hover:bg-border xl:flex-1"
-      >
-        <ChevronLeft className="size-4 mr-1" />
-        Back
-      </Button>
-      <Button
-        data-testid="create-space-onboarding-continue-button"
-        type="submit"
-        form={FORM_ID}
-        disabled={!isValid || isSubmitting || isCheckingAccess || isSpaceLoading}
-        className="w-full h-12 rounded-lg text-base xl:flex-1"
-      >
-        {isSubmitting ? (
-          <Spinner />
-        ) : (
-          <>
-            Next
-            <ChevronRight className="size-4 ml-1" />
-          </>
-        )}
-      </Button>
-    </div>
+    <OnboardingFooter
+      onBack={onExit}
+      backDisabled={isSubmitting}
+      continueLabel="Next"
+      continueType="submit"
+      continueForm={FORM_ID}
+      continueDisabled={!isValid || isSubmitting || isCheckingAccess || isSpaceLoading}
+      continueLoading={isSubmitting}
+      continueTestId="create-space-onboarding-continue-button"
+    />
   )
 
   return (

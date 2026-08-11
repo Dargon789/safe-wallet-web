@@ -1,14 +1,18 @@
 import { useMemo, type ReactElement } from 'react'
-import { FormProvider, useWatch } from 'react-hook-form'
+import { useWatch } from 'react-hook-form'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { Button } from '@/components/ui/button'
+import OnboardingFooter from '@/components/common/OnboardingFooter'
 import { Typography } from '@/components/ui/typography'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { SearchInput } from '@/components/ui/search-input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { ChevronLeft, ChevronRight, Search, Loader2 } from 'lucide-react'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Info } from 'lucide-react'
+import SimilarityConfirmDialog from '@/components/common/TrustedSafesModal/SimilarityConfirmDialog'
 import { OnboardingLayout, StepCounter, SafeAppMockup, deriveSidePanelAccountsFromSpace } from '../OnboardingLayout'
 import useWallet from '@/hooks/wallets/useWallet'
 import { type AllSafeItems } from '@/hooks/safes'
+import { cn } from '@/utils/cn'
+import { SAFE_ACCOUNTS_LIMIT } from '../../constants'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import OnboardingSafesList from './components/OnboardingSafesList'
@@ -16,7 +20,7 @@ import ConnectWalletHint from '../ConnectWalletHint'
 import useOnboardingNavigation from './hooks/useOnboardingNavigation'
 import useOnboardingSafes from './hooks/useOnboardingSafes'
 import useOnboardingSubmit from './hooks/useOnboardingSubmit'
-import { useSelectAll } from '../../hooks/useSelectAll'
+import useOnboardingSelection from './hooks/useOnboardingSelection'
 import {
   deriveSidePanelAccounts,
   deriveSelectedBalanceSafes,
@@ -30,7 +34,16 @@ const SelectSafesOnboarding = (): ReactElement => {
   const wallet = useWallet()
   const totalSteps = useOnboardingStepCount()
   const { spaceId, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
-  const { trustedSafes, ownedSafes, similarAddresses, handleSearch, hasNoSafes } = useOnboardingSafes()
+  const {
+    trustedSafes,
+    ownedSafes,
+    flaggedAddresses,
+    trustedSimilarityGroups,
+    ownedSimilarityGroups,
+    similarWarnings,
+    handleSearch,
+    hasNoSafes,
+  } = useOnboardingSafes()
   const allSafes = useMemo<AllSafeItems>(() => [...trustedSafes, ...ownedSafes], [trustedSafes, ownedSafes])
   const { formMethods, onSubmit, selectedSafesLength, error, isSubmitting } = useOnboardingSubmit(
     spaceId,
@@ -39,12 +52,8 @@ const SelectSafesOnboarding = (): ReactElement => {
   )
 
   const { control, setValue } = formMethods
-  const { trustedSelection, ownedSelection, handleSelectAll, isAtLimit } = useSelectAll({
-    visibleTrusted: trustedSafes,
-    visibleOwned: ownedSafes,
-    control,
-    setValue,
-  })
+  const { selectedKeys, isAtLimit, handleToggle, pendingConfirmation, confirmPending, cancelPending } =
+    useOnboardingSelection({ items: allSafes, control, setValue, flaggedAddresses })
 
   const { data: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !spaceId })
   const { allSafes: spaceSafes } = useSpaceSafes()
@@ -70,108 +79,104 @@ const SelectSafesOnboarding = (): ReactElement => {
     [selectedSafes, allSafes, spaceSafes],
   )
 
+  const noSearchResults = !hasNoSafes && trustedSafes.length === 0 && ownedSafes.length === 0
+
   const main = (
-    <FormProvider {...formMethods}>
-      <form id={FORM_ID} onSubmit={onSubmit} className="flex flex-col gap-6">
-        <StepCounter currentStep={ONBOARDING_STEP} totalSteps={totalSteps} />
+    <form id={FORM_ID} onSubmit={onSubmit} className="flex flex-col gap-6">
+      <StepCounter currentStep={ONBOARDING_STEP} totalSteps={totalSteps} />
 
-        <div className="flex flex-col gap-2 shrink-0">
-          <Typography variant="h2">Select Safes</Typography>
-          <Typography variant="paragraph" color="muted">
-            Choose which Safes to add to this Workspace. You can add more later.
-          </Typography>
-        </div>
+      <div className="flex flex-col gap-2 shrink-0">
+        <Typography variant="h2">Select Safe accounts</Typography>
+        <Typography variant="paragraph" color="muted">
+          Choose which Safe account to add to this Workspace. You can add more later.
+        </Typography>
+      </div>
 
-        {!wallet && <ConnectWalletHint testId="select-safes-connect-wallet-button" />}
+      {!wallet && <ConnectWalletHint testId="select-safes-connect-wallet-button" />}
 
-        {hasNoSafes ? (
-          <Alert className="shrink-0">
-            <AlertDescription>You don&apos;t have any safes yet</AlertDescription>
-          </Alert>
-        ) : (
-          <>
-            <InputGroup className="bg-card px-2 shrink-0">
-              <InputGroupAddon>
-                <Search className="size-4" />
-              </InputGroupAddon>
-              <InputGroupInput
-                placeholder="Search for safes"
-                aria-label="Search Safe list"
-                autoComplete="off"
-                onChange={(e) => handleSearch(e.target.value)}
-              />
-            </InputGroup>
+      {hasNoSafes ? (
+        <Alert className="shrink-0">
+          <AlertDescription>You don&apos;t have any safes yet</AlertDescription>
+        </Alert>
+      ) : (
+        <>
+          <div className="flex shrink-0 items-center gap-3">
+            <div
+              data-testid="selected-count"
+              className={cn(
+                'flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm',
+                isAtLimit ? 'font-semibold text-yellow-700' : 'text-muted-foreground',
+              )}
+            >
+              <span>
+                {/* Fixed-width, right-aligned digit cell so the row doesn't shift when the count changes width. */}
+                <span className="inline-block min-w-[2ch] text-right tabular-nums">{selectedKeys.size}</span> of{' '}
+                {SAFE_ACCOUNTS_LIMIT} selected
+              </span>
+              <Tooltip>
+                <TooltipTrigger render={<span className="inline-flex cursor-help" />}>
+                  <Info className="size-4" />
+                </TooltipTrigger>
+                <TooltipContent>You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts per workspace</TooltipContent>
+              </Tooltip>
+            </div>
+            <SearchInput
+              className="flex-1"
+              placeholder="by name, address or network"
+              aria-label="Search Safe list"
+              autoComplete="off"
+              onChange={(e) => handleSearch(e.target.value)}
+            />
+          </div>
 
-            <div className="relative min-w-0" data-testid="onboarding-safes-list-region">
+          <div className="relative min-w-0" data-testid="onboarding-safes-list-region">
+            {noSearchResults ? (
+              <Typography variant="paragraph" align="center" color="muted" className="py-8">
+                No safes match your search
+              </Typography>
+            ) : (
               <OnboardingSafesList
                 trustedSafes={trustedSafes}
                 ownedSafes={ownedSafes}
-                similarAddresses={similarAddresses}
+                flaggedAddresses={flaggedAddresses}
+                trustedSimilarityGroups={trustedSimilarityGroups}
+                ownedSimilarityGroups={ownedSimilarityGroups}
+                similarWarnings={similarWarnings}
+                selectedKeys={selectedKeys}
+                onToggle={handleToggle}
                 isAtLimit={isAtLimit}
-                trustedSelectAll={{
-                  state: trustedSelection.state,
-                  count: trustedSelection.selectedCount,
-                  total: trustedSelection.total,
-                  onToggle: (check) => handleSelectAll('trusted', check),
-                  disabled: trustedSelection.disabled,
-                }}
-                ownedSelectAll={{
-                  state: ownedSelection.state,
-                  count: ownedSelection.selectedCount,
-                  total: ownedSelection.total,
-                  onToggle: (check) => handleSelectAll('owned', check),
-                  disabled: ownedSelection.disabled,
-                }}
               />
-            </div>
-
-            {error && (
-              <Alert variant="destructive" className="shrink-0">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
             )}
-          </>
-        )}
-      </form>
-    </FormProvider>
+          </div>
+
+          {error && (
+            <Alert variant="destructive" className="shrink-0">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+        </>
+      )}
+    </form>
   )
 
   const footer = (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col-reverse gap-3 xl:flex-row xl:items-center">
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={handleBack}
-          disabled={isSubmitting}
-          className="w-full h-12 rounded-lg bg-muted hover:bg-border xl:flex-1"
-        >
-          <ChevronLeft className="size-4 mr-1" />
-          Back
-        </Button>
-        <Button
-          data-testid="select-safes-continue-button"
-          type="submit"
-          form={FORM_ID}
-          disabled={selectedSafesLength === 0 || isSubmitting}
-          className="w-full h-12 rounded-lg text-base xl:flex-1"
-        >
-          {isSubmitting ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <>
-              Next
-              <ChevronRight className="size-4 ml-1" />
-            </>
-          )}
-        </Button>
-      </div>
+      <OnboardingFooter
+        onBack={handleBack}
+        backDisabled={isSubmitting}
+        continueLabel="Next"
+        continueType="submit"
+        continueForm={FORM_ID}
+        continueDisabled={selectedSafesLength === 0 || isSubmitting}
+        continueLoading={isSubmitting}
+        continueTestId="select-safes-continue-button"
+      />
       <button
         data-testid="select-safes-skip-link"
         type="button"
         onClick={handleSkip}
         disabled={isSubmitting}
-        className="cursor-pointer text-sm text-muted-foreground underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+        className="cursor-pointer text-sm font-semibold text-foreground underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
       >
         Skip, add Safes later
       </button>
@@ -179,18 +184,29 @@ const SelectSafesOnboarding = (): ReactElement => {
   )
 
   return (
-    <OnboardingLayout
-      main={main}
-      footer={footer}
-      sidePanel={
-        <SafeAppMockup
-          name={space?.name ?? ''}
-          highlight="accounts"
-          accounts={sidePanelAccounts}
-          balanceSafes={balanceSafes}
+    <>
+      <OnboardingLayout
+        main={main}
+        footer={footer}
+        sidePanel={
+          <SafeAppMockup
+            name={space?.name ?? ''}
+            highlight="accounts"
+            accounts={sidePanelAccounts}
+            balanceSafes={balanceSafes}
+          />
+        }
+      />
+
+      {pendingConfirmation && (
+        <SimilarityConfirmDialog
+          open
+          safe={{ address: pendingConfirmation.address, name: pendingConfirmation.displayName }}
+          onConfirm={confirmPending}
+          onCancel={cancelPending}
         />
-      }
-    />
+      )}
+    </>
   )
 }
 

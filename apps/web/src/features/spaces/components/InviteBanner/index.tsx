@@ -1,7 +1,8 @@
-import { Card, Box, Typography, Stack } from '@mui/material'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { SpaceSummary } from '../SpaceCard'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
 import css from './styles.module.css'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
@@ -18,40 +19,29 @@ const SpaceListInvite = ({ space, invitedByName }: SpaceListInvite) => {
   const { name, safeCount, memberCount } = space
 
   return (
-    <Card sx={{ p: 2, mb: 2 }} data-testid="space-invite-banner">
-      <Stack direction="row" alignItems="center" flexWrap="wrap" rowGap={0.5} columnGap={0.5} mb={2}>
-        <Typography variant="h4" fontWeight={700} color="primary.light">
-          You were invited to join
-        </Typography>
-        <Typography variant="h4" fontWeight={700} color="primary.main">
-          {name}
-        </Typography>
-        <Inviter invitedByName={invitedByName} variant="h4" avatarSize={24} />
-      </Stack>
+    <div className="mb-4 rounded-3xl bg-card p-4" data-testid="space-invite-banner">
+      <div className={cn(css.spacesListInviteContent, 'mb-4')}>
+        <div className="flex flex-grow flex-row flex-wrap items-center gap-x-1 gap-y-1">
+          <Typography variant="paragraph-small">You were invited to join</Typography>
+          <Typography variant="paragraph-small-bold">{name}</Typography>
+          <Inviter invitedByName={invitedByName} variant="paragraph-small" avatarSize={24} />
+        </div>
 
-      <Card sx={{ p: 2, backgroundColor: 'background.main' }}>
-        <Box className={css.spacesListInviteContent}>
-          <Stack direction="row" spacing={2} alignItems="center" flexGrow={1}>
-            <Box>
-              <InitialsAvatar name={name} size="large" />
-            </Box>
+        <div className={cn(css.inviteButtonContainer, 'flex flex-row gap-2')}>
+          <Track {...SPACE_EVENTS.DECLINE_INVITE} label={SPACE_LABELS.space_list_page}>
+            <DeclineButton space={space} />
+          </Track>
+          <Track {...SPACE_EVENTS.ACCEPT_INVITE} label={SPACE_LABELS.space_list_page}>
+            <AcceptButton space={space} />
+          </Track>
+        </div>
+      </div>
 
-            <Box>
-              <SpaceSummary name={name} numberOfAccounts={safeCount} numberOfMembers={memberCount} />
-            </Box>
-          </Stack>
-
-          <Stack direction="row" spacing={1}>
-            <Track {...SPACE_EVENTS.ACCEPT_INVITE} label={SPACE_LABELS.space_list_page}>
-              <AcceptButton space={space} />
-            </Track>
-            <Track {...SPACE_EVENTS.DECLINE_INVITE} label={SPACE_LABELS.space_list_page}>
-              <DeclineButton space={space} />
-            </Track>
-          </Stack>
-        </Box>
-      </Card>
-    </Card>
+      <div className="flex flex-row items-center gap-3 rounded-2xl bg-[var(--color-background-main)] px-2 py-3">
+        <InitialsAvatar name={name} size="medium" />
+        <SpaceSummary name={name} numberOfAccounts={safeCount} numberOfMembers={memberCount} isCompact />
+      </div>
+    </div>
   )
 }
 

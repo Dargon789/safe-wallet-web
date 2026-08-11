@@ -3,23 +3,26 @@ import { createMockContext } from '../test-helpers'
 
 jest.mock('@safe-global/utils/services/contracts/safeContracts', () => ({
   isValidMasterCopy: jest.fn(),
-  isMigrationToL2Possible: jest.fn(),
+  isUnsupportedMastercopyMigratable: jest.fn(),
 }))
 
-import { isValidMasterCopy, isMigrationToL2Possible } from '@safe-global/utils/services/contracts/safeContracts'
+import {
+  isValidMasterCopy,
+  isUnsupportedMastercopyMigratable,
+} from '@safe-global/utils/services/contracts/safeContracts'
 
 const mockIsValidMasterCopy = isValidMasterCopy as jest.Mock
-const mockIsMigrationToL2Possible = isMigrationToL2Possible as jest.Mock
+const mockIsUnsupportedMastercopyMigratable = isUnsupportedMastercopyMigratable as jest.Mock
 
 describe('contractVersionScanner', () => {
   beforeEach(() => {
     mockIsValidMasterCopy.mockReturnValue(true)
-    mockIsMigrationToL2Possible.mockReturnValue(false)
+    mockIsUnsupportedMastercopyMigratable.mockReturnValue(false)
   })
 
   it('returns critical issue for unsupported mastercopy', async () => {
     mockIsValidMasterCopy.mockReturnValue(false)
-    mockIsMigrationToL2Possible.mockReturnValue(false)
+    mockIsUnsupportedMastercopyMigratable.mockReturnValue(false)
 
     const result = await contractVersionScanner.scan(createMockContext({ implementationVersionState: 'UNKNOWN' }))
     expect(result.status).toBe('issue')
@@ -27,9 +30,9 @@ describe('contractVersionScanner', () => {
     expect(result.score).toBe(10)
   })
 
-  it('suggests migration when L2 migration is possible', async () => {
+  it('suggests migration when mastercopy migration is possible', async () => {
     mockIsValidMasterCopy.mockReturnValue(false)
-    mockIsMigrationToL2Possible.mockReturnValue(true)
+    mockIsUnsupportedMastercopyMigratable.mockReturnValue(true)
 
     const result = await contractVersionScanner.scan(createMockContext({ implementationVersionState: 'UNKNOWN' }))
     expect(result.status).toBe('issue')
@@ -166,6 +169,11 @@ describe('contractVersionScanner', () => {
     expect(result.status).toBe('issue')
     expect(result.severity).toBe('High')
     expect(result.score).toBe(30)
+    // Full address so EvidenceList shortens it and adds a copy button (WA-2371).
+    expect(result.evidence).toContainEqual({
+      label: 'Implementation',
+      value: '0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF',
+    })
   })
 
   it('returns clear for known L2 singleton address', async () => {
@@ -193,6 +201,10 @@ describe('contractVersionScanner', () => {
     expect(result.status).toBe('partial')
     expect(result.severity).toBe('Medium')
     expect(result.score).toBe(60)
+    expect(result.evidence).toContainEqual({
+      label: 'Original implementation',
+      value: '0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF',
+    })
   })
 
   it('returns clear when creation master copy is a known deployment', async () => {

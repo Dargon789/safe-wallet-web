@@ -32,16 +32,6 @@ jest.mock('@/components/balances/CurrencySelect', () => ({
   default: () => <button data-testid="currency-select">Currency</button>,
 }))
 
-jest.mock('@/components/dashboard/StakingBanner', () => ({
-  __esModule: true,
-  default: () => <div data-testid="staking-banner" />,
-}))
-
-jest.mock('@/components/dashboard/StakingBanner/useIsStakingBannerVisible', () => ({
-  __esModule: true,
-  default: () => false,
-}))
-
 jest.mock('@/services/local-storage/useLocalStorage', () => ({
   __esModule: true,
   default: () => [false, jest.fn()],
@@ -56,9 +46,16 @@ jest.mock('@/features/portfolio', () => ({
   PortfolioFeature: {},
 }))
 
+jest.mock('@/features/stake', () => ({
+  StakeFeature: {},
+  useIsStakingPromoBannerVisible: () => false,
+  STAKING_PROMO_BANNER_HIDE_KEY: 'hideStakingPromoBanner_v2',
+}))
+
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: () => ({
     NoFeeCampaignBanner: () => <div data-testid="no-fee-campaign-banner" />,
+    StakingPromoBanner: () => <div data-testid="staking-promo-banner" />,
     PortfolioRefreshHint: () => <div data-testid="portfolio-refresh-hint" />,
   }),
 }))
@@ -67,7 +64,7 @@ const DEFAULT_SETTINGS = {
   currency: 'usd',
   hiddenTokens: {},
   tokenList: TOKEN_LISTS.TRUSTED,
-  shortName: { copy: true, qr: true },
+  shortName: { qr: true },
   theme: { darkMode: false },
   env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
   signing: { onChainSigning: false, blindSigning: false },
@@ -107,7 +104,7 @@ describe('Balances page', () => {
     expect(screen.queryByTestId('assets-table')).not.toBeInTheDocument()
   })
 
-  const tooltipText = 'Total Balance may be different when you show all tokens.'
+  const tooltipText = 'Total from this list only. Portfolio total includes positions and may use other token data.'
 
   const renderWithTokenList = (tokenList: TOKEN_LISTS | undefined) =>
     render(<BalancesPage />, {
@@ -126,9 +123,9 @@ describe('Balances page', () => {
     expect(screen.getByTestId('total-asset-value')).toHaveTextContent(tooltipText)
   })
 
-  it('hides the total balance tooltip when only trusted tokens are shown', () => {
+  it('shows the total balance tooltip when only trusted tokens are shown (tooltip is informational and list-independent)', () => {
     renderWithTokenList(TOKEN_LISTS.TRUSTED)
 
-    expect(screen.getByTestId('total-asset-value')).not.toHaveTextContent(tooltipText)
+    expect(screen.getByTestId('total-asset-value')).toHaveTextContent(tooltipText)
   })
 })

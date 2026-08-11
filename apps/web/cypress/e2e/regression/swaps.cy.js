@@ -18,9 +18,8 @@ describe('Swaps tests', () => {
 
   beforeEach(() => {
     cy.intercept('GET', constants.transactionHistoryEndpoint).as('History')
-    cy.visit(constants.swapUrl + staticSafes.SEP_STATIC_SAFE_1)
+    wallet.connectSignerViaStorage(signer, constants.swapUrl + staticSafes.SEP_STATIC_SAFE_1)
     cy.wait('@History', { timeout: 20000 })
-    wallet.connectSigner(signer)
     iframeSelector = `iframe[src*="${constants.swapWidget}"]`
   })
 
@@ -29,7 +28,6 @@ describe('Swaps tests', () => {
     { defaultCommandTimeout: 30000 },
     () => {
       let isCustomRecipientFound
-      swaps.getMockQuoteResponse(swaps.quoteResponse.quote1)
       swaps.acceptLegalDisclaimer()
       cy.wait(4000)
       main
@@ -46,13 +44,9 @@ describe('Swaps tests', () => {
           swaps.enableCustomRecipient(isCustomRecipientFound(swaps.customRecipient))
           swaps.clickOnSettingsBtn()
           swaps.enterRecipient(swaps.blockedAddress)
-          swaps.selectOutputCurrency(swaps.swapTokens.dai)
-          cy.wait('@mockedQuote').then((interception) => {
-            expect(interception.response.statusCode).to.eq(200)
-            cy.log('Intercepted response:', JSON.stringify(interception.response.body))
-          })
         })
-      cy.contains(swaps.blockedAddressStr)
+
+      swaps.verifyBlockedAddressFormShown()
     },
   )
 })
