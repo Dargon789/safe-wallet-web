@@ -46,7 +46,7 @@
     "@0xsequence/relayer": "workspace:*",
     "@0xsequence/utils": "workspace:*",
     "@0xsequence/wallet": "workspace:*",
-    "@babel/core": "^7.21.4",
+    "@babel/core": "^7.29.6",
     "@babel/plugin-transform-class-properties": "^7.23.3",
     "@babel/preset-env": "^7.21.4",
     "@babel/preset-typescript": "^7.21.4",

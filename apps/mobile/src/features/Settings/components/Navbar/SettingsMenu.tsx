@@ -12,7 +12,7 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useEditAccountItem } from '@/src/features/AccountsSheet/AccountItem/hooks/useEditAccountItem'
 import { type Address } from '@/src/types/address'
 import { router } from 'expo-router'
-import { FloatingMenu } from '../FloatingMenu'
+import { FloatingMenu, NATIVE_MENU_DESTRUCTIVE_COLOR } from '../FloatingMenu'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { trackEvent } from '@/src/services/analytics/firebaseAnalytics'
 import { createAppSettingsOpenEvent, createSettingsMenuActionEvent } from '@/src/services/analytics/events/settings'
@@ -28,7 +28,6 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
   const copyAndDispatchToast = useCopyAndDispatchToast()
   const theme = useTheme()
   const color = theme.color.get()
-  const colorError = theme.error?.get() || '#FF5F72'
 
   if (!safeAddress) {
     return null
@@ -67,15 +66,16 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
             backgroundColor={'$backgroundSkeleton'}
             alignItems={'center'}
             justifyContent={'center'}
-            borderRadius={16}
-            height={32}
-            width={32}
+            borderRadius={200}
+            height={40}
+            width={40}
           >
-            <SafeFontIcon name={'settings'} size={20} color={'$color'} />
+            <SafeFontIcon name={'settings'} size={24} color={'$color'} />
           </View>
         </Pressable>
 
         <FloatingMenu
+          testID="settings-screen-header-more-settings-button"
           onPressAction={({ nativeEvent }) => {
             const action = nativeEvent.event as 'rename' | 'explorer' | 'copy' | 'share' | 'remove'
 
@@ -180,6 +180,7 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
             {
               id: 'remove',
               title: 'Remove account',
+              titleColor: NATIVE_MENU_DESTRUCTIVE_COLOR,
               attributes: {
                 destructive: true,
               },
@@ -187,20 +188,20 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
                 ios: 'trash',
                 android: 'baseline_delete_24',
               }),
-              imageColor: colorError,
+              imageColor: NATIVE_MENU_DESTRUCTIVE_COLOR,
             },
           ]}
         >
-          <Pressable hitSlop={6} testID={'settings-screen-header-more-settings-button'}>
+          <Pressable hitSlop={6}>
             <View
               backgroundColor={'$backgroundSkeleton'}
               alignItems={'center'}
               justifyContent={'center'}
-              borderRadius={16}
-              height={32}
-              width={32}
+              borderRadius={200}
+              height={40}
+              width={40}
             >
-              <SafeFontIcon name={'options-horizontal'} size={20} color={'$color'} />
+              <SafeFontIcon name={'options-horizontal'} size={24} color={'$color'} />
             </View>
           </Pressable>
         </FloatingMenu>
