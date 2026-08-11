@@ -4,7 +4,7 @@ import { type AllSafeItems, _groupAndSort, getComparator, useSafesSearch } from 
 import useAllSafes, { type SafeItem } from '@/hooks/safes/useAllSafes'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
-import { useSimilarityClusters } from '@/features/address-poisoning'
+import { useSimilarityClusters, bandGroupsForList, buildSimilarWarnings } from '@/features/address-poisoning'
 
 const useOnboardingSafes = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -28,17 +28,25 @@ const useOnboardingSafes = () => {
     }
   }, [allSafes])
 
-  // Flag against the combined pool (so an owned safe impersonating a trusted one is caught) but
-  // only surface warnings on owned safes — a safe the user trusted at some point is treated as vetted.
-  const combinedAddresses = useMemo(
-    () => [...trustedSafeItems, ...ownedSafeItems].map((s) => s.address),
-    [trustedSafeItems, ownedSafeItems],
+  // Cluster the full pool — a pinned/trusted impostor must still be caught (WA-2912).
+  const allSafeAddresses = useMemo(() => (allSafes ?? []).map((s) => s.address), [allSafes])
+  const { flagged: flaggedAddresses, groupIdByAddress } = useSimilarityClusters(allSafeAddresses)
+
+  // Each list bands its own cluster members.
+  const trustedSimilarityGroups = useMemo(
+    () => bandGroupsForList(trustedSafeItems, groupIdByAddress),
+    [trustedSafeItems, groupIdByAddress],
   )
-  const flaggedCombined = useSimilarityClusters(combinedAddresses).flagged
-  const flaggedOwnedAddresses = useMemo<Set<string>>(() => {
-    const ownedAddresses = new Set(ownedSafeItems.map((s) => s.address.toLowerCase()))
-    return new Set([...flaggedCombined].filter((address) => ownedAddresses.has(address)))
-  }, [flaggedCombined, ownedSafeItems])
+  const ownedSimilarityGroups = useMemo(
+    () => bandGroupsForList(ownedSafeItems, groupIdByAddress),
+    [ownedSafeItems, groupIdByAddress],
+  )
+
+  // ⚠️ only where a cluster spans both lists — a single band can't box it.
+  const similarWarnings = useMemo(
+    () => buildSimilarWarnings(trustedSafeItems, ownedSafeItems, groupIdByAddress),
+    [trustedSafeItems, ownedSafeItems, groupIdByAddress],
+  )
 
   // Group into multi-chain / single-chain and sort
   const trustedGrouped = useMemo<AllSafeItems>(
@@ -63,7 +71,10 @@ const useOnboardingSafes = () => {
   return {
     trustedSafes: searchQuery ? filteredTrusted : trustedGrouped,
     ownedSafes: searchQuery ? filteredOwned : ownedGrouped,
-    flaggedOwnedAddresses,
+    flaggedAddresses,
+    trustedSimilarityGroups,
+    ownedSimilarityGroups,
+    similarWarnings,
     handleSearch,
     hasNoSafes,
   }

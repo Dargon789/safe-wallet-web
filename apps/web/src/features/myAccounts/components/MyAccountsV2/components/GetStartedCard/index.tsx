@@ -39,12 +39,7 @@ const GetStartedCard = () => {
         </p>
 
         <div className="mt-5 flex flex-col gap-2.5">
-          <Button
-            size="lg"
-            className="h-12 w-full text-[15px]"
-            onClick={connectWallet}
-            data-testid="connect-wallet-button"
-          >
+          <Button size="xl" className="w-full" onClick={connectWallet} data-testid="connect-wallet-button">
             <Wallet className="size-[18px]" />
             Connect wallet
           </Button>
@@ -58,8 +53,8 @@ const GetStartedCard = () => {
           <Track {...OVERVIEW_EVENTS.ADD_TO_WATCHLIST} label={OVERVIEW_LABELS.login_page}>
             <Button
               variant="ghost"
-              size="lg"
-              className="h-12 w-full text-[15px]"
+              size="xl"
+              className="w-full"
               data-testid="watch-account-button"
               render={<NextLink href={{ pathname: AppRoutes.newSafe.load, query: { next } }} />}
             >
