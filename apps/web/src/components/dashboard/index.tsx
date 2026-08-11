@@ -2,7 +2,6 @@ import FirstSteps from '@/components/dashboard/FirstSteps'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { type ReactElement, useMemo } from 'react'
 import dynamic from 'next/dynamic'
-import { Stack } from '@mui/material'
 import PendingTxsList from '@/components/dashboard/PendingTxs/PendingTxsList'
 import AssetsWidget from '@/components/dashboard/Assets'
 import Overview from '@/components/dashboard/Overview/Overview'
@@ -10,11 +9,7 @@ import ExplorePossibleWidget from '@/components/dashboard/ExplorePossibleWidget'
 import { useIsRecoverySupported } from '@/features/recovery'
 import { useHasFeature } from '@/hooks/useChains'
 import css from './styles.module.css'
-import {
-  InconsistentSignerSetupWarning,
-  OutdatedMastercopyWarning,
-  UnsupportedMastercopyWarning,
-} from '@/features/multichain'
+import { InconsistentSignerSetupWarning, MastercopyWarning } from '@/features/multichain'
 import { MyAccountsFeature } from '@/features/myAccounts'
 import { ActionRequiredPanel } from './ActionRequiredPanel'
 import { VulnerableModuleWarning } from './ActionRequiredPanel/VulnerableModuleWarning'
@@ -61,10 +56,10 @@ const Dashboard = (): ReactElement => {
           {isStakingPromoBannerVisible && <StakingPromoBanner onDismiss={() => setHideStakingPromoBanner(true)} />}
 
           {noAssets && (
-            <Stack spacing={1}>
+            <div className="flex flex-col gap-2">
               {showHnBanner && <HnBannerForCarousel onDismiss={() => {}} />}
               {!showHnBanner && <AddFundsToGetStarted />}
-            </Stack>
+            </div>
           )}
 
           <div className={css.hideIfEmpty}>
@@ -91,8 +86,7 @@ const Dashboard = (): ReactElement => {
             <VulnerableModuleWarning isVulnerable={isVulnerableSafe} />
             {supportsRecovery && <RecoveryHeader />}
             <InconsistentSignerSetupWarning />
-            <OutdatedMastercopyWarning />
-            <UnsupportedMastercopyWarning />
+            <MastercopyWarning />
             <NonPinnedWarning />
           </ActionRequiredPanel>
 

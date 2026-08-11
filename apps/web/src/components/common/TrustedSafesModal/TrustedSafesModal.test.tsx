@@ -3,7 +3,8 @@ import TrustedSafesModal from './index'
 import type { UseTrustedSafesModalReturn } from './useTrustedSafesModal'
 import { useRouter } from 'next/router'
 import { useIsQualifiedSafe } from '@/features/spaces'
-import { OrderByOption, ORDER_BY_RESET_VERSION } from '@/store/orderByPreferenceSlice'
+import { OrderByOption, ORDER_BY_RESET_VERSION, TRUSTED_ORDER_SCOPE } from '@/store/orderByPreferenceSlice'
+import { getStoreInstance } from '@/store'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
@@ -90,6 +91,9 @@ const mockModal: UseTrustedSafesModalReturn = {
   pendingConfirmation: null,
   pendingSelectAllConfirmation: false,
   similarAddressesForSelectAll: [],
+  flagged: new Set<string>(),
+  similarityGroups: new Map<string, string>(),
+  anchorAddresses: new Set<string>(),
   searchQuery: '',
   isLoading: false,
   hasChanges: false,
@@ -116,6 +120,13 @@ describe('TrustedSafesModal', () => {
     ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
     mockUseIsQualifiedSafe.mockReturnValue(false)
     mockWalletValue = null
+    // The content defers its table mount past two animation frames; run them synchronously so the
+    // table renders in the same tick and the assertions below don't need to await frames.
+    jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb: FrameRequestCallback) => {
+      cb(0)
+      return 0
+    })
+    jest.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {})
   })
 
   it('should render modal when open', () => {
@@ -152,6 +163,17 @@ describe('TrustedSafesModal', () => {
   it('should render the search bar', () => {
     render(<TrustedSafesModal modal={mockModal} />)
     expect(screen.getByPlaceholderText('by name, address or network')).toBeInTheDocument()
+  })
+
+  it('renders the dialog shell before the accounts table (deferred mount)', () => {
+    // Use real rAF (won't fire during the synchronous render) so the table stays deferred.
+    jest.restoreAllMocks()
+    ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
+    render(<TrustedSafesModal modal={mockModal} />)
+    // Shell is present immediately…
+    expect(screen.getByText('Manage my account list')).toBeInTheDocument()
+    // …but the heavy table is not mounted yet.
+    expect(screen.queryByTestId('safe-accounts-table')).not.toBeInTheDocument()
   })
 
   it('should call close when cancel clicked', () => {
@@ -287,9 +309,15 @@ describe('TrustedSafesModal', () => {
       orderByPreference: { orderBy: OrderByOption.MANUAL, resetVersion: ORDER_BY_RESET_VERSION, manualOrder: {} },
     }
 
-    it('does not enable reordering under the default (Name) sort', () => {
+    it('enables reordering under the default (Name) sort and switches to Manual on drop', () => {
       render(<TrustedSafesModal modal={mockModal} />)
-      expect(screen.queryByTestId('reorder-enabled')).not.toBeInTheDocument()
+      expect(getStoreInstance().getState().orderByPreference.orderBy).toBe(OrderByOption.NAME)
+
+      fireEvent.click(screen.getByTestId('reorder-enabled'))
+
+      const { orderByPreference } = getStoreInstance().getState()
+      expect(orderByPreference.orderBy).toBe(OrderByOption.MANUAL)
+      expect(orderByPreference.manualOrder?.[TRUSTED_ORDER_SCOPE]).toBeDefined()
     })
 
     it('enables reordering in Manual sort mode', () => {

@@ -17,7 +17,8 @@ import { useParentSafe } from '@/hooks/useParentSafe'
 import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
-import { useIsTopbarElevated } from '@/hooks/useTopbarElevation'
+import { useIsTopbarElevated, useIsTopbarAboveOverlay } from '@/hooks/useTopbarElevation'
+import { useTopbarHeight } from '@/hooks/useTopbarHeight'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -60,6 +61,12 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   useRouterGuard({ useGuard: useFlowActivationGuard })
   useKeyboardObserver()
   const isTopbarElevated = useIsTopbarElevated()
+  const isTopbarAboveOverlay = useIsTopbarAboveOverlay()
+  // The Topbar is absolutely positioned, so the content reserves space for it via the
+  // `--topbar-height` CSS var. That height is not constant: below the header's `@1100px`
+  // container query the safe selector wraps onto its own row, doubling the topbar height.
+  // A fixed reserve then lets the topbar overlap the page (WA: dashboard cards clipped).
+  const setTopbarNode = useTopbarHeight()
 
   // Hide sidebar when transaction flow is open
   const isSidebarVisible = isSidebarOpen && !txFlow
@@ -91,8 +98,16 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
       >
         {!hideHeader && (
           <div
+            ref={setTopbarNode}
             className={classnames(css.topbar, {
               [css.topbarElevated]: isTopbarElevated,
+              [css.topbarAboveOverlay]: isTopbarAboveOverlay,
+              // The topbar is absolutely positioned, so it can't inherit `.main`'s sidebar
+              // offset — it has to reproduce it. Keep these conditions identical to the
+              // `mainNoSidebar` / `mainSidebarCollapsed` ones below or the header drifts out
+              // of alignment with the page content underneath it.
+              [css.topbarNoSidebar]: !isSidebarVisible || !isSidebarRoute,
+              [css.topbarCollapsed]: isSidebarRoute && isSidebarVisible && !isSidebarExpanded,
             })}
           >
             <Topbar onMenuToggle={menuToggleHandler} onBatchToggle={setBatchOpen} />

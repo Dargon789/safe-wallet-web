@@ -15,6 +15,7 @@ import { PendingSafeStatus } from '@/features/counterfactual/types'
 import type { UndeployedSafesState } from '@/features/counterfactual/types'
 import useWallet from '@/hooks/wallets/useWallet'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { getOwnerAwaitingConfirmations } from '@/utils/transaction-guards'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
@@ -42,6 +43,20 @@ const resolveThresholdAndOwners = (
   owners: isCurrentSafe ? (safe.owners?.length ?? 0) : (overview?.owners.length ?? 0),
 })
 
+// Read-only is derived from the overview's owners (this surface fetches overviews for every listed
+// safe anyway), so the bar never enumerates owned safes via the captcha-protected owners endpoint.
+// No wallet → read-only; no overview (counterfactual safes) → the item's own flag, which is correct
+// for CF safes even without the enumeration.
+const deriveIsReadOnly = (
+  overview: SafeOverview | undefined,
+  walletAddress: string | undefined,
+  fallback: boolean,
+): boolean => {
+  if (!walletAddress) return true
+  if (!overview) return fallback
+  return !overview.owners.some((owner) => sameAddress(owner.value, walletAddress))
+}
+
 const mapChainIds = (chainConfigs: Chain[], chainIds: string[]): ChainInfo[] =>
   chainIds.map((id) =>
     toChainInfo(
@@ -57,6 +72,7 @@ const mapMultiChainItemChains = (
   overviews: SafeOverview[] | undefined,
   overviewsLoading: boolean,
   undeployedSafes: UndeployedSafesState,
+  walletAddress: string | undefined,
 ): SafeItemDataChain[] =>
   chainIds.map((id) => {
     const overview = overviews?.find((o) => sameAddress(o.address.value, item.address) && o.chainId === id)
@@ -72,8 +88,8 @@ const mapMultiChainItemChains = (
       balance: overview?.fiatTotal,
       isLoading: overviewsLoading && !overview,
       queued: overview?.queued,
-      awaitingConfirmation: overview?.awaitingConfirmation ?? undefined,
-      isReadOnly: perChainSafe?.isReadOnly ?? false,
+      awaitingConfirmation: getOwnerAwaitingConfirmations(overview, walletAddress) || undefined,
+      isReadOnly: deriveIsReadOnly(overview, walletAddress, perChainSafe?.isReadOnly ?? false),
       isUndeployed: Boolean(undeployed),
       isActivating: Boolean(undeployed && undeployed.status.status !== PendingSafeStatus.AWAITING_EXECUTION),
     }
@@ -88,6 +104,7 @@ function buildMultiChainItem(
   safe: { threshold: number; owners?: { value: string }[] },
   chainConfigs: Chain[],
   undeployedSafes: UndeployedSafesState,
+  walletAddress: string | undefined,
 ): SafeItemData {
   const chainIds = item.safes.map((s) => s.chainId)
   const orderedChainIds = isCurrentSafe ? [currentChainId, ...chainIds.filter((id) => id !== currentChainId)] : chainIds
@@ -103,7 +120,15 @@ function buildMultiChainItem(
     ...resolveThresholdAndOwners(isCurrentSafe, safe, currentChainOverview),
     balance: currentChainOverview?.fiatTotal ?? '0',
     isLoading: overviewsLoading && !currentChainOverview,
-    chains: mapMultiChainItemChains(chainConfigs, orderedChainIds, item, overviews, overviewsLoading, undeployedSafes),
+    chains: mapMultiChainItemChains(
+      chainConfigs,
+      orderedChainIds,
+      item,
+      overviews,
+      overviewsLoading,
+      undeployedSafes,
+      walletAddress,
+    ),
   }
 }
 
@@ -115,6 +140,7 @@ function buildSingleChainItem(
   safe: { threshold: number; owners?: { value: string }[] },
   chainConfigs: Chain[],
   undeployedSafes: UndeployedSafesState,
+  walletAddress: string | undefined,
 ): SafeItemData {
   const overview = overviews?.find((o) => sameAddress(o.address.value, item.address) && o.chainId === item.chainId)
   const undeployed = undeployedSafes[item.chainId]?.[item.address]
@@ -129,8 +155,8 @@ function buildSingleChainItem(
     chains: mapChainIds(chainConfigs, [item.chainId]).map((chain) => ({
       ...chain,
       queued: overview?.queued,
-      awaitingConfirmation: overview?.awaitingConfirmation ?? undefined,
-      isReadOnly: item.isReadOnly ?? false,
+      awaitingConfirmation: getOwnerAwaitingConfirmations(overview, walletAddress) || undefined,
+      isReadOnly: deriveIsReadOnly(overview, walletAddress, item.isReadOnly ?? false),
       isUndeployed: Boolean(undeployed),
       isActivating: Boolean(undeployed && undeployed.status.status !== PendingSafeStatus.AWAITING_EXECUTION),
     })),
@@ -176,6 +202,7 @@ export function useSpaceSafeSelectorItems() {
             safe,
             chainConfigs,
             undeployedSafes,
+            walletAddress,
           )
         }
 
@@ -187,9 +214,19 @@ export function useSpaceSafeSelectorItems() {
           safe,
           chainConfigs,
           undeployedSafes,
+          walletAddress,
         )
       }),
-    [effectiveSafeAddress, currentChainId, safe, overviews, overviewsLoading, chainConfigs, undeployedSafes],
+    [
+      effectiveSafeAddress,
+      currentChainId,
+      safe,
+      overviews,
+      overviewsLoading,
+      chainConfigs,
+      undeployedSafes,
+      walletAddress,
+    ],
   )
 
   const workspaceItems = useMemo(() => buildItems(workspaceSafes), [buildItems, workspaceSafes])
