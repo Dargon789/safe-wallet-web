@@ -41,6 +41,9 @@ const baseMockModal: UseTrustedSafesModalReturn = {
   pendingConfirmation: null,
   pendingSelectAllConfirmation: false,
   similarAddressesForSelectAll: [],
+  flagged: new Set<string>(),
+  similarityGroups: new Map<string, string>(),
+  anchorAddresses: new Set<string>(),
   searchQuery: '',
   isLoading: false,
   hasChanges: false,
@@ -62,7 +65,7 @@ const baseMockModal: UseTrustedSafesModalReturn = {
 }
 
 const meta = {
-  title: 'Common/TrustedSafesModal',
+  title: 'Components/Common/TrustedSafesModal',
   component: TrustedSafesModal,
   decorators: [withMockProvider()],
   parameters: {

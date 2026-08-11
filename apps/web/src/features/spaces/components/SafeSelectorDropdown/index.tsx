@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { type MouseEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { Select, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -9,6 +9,7 @@ import SafeDropdownContainer from './components/SafeDropdownContainer'
 import InlineRetryError from '@/components/common/InlineRetryError'
 import { useSafeSelectorState } from './hooks/useSafeSelectorState'
 import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
+import { useTopbarOverlayElevation } from '@/hooks/useTopbarElevation'
 import useChains from '@/hooks/useChains'
 import { getSafeSelectorClassVariants } from './utils/classVariants'
 import type { SafeItemData, SafeSelectorDropdownProps } from './types'
@@ -41,7 +42,7 @@ function buildFallbackSafeItem(selectedItemId: string | undefined, chainConfigs:
 
 function SafeSelectorDropdownSkeleton() {
   return (
-    <div className="w-full sm:w-[430px] min-h-[calc(68px)] flex items-center gap-4 rounded-lg p-2 pl-6 bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+    <div className="w-full min-[430px]:w-auto min-[430px]:flex-1 min-[430px]:min-w-0 min-[430px]:max-w-[515px] h-10 flex items-center gap-4 rounded-lg py-0.5 pl-1.5 pr-2 bg-muted">
       <Skeleton className="size-8 shrink-0 rounded-full" />
       <div className="flex flex-1 flex-col gap-1.5">
         <Skeleton className="h-3.5 w-24 rounded-full" />
@@ -57,6 +58,7 @@ function SafeSelectorDropdownSkeleton() {
 
 function SafeSelectorDropdown({
   items,
+  listItems,
   selectedItemId,
   onItemSelect,
   isLoading,
@@ -64,6 +66,12 @@ function SafeSelectorDropdown({
   onRetry,
   header,
   footer,
+  emptyStateOverride,
+  searchValue,
+  onSearchValueChange,
+  onItemRename,
+  onReorder,
+  keepOpen,
 }: SafeSelectorDropdownProps) {
   const hasDropdownContent = Boolean(header) || Boolean(footer) || isLoading || isError
   // Force-openable so `isSingleSafe` can't hide the chevron when only one other safe exists.
@@ -88,8 +96,12 @@ function SafeSelectorDropdown({
   useEffect(() => setMounted(true), [])
 
   const variants = getSafeSelectorClassVariants(isSingleSafe)
+  const isPopupOpen = variants.canOpen && !isDisabled && dropdownOpen
   const safeSelectValue = selectedItemId ?? selectedItem?.id
   const safeItemSelect = onItemSelect ?? (() => {})
+
+  // The dropdown's backdrop dims the whole page; lift the topbar above it so the trigger stays lit.
+  useTopbarOverlayElevation('safe-selector', isPopupOpen)
 
   const { configs: chainConfigs } = useChains()
   const fallbackSelectedItem = useMemo(
@@ -97,6 +109,34 @@ function SafeSelectorDropdown({
     [selectedItem, selectedItemId, chainConfigs],
   )
   const triggerItem = selectedItem ?? fallbackSelectedItem
+
+  // A lifted search query would otherwise persist across open/close (local state resets with the popup).
+  const handleOpenChangeWithReset = (open: boolean) => {
+    // Ignore close requests while a modal is layered on top (e.g. renaming): base-ui tries to close
+    // the popup when focus/pointer moves into the dialog, but we want the user to keep their place.
+    if (!open && keepOpen) return
+    if (!open) onSearchValueChange?.('')
+    handleOpenChange(open)
+  }
+
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const wasOpenOnPressRef = useRef(false)
+
+  // The display layer sits on top of the full-bleed trigger and its tooltip triggers must keep pointer
+  // events (otherwise they never open on hover), so a press on the safe name or the balance lands on a
+  // <span> the trigger behind it never sees. Forward it — unless it hit one of the row's own controls,
+  // or base-ui already closed the popup on this same pointerdown, in which case forwarding reopens it.
+  // Capture phase is required: when the popup is open base-ui dismisses it mid-pointerdown, so by the
+  // bubble phase the state already reads closed and the guard below would let the click reopen it.
+  const rememberOpenStateOnPress = () => {
+    wasOpenOnPressRef.current = isPopupOpen
+  }
+
+  const forwardPressToTrigger = (event: MouseEvent<HTMLDivElement>) => {
+    if (wasOpenOnPressRef.current || isDisabled || !variants.canOpen) return
+    if (event.target instanceof Element && event.target.closest('a, button, [role="button"]')) return
+    triggerRef.current?.click()
+  }
 
   if (!mounted || !triggerItem) {
     if (isError && mounted) return <InlineRetryError message="Failed to load Safe data" onRetry={onRetry} />
@@ -112,33 +152,57 @@ function SafeSelectorDropdown({
     <Select
       value={safeSelectValue}
       onValueChange={handleSafeChange}
-      open={variants.canOpen && !isDisabled ? dropdownOpen : false}
-      onOpenChange={isDisabled ? undefined : handleOpenChange}
+      open={isPopupOpen}
+      onOpenChange={isDisabled ? undefined : handleOpenChangeWithReset}
       // Deliberately not disabled: a disabled <button> blocks the inline address actions (copy,
       // explorer, env hint). Safe switching is prevented by the forced-closed `open` above instead.
     >
-      <SelectTrigger
+      <div
         className={cn(
           // The wrapper's overflow-hidden clips this focus-visible ring into stray top/bottom bars,
           // so suppress it — the card shows no focus ring by design (wrapper sets focus:ring-0).
-          '-m-4 flex-1 border-0 shadow-none bg-transparent dark:bg-transparent py-0 pl-6 hover:bg-transparent dark:hover:bg-transparent data-[state=open]:bg-transparent focus-visible:ring-0 focus-visible:border-0 [&_[data-slot=select-value]]:pr-0 relative',
+          //
+          // min-w-0 (trigger + value slot): without it a long safe name can't shrink/truncate and
+          // pushes the balance and chevron out of the clipped card. Concretely: `flex-1` alone still
+          // floors a flex item at min-content, so display content plus the paddings exceeded the
+          // selector's fixed box and overflowed ~19px right; the trigger lays its chevron out with
+          // `justify-end`, so the chevron rode that overflow into the gap and its padding ended up
+          // under the nested-safes button. Letting both shrink keeps them inside.
+          '-m-4 flex-1 min-w-0 w-full border-0 shadow-none bg-transparent dark:bg-transparent py-0 pl-4 hover:bg-transparent dark:hover:bg-transparent data-[state=open]:bg-transparent focus-visible:ring-0 focus-visible:border-0 [&_[data-slot=select-value]]:pr-0 [&_[data-slot=select-value]]:min-w-0 relative',
           variants.triggerClass,
           isDisabled && 'cursor-not-allowed opacity-50',
         )}
-        size="default"
-        iconWrapperClassName={variants.iconWrapperClass}
-        // Not the native `disabled` (that would kill the nested copy/explorer buttons); aria-disabled
-        // just announces the inert trigger to assistive tech while leaving descendants operable.
-        aria-disabled={isDisabled || undefined}
-        data-testid="open-safes-icon"
       >
-        <SelectValue>
+        {/* The trigger is an invisible full-bleed overlay BEHIND the display content, so the inline
+            copy/explorer actions render outside the trigger <button> (no interactive nesting). */}
+        <SelectTrigger
+          ref={triggerRef}
+          className={cn(
+            // justify-end: the SelectValue is sr-only (out of flow), so the icon is the only flex
+            // item and justify-between would park it at the left, behind the avatar.
+            // eslint-disable-next-line no-restricted-syntax -- invisible full-bleed overlay trigger behind the card content (inset-0, ring/skin suppression); not a size/skin variant
+            'absolute inset-0 z-0 h-auto w-auto justify-end border-0 bg-transparent p-0 hover:bg-transparent focus-visible:border-0 focus-visible:ring-0',
+            isDisabled && 'cursor-not-allowed opacity-50',
+          )}
+          variant="ghost"
+          iconWrapperClassName={variants.iconWrapperClass}
+          aria-label={`Select Safe ${triggerItem.address}`}
+          aria-disabled={isDisabled || undefined}
+          data-testid="open-safes-icon"
+        >
+          <SelectValue className="sr-only">{triggerItem.address}</SelectValue>
+        </SelectTrigger>
+        <div
+          onPointerDownCapture={rememberOpenStateOnPress}
+          onClick={forwardPressToTrigger}
+          className="relative z-10 flex h-full w-full pointer-events-none [&_[data-slot=tooltip-trigger]]:pointer-events-auto [&_[role=button]]:pointer-events-auto [&_a]:pointer-events-auto [&_button]:pointer-events-auto"
+        >
           <SafeSelectorTriggerContent selectedItem={triggerItem} selectedChainId={selectedChainId} />
-        </SelectValue>
-      </SelectTrigger>
+        </div>
+      </div>
 
       <SafeDropdownContainer
-        items={items}
+        items={listItems ?? items}
         selectedItemId={safeSelectValue}
         onItemSelect={safeItemSelect}
         isLoading={isLoading}
@@ -146,20 +210,27 @@ function SafeSelectorDropdown({
         onRetry={onRetry}
         header={header}
         footer={footer}
+        emptyStateOverride={emptyStateOverride}
         closeDropdown={closeDropdown}
+        searchValue={searchValue}
+        onSearchValueChange={onSearchValueChange}
+        onItemRename={onItemRename}
+        onReorder={onReorder}
       />
     </Select>
   )
 
   // TODO: change rounded-lg (8px) to rounded-2xl (16px) after migrating to the new design system
+  // A muted 40px chip: the SpaceSafeBar pill that groups this with the nested-safes and
+  // network controls carries the white card and its shadow.
   const wrapperClassName = cn(
-    'group relative w-full sm:w-[430px] min-h-[calc(68px)] flex items-center shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)] rounded-lg p-2 overflow-hidden bg-card focus:ring-0',
+    'group relative w-full min-[430px]:w-auto min-[430px]:flex-1 min-[430px]:min-w-0 min-[430px]:max-w-[515px] h-10 flex items-center rounded-lg py-0.5 pl-1.5 pr-2 overflow-hidden bg-muted focus:ring-0',
     variants.wrapperClass,
   )
 
   const innerContent = (
     <>
-      <div className="pointer-events-none absolute inset-1 rounded-md bg-muted/30 opacity-0 group-hover:opacity-100" />
+      <div className="pointer-events-none absolute inset-0 rounded-lg bg-muted-foreground/5 opacity-0 group-hover:opacity-100" />
       {selectElement}
     </>
   )

@@ -1,15 +1,15 @@
 import { FormProvider, useForm } from 'react-hook-form'
 import { useUpdateSpace, type UpdateSpaceFormData } from './useUpdateSpace'
 import ErrorAlert from './ErrorAlert'
-import { Button } from '@mui/material'
+import { Button } from '@/components/ui/button'
 import { type GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useIsAdmin } from '@/features/spaces'
 import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 import NameInput from '@/components/common/NameInput'
 import { NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 
-const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => {
-  const { handleUpdate, error } = useUpdateSpace(space)
+const UpdateSpaceForm = ({ space, onClose }: { space: GetSpaceResponse | undefined; onClose?: () => void }) => {
+  const { handleUpdate, error } = useUpdateSpace(space, onClose)
   const isAdmin = useIsAdmin(space?.uuid)
 
   const formMethods = useForm<UpdateSpaceFormData>({
@@ -42,7 +42,7 @@ const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => 
 
         <ErrorAlert error={error} />
 
-        <Button data-testid="space-save-button" variant="contained" type="submit" sx={{ mt: 2 }} disabled={!canSubmit}>
+        <Button data-testid="space-save-button" type="submit" className="mt-4" disabled={!canSubmit}>
           Save
         </Button>
       </form>
