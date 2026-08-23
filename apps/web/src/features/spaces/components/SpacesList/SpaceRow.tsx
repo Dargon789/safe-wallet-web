@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
-import IconButton from '@mui/material/IconButton'
+import { EllipsisVertical } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { Separator } from '@/components/ui/separator'
@@ -45,7 +45,10 @@ const SpaceRow = ({
 
   return (
     <>
-      <div data-testid="space-row" className="relative">
+      <div
+        data-testid="space-row"
+        className="relative isolate before:absolute before:-inset-x-3 before:inset-y-1 before:-z-10 before:rounded-md hover:before:bg-muted"
+      >
         <Link
           href={{ pathname: AppRoutes.spaces.index, query: { spaceId: space.uuid } }}
           onClick={handleOpenWorkspace}
@@ -67,14 +70,15 @@ const SpaceRow = ({
             {isAdmin ? (
               <SpaceContextMenu space={space} />
             ) : (
-              <IconButton
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 data-testid="space-row-locked-actions"
-                size="small"
                 disabled
                 aria-label={MEMBER_NO_EDIT_MESSAGE}
               >
-                <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
-              </IconButton>
+                <EllipsisVertical className="text-muted-foreground" />
+              </Button>
             )}
           </AdminOnlyWorkspaceTooltip>
         </div>

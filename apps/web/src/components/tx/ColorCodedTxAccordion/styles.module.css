@@ -1,0 +1,50 @@
+.item {
+  gap: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  /* The tx-type colour coding rides on the border and the open row's tint; the card fill itself stays
+     neutral so the whole block is never washed in colour. */
+  background-color: var(--card);
+  border: 1px solid var(--accordion-border-active);
+  box-shadow: none;
+}
+
+/* No hover fill: greying the panel made the nested "Advanced details" block blend into it. The
+   border already marks the region, and the trigger itself is the affordance. */
+
+.trigger {
+  min-height: 56px;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none;
+  background-color: transparent !important;
+}
+
+.trigger:hover {
+  background-color: transparent !important;
+}
+
+/* Open row takes the tx-type tint. Child combinators: a descendant match would let an enclosing open
+   accordion tint this row while it is closed. */
+[data-slot='accordion-item'][data-open] > * > .trigger {
+  background-color: var(--accordion-fill-active) !important;
+}
+
+.content {
+  background-color: transparent;
+}
+
+/* Fill is a per-tx-level tint set inline (see TxInfoColors.background); no border, matching the
+   pre-shadcn chip which was a plain tinted label. */
+.methodChip {
+  border-color: transparent;
+}
+
+.divider {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-2);
+  margin-left: calc(-1 * var(--space-2));
+  width: calc(100% + var(--space-4));
+}

@@ -1,13 +1,8 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import Box from '@mui/material/Box'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import TableSortLabel from '@mui/material/TableSortLabel'
+import { ChevronDown, ChevronUp } from 'lucide-react'
+import { TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import tableCss from './styles.module.css'
 import type { AllSafeItems } from '@/hooks/safes'
 import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNT_COLUMNS, SELECT_COLUMN, type SafeAccountColumnId } from './columns'
@@ -21,6 +16,10 @@ import {
 } from './useSafeAccountRows'
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
 import ReorderableBody, { toggleExpanded } from './ReorderableBody'
+import { bandHeaderAt } from './SimilarityBand'
+import { orderGroupsBySimilarity } from './orderGroupsBySimilarity'
+import { weaveReorderedKeys } from '@/utils/reorder'
+import type { SimilarWarning } from '@/features/address-poisoning'
 import EntryDialog from '@/components/address-book/EntryDialog'
 
 /** Renaming a safe = editing its address-book entry across every chain it lives on. */
@@ -94,8 +93,12 @@ export type SafeAccountsTableProps = {
   actionsWidth?: string
   /** Replaces the default context-menu actions cell for each row (e.g. an "Add to workspace" button). */
   renderActions?: (line: AccountLine) => ReactNode
-  /** Lowercased addresses to flag with a "High similarity" warning badge. */
-  flaggedAddresses?: Set<string>
+  /** Lowercased address → cross-list look-alike peers; drives the inline ⚠️ + tooltip. */
+  similarWarnings?: Map<string, SimilarWarning>
+  /** Lowercased address → cluster id; contiguous same-cluster rows render inside a warning band. */
+  similarityGroups?: Map<string, string>
+  /** Lowercased vetted/pinned addresses — ordering-only: a band opens at its anchor's slot, anchor first. */
+  anchorAddresses?: Set<string>
   /** Enables a leading checkbox column and makes rows selectable. */
   selection?: SafeAccountsSelection
   /**
@@ -116,47 +119,45 @@ export type SafeAccountsTableProps = {
   /** Fired when a row's link is clicked; receives the clicked line so callers can track the safe. */
   onLinkClick?: (line: AccountLine) => void
   /**
-   * Renders the table flush inside a card: no column header, no bordered container, and the Name
-   * column flexes to fill the available width instead of being fixed. Used by the dashboard widget.
+   * Renders the table flush inside a card: no column header, no bordered container, no row
+   * dividers, and the Name column flexes to fill the available width instead of being fixed.
+   * Used by the dashboard widget.
    */
   embedded?: boolean
+  /**
+   * Whether the standalone container draws its 1px outline. Defaults to `true`. The space
+   * "Safe accounts" page passes `false` to sit flush on the page background while keeping the
+   * card fill, header and dividers.
+   */
+  bordered?: boolean
   'data-testid'?: string
 }
 
-// Header labels sit on a light-grey rounded bar (see the header cell sx below), matching the design.
-const headerSx = {
-  textTransform: 'uppercase',
-  fontSize: '12px',
-  fontWeight: 500,
-  letterSpacing: '0.04em',
-  color: 'text.secondary',
-  whiteSpace: 'nowrap',
-  py: 1.25,
-  // Match the body cells' slim padding so labels align with their columns.
-  px: 1,
-  // The grey bar sits inset 4px from the panel edges: transparent borders +
-  // padding-box clip shrink the painted background without moving the cells.
-  // `&&` outranks the theme's MuiTableCell-head border-bottom.
-  backgroundClip: 'padding-box',
-  '&&': { border: '4px solid transparent', borderLeft: 'none', borderRight: 'none' },
-  '&&:first-of-type': { pl: 2, borderLeft: '4px solid transparent' },
-  '&&:last-of-type': { pr: 2, borderRight: '4px solid transparent' },
-} as const
-
-const SafeAccountsTable = ({
+// Declared as a hoisted `function` (not a `const` arrow) on purpose: this component sits in a
+// cross-feature import cycle (myAccounts ↔ spaces barrels), and webpack's React Refresh runtime
+// eagerly reads every export at module-eval time. A `const` binding read mid-cycle throws
+// "Cannot access before initialization" (TDZ) and crashes Storybook; a hoisted function is
+// readable even while its module is still initializing. The app (Rspack) tolerates the cycle
+// regardless. Must be `export default function` inline (not a trailing `export default X`) — the
+// latter compiles to a TDZ `__WEBPACK_DEFAULT_EXPORT__` temp that reintroduces the crash. See
+// docs/feature-architecture.md.
+export default function SafeAccountsTable({
   items,
   columns,
   actionsWidth,
   renderActions,
-  flaggedAddresses,
+  similarWarnings,
+  similarityGroups,
+  anchorAddresses,
   selection,
   allowRenameInDialog = false,
   reorder,
   sortableColumns = true,
   onLinkClick,
   embedded = false,
+  bordered = true,
   'data-testid': testId = 'safe-accounts-table',
-}: SafeAccountsTableProps) => {
+}: SafeAccountsTableProps) {
   const [overviewsByKey, setOverviewsByKey] = useState<Map<string, SafeOverview>>(new Map())
 
   // Rows report their lazily-fetched overviews here. RTK returns a stable object ref per cache entry
@@ -188,10 +189,6 @@ const SafeAccountsTable = ({
   const canRename = allowRenameInDialog || !selection
   const onRename = canRename ? (line: AccountLine) => setRenameTarget(toRenameTarget(line)) : undefined
 
-  // While reordering, the incoming (manual) order is authoritative: column-header sorting is
-  // suppressed and multi-chain groups collapse so each row is a single draggable account.
-  const reorderActive = Boolean(reorder)
-
   const visibleColumns = useMemo(() => {
     const base = columns ? SAFE_ACCOUNT_COLUMNS.filter((c) => columns.includes(c.id)) : SAFE_ACCOUNT_COLUMNS
     const withActions = actionsWidth ? base.map((c) => (c.id === 'actions' ? { ...c, width: actionsWidth } : c)) : base
@@ -207,10 +204,10 @@ const SafeAccountsTable = ({
   )
 
   const sortedGroups = useMemo(() => {
-    if (reorderActive || !sortableColumns || !sort.orderBy) return groups
+    if (!sortableColumns || !sort.orderBy) return groups
     const orderBy = sort.orderBy
     return [...groups].sort((a, b) => compareGroups(a, b, orderBy, sort.order))
-  }, [groups, sort, reorderActive, sortableColumns])
+  }, [groups, sort, sortableColumns])
 
   // When an external sort-mode control takes over ordering (Last visited / Manual), clear any active
   // column sort so a stale header arrow and order don't linger if column sorting re-enables.
@@ -218,9 +215,26 @@ const SafeAccountsTable = ({
     if (!sortableColumns) setSort({ orderBy: null, order: 'asc' })
   }, [sortableColumns])
 
+  // Pull similarity clusters together (non-reorder body) so each renders as one contiguous band.
+  const displayGroups = useMemo(
+    () => orderGroupsBySimilarity(sortedGroups, similarityGroups, anchorAddresses),
+    [sortedGroups, similarityGroups, anchorAddresses],
+  )
+
+  // Weave the dropped (non-clustered) rows into the stored order: the clusters' pin-to-top is
+  // display-only and must not rewrite the user's manual arrangement (it would outlive the cluster).
+  const handleReorder = useCallback(
+    (reorderedDraggable: string[]) => {
+      const storedOrder = sortedGroups.map((group) => group.parent.address)
+      const isClustered = (address: string) => Boolean(similarityGroups?.get(address.toLowerCase()))
+      reorder?.onReorder(weaveReorderedKeys(storedOrder, reorderedDraggable, isClustered))
+    },
+    [reorder, sortedGroups, similarityGroups],
+  )
+
   const lines = useMemo<Array<{ line: AccountLine; groupKey: string; group: AccountGroup }>>(() => {
     const result: Array<{ line: AccountLine; groupKey: string; group: AccountGroup }> = []
-    for (const group of sortedGroups) {
+    for (const group of displayGroups) {
       result.push({ line: group.parent, groupKey: group.parent.key, group })
       if (group.children.length > 0 && expanded.has(group.parent.key)) {
         for (const child of group.children) {
@@ -229,7 +243,7 @@ const SafeAccountsTable = ({
       }
     }
     return result
-  }, [sortedGroups, expanded])
+  }, [displayGroups, expanded])
 
   const handleSort = (column: SafeSortColumn) =>
     setSort((prev) => ({
@@ -242,68 +256,26 @@ const SafeAccountsTable = ({
   if (items.length === 0) return null
 
   return (
-    <Box data-testid={testId} sx={{ width: '100%' }}>
-      <TableContainer
-        sx={
-          embedded
-            ? { width: '100%', overflowX: 'visible' }
-            : {
-                width: '100%',
-                // Reorder mode floats the drag grip in the left gutter, outside the card — clipping it
-                // would hide the handle, so drop the horizontal scroll container while reordering.
-                overflowX: reorderActive ? 'visible' : 'auto',
-                borderRadius: '16px',
-                backgroundColor: 'background.paper',
-                border: '1px solid',
-                borderColor: 'border.light',
-                // Keep the last row off the rounded bottom edge (the header already insets from the top).
-                pb: 1,
-              }
-        }
+    <div data-testid={testId} className="w-full">
+      <div
+        className={cn(
+          'w-full',
+          embedded ? 'overflow-x-visible' : 'overflow-x-auto',
+          !embedded && tableCss.container,
+          // `bordered={false}` drops the panel's edge — for tables nested in something that draws its own.
+          !embedded && !bordered && tableCss.containerBorderless,
+        )}
       >
-        <Table
-          sx={{
+        {/* Raw <table> instead of the ui <Table> wrapper: we own the horizontal-scroll container
+            above so `embedded` tables can opt out of it. The shadcn table sub-components are used
+            throughout. */}
+        <table
+          className={cn('w-full caption-bottom text-sm', tableCss.table)}
+          style={{
             tableLayout: 'fixed',
             minWidth: embedded ? undefined : minWidth,
             borderCollapse: 'separate',
             borderSpacing: 0,
-            // The base theme tints every MuiTableRow green on hover; suppress it on the <tr> (otherwise
-            // it bleeds green into the inset corners) and instead paint a grey pill (the same --muted as
-            // the safe-selector dropdown) on the row's cells — inset and rounded like the dropdown rows.
-            // Painting the cells (not the <tr>) lets the first/last cells' transparent side borders inset
-            // the fill from the panel edges. Locked rows stay un-hovered.
-            '& .MuiTableBody-root .MuiTableRow-root:hover': { backgroundColor: 'transparent' },
-            '& .MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root': {
-              backgroundColor: 'var(--muted)',
-            },
-            '& .MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root:first-of-type': {
-              borderTopLeftRadius: '8px',
-              borderBottomLeftRadius: '8px',
-            },
-            '& .MuiTableBody-root .MuiTableRow-root:not([data-disabled]):hover .MuiTableCell-root:last-of-type': {
-              borderTopRightRadius: '8px',
-              borderBottomRightRadius: '8px',
-            },
-            // Transparent top/bottom borders (with background-clip) inset the hover pill vertically so it
-            // floats clear of the separators. Set here — not per-cell — because the base theme forces
-            // cell borderBottom to `none` at a specificity a per-cell sx can't beat (which is why only
-            // the bottom touched). The outer cells' horizontal inset borders live in the cell sx.
-            '& .MuiTableBody-root .MuiTableCell-root': {
-              borderTop: '6px solid transparent',
-              borderBottom: '6px solid transparent',
-              backgroundClip: 'padding-box',
-            },
-            // Row separator, drawn as a 1px line at the bottom of the <tr> (keyed off data-divider,
-            // absent on the last row). It lives on the row — not the cells — so the cells' transparent
-            // top/bottom borders can inset the hover pill clear of the separator. Inset 4px each side to
-            // line up with the pill.
-            '& .MuiTableBody-root .MuiTableRow-root[data-divider]': {
-              backgroundImage:
-                'linear-gradient(to right, transparent 4px, var(--color-border-light) 4px, var(--color-border-light) calc(100% - 4px), transparent calc(100% - 4px))',
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'bottom',
-              backgroundSize: '100% 1px',
-            },
           }}
         >
           {/* Embedded (headerless) tables need a colgroup to keep fixed-layout column widths; the Name
@@ -317,42 +289,65 @@ const SafeAccountsTable = ({
           )}
 
           {!embedded && (
-            <TableHead>
-              <TableRow>
-                {visibleColumns.map((column, index) => (
-                  <TableCell
-                    key={column.id}
-                    sortDirection={sort.orderBy === column.sortKey ? sort.order : false}
-                    className={cn(
-                      'bg-muted',
-                      index === 0 && 'rounded-l-lg',
-                      index === visibleColumns.length - 1 && 'rounded-r-lg',
-                    )}
-                    sx={{ ...headerSx, width: column.width, textAlign: column.align ?? 'left' }}
-                  >
-                    {column.sortable && column.sortKey && !reorderActive && sortableColumns ? (
-                      <TableSortLabel
-                        active={sort.orderBy === column.sortKey}
-                        direction={sort.orderBy === column.sortKey ? sort.order : 'asc'}
-                        onClick={() => handleSort(column.sortKey as SafeSortColumn)}
-                        data-testid={`account-sort-${column.id}`}
-                      >
-                        {column.label}
-                      </TableSortLabel>
-                    ) : (
-                      column.label
-                    )}
-                  </TableCell>
-                ))}
+            <TableHeader>
+              <TableRow className="border-0 hover:bg-transparent">
+                {visibleColumns.map((column, index) => {
+                  const active = sort.orderBy === column.sortKey
+                  const canSort = column.sortable && column.sortKey && sortableColumns
+                  return (
+                    <TableHead
+                      key={column.id}
+                      aria-sort={active ? (sort.order === 'asc' ? 'ascending' : 'descending') : undefined}
+                      // Indents the NAME label so it sits above the account name text rather than the
+                      // avatar (see styles.module.css) — a leading checkbox column already offsets the
+                      // cell, so it needs less.
+                      data-name-head={column.id === 'name' ? (selection ? 'selection' : 'default') : undefined}
+                      className={cn(
+                        'bg-muted whitespace-nowrap px-2 py-2.5 text-xs font-semibold uppercase leading-4 tracking-normal text-muted-foreground',
+                        index === 0 && 'rounded-l-lg',
+                        index === visibleColumns.length - 1 && 'rounded-r-lg',
+                      )}
+                      style={{ width: column.width, textAlign: column.align ?? 'left' }}
+                    >
+                      {canSort ? (
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => handleSort(column.sortKey as SafeSortColumn)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault()
+                              handleSort(column.sortKey as SafeSortColumn)
+                            }
+                          }}
+                          data-testid={`account-sort-${column.id}`}
+                          className="inline-flex cursor-pointer items-center gap-0.5 select-none uppercase"
+                        >
+                          {column.label}
+                          {active ? (
+                            sort.order === 'desc' ? (
+                              <ChevronDown className="size-4" aria-hidden />
+                            ) : (
+                              <ChevronUp className="size-4" aria-hidden />
+                            )
+                          ) : null}
+                        </span>
+                      ) : (
+                        column.label
+                      )}
+                    </TableHead>
+                  )
+                })}
               </TableRow>
-            </TableHead>
+            </TableHeader>
           )}
 
           {reorder ? (
             <ReorderableBody
-              groups={sortedGroups}
+              groups={displayGroups}
               columns={visibleColumns}
-              flaggedAddresses={flaggedAddresses}
+              similarWarnings={similarWarnings}
+              similarityGroups={similarityGroups}
               expanded={expanded}
               setExpanded={setExpanded}
               renderActions={renderActions}
@@ -360,44 +355,55 @@ const SafeAccountsTable = ({
               onLinkClick={onLinkClick}
               getCheckbox={selection ? (group, line) => getRowCheckbox(group, line, selection) : undefined}
               onSelectToggle={selection ? (line, next) => selection.onToggle(line, next) : undefined}
-              onReorder={reorder.onReorder}
+              onReorder={handleReorder}
               onOverviewsLoaded={handleOverviewsLoaded}
             />
           ) : (
             <TableBody>
-              {lines.map(({ line, groupKey, group }, index) => (
-                <SafeAccountTableRow
-                  key={line.key}
-                  line={line}
-                  columns={visibleColumns}
-                  expanded={line.expandable ? expanded.has(groupKey) : undefined}
-                  isFlagged={flaggedAddresses?.has(line.address.toLowerCase())}
-                  renderActions={renderActions}
-                  onRename={onRename}
-                  checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
-                  onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}
-                  onToggle={line.expandable ? () => toggle(groupKey) : undefined}
-                  onLinkClick={onLinkClick}
-                  showDivider={index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}
-                  onOverviewsLoaded={handleOverviewsLoaded}
-                />
-              ))}
+              {lines.flatMap(({ line, groupKey, group }, index) => {
+                const clusterId = similarityGroups?.get(line.address.toLowerCase())
+                const bandHeader = bandHeaderAt(
+                  index,
+                  (i) => similarityGroups?.get(lines[i].line.address.toLowerCase()),
+                  visibleColumns.length,
+                )
+
+                const row = (
+                  <SafeAccountTableRow
+                    key={line.key}
+                    line={line}
+                    columns={visibleColumns}
+                    expanded={line.expandable ? expanded.has(groupKey) : undefined}
+                    warning={similarWarnings?.get(line.address.toLowerCase())}
+                    highlighted={Boolean(clusterId)}
+                    renderActions={renderActions}
+                    onRename={onRename}
+                    checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
+                    onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}
+                    onToggle={line.expandable ? () => toggle(groupKey) : undefined}
+                    onLinkClick={onLinkClick}
+                    showDivider={!embedded && index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}
+                    onOverviewsLoaded={handleOverviewsLoaded}
+                  />
+                )
+
+                return bandHeader ? [bandHeader, row] : [row]
+              })}
             </TableBody>
           )}
-        </Table>
-      </TableContainer>
+        </table>
+      </div>
 
       {renameTarget && (
         <EntryDialog
           handleClose={() => setRenameTarget(null)}
           defaultValues={{ name: renameTarget.name, address: renameTarget.address }}
           chainIds={renameTarget.chainIds}
-          // In a modal surface, sit above the shadcn Dialog (--z-overlay: 1400) instead of behind it.
-          sx={allowRenameInDialog ? { zIndex: 1450 } : undefined}
+          // In a modal surface, sit above the shadcn Dialog (--z-overlay) instead of behind it.
+          className={allowRenameInDialog ? 'z-[var(--z-nested-overlay)]' : undefined}
+          overlayClassName={allowRenameInDialog ? 'z-[var(--z-nested-overlay)]' : undefined}
         />
       )}
-    </Box>
+    </div>
   )
 }
-
-export default SafeAccountsTable

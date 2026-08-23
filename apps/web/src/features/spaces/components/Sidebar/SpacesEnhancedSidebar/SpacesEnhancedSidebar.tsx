@@ -10,7 +10,7 @@ import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_G
 import { getNonDeclinedSpaces } from '@/features/spaces/utils'
 import type { SpaceItem } from '../types'
 import { getQuerySpaceId } from '../utils'
-import { useSidebarHydrated } from '../hooks/useSidebarHydrated'
+import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import useIsQualifiedSafe from '../../../hooks/useIsQualifiedSafe'
 import { SidebarSkeleton } from '../SidebarSkeleton'
@@ -43,16 +43,22 @@ export const SpacesEnhancedSidebar = ({
   onOpenChange,
   isContainedInDrawer = false,
 }: SpacesEnhancedSidebarProps = {}): ReactElement => {
-  const isHydrated = useSidebarHydrated()
+  const isHydrated = useIsHydrated()
   const isDarkMode = useDarkMode()
   const spacesSidebarWidth = 'min(230px, 100%)'
+  const spacesSidebarIconWidth = '34px'
 
   return (
     <SidebarProvider
       open={isContainedInDrawer ? true : undefined}
       openMobile={isDrawerOpen}
       onOpenMobileChange={(open) => !open && onDrawerClose?.()}
-      style={{ '--sidebar-width': spacesSidebarWidth } as CSSProperties}
+      style={
+        {
+          '--sidebar-width': spacesSidebarWidth,
+          '--sidebar-width-icon': spacesSidebarIconWidth,
+        } as CSSProperties
+      }
       className={cn('shadcn-scope', isDarkMode && 'dark', isContainedInDrawer && 'h-dvh')}
     >
       <SidebarStateReporter onOpenChange={onOpenChange} />

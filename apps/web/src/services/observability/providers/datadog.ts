@@ -1,8 +1,10 @@
-import type { ILogger, IObservabilityProvider } from '../types'
+import type { ILogger, IObservabilityProvider, ObservedError } from '../types'
+import { matchUserOutcome } from '@safe-global/utils/services/exceptions/normalizeError'
 import {
   datadogRum,
   type RumEvent,
   type RumErrorEvent,
+  type RumResourceEvent,
   type RumEventDomainContext,
   type RumErrorEventDomainContext,
 } from '@datadog/browser-rum'
@@ -23,6 +25,7 @@ import {
   DATADOG_RUM_TRACING_ENABLED,
   GATEWAY_URL_PRODUCTION,
   GATEWAY_URL_STAGING,
+  IS_TEST_E2E,
 } from '@/config/constants'
 
 type DatadogSite =
@@ -33,7 +36,7 @@ type DatadogSite =
   | 'ddog-gov.com'
   | 'ap1.datadoghq.com'
 
-export const isDatadogEnabled = Boolean(DATADOG_RUM_APPLICATION_ID) && Boolean(DATADOG_RUM_CLIENT_TOKEN)
+export const isDatadogEnabled = Boolean(DATADOG_RUM_APPLICATION_ID) && Boolean(DATADOG_RUM_CLIENT_TOKEN) && !IS_TEST_E2E
 
 const EXTENSION_URL_PATTERNS = [
   'chrome-extension://',
@@ -66,12 +69,79 @@ const isKnownNoise = (message: string | undefined): boolean => {
   return KNOWN_NOISE_PATTERNS.some((pattern) => message.includes(pattern))
 }
 
+// Our own webpack output — anything reported from here is first-party and must
+// stay visible even if its `error.type` happens to be `EvalError` (see below).
+const FIRST_PARTY_BUNDLE_PATH = '_next/static/'
+
+/**
+ * `error.type === 'EvalError'` is not proof of a CSP-blocked eval() on its
+ * own: a thrown string `"EvalError: …"`, an explicit `new EvalError()`, or any
+ * custom class that sets `name = 'EvalError'` all produce the same `type` in
+ * `@datadog/browser-core`'s `computeRawError` (`stackTrace.name`). So this is
+ * additionally gated on the stack *not* pointing at our own bundle
+ * (`_next/static/`) — mirrors `originatesFromExtension`'s pattern-matching,
+ * inverted. We ship no eval()/Function() call of our own today (grepped
+ * `apps/web/src` and `packages/`), so a same-bundle `EvalError` would mean
+ * something new started calling eval() and is worth surfacing, not silencing.
+ * A missing stack defaults to "not first-party": we have no eval() call site
+ * of our own to attribute it to, so there is nothing here that a stack could
+ * be pointing at.
+ */
+const isNotFirstPartyStack = (stack: string | undefined): boolean => {
+  if (!stack) return true
+  return !stack.includes(FIRST_PARTY_BUNDLE_PATH)
+}
+
+/**
+ * Real-world `EvalError`s reaching RUM are third-party vendor scripts (Beamer,
+ * GTM, Calendly, Cloudflare Turnstile, HubSpot forms, etc.) whose eval() /
+ * `new Function()` call our `script-src` CSP correctly blocks in production —
+ * the block is the intended behaviour and nothing is broken for the user, so
+ * it is dropped rather than counted as a real error (WA-2952).
+ *
+ * Trade-off this accepts: `'unsafe-eval'` **is** permitted in dev/Cypress
+ * (`config/securityHeaders.ts`), so a first-party eval()/Function() call would
+ * pass locally and only throw — as this same `EvalError` type — in
+ * production, where this filter would otherwise hide it. Accepted because (a)
+ * no current bundle path constructs code dynamically, and (b)
+ * `isNotFirstPartyStack` still surfaces it if the stack ever does point at our
+ * own `_next/static/` output.
+ */
+const isCspBlockedEval = (errorEvent: RumErrorEvent): boolean =>
+  errorEvent.error.type === 'EvalError' && isNotFirstPartyStack(errorEvent.error.stack)
+
 const NON_USER_IMPACTING_SOURCES = new Set(['console', 'report'])
 
 /**
+ * Resource requests whose non-2xx responses are an expected part of normal
+ * operation, not failures. Dropped before dispatch to keep RUM ingestion and
+ * the Resource explorer free of predictable noise. Matched on the raw request
+ * URL (the `@resource.url_path_group` facet is computed by Datadog and is not
+ * available client-side) plus the status code.
+ */
+const EXPECTED_RESOURCE_FAILURES: { urlPattern: RegExp; statuses: Set<number> }[] = [
+  // CGW returns 404 from the "is this user targeted?" check when no outreach
+  // exists for the Safe — polled on nearly every Safe load, so this dominates
+  // RUM resource volume. Scoped to the exact outreaches/chains/safes route so
+  // sibling operations (e.g. /signers/{address}/submissions) keep reporting 404.
+  {
+    urlPattern: /\/v1\/targeted-messaging\/outreaches\/[^/]+\/chains\/[^/]+\/safes\/[^/?#]+/,
+    statuses: new Set([404]),
+  },
+]
+
+const isExpectedResourceFailure = (event: RumResourceEvent): boolean => {
+  const { url, status_code: status } = event.resource ?? {}
+  if (!url || status === undefined) return false
+  return EXPECTED_RESOURCE_FAILURES.some(({ urlPattern, statuses }) => urlPattern.test(url) && statuses.has(status))
+}
+
+/**
  * Drop RUM error events that are demonstrably not caused by user-impacting
- * failures so the Error-Free Views SLO reflects real breakage. Non-error events
- * (views, actions, resources) pass through untouched.
+ * failures so the Error-Free Views SLO reflects real breakage, plus resource
+ * events for endpoints whose non-2xx responses are expected (see
+ * `EXPECTED_RESOURCE_FAILURES`). Views, actions and other resources pass
+ * through untouched.
  *
  * Sources we drop:
  * - `console`: the RUM SDK auto-instruments `console.error` via
@@ -84,17 +154,36 @@ const NON_USER_IMPACTING_SOURCES = new Set(['console', 'report'])
  *   not indicative of user-blocking failure; CSP visibility belongs on a
  *   `report-uri`/`report-to` endpoint, not the SLO.
  *
+ * We also drop, regardless of source:
+ * - `EvalError`s whose stack doesn't point at our own bundle (see
+ *   `isCspBlockedEval`): a third-party vendor script's eval()/Function() call
+ *   correctly blocked by our `script-src` CSP (WA-2952). The CSP doing its
+ *   job is not a Safe{Wallet} failure.
+ *
  * Genuine user failures continue to flow through `trackError` /
  * `captureException` (source: `custom`), unhandled exceptions (`source`), and
  * network failures (`network`).
  */
 export const filterRumEvent = (event: RumEvent, context: RumEventDomainContext): boolean => {
+  if (event.type === 'resource') return !isExpectedResourceFailure(event as RumResourceEvent)
   if (event.type !== 'error') return true
 
   const errorEvent = event as RumErrorEvent
   if (NON_USER_IMPACTING_SOURCES.has(errorEvent.error.source)) return false
   if (isKnownNoise(errorEvent.error.message)) return false
+  if (isCspBlockedEval(errorEvent)) return false
   if (originatesFromExtension(errorEvent.error.stack)) return false
+
+  // User-driven outcomes surfaced as unhandled errors by third-party SDKs
+  // (WalletConnect TTL expiry, a wallet's bare "Rejected" reply) never pass
+  // through trackError/the normalizer. Re-emit them as info-level actions —
+  // kept queryable as an approval-flow drop-off signal — and drop the RUM
+  // error so they stay off the Error-Free Views SLO (WA-2950).
+  const userOutcome = matchUserOutcome(errorEvent.error.message)
+  if (userOutcome) {
+    datadogRum.addAction(errorEvent.error.message, { level: 'info', error_type: userOutcome })
+    return false
+  }
 
   // context.error is the raw value originally passed to addError/captureException
   const { error: rawError } = context as RumErrorEventDomainContext
@@ -176,9 +265,12 @@ export class DatadogProvider implements IObservabilityProvider {
     }
   }
 
-  captureException(error: Error, context?: Record<string, unknown>): void {
-    if (this.isInitialized) {
-      datadogRum.addError(error, context)
+  captureError({ error, isUserFacing, tags }: ObservedError): void {
+    // Only user-facing failures become RUM errors (addError) so background /
+    // logged errors don't count against the Error-Free Views SLO — those are
+    // already recorded as warn-level actions via getLogger().warn.
+    if (this.isInitialized && isUserFacing) {
+      datadogRum.addError(error, tags)
     }
   }
 }

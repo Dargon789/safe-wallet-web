@@ -1,4 +1,4 @@
-import { renderWithUserEvent, screen, within } from '@/tests/test-utils'
+import { renderWithUserEvent, screen } from '@/tests/test-utils'
 import type { ReactElement } from 'react'
 import NftCollections from '../components/NftCollections'
 import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
@@ -12,7 +12,7 @@ jest.mock('@/services/observability', () => ({
     info: jest.fn(),
     warn: jest.fn(),
   },
-  captureException: jest.fn(),
+  captureError: jest.fn(),
 }))
 
 jest.mock('@/services/analytics', () => ({
@@ -79,8 +79,8 @@ describe('NftCollections', () => {
 
     expect(await screen.findByTestId('nft-checkbox-1')).toBeInTheDocument()
 
-    const firstCheckbox = within(screen.getByTestId('nft-checkbox-1')).getByRole('checkbox')
-    const secondCheckbox = within(screen.getByTestId('nft-checkbox-2')).getByRole('checkbox')
+    const firstCheckbox = screen.getByTestId('nft-checkbox-1')
+    const secondCheckbox = screen.getByTestId('nft-checkbox-2')
 
     await user.click(firstCheckbox)
     await user.click(secondCheckbox)
