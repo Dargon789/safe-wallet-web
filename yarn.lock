@@ -44204,11 +44204,11 @@ __metadata:
   linkType: hard
 
 "systeminformation@npm:^5.31.1":
-  version: 5.33.15
-  resolution: "systeminformation@npm:5.33.15"
+  version: 5.33.17
+  resolution: "systeminformation@npm:5.33.17"
   bin:
     systeminformation: lib/cli.js
-  checksum: 10/7b323565aafd78e65577eae24ea954a667d228c8d5185a51f65c000265d23474ef22022bbc78ed940aee5daeefdaf6c7bf896ba66238a934e48acf5f60c5de26
+  checksum: 10/e5ecb691a923b3c5c3f4f1ca58a098394150d537d04dd7977c5f99d4a553d282c222d51d8cd16b8070d6fc7da3222b7797750ed804bdc15cfe13441036b9039e
   conditions: (os=darwin | os=linux | os=win32 | os=freebsd | os=openbsd | os=netbsd | os=sunos | os=android)
   languageName: node
   linkType: hard
