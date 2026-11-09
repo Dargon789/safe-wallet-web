@@ -3,13 +3,13 @@
   "version": "0.0.0",
   "main": "index.ts",
   "dependencies": {
-    "@faker-js/faker": "^10.5.0",
+    "@faker-js/faker": "^10.6.0",
     "@safe-global/store": "workspace:^",
     "@safe-global/types-kit": "^4.0.1",
     "ethers": "6.17.0",
     "jest": "^30.5.2",
     "msw": "^2.7.3",
-    "ts-jest": "^29.4.6"
+    "ts-jest": "^29.4.15"
   },
   "devDependencies": {
     "jest-transform-stub": "2.0.0",
