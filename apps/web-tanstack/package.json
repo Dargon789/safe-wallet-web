@@ -40,7 +40,7 @@
   "devDependencies": {
     "@mdx-js/rollup": "^3.1.1",
     "@safe-global/test": "workspace:*",
-    "@tailwindcss/vite": "^4.3.3",
+    "@tailwindcss/vite": "^4.3.4",
     "@tanstack/router-devtools": "1.167.2",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^6.6.3",
