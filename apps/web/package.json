@@ -137,7 +137,7 @@
     "@safe-global/types-kit": "^4.0.1",
     "@storybook/addon-designs": "^11.1.4",
     "@storybook/addon-docs": "^10.6.6",
-    "@storybook/addon-links": "^10.5.0",
+    "@storybook/addon-links": "^10.6.6",
     "@storybook/addon-onboarding": "^10.6.6",
     "@storybook/addon-themes": "^10.6.6",
     "@storybook/builder-webpack5": "^10.6.6",
@@ -197,10 +197,10 @@
     "typechain": "^8.3.2",
     "typescript": "~5.9.2",
     "typescript-plugin-css-modules": "^4.2.2",
-    "vite": "8.3.6",
+    "vite": "8.3.7",
     "vite-plugin-svgr": "^5.2.0",
     "wait-on": "^9.5.1",
-    "webpack": "^5.97.1"
+    "webpack": "^5.112.2"
   },
   "nextBundleAnalysis": {
     "budget": null,
